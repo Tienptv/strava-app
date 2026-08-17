@@ -7,7 +7,7 @@ export default function ChallengeTable({ challengeData, year, month }) {
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
-    fetch('/api/challenge/targets')
+    fetch('/api/challenge/targets', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setUserData(data))
       .catch(e => console.error("Error loading user data from API", e));
