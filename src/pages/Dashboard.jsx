@@ -166,7 +166,7 @@ export default function Dashboard({ athlete, apiFetch }) {
       const myFnameNorm = normalize(myFname);
       const myLnameNorm = normalize(myLname);
       const filteredImportedActivities = importedActivities.filter(impAct => {
-        if (athlete && athlete.id && impAct.athlete?.id === athlete.id) return false;
+        if (athlete && athlete.id && String(impAct.athlete?.id) === String(athlete.id)) return false;
         const impFnameNorm = normalize(impAct.athlete?.firstname);
         const impLnameNorm = normalize(impAct.athlete?.lastname);
         const isMe = impFnameNorm === myFnameNorm && (impLnameNorm === myLnameNorm || impLnameNorm.startsWith(myLnameNorm) || myLnameNorm.startsWith(impLnameNorm));

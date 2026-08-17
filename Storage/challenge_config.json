@@ -65,14 +65,6 @@
       "admin": true,
       "owner": true
     },
-    "Phuong_N.": {
-      "resource_state": 2,
-      "firstname": "Phuong",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
     "Phuong_T.": {
       "resource_state": 2,
       "firstname": "Phuong",

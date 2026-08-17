@@ -529,17 +529,6 @@
   },
   {
     "type": "Run",
-    "distance": 10090,
-    "moving_time": 6540,
-    "start_date_local": "2026-08-02T04:33:00Z",
-    "athlete": {
-      "id": 133066813,
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "type": "Run",
     "distance": 8280,
     "moving_time": 5100,
     "start_date_local": "2026-08-02T04:29:00Z",
