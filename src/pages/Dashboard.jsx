@@ -10,7 +10,14 @@ import { processChallengeData, getCombinedDistance } from '../utils/challengeSta
 import { useLang } from '../i18n/LangContext';
 import historicalActivitiesFallback from '../../Storage/historical_activities.json';
 
-export default function Dashboard({ athlete, apiFetch }) {
+export default function Dashboard({ 
+  athlete, 
+  apiFetch, 
+  challengeMonth: propMonth, 
+  challengeYear: propYear, 
+  setChallengeMonth: propSetMonth, 
+  setChallengeYear: propSetYear 
+}) {
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
   const [clubs, setClubs] = useState([]);
@@ -21,13 +28,19 @@ export default function Dashboard({ athlete, apiFetch }) {
 
   // Challenge States
   const [viewMode, setViewMode] = useState('overview'); // 'overview' | 'challenge'
-  const [challengeMonth, setChallengeMonth] = useState(new Date().getMonth() + 1);
-  const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
+  const [internalMonth, setInternalMonth] = useState(new Date().getMonth() + 1);
+  const [internalYear, setInternalYear] = useState(new Date().getFullYear());
+
+  const challengeMonth = propMonth !== undefined ? propMonth : internalMonth;
+  const challengeYear = propYear !== undefined ? propYear : internalYear;
+  const setChallengeMonth = propSetMonth || setInternalMonth;
+  const setChallengeYear = propSetYear || setInternalYear;
   const [allChallengeActivities, setAllChallengeActivities] = useState([]);
   const [challengeData, setChallengeData] = useState([]);
   const [combinedTotalDistance, setCombinedTotalDistance] = useState(0);
   const [loadingChallenge, setLoadingChallenge] = useState(false);
   const [challengeParticipants, setChallengeParticipants] = useState({});
+  const [challengeConfig, setChallengeConfig] = useState(null);
   const [totalKmBase, setTotalKmBase] = useState(null);
 
   useEffect(() => {
@@ -35,10 +48,20 @@ export default function Dashboard({ athlete, apiFetch }) {
       const processed = processChallengeData(allChallengeActivities, challengeParticipants, challengeYear, challengeMonth, totalKmBase);
       setChallengeData(processed);
       
-      const combined = getCombinedDistance(allChallengeActivities, challengeParticipants, challengeYear);
+      const allYearParticipants = challengeConfig?.participants || challengeParticipants;
+      const combined = getCombinedDistance(allChallengeActivities, allYearParticipants, challengeYear);
       setCombinedTotalDistance(combined);
     }
-  }, [allChallengeActivities, challengeParticipants, challengeMonth, challengeYear, viewMode, loadingChallenge, totalKmBase]);
+  }, [allChallengeActivities, challengeParticipants, challengeMonth, challengeYear, viewMode, loadingChallenge, totalKmBase, challengeConfig]);
+
+  // Cập nhật danh sách thành viên khi đổi tháng/năm
+  useEffect(() => {
+    if (challengeConfig) {
+      const monthKey = `${challengeYear}_${challengeMonth}`;
+      const currentParts = (challengeConfig.monthlyParticipants && challengeConfig.monthlyParticipants[monthKey]) || challengeConfig.participants || {};
+      setChallengeParticipants(currentParts);
+    }
+  }, [challengeMonth, challengeYear, challengeConfig]);
 
   useEffect(() => {
     loadData();
@@ -73,10 +96,13 @@ export default function Dashboard({ athlete, apiFetch }) {
   const checkChallengeData = async () => {
     try {
       const config = await apiFetch('/challenge/config').catch(() => null);
-      if (config && config.participants && Object.keys(config.participants).length > 0) {
-        setChallengeParticipants(config.participants);
+      if (config && ((config.participants && Object.keys(config.participants).length > 0) || (config.monthlyParticipants && Object.keys(config.monthlyParticipants).length > 0))) {
+        setChallengeConfig(config);
+        const monthKey = `${challengeYear}_${challengeMonth}`;
+        const currentParts = (config.monthlyParticipants && config.monthlyParticipants[monthKey]) || config.participants || {};
+        setChallengeParticipants(currentParts);
         setViewMode('challenge');
-        loadChallengeActivities(config.clubId, config.participants);
+        loadChallengeActivities(config.clubId, config.participants || currentParts);
       } else {
         setViewMode('overview');
       }

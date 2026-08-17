@@ -121,6 +121,7 @@ const translations = {
     // Sidebar & Challenge Group
     challengeGroup: 'Challenge Group',
     selectGroup: '-- Chọn nhóm --',
+    selectChallengeMonth: 'Tháng áp dụng:',
     participants: 'Thành viên tham gia',
     noMembersFound: 'Không có thành viên',
     saveChallenge: 'Lưu Challenge',
@@ -253,6 +254,7 @@ const translations = {
     // Sidebar & Challenge Group
     challengeGroup: 'Challenge Group',
     selectGroup: '-- Select Group --',
+    selectChallengeMonth: 'Challenge Month:',
     participants: 'Participants',
     noMembersFound: 'No members found',
     saveChallenge: 'Save Challenge',

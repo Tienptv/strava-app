@@ -3,7 +3,7 @@ import { Target, Users, Search, Check, Save, Upload } from 'lucide-react';
 import Papa from 'papaparse';
 import { useLang } from '../i18n/LangContext';
 
-export default function Sidebar({ apiFetch }) {
+export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
   const { t } = useLang();
   const [clubs, setClubs] = useState([]);
   const [selectedClubId, setSelectedClubId] = useState('');
@@ -13,16 +13,30 @@ export default function Sidebar({ apiFetch }) {
   
   // State quản lý challenge participants: { [athleteId]: true/false }
   const [participants, setParticipants] = useState({});
+  const [monthlyParticipants, setMonthlyParticipants] = useState({});
+  const [rawConfig, setRawConfig] = useState(null);
+
+  const activeMonth = currentMonth || (new Date().getMonth() + 1);
+  const activeYear = currentYear || new Date().getFullYear();
 
   useEffect(() => {
-    // Load saved config on mount
+    // Load saved config on mount or when active month/year changes
     apiFetch('/challenge/config')
       .then(data => {
+        if (!data) return;
+        setRawConfig(data);
         if (data.clubId) setSelectedClubId(data.clubId);
-        if (data.participants) setParticipants(data.participants);
+        if (data.monthlyParticipants) {
+          setMonthlyParticipants(data.monthlyParticipants);
+          const currentKey = `${activeYear}_${activeMonth}`;
+          const currentParts = data.monthlyParticipants[currentKey] || data.participants || {};
+          setParticipants(currentParts);
+        } else if (data.participants) {
+          setParticipants(data.participants);
+        }
       })
       .catch(err => console.error('Lỗi tải config:', err));
-  }, [apiFetch]);
+  }, [apiFetch, activeMonth, activeYear]);
 
   const [savedMessage, setSavedMessage] = useState(false);
 
@@ -61,14 +75,23 @@ export default function Sidebar({ apiFetch }) {
 
   const handleSave = async () => {
     try {
+      const monthKey = `${activeYear}_${activeMonth}`;
+      const updatedMonthly = {
+        ...monthlyParticipants,
+        [monthKey]: participants
+      };
+      setMonthlyParticipants(updatedMonthly);
+
       await apiFetch('/challenge/config', {
         method: 'POST',
         body: JSON.stringify({
           clubId: selectedClubId,
-          participants: participants
+          monthKey: monthKey,
+          participants: participants,
+          monthlyParticipants: updatedMonthly
         })
       });
-      window.dispatchEvent(new Event('challengeUpdated'));
+      window.dispatchEvent(new CustomEvent('challengeUpdated', { detail: { year: activeYear, month: activeMonth } }));
       
       setSavedMessage(true);
       setTimeout(() => setSavedMessage(false), 3000);
@@ -355,7 +378,7 @@ export default function Sidebar({ apiFetch }) {
 
       <div className="sidebar__footer">
         <div className="sidebar__stats">
-          <span>{t('participants')}:</span>
+          <span>{t('participants')} ({t('month')} {activeMonth}/{activeYear}):</span>
           <strong>{participantCount}</strong>
         </div>
         

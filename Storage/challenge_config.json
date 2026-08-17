@@ -7,8 +7,7 @@
       "lastname": "V.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 73380484
+      "owner": false
     },
     "An_H.": {
       "resource_state": 2,
@@ -16,8 +15,7 @@
       "lastname": "H.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 110041582
+      "owner": false
     },
     "Benjamin_D.": {
       "resource_state": 2,
@@ -25,8 +23,7 @@
       "lastname": "D.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 83759389
+      "owner": false
     },
     "Chi_N.": {
       "resource_state": 2,
@@ -34,8 +31,15 @@
       "lastname": "N.",
       "membership": "member",
       "admin": true,
-      "owner": false,
-      "id": 53686864
+      "owner": false
+    },
+    "Cuong_N.": {
+      "resource_state": 2,
+      "firstname": "Cuong",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
     },
     "Huy_H.": {
       "resource_state": 2,
@@ -43,8 +47,15 @@
       "lastname": "H.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 103943712
+      "owner": false
+    },
+    "Học_P.": {
+      "resource_state": 2,
+      "firstname": "Học",
+      "lastname": "P.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
     },
     "Katy_N.": {
       "resource_state": 2,
@@ -52,8 +63,7 @@
       "lastname": "N.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 149162660
+      "owner": false
     },
     "Khương_P.": {
       "resource_state": 2,
@@ -61,8 +71,7 @@
       "lastname": "P.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 129623990
+      "owner": false
     },
     "Lieu_V.": {
       "resource_state": 2,
@@ -70,8 +79,15 @@
       "lastname": "V.",
       "membership": "member",
       "admin": true,
-      "owner": true,
-      "id": 72851794
+      "owner": true
+    },
+    "Phuong_N.": {
+      "resource_state": 2,
+      "firstname": "Phuong",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
     },
     "Phuong_T.": {
       "resource_state": 2,
@@ -79,8 +95,7 @@
       "lastname": "T.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 48977253
+      "owner": false
     },
     "Quy_T.": {
       "resource_state": 2,
@@ -88,8 +103,7 @@
       "lastname": "T.",
       "membership": "member",
       "admin": true,
-      "owner": false,
-      "id": 79037203
+      "owner": false
     },
     "Sang_N.": {
       "resource_state": 2,
@@ -97,8 +111,15 @@
       "lastname": "N.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 125487039
+      "owner": false
+    },
+    "Sơn_N.": {
+      "resource_state": 2,
+      "firstname": "Sơn",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": true,
+      "owner": false
     },
     "Tam_N.": {
       "resource_state": 2,
@@ -106,8 +127,7 @@
       "lastname": "N.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 106178600
+      "owner": false
     },
     "Thanh_D.": {
       "resource_state": 2,
@@ -115,8 +135,7 @@
       "lastname": "D.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 87080139
+      "owner": false
     },
     "Thanh_X.": {
       "resource_state": 2,
@@ -124,8 +143,7 @@
       "lastname": "X.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 106101923
+      "owner": false
     },
     "Thinh_V.": {
       "resource_state": 2,
@@ -133,8 +151,15 @@
       "lastname": "V.",
       "membership": "member",
       "admin": true,
-      "owner": false,
-      "id": 77523597
+      "owner": false
+    },
+    "Tran_M.": {
+      "resource_state": 2,
+      "firstname": "Tran",
+      "lastname": "M.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
     },
     "Trong_T.": {
       "resource_state": 2,
@@ -142,8 +167,15 @@
       "lastname": "T.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 81517643
+      "owner": false
+    },
+    "Đạt_N.": {
+      "resource_state": 2,
+      "firstname": "Đạt",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
     },
     "俊宇_杨.": {
       "resource_state": 2,
@@ -151,13 +183,140 @@
       "lastname": "杨.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 118715057
+      "owner": false
+    },
+    "Andie_L.": {
+      "resource_state": 2,
+      "firstname": "Andie",
+      "lastname": "L.",
+      "membership": "member",
+      "admin": true,
+      "owner": false
+    },
+    "binh_N.": {
+      "resource_state": 2,
+      "firstname": "binh",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Dũng_N.": {
+      "resource_state": 2,
+      "firstname": "Dũng",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Hendrien_N.": {
+      "resource_state": 2,
+      "firstname": "Hendrien",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Herman_V.": {
+      "resource_state": 2,
+      "firstname": "Herman",
+      "lastname": "V.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Huy_N.": {
+      "resource_state": 2,
+      "firstname": "Huy",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": true,
+      "owner": false
+    },
+    "Huy_V.": {
+      "resource_state": 2,
+      "firstname": "Huy",
+      "lastname": "V.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Huynh_N.": {
+      "resource_state": 2,
+      "firstname": "Huynh",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Ilse_V.": {
+      "resource_state": 2,
+      "firstname": "Ilse",
+      "lastname": "V.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Kha_M.": {
+      "resource_state": 2,
+      "firstname": "Kha",
+      "lastname": "M.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Khoa_L.": {
+      "resource_state": 2,
+      "firstname": "Khoa",
+      "lastname": "L.",
+      "membership": "member",
+      "admin": true,
+      "owner": false
+    },
+    "Nam_N.": {
+      "resource_state": 2,
+      "firstname": "Nam",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
     },
     "Nguyen_H.": {
       "resource_state": 2,
       "firstname": "Nguyen",
       "lastname": "H.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Peter_V.": {
+      "resource_state": 2,
+      "firstname": "Peter",
+      "lastname": "V.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Pha_V.": {
+      "resource_state": 2,
+      "firstname": "Pha",
+      "lastname": "V.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Phú_N.": {
+      "resource_state": 2,
+      "firstname": "Phú",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Thắm_Đ.": {
+      "resource_state": 2,
+      "firstname": "Thắm",
+      "lastname": "Đ.",
       "membership": "member",
       "admin": false,
       "owner": false
@@ -168,17 +327,1711 @@
       "lastname": "P.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 133066813
+      "owner": false
     },
-    "Huy_V.": {
+    "vu_D.": {
       "resource_state": 2,
-      "firstname": "Huy",
-      "lastname": "V.",
+      "firstname": "vu",
+      "lastname": "D.",
       "membership": "member",
       "admin": false,
-      "owner": false,
-      "id": 51364143
+      "owner": false
+    },
+    "Vuong _N.": {
+      "resource_state": 2,
+      "firstname": "Vuong ",
+      "lastname": "N.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
+    },
+    "Vĩnh_P.": {
+      "resource_state": 2,
+      "firstname": "Vĩnh",
+      "lastname": "P.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
     }
-  }
+  },
+  "monthlyParticipants": {
+    "2026_1": {
+      "Abba_V.": {
+        "resource_state": 2,
+        "firstname": "Abba",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 73380484
+      },
+      "An_H.": {
+        "resource_state": 2,
+        "firstname": "An",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 110041582
+      },
+      "Benjamin_D.": {
+        "resource_state": 2,
+        "firstname": "Benjamin",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 83759389
+      },
+      "Chi_N.": {
+        "resource_state": 2,
+        "firstname": "Chi",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 53686864
+      },
+      "Huy_H.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 103943712
+      },
+      "Katy_N.": {
+        "resource_state": 2,
+        "firstname": "Katy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 149162660
+      },
+      "Khương_P.": {
+        "resource_state": 2,
+        "firstname": "Khương",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 129623990
+      },
+      "Lieu_V.": {
+        "resource_state": 2,
+        "firstname": "Lieu",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": true,
+        "id": 72851794
+      },
+      "Phuong_T.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 48977253
+      },
+      "Quy_T.": {
+        "resource_state": 2,
+        "firstname": "Quy",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 79037203
+      },
+      "Sang_N.": {
+        "resource_state": 2,
+        "firstname": "Sang",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 125487039
+      },
+      "Tam_N.": {
+        "resource_state": 2,
+        "firstname": "Tam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106178600
+      },
+      "Thanh_D.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 87080139
+      },
+      "Thanh_X.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "X.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106101923
+      },
+      "Thinh_V.": {
+        "resource_state": 2,
+        "firstname": "Thinh",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 77523597
+      },
+      "Trong_T.": {
+        "resource_state": 2,
+        "firstname": "Trong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 81517643
+      },
+      "俊宇_杨.": {
+        "resource_state": 2,
+        "firstname": "俊宇",
+        "lastname": "杨.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 118715057
+      },
+      "Nguyen_H.": {
+        "resource_state": 2,
+        "firstname": "Nguyen",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Tien_P.": {
+        "resource_state": 2,
+        "firstname": "Tien",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 133066813
+      },
+      "Huy_V.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 51364143
+      },
+      "Học_P.": {
+        "resource_state": 2,
+        "firstname": "Học",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      }
+    },
+    "2026_2": {
+      "Abba_V.": {
+        "resource_state": 2,
+        "firstname": "Abba",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 73380484
+      },
+      "An_H.": {
+        "resource_state": 2,
+        "firstname": "An",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 110041582
+      },
+      "Benjamin_D.": {
+        "resource_state": 2,
+        "firstname": "Benjamin",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 83759389
+      },
+      "Chi_N.": {
+        "resource_state": 2,
+        "firstname": "Chi",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 53686864
+      },
+      "Huy_H.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 103943712
+      },
+      "Katy_N.": {
+        "resource_state": 2,
+        "firstname": "Katy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 149162660
+      },
+      "Khương_P.": {
+        "resource_state": 2,
+        "firstname": "Khương",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 129623990
+      },
+      "Lieu_V.": {
+        "resource_state": 2,
+        "firstname": "Lieu",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": true,
+        "id": 72851794
+      },
+      "Phuong_T.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 48977253
+      },
+      "Quy_T.": {
+        "resource_state": 2,
+        "firstname": "Quy",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 79037203
+      },
+      "Sang_N.": {
+        "resource_state": 2,
+        "firstname": "Sang",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 125487039
+      },
+      "Tam_N.": {
+        "resource_state": 2,
+        "firstname": "Tam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106178600
+      },
+      "Thanh_D.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 87080139
+      },
+      "Thanh_X.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "X.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106101923
+      },
+      "Thinh_V.": {
+        "resource_state": 2,
+        "firstname": "Thinh",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 77523597
+      },
+      "Trong_T.": {
+        "resource_state": 2,
+        "firstname": "Trong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 81517643
+      },
+      "俊宇_杨.": {
+        "resource_state": 2,
+        "firstname": "俊宇",
+        "lastname": "杨.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 118715057
+      },
+      "Nguyen_H.": {
+        "resource_state": 2,
+        "firstname": "Nguyen",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Tien_P.": {
+        "resource_state": 2,
+        "firstname": "Tien",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 133066813
+      },
+      "Huy_V.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 51364143
+      },
+      "Học_P.": {
+        "resource_state": 2,
+        "firstname": "Học",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      }
+    },
+    "2026_3": {
+      "Abba_V.": {
+        "resource_state": 2,
+        "firstname": "Abba",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 73380484
+      },
+      "An_H.": {
+        "resource_state": 2,
+        "firstname": "An",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 110041582
+      },
+      "Benjamin_D.": {
+        "resource_state": 2,
+        "firstname": "Benjamin",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 83759389
+      },
+      "Chi_N.": {
+        "resource_state": 2,
+        "firstname": "Chi",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 53686864
+      },
+      "Huy_H.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 103943712
+      },
+      "Katy_N.": {
+        "resource_state": 2,
+        "firstname": "Katy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 149162660
+      },
+      "Khương_P.": {
+        "resource_state": 2,
+        "firstname": "Khương",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 129623990
+      },
+      "Lieu_V.": {
+        "resource_state": 2,
+        "firstname": "Lieu",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": true,
+        "id": 72851794
+      },
+      "Phuong_T.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 48977253
+      },
+      "Quy_T.": {
+        "resource_state": 2,
+        "firstname": "Quy",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 79037203
+      },
+      "Sang_N.": {
+        "resource_state": 2,
+        "firstname": "Sang",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 125487039
+      },
+      "Tam_N.": {
+        "resource_state": 2,
+        "firstname": "Tam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106178600
+      },
+      "Thanh_D.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 87080139
+      },
+      "Thanh_X.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "X.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106101923
+      },
+      "Thinh_V.": {
+        "resource_state": 2,
+        "firstname": "Thinh",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 77523597
+      },
+      "Trong_T.": {
+        "resource_state": 2,
+        "firstname": "Trong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 81517643
+      },
+      "俊宇_杨.": {
+        "resource_state": 2,
+        "firstname": "俊宇",
+        "lastname": "杨.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 118715057
+      },
+      "Nguyen_H.": {
+        "resource_state": 2,
+        "firstname": "Nguyen",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Tien_P.": {
+        "resource_state": 2,
+        "firstname": "Tien",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 133066813
+      },
+      "Huy_V.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 51364143
+      },
+      "Học_P.": {
+        "resource_state": 2,
+        "firstname": "Học",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      }
+    },
+    "2026_4": {
+      "Abba_V.": {
+        "resource_state": 2,
+        "firstname": "Abba",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 73380484
+      },
+      "An_H.": {
+        "resource_state": 2,
+        "firstname": "An",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 110041582
+      },
+      "Benjamin_D.": {
+        "resource_state": 2,
+        "firstname": "Benjamin",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 83759389
+      },
+      "Chi_N.": {
+        "resource_state": 2,
+        "firstname": "Chi",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 53686864
+      },
+      "Huy_H.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 103943712
+      },
+      "Katy_N.": {
+        "resource_state": 2,
+        "firstname": "Katy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 149162660
+      },
+      "Khương_P.": {
+        "resource_state": 2,
+        "firstname": "Khương",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 129623990
+      },
+      "Lieu_V.": {
+        "resource_state": 2,
+        "firstname": "Lieu",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": true,
+        "id": 72851794
+      },
+      "Phuong_T.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 48977253
+      },
+      "Quy_T.": {
+        "resource_state": 2,
+        "firstname": "Quy",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 79037203
+      },
+      "Sang_N.": {
+        "resource_state": 2,
+        "firstname": "Sang",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 125487039
+      },
+      "Tam_N.": {
+        "resource_state": 2,
+        "firstname": "Tam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106178600
+      },
+      "Thanh_D.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 87080139
+      },
+      "Thanh_X.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "X.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106101923
+      },
+      "Thinh_V.": {
+        "resource_state": 2,
+        "firstname": "Thinh",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 77523597
+      },
+      "Trong_T.": {
+        "resource_state": 2,
+        "firstname": "Trong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 81517643
+      },
+      "俊宇_杨.": {
+        "resource_state": 2,
+        "firstname": "俊宇",
+        "lastname": "杨.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 118715057
+      },
+      "Nguyen_H.": {
+        "resource_state": 2,
+        "firstname": "Nguyen",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Tien_P.": {
+        "resource_state": 2,
+        "firstname": "Tien",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 133066813
+      },
+      "Huy_V.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 51364143
+      },
+      "Học_P.": {
+        "resource_state": 2,
+        "firstname": "Học",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      }
+    },
+    "2026_5": {
+      "Abba_V.": {
+        "resource_state": 2,
+        "firstname": "Abba",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 73380484
+      },
+      "An_H.": {
+        "resource_state": 2,
+        "firstname": "An",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 110041582
+      },
+      "Benjamin_D.": {
+        "resource_state": 2,
+        "firstname": "Benjamin",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 83759389
+      },
+      "Chi_N.": {
+        "resource_state": 2,
+        "firstname": "Chi",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 53686864
+      },
+      "Huy_H.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 103943712
+      },
+      "Katy_N.": {
+        "resource_state": 2,
+        "firstname": "Katy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 149162660
+      },
+      "Khương_P.": {
+        "resource_state": 2,
+        "firstname": "Khương",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 129623990
+      },
+      "Lieu_V.": {
+        "resource_state": 2,
+        "firstname": "Lieu",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": true,
+        "id": 72851794
+      },
+      "Phuong_T.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 48977253
+      },
+      "Quy_T.": {
+        "resource_state": 2,
+        "firstname": "Quy",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 79037203
+      },
+      "Sang_N.": {
+        "resource_state": 2,
+        "firstname": "Sang",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 125487039
+      },
+      "Tam_N.": {
+        "resource_state": 2,
+        "firstname": "Tam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106178600
+      },
+      "Thanh_D.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 87080139
+      },
+      "Thanh_X.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "X.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106101923
+      },
+      "Thinh_V.": {
+        "resource_state": 2,
+        "firstname": "Thinh",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 77523597
+      },
+      "Trong_T.": {
+        "resource_state": 2,
+        "firstname": "Trong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 81517643
+      },
+      "俊宇_杨.": {
+        "resource_state": 2,
+        "firstname": "俊宇",
+        "lastname": "杨.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 118715057
+      },
+      "Nguyen_H.": {
+        "resource_state": 2,
+        "firstname": "Nguyen",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Tien_P.": {
+        "resource_state": 2,
+        "firstname": "Tien",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 133066813
+      },
+      "Huy_V.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 51364143
+      },
+      "Học_P.": {
+        "resource_state": 2,
+        "firstname": "Học",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      }
+    },
+    "2026_6": {
+      "Abba_V.": {
+        "resource_state": 2,
+        "firstname": "Abba",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 73380484
+      },
+      "An_H.": {
+        "resource_state": 2,
+        "firstname": "An",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 110041582
+      },
+      "Benjamin_D.": {
+        "resource_state": 2,
+        "firstname": "Benjamin",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 83759389
+      },
+      "Chi_N.": {
+        "resource_state": 2,
+        "firstname": "Chi",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 53686864
+      },
+      "Huy_H.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 103943712
+      },
+      "Katy_N.": {
+        "resource_state": 2,
+        "firstname": "Katy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 149162660
+      },
+      "Khương_P.": {
+        "resource_state": 2,
+        "firstname": "Khương",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 129623990
+      },
+      "Lieu_V.": {
+        "resource_state": 2,
+        "firstname": "Lieu",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": true,
+        "id": 72851794
+      },
+      "Phuong_T.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 48977253
+      },
+      "Quy_T.": {
+        "resource_state": 2,
+        "firstname": "Quy",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 79037203
+      },
+      "Sang_N.": {
+        "resource_state": 2,
+        "firstname": "Sang",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 125487039
+      },
+      "Tam_N.": {
+        "resource_state": 2,
+        "firstname": "Tam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106178600
+      },
+      "Thanh_D.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 87080139
+      },
+      "Thanh_X.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "X.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106101923
+      },
+      "Thinh_V.": {
+        "resource_state": 2,
+        "firstname": "Thinh",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 77523597
+      },
+      "Trong_T.": {
+        "resource_state": 2,
+        "firstname": "Trong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 81517643
+      },
+      "俊宇_杨.": {
+        "resource_state": 2,
+        "firstname": "俊宇",
+        "lastname": "杨.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 118715057
+      },
+      "Nguyen_H.": {
+        "resource_state": 2,
+        "firstname": "Nguyen",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Tien_P.": {
+        "resource_state": 2,
+        "firstname": "Tien",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 133066813
+      },
+      "Huy_V.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 51364143
+      },
+      "Học_P.": {
+        "resource_state": 2,
+        "firstname": "Học",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      }
+    },
+    "2026_7": {
+      "Abba_V.": {
+        "resource_state": 2,
+        "firstname": "Abba",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 73380484
+      },
+      "An_H.": {
+        "resource_state": 2,
+        "firstname": "An",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 110041582
+      },
+      "Benjamin_D.": {
+        "resource_state": 2,
+        "firstname": "Benjamin",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 83759389
+      },
+      "Chi_N.": {
+        "resource_state": 2,
+        "firstname": "Chi",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 53686864
+      },
+      "Huy_H.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 103943712
+      },
+      "Katy_N.": {
+        "resource_state": 2,
+        "firstname": "Katy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 149162660
+      },
+      "Khương_P.": {
+        "resource_state": 2,
+        "firstname": "Khương",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 129623990
+      },
+      "Lieu_V.": {
+        "resource_state": 2,
+        "firstname": "Lieu",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": true,
+        "id": 72851794
+      },
+      "Phuong_T.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 48977253
+      },
+      "Quy_T.": {
+        "resource_state": 2,
+        "firstname": "Quy",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 79037203
+      },
+      "Sang_N.": {
+        "resource_state": 2,
+        "firstname": "Sang",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 125487039
+      },
+      "Tam_N.": {
+        "resource_state": 2,
+        "firstname": "Tam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106178600
+      },
+      "Thanh_D.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 87080139
+      },
+      "Thanh_X.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "X.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 106101923
+      },
+      "Thinh_V.": {
+        "resource_state": 2,
+        "firstname": "Thinh",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": false,
+        "id": 77523597
+      },
+      "Trong_T.": {
+        "resource_state": 2,
+        "firstname": "Trong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 81517643
+      },
+      "俊宇_杨.": {
+        "resource_state": 2,
+        "firstname": "俊宇",
+        "lastname": "杨.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 118715057
+      },
+      "Nguyen_H.": {
+        "resource_state": 2,
+        "firstname": "Nguyen",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Tien_P.": {
+        "resource_state": 2,
+        "firstname": "Tien",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 133066813
+      },
+      "Huy_V.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false,
+        "id": 51364143
+      },
+      "Học_P.": {
+        "resource_state": 2,
+        "firstname": "Học",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      }
+    },
+    "2026_8": {
+      "Abba_V.": {
+        "resource_state": 2,
+        "firstname": "Abba",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "An_H.": {
+        "resource_state": 2,
+        "firstname": "An",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Benjamin_D.": {
+        "resource_state": 2,
+        "firstname": "Benjamin",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Chi_N.": {
+        "resource_state": 2,
+        "firstname": "Chi",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false
+      },
+      "Cuong_N.": {
+        "resource_state": 2,
+        "firstname": "Cuong",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Huy_H.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Học_P.": {
+        "resource_state": 2,
+        "firstname": "Học",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Katy_N.": {
+        "resource_state": 2,
+        "firstname": "Katy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Khương_P.": {
+        "resource_state": 2,
+        "firstname": "Khương",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Lieu_V.": {
+        "resource_state": 2,
+        "firstname": "Lieu",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": true
+      },
+      "Phuong_N.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Phuong_T.": {
+        "resource_state": 2,
+        "firstname": "Phuong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Quy_T.": {
+        "resource_state": 2,
+        "firstname": "Quy",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": true,
+        "owner": false
+      },
+      "Sang_N.": {
+        "resource_state": 2,
+        "firstname": "Sang",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Sơn_N.": {
+        "resource_state": 2,
+        "firstname": "Sơn",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false
+      },
+      "Tam_N.": {
+        "resource_state": 2,
+        "firstname": "Tam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Thanh_D.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Thanh_X.": {
+        "resource_state": 2,
+        "firstname": "Thanh",
+        "lastname": "X.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Thinh_V.": {
+        "resource_state": 2,
+        "firstname": "Thinh",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": true,
+        "owner": false
+      },
+      "Tran_M.": {
+        "resource_state": 2,
+        "firstname": "Tran",
+        "lastname": "M.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Trong_T.": {
+        "resource_state": 2,
+        "firstname": "Trong",
+        "lastname": "T.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Đạt_N.": {
+        "resource_state": 2,
+        "firstname": "Đạt",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "俊宇_杨.": {
+        "resource_state": 2,
+        "firstname": "俊宇",
+        "lastname": "杨.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Andie_L.": {
+        "resource_state": 2,
+        "firstname": "Andie",
+        "lastname": "L.",
+        "membership": "member",
+        "admin": true,
+        "owner": false
+      },
+      "binh_N.": {
+        "resource_state": 2,
+        "firstname": "binh",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Dũng_N.": {
+        "resource_state": 2,
+        "firstname": "Dũng",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Hendrien_N.": {
+        "resource_state": 2,
+        "firstname": "Hendrien",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Herman_V.": {
+        "resource_state": 2,
+        "firstname": "Herman",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Huy_N.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": true,
+        "owner": false
+      },
+      "Huy_V.": {
+        "resource_state": 2,
+        "firstname": "Huy",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Huynh_N.": {
+        "resource_state": 2,
+        "firstname": "Huynh",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Ilse_V.": {
+        "resource_state": 2,
+        "firstname": "Ilse",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Kha_M.": {
+        "resource_state": 2,
+        "firstname": "Kha",
+        "lastname": "M.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Khoa_L.": {
+        "resource_state": 2,
+        "firstname": "Khoa",
+        "lastname": "L.",
+        "membership": "member",
+        "admin": true,
+        "owner": false
+      },
+      "Nam_N.": {
+        "resource_state": 2,
+        "firstname": "Nam",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Nguyen_H.": {
+        "resource_state": 2,
+        "firstname": "Nguyen",
+        "lastname": "H.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Peter_V.": {
+        "resource_state": 2,
+        "firstname": "Peter",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Pha_V.": {
+        "resource_state": 2,
+        "firstname": "Pha",
+        "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Phú_N.": {
+        "resource_state": 2,
+        "firstname": "Phú",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Thắm_Đ.": {
+        "resource_state": 2,
+        "firstname": "Thắm",
+        "lastname": "Đ.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Tien_P.": {
+        "resource_state": 2,
+        "firstname": "Tien",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "vu_D.": {
+        "resource_state": 2,
+        "firstname": "vu",
+        "lastname": "D.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Vuong _N.": {
+        "resource_state": 2,
+        "firstname": "Vuong ",
+        "lastname": "N.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "Vĩnh_P.": {
+        "resource_state": 2,
+        "firstname": "Vĩnh",
+        "lastname": "P.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      }
+    }
+  },
+  "monthKey": "2026_8"
 }

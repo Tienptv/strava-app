@@ -283,11 +283,31 @@ app.get('/api/challenge/config', (req, res) => {
 // Lưu cấu hình
 app.post('/api/challenge/config', (req, res) => {
   try {
-    const data = req.body;
+    let existingConfig = { participants: {}, monthlyParticipants: {}, clubId: '' };
+    if (fs.existsSync(CONFIG_FILE)) {
+      try {
+        existingConfig = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+      } catch (e) {}
+    }
+
+    const payload = req.body;
+    const merged = {
+      ...existingConfig,
+      ...payload,
+      monthlyParticipants: {
+        ...(existingConfig.monthlyParticipants || {}),
+        ...(payload.monthlyParticipants || {})
+      }
+    };
+
+    if (payload.monthKey && payload.participants) {
+      merged.monthlyParticipants[payload.monthKey] = payload.participants;
+    }
+
     const dir = path.dirname(CONFIG_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
-    res.json(data);
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(merged, null, 2));
+    res.json(merged);
   } catch (error) {
     console.error('Lỗi lưu config:', error.message);
     res.status(500).json({ error: 'Không thể lưu cấu hình' });

@@ -97,19 +97,34 @@ function App() {
   }
 
   const isAdmin = athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID;
+  const [challengeMonth, setChallengeMonth] = useState(new Date().getMonth() + 1);
+  const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
 
   return (
     <BrowserRouter>
       {athlete && <Navbar athlete={athlete} onLogout={handleLogout} />}
       <div className={athlete ? "app-layout" : ""}>
-        {athlete && isAdmin && <Sidebar apiFetch={apiFetch} />}
+        {athlete && isAdmin && (
+          <Sidebar 
+            apiFetch={apiFetch} 
+            currentMonth={challengeMonth}
+            currentYear={challengeYear}
+          />
+        )}
         <main className={athlete ? "app-main" : ""}>
           <Routes>
             <Route
               path="/"
               element={
                 athlete
-                  ? <Dashboard athlete={athlete} apiFetch={apiFetch} />
+                  ? <Dashboard 
+                      athlete={athlete} 
+                      apiFetch={apiFetch} 
+                      challengeMonth={challengeMonth}
+                      challengeYear={challengeYear}
+                      setChallengeMonth={setChallengeMonth}
+                      setChallengeYear={setChallengeYear}
+                    />
                   : <Login onLogin={handleLogin} />
               }
             />
