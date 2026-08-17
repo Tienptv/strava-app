@@ -120,6 +120,14 @@
       "membership": "member",
       "admin": false,
       "owner": false
+    },
+    "pham_T.": {
+      "resource_state": 2,
+      "firstname": "pham",
+      "lastname": "T.",
+      "membership": "member",
+      "admin": false,
+      "owner": false
     }
   },
   "monthlyParticipants": {
@@ -2718,6 +2726,14 @@
         "resource_state": 2,
         "firstname": "Huy",
         "lastname": "V.",
+        "membership": "member",
+        "admin": false,
+        "owner": false
+      },
+      "pham_T.": {
+        "resource_state": 2,
+        "firstname": "pham",
+        "lastname": "T.",
         "membership": "member",
         "admin": false,
         "owner": false
