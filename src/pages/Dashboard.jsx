@@ -283,19 +283,25 @@ export default function Dashboard({ athlete, apiFetch }) {
         <div className="challenge-view">
           <ClubGoalProgress totalDistance={combinedTotalDistance} />
           
-          <div className="tabs" style={{ marginBottom: '16px' }}>
-            <button
-              className={`tab ${challengeMonth === 7 ? 'tab--active' : ''}`}
-              onClick={() => { setChallengeMonth(7); setChallengeYear(new Date().getFullYear()); }}
-            >
-              Tháng 7/{new Date().getFullYear()}
-            </button>
-            <button
-              className={`tab ${challengeMonth === 8 ? 'tab--active' : ''}`}
-              onClick={() => { setChallengeMonth(8); setChallengeYear(new Date().getFullYear()); }}
-            >
-              Tháng 8/{new Date().getFullYear()}
-            </button>
+          <div className="tabs" style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(m => (
+              <button
+                key={m}
+                className={`tab ${challengeMonth === m ? 'tab--active' : ''}`}
+                onClick={() => { setChallengeMonth(m); setChallengeYear(new Date().getFullYear()); }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: challengeMonth === m ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  color: challengeMonth === m ? '#38bdf8' : '#cbd5e1',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                Tháng {m}/{new Date().getFullYear()}
+              </button>
+            ))}
           </div>
           {loadingChallenge ? (
             <div className="loading">
