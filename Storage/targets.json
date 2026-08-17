@@ -1,0 +1,9 @@
+{
+  "Tien_P.": {
+    "target": "100",
+    "penalty": true
+  },
+  "Thanh_X.": {
+    "penalty": false
+  }
+}

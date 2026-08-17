@@ -1,0 +1,221 @@
+const translations = {
+  vi: {
+    // Navbar
+    dashboard: 'Dashboard',
+    logout: 'Đăng xuất',
+
+    // Login
+    appTitle: 'Strava Tracker',
+    appSubtitle: 'Theo dõi dữ liệu thể thao cá nhân và nhóm từ Strava. Xem thống kê, biểu đồ và hoạt động chi tiết.',
+    featureActivities: 'Xem tất cả hoạt động thể thao cá nhân',
+    featureClubs: 'Theo dõi hoạt động của nhóm / câu lạc bộ',
+    featureCharts: 'Biểu đồ thống kê khoảng cách, thời gian, độ cao',
+    featureLive: 'Cập nhật dữ liệu trực tiếp từ Strava API',
+    loginButton: 'Đăng nhập với Strava',
+    loginNote: 'Ứng dụng sẽ yêu cầu quyền đọc dữ liệu hoạt động từ Strava.',
+
+    // Dashboard
+    greeting: 'Xin chào, runner',
+    totalDistance: 'Tổng quãng đường',
+    allActivities: 'Tất cả hoạt động',
+    totalTime: 'Tổng thời gian',
+    movingTime: 'Thời gian di chuyển',
+    totalElevation: 'Tổng độ cao',
+    elevationGain: 'Elevation gain',
+    recentActivities: 'Hoạt động gần đây',
+    last4Weeks: '4 tuần qua',
+    tabActivities: 'Hoạt động',
+    tabCharts: 'Biểu đồ',
+    tabClubs: 'Câu lạc bộ',
+    recentActivitiesTitle: 'Hoạt động gần đây',
+    refresh: 'Làm mới',
+    noActivities: 'Chưa có hoạt động nào',
+    noActivitiesHint: 'Hãy bắt đầu một hoạt động trên Strava để xem dữ liệu tại đây.',
+    yourClubs: 'Câu lạc bộ của bạn',
+    noClubs: 'Chưa tham gia câu lạc bộ nào',
+    noClubsHint: 'Tham gia câu lạc bộ trên Strava để theo dõi hoạt động nhóm.',
+    multiSport: 'Đa môn',
+    members: 'thành viên',
+    loadingData: 'Đang tải dữ liệu từ Strava...',
+    overview: 'Tổng quan',
+    challengeTab: 'Challenge',
+    loadingChallengeData: 'Đang tải dữ liệu Challenge...',
+
+    // Goals
+    personalGoalTitle: 'Mục tiêu cá nhân',
+    editGoal: 'Chỉnh sửa mục tiêu',
+    goalReached: 'Chúc mừng! Bạn đã đạt mục tiêu tháng này!',
+    clubGoalTitle: 'Mục tiêu tập thể',
+    runAcrossVietnam: 'Thử thách: Cả nhóm cùng chạy xuyên Việt',
+    clubGoalReached: 'Tuyệt vời! Cả nhóm đã hoàn thành thử thách xuyên Việt!',
+
+    // ChallengeTable
+    noChallengeData: 'Không có dữ liệu Challenge',
+    noChallengeDataHint: 'Vui lòng chọn thành viên bên Sidebar và lưu Challenge để bắt đầu.',
+    challengeMonth: 'CHALLENGE THÁNG',
+
+    // Sidebar (Import)
+    importSuccess: 'Đã tải thành công dữ liệu từ file CSV!',
+    importError: 'Có lỗi khi đọc file CSV.',
+    importCsv: 'Import CSV (Club Reports)',
+
+    // Activity Card
+    distance: 'Quãng đường',
+    time: 'Thời gian',
+    elevation: 'Độ cao',
+    pace: 'Pace',
+    avgSpeed: 'Tốc độ TB',
+    unnamedActivity: 'Hoạt động không tên',
+
+    // Chart
+    distanceKm: 'Quãng đường (km)',
+    distanceChart: 'Quãng đường theo tuần',
+    timeHours: 'Thời gian (giờ)',
+    timeChart: 'Thời gian theo tuần',
+    thisWeek: 'Tuần này',
+    weekPrefix: 'Tuần -',
+    activityChart: 'Biểu đồ hoạt động',
+
+    // Callback
+    authenticating: 'Đang xác thực với Strava...',
+    loginSuccess: 'Đăng nhập thành công! Đang chuyển hướng...',
+    authFailed: 'Xác thực thất bại. Vui lòng thử lại.',
+    backHome: 'Về trang chủ',
+    loading: 'Đang tải...',
+    sessionExpired: 'Phiên đăng nhập hết hạn',
+
+    // ClubView
+    clubActivities: 'Hoạt động câu lạc bộ',
+    backToDashboard: '← Quay lại Dashboard',
+    clubMembers: 'Thành viên',
+    loadingClub: 'Đang tải thông tin câu lạc bộ...',
+    recentClubActivities: 'Hoạt động gần đây của câu lạc bộ',
+    noClubActivities: 'Chưa có hoạt động nào',
+    noClubActivitiesHint: 'Chưa có hoạt động gần đây nào từ thành viên câu lạc bộ.',
+    memberList: 'Danh sách thành viên',
+    cannotLoadMembers: 'Không thể tải danh sách thành viên',
+
+    // Sidebar & Challenge Group
+    challengeGroup: 'Challenge Group',
+    selectGroup: '-- Chọn nhóm --',
+    participants: 'Thành viên tham gia',
+    noMembersFound: 'Không có thành viên',
+    saveChallenge: 'Lưu Challenge',
+    challengeSaved: 'Đã lưu danh sách!',
+    loadingMembers: 'Đang tải...',
+    searchMembers: 'Tìm kiếm thành viên...',
+    selectAll: 'Chọn tất cả',
+    deselectAll: 'Bỏ chọn tất cả',
+  },
+
+  en: {
+    // Navbar
+    dashboard: 'Dashboard',
+    logout: 'Logout',
+
+    // Login
+    appTitle: 'Strava Tracker',
+    appSubtitle: 'Track your personal and group sports data from Strava. View statistics, charts, and detailed activities.',
+    featureActivities: 'View all personal sports activities',
+    featureClubs: 'Track group / club activities',
+    featureCharts: 'Charts for distance, time, elevation stats',
+    featureLive: 'Live data updates from Strava API',
+    loginButton: 'Login with Strava',
+    loginNote: 'The app will request read access to your Strava activity data.',
+
+    // Dashboard
+    greeting: 'Hello, runner',
+    totalDistance: 'Total Distance',
+    allActivities: 'All activities',
+    totalTime: 'Total Time',
+    movingTime: 'Moving time',
+    totalElevation: 'Total Elevation',
+    elevationGain: 'Elevation gain',
+    recentActivities: 'Recent Activities',
+    last4Weeks: 'Last 4 weeks',
+    tabActivities: 'Activities',
+    tabCharts: 'Charts',
+    tabClubs: 'Clubs',
+    recentActivitiesTitle: 'Recent Activities',
+    refresh: 'Refresh',
+    noActivities: 'No activities yet',
+    noActivitiesHint: 'Start an activity on Strava to see your data here.',
+    yourClubs: 'Your Clubs',
+    noClubs: 'No clubs joined yet',
+    noClubsHint: 'Join a club on Strava to track group activities.',
+    multiSport: 'Multi-sport',
+    members: 'members',
+    loadingData: 'Loading data from Strava...',
+    overview: 'Overview',
+    challengeTab: 'Challenge',
+    loadingChallengeData: 'Loading Challenge data...',
+
+    // Goals
+    personalGoalTitle: 'Personal Goal',
+    editGoal: 'Edit Goal',
+    goalReached: 'Congratulations! You reached your monthly goal!',
+    clubGoalTitle: 'Club Goal',
+    runAcrossVietnam: 'Challenge: Run across Vietnam together',
+    clubGoalReached: 'Awesome! The group has completed the cross-Vietnam challenge!',
+
+    // ChallengeTable
+    noChallengeData: 'No Challenge Data',
+    noChallengeDataHint: 'Please select members in the Sidebar and save Challenge to start.',
+    challengeMonth: 'CHALLENGE MONTH',
+
+    // Sidebar (Import)
+    importSuccess: 'Successfully loaded data from CSV file!',
+    importError: 'Error reading CSV file.',
+    importCsv: 'Import CSV (Club Reports)',
+
+    // Activity Card
+    distance: 'Distance',
+    time: 'Time',
+    elevation: 'Elevation',
+    pace: 'Pace',
+    avgSpeed: 'Avg Speed',
+    unnamedActivity: 'Unnamed Activity',
+
+    // Chart
+    distanceKm: 'Distance (km)',
+    distanceChart: 'Weekly Distance',
+    timeHours: 'Time (hours)',
+    timeChart: 'Weekly Time',
+    thisWeek: 'This week',
+    weekPrefix: 'Week -',
+    activityChart: 'Activity Chart',
+
+    // Callback
+    authenticating: 'Authenticating with Strava...',
+    loginSuccess: 'Login successful! Redirecting...',
+    authFailed: 'Authentication failed. Please try again.',
+    backHome: 'Back to Home',
+    loading: 'Loading...',
+    sessionExpired: 'Session expired',
+
+    // ClubView
+    clubActivities: 'Club Activities',
+    backToDashboard: '← Back to Dashboard',
+    clubMembers: 'Members',
+    loadingClub: 'Loading club info...',
+    recentClubActivities: 'Recent Club Activities',
+    noClubActivities: 'No activities yet',
+    noClubActivitiesHint: 'No recent activities from club members.',
+    memberList: 'Member List',
+    cannotLoadMembers: 'Cannot load member list',
+
+    // Sidebar & Challenge Group
+    challengeGroup: 'Challenge Group',
+    selectGroup: '-- Select Group --',
+    participants: 'Participants',
+    noMembersFound: 'No members found',
+    saveChallenge: 'Save Challenge',
+    challengeSaved: 'List saved!',
+    loadingMembers: 'Loading...',
+    searchMembers: 'Search members...',
+    selectAll: 'Select All',
+    deselectAll: 'Deselect All',
+  },
+};
+
+export default translations;
