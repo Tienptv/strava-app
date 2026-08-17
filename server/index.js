@@ -13,6 +13,7 @@ const __dirname = path.dirname(__filename);
 const TARGETS_FILE = path.join(__dirname, '../Storage/targets.json');
 const CONFIG_FILE = path.join(__dirname, '../Storage/challenge_config.json');
 const IMPORTED_FILE = path.join(__dirname, '../Storage/imported_activities.json');
+const TOTAL_KM_FILE = path.join(__dirname, '../Storage/Total-km-17-08-2026.csv');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -317,6 +318,95 @@ app.post('/api/challenge/imported', (req, res) => {
   } catch (error) {
     console.error('Lỗi lưu imported:', error.message);
     res.status(500).json({ error: 'Không thể lưu dữ liệu imported' });
+  }
+});
+
+// ==========================================
+// TOTAL-KM BASELINE ROUTES
+// ==========================================
+
+// Đọc dữ liệu All-Time km từ file CSV Total-km-17-08-2026.csv
+app.get('/api/challenge/total-km', (req, res) => {
+  try {
+    let filePath = TOTAL_KM_FILE;
+    if (!fs.existsSync(filePath)) {
+      const storageDir = path.join(__dirname, '../Storage');
+      if (fs.existsSync(storageDir)) {
+        const files = fs.readdirSync(storageDir).filter(f => f.startsWith('Total-km') && f.endsWith('.csv'));
+        if (files.length > 0) {
+          filePath = path.join(storageDir, files[0]);
+        }
+      }
+    }
+
+    if (!fs.existsSync(filePath)) {
+      return res.json({ cutoffDate: '2026-08-17T23:59:59.999Z', items: [] });
+    }
+
+    const content = fs.readFileSync(filePath, 'utf8');
+    const lines = content.split(/\r?\n/).filter(line => line.trim().length > 0);
+    const items = [];
+
+    // Header: name,Dthletes,Distance
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      const parts = line.split(',');
+      if (parts.length >= 2) {
+        const name = (parts[0] || '').trim();
+        const athleteUrl = (parts[1] || '').trim();
+        const rawDist = (parts[2] || '').replace(/[^\d.]/g, '').trim();
+        const dist = rawDist ? parseFloat(rawDist) : null;
+
+        let athleteId = null;
+        const idMatch = athleteUrl.match(/\/athletes\/(\d+)/);
+        if (idMatch) {
+          athleteId = parseInt(idMatch[1], 10);
+        }
+
+        if (name || athleteId) {
+          items.push({
+            name,
+            athleteUrl,
+            athleteId,
+            baseDistance: dist !== null && !isNaN(dist) ? dist : null
+          });
+        }
+      }
+    }
+
+    res.json({
+      cutoffDate: '2026-08-17T23:59:59.999Z',
+      items
+    });
+  } catch (error) {
+    console.error('Lỗi đọc total-km base:', error.message);
+    res.status(500).json({ error: 'Không thể đọc dữ liệu Total-km' });
+  }
+});
+
+// Cập nhật file Total-km CSV nếu cần
+app.post('/api/challenge/total-km', (req, res) => {
+  try {
+    const { items, csvContent } = req.body;
+    const dir = path.dirname(TOTAL_KM_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    if (csvContent) {
+      fs.writeFileSync(TOTAL_KM_FILE, csvContent, 'utf8');
+    } else if (Array.isArray(items)) {
+      let csv = 'name,Dthletes,Distance\n';
+      items.forEach(it => {
+        const d = it.baseDistance !== null && it.baseDistance !== undefined ? it.baseDistance.toFixed(2) : '';
+        const url = it.athleteUrl || (it.athleteId ? `/athletes/${it.athleteId}` : '');
+        csv += `${it.name || ''},${url},${d}\n`;
+      });
+      fs.writeFileSync(TOTAL_KM_FILE, csv, 'utf8');
+    }
+
+    res.json({ success: true, message: 'Đã lưu Total-km' });
+  } catch (error) {
+    console.error('Lỗi lưu total-km:', error.message);
+    res.status(500).json({ error: 'Không thể lưu Total-km' });
   }
 });
 

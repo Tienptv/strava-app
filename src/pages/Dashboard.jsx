@@ -27,16 +27,17 @@ export default function Dashboard({ athlete, apiFetch }) {
   const [combinedTotalDistance, setCombinedTotalDistance] = useState(0);
   const [loadingChallenge, setLoadingChallenge] = useState(false);
   const [challengeParticipants, setChallengeParticipants] = useState({});
+  const [totalKmBase, setTotalKmBase] = useState(null);
 
   useEffect(() => {
     if (viewMode === 'challenge' && !loadingChallenge) {
-      const processed = processChallengeData(allChallengeActivities, challengeParticipants, challengeYear, challengeMonth);
+      const processed = processChallengeData(allChallengeActivities, challengeParticipants, challengeYear, challengeMonth, totalKmBase);
       setChallengeData(processed);
       
       const combined = getCombinedDistance(allChallengeActivities, challengeParticipants, challengeYear);
       setCombinedTotalDistance(combined);
     }
-  }, [allChallengeActivities, challengeParticipants, challengeMonth, challengeYear, viewMode, loadingChallenge]);
+  }, [allChallengeActivities, challengeParticipants, challengeMonth, challengeYear, viewMode, loadingChallenge, totalKmBase]);
 
   useEffect(() => {
     loadData();
@@ -132,7 +133,34 @@ export default function Dashboard({ athlete, apiFetch }) {
         console.error('Lỗi khi đọc importedActivities', e);
       }
 
+      // Load Total-km baseline from backend
+      try {
+        const totalKmData = await apiFetch('/challenge/total-km').catch(() => null);
+        if (totalKmData) {
+          setTotalKmBase(totalKmData);
+        }
+      } catch (e) {
+        console.error('Lỗi khi đọc Total-km base', e);
+      }
+
       const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
+
+      // Enrich participants with athlete IDs from imported activities
+      importedActivities.forEach(impAct => {
+        if (impAct.athlete?.id) {
+          const impFname = normalize(impAct.athlete.firstname);
+          const impLname = normalize(impAct.athlete.lastname);
+          const foundKey = Object.keys(participants).find(k => {
+            const p = participants[k];
+            const pFname = normalize(p.firstname);
+            const pLname = normalize(p.lastname);
+            return pFname === impFname && (pLname === impLname || pLname.startsWith(impLname) || impLname.startsWith(pLname));
+          });
+          if (foundKey && !participants[foundKey].id) {
+            participants[foundKey].id = impAct.athlete.id;
+          }
+        }
+      });
 
       // Loại bỏ các hoạt động của chính mình trong importedActivities vì đã có myActivities (đầy đủ hơn)
       const myFnameNorm = normalize(myFname);
@@ -162,7 +190,7 @@ export default function Dashboard({ athlete, apiFetch }) {
       // Nếu có CSV import, ta bỏ qua clubActivities (vì API không có ngày tháng dễ sinh trùng lặp/ảo)
       const allActivities = importedActivities.length > 0 
          ? [...myActivities, ...filteredImportedActivities] 
-         : [...filteredClubActivities, ...myActivities];
+         : [...clubActivities, ...myActivities];
       
       // Inject authenticated athlete ID into participants to map personal activities
       if (athlete && athlete.id) {
@@ -292,14 +320,14 @@ export default function Dashboard({ athlete, apiFetch }) {
                 style={{
                   padding: '8px 16px',
                   borderRadius: '6px',
-                  border: 'none',
-                  background: challengeMonth === m ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  color: challengeMonth === m ? '#38bdf8' : '#cbd5e1',
+                  border: '1px solid var(--border)',
+                  background: challengeMonth === m ? 'rgba(0, 163, 166, 0.1)' : 'var(--bg-card)',
+                  color: challengeMonth === m ? 'var(--accent)' : 'var(--text-secondary)',
                   cursor: 'pointer',
                   fontWeight: 'bold'
                 }}
               >
-                Tháng {m}/{new Date().getFullYear()}
+                {t('month')} {m}/{new Date().getFullYear()}
               </button>
             ))}
           </div>

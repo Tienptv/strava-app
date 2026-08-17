@@ -1,48 +1,136 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLang } from '../i18n/LangContext';
-import { Map, MapPin } from 'lucide-react';
+import { Compass, Edit2, X } from 'lucide-react';
 
 export default function ClubGoalProgress({ totalDistance = 0 }) {
   const { t } = useLang();
   
-  // Default goal: Xuyên Việt (2360 km)
-  const CLUB_GOAL_KM = 2360;
+  const [targetKm, setTargetKm] = useState(() => {
+    const saved = localStorage.getItem('clubGoalKm');
+    if (!saved || saved === '2360') return 9000;
+    return parseInt(saved) || 9000;
+  });
+  
+  const [customTitle, setCustomTitle] = useState(() => localStorage.getItem('clubGoalTitle_custom'));
+  const [customSubtitle, setCustomSubtitle] = useState(() => localStorage.getItem('clubGoalSubtitle_custom'));
 
-  const percent = Math.min(Math.round((totalDistance / CLUB_GOAL_KM) * 100) || 0, 100);
+  const goalTitle = customTitle || t('clubGoalTitle');
+  const goalSubtitle = customSubtitle || t('runAcrossVietnam');
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempTarget, setTempTarget] = useState(targetKm);
+  const [tempTitle, setTempTitle] = useState('');
+  const [tempSubtitle, setTempSubtitle] = useState('');
+
+  const handleOpenEdit = () => {
+    setTempTarget(targetKm);
+    setTempTitle(goalTitle);
+    setTempSubtitle(goalSubtitle);
+    setIsEditing(true);
+  };
+
+  const handleSaveGoal = (e) => {
+    e.preventDefault();
+    const val = parseInt(tempTarget);
+    if (val > 0) {
+      setTargetKm(val);
+      localStorage.setItem('clubGoalKm', val);
+    }
+    
+    if (tempTitle && tempTitle !== t('clubGoalTitle')) {
+      setCustomTitle(tempTitle);
+      localStorage.setItem('clubGoalTitle_custom', tempTitle);
+    } else {
+      setCustomTitle(null);
+      localStorage.removeItem('clubGoalTitle_custom');
+    }
+    
+    if (tempSubtitle && tempSubtitle !== t('runAcrossVietnam')) {
+      setCustomSubtitle(tempSubtitle);
+      localStorage.setItem('clubGoalSubtitle_custom', tempSubtitle);
+    } else {
+      setCustomSubtitle(null);
+      localStorage.removeItem('clubGoalSubtitle_custom');
+    }
+
+    setIsEditing(false);
+  };
+
+  const percent = Math.min(Math.round((totalDistance / targetKm) * 100) || 0, 100);
+  
+  // Giới hạn logo không vượt quá chiều dài thanh bar
+  const vehiclePos = percent > 96 ? 96 : percent;
+
+  // Các thủ đô, thành phố lớn các nước trên đường đi từ TP.HCM đến Bắc Cực (~9.000 km)
+  const milestones = [
+    { name: t('hanoi'), icon: '🍜', percent: 13, pos: 'top' },
+    { name: t('beijing'), icon: '🐼', percent: 38, pos: 'bottom' },
+    { name: t('ulaanbaatar'), icon: '🐎', percent: 52, pos: 'top' },
+    { name: t('irkutsk'), icon: '🐻', percent: 65, pos: 'bottom' },
+    { name: t('norilsk'), icon: '⛄', percent: 80, pos: 'top' }
+  ];
 
   return (
     <div className="club-goal-card">
       <div className="club-goal__header">
         <div className="club-goal__title">
-          <Map size={20} color="var(--accent)" />
-          <span>{t('clubGoalTitle')}</span>
+          <Compass size={22} color="var(--accent)" />
+          <span>{goalTitle}</span>
         </div>
         <div className="club-goal__stats">
           <span className="current-dist">{totalDistance.toFixed(1)}</span>
-          <span className="total-goal">/ {CLUB_GOAL_KM} km</span>
+          <div className="target-display">
+            <span className="total-goal">/ {targetKm} km</span>
+            <button className="btn-icon btn-edit" onClick={handleOpenEdit} title="Edit Target">
+              <Edit2 size={14} />
+            </button>
+          </div>
         </div>
       </div>
       
-      <p className="club-goal__subtitle">{t('runAcrossVietnam')} ({percent}%)</p>
+      <p className="club-goal__subtitle">{goalSubtitle} ({percent}%)</p>
 
       <div className="vietnam-map-progress">
         <div className="map-labels">
-          <span className="map-label start-label">Hà Nội</span>
-          <span className="map-label end-label">Cà Mau</span>
+          <span className="map-label start-label">{t('startLocation')}</span>
+          <span className="map-label end-label">{t('endLocation')}</span>
         </div>
         
         <div className="map-track-container">
           {/* Background track */}
           <div className="map-track-bg"></div>
           
+          {/* Start Point Badge - HCM */}
+          <div className="map-pin-start" title={t('startLocation')}>
+            <div className="start-badge">
+              <span>☕</span>
+            </div>
+          </div>
+
           {/* Filled track */}
           <div className="map-track-fill" style={{ width: `${percent}%` }}></div>
           
+          {/* Milestones / Capitals & Cities with Fun Icons */}
+          {milestones.map((ms, i) => {
+            const isPassed = percent >= ms.percent;
+            return (
+              <div key={i} className={`map-milestone milestone-${ms.pos}`} style={{ left: `${ms.percent}%` }}>
+                <div 
+                  className={`milestone-badge ${isPassed ? 'milestone-badge--passed' : ''}`}
+                  title={`${ms.name} (${ms.percent}%)`}
+                >
+                  <span className="milestone-badge__icon">{ms.icon}</span>
+                </div>
+                <span className={`milestone-name pos-${ms.pos}`}>{ms.name}</span>
+              </div>
+            );
+          })}
+
           {/* Moving Car / Runner icon */}
           <div 
             className="map-vehicle"
             style={{ 
-              left: `calc(${percent}% - 24px)`, 
+              left: `calc(${vehiclePos}% - 12px)`, 
               display: 'flex', 
               alignItems: 'center' 
             }}
@@ -53,14 +141,66 @@ export default function ClubGoalProgress({ totalDistance = 0 }) {
           </div>
           
           {/* Destination Pin */}
-          <div className="map-pin-end">
-            <MapPin size={20} color="var(--accent)" fill="var(--bg-secondary)" />
+          <div className="map-pin-end" title={t('endLocation')}>
+            <div className="destination-badge">
+              <span>🐻‍❄️</span>
+            </div>
           </div>
         </div>
       </div>
       
       {percent >= 100 && (
         <p className="goal-congrats" style={{ marginTop: '16px' }}>🎉 {t('clubGoalReached')}</p>
+      )}
+
+      {/* Edit Goal Modal */}
+      {isEditing && (
+        <div className="goal-edit-modal-backdrop" onClick={() => setIsEditing(false)}>
+          <div className="goal-edit-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{t('editChallenge')}</h3>
+              <button className="btn-icon" onClick={() => setIsEditing(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveGoal}>
+              <div className="form-group">
+                <label>{t('goalTitleLabel')}</label>
+                <input 
+                  type="text" 
+                  value={tempTitle} 
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  className="modal-input"
+                  placeholder={t('clubGoalTitle')}
+                />
+              </div>
+              <div className="form-group">
+                <label>{t('challengeDescLabel')}</label>
+                <input 
+                  type="text" 
+                  value={tempSubtitle} 
+                  onChange={(e) => setTempSubtitle(e.target.value)}
+                  className="modal-input"
+                  placeholder={t('runAcrossVietnam')}
+                />
+              </div>
+              <div className="form-group">
+                <label>{t('targetDistanceLabel')}</label>
+                <input 
+                  type="number" 
+                  value={tempTarget} 
+                  onChange={(e) => setTempTarget(e.target.value)}
+                  className="modal-input"
+                  min="1"
+                />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn-cancel" onClick={() => setIsEditing(false)}>{t('cancel')}</button>
+                <button type="submit" className="btn-save">{t('saveChanges')}</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

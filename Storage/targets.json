@@ -12,5 +12,33 @@
   "Sơn_N._2026_8": {
     "target": "200",
     "penalty": false
+  },
+  "Huy_H._2026_8": {
+    "target": 0,
+    "penalty": false
+  },
+  "Sang_N._2026_8": {
+    "target": 50,
+    "penalty": true
+  },
+  "Tien_P._2026_8": {
+    "target": 50,
+    "penalty": true
+  },
+  "Thinh_V._2026_8": {
+    "target": 46,
+    "penalty": true
+  },
+  "Thanh_X._2026_8": {
+    "penalty": false,
+    "target": 0
+  },
+  "Lieu_V._2026_8": {
+    "target": "",
+    "penalty": false
+  },
+  "Phuong_N._2026_8": {
+    "penalty": false,
+    "target": 0
   }
 }

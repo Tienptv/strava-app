@@ -110,9 +110,17 @@ export default function Sidebar({ apiFetch }) {
               let athleteId = null;
               let athleteName = row.Name || row.Athlete || '';
               
-              if (row.Athlete && row.Athlete.includes('/athletes/')) {
-                athleteId = parseInt(row.Athlete.replace('/athletes/', ''), 10);
+              if (row.Athlete && String(row.Athlete).includes('/athletes/')) {
+                athleteId = parseInt(String(row.Athlete).replace('/athletes/', ''), 10);
                 athleteName = row.Name || '';
+              }
+
+              let activityId = null;
+              if (row.Activity) {
+                const match = String(row.Activity).match(/\d+/);
+                if (match) activityId = match[0];
+              } else if (row['Activity ID'] || row.id || row.Id) {
+                activityId = String(row['Activity ID'] || row.id || row.Id);
               }
 
               let nameParts = athleteName.trim().split(' ');
@@ -120,35 +128,33 @@ export default function Sidebar({ apiFetch }) {
               let firstname = nameParts.join(' ');
 
               let dateStr = row.Date || '';
-              if (dateStr.includes('/')) {
-                 let dParts = dateStr.split('/');
-                 if (dParts.length === 3) {
-                    if (dParts[0].length === 4) {
-                       dateStr = `${dParts[0]}/${dParts[1]}/${dParts[2]}`;
-                    } else {
-                       dateStr = `${dParts[1]}/${dParts[0]}/${dParts[2]}`;
-                    }
-                 }
-              } else {
-                 dateStr = dateStr.replace(/([+-]\d{2})$/, '$1:00');
-              }
-              let startDate = new Date(dateStr);
-
               let localIsoStr = null;
-              if (!isNaN(startDate.getTime())) {
-                if (dateStr.includes('T')) {
-                   localIsoStr = dateStr.substring(0, 19) + 'Z';
-                } else {
-                   localIsoStr = startDate.getFullYear() + '-' + 
-                     String(startDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                     String(startDate.getDate()).padStart(2, '0') + 'T' + 
-                     String(startDate.getHours()).padStart(2, '0') + ':' + 
-                     String(startDate.getMinutes()).padStart(2, '0') + ':' + 
-                     String(startDate.getSeconds()).padStart(2, '0') + 'Z';
+
+              if (dateStr.includes('T')) {
+                // Định dạng ISO: "2026-08-17T05:56:00.000+07:00" -> lấy đúng phần giờ local YYYY-MM-DDTHH:mm:ssZ
+                localIsoStr = dateStr.substring(0, 19) + 'Z';
+              } else if (dateStr) {
+                if (dateStr.includes('/')) {
+                   let dParts = dateStr.split(' ')[0].split('/');
+                   let tPart = dateStr.split(' ')[1] || '00:00:00';
+                   if (dParts.length === 3) {
+                      if (dParts[0].length === 4) {
+                         dateStr = `${dParts[0]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[2]).padStart(2, '0')}T${tPart}Z`;
+                      } else {
+                         dateStr = `${dParts[2]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[0]).padStart(2, '0')}T${tPart}Z`;
+                      }
+                      localIsoStr = dateStr;
+                   }
+                } else if (dateStr.includes('-')) {
+                   let parts = dateStr.split(' ');
+                   let dPart = parts[0];
+                   let tPart = parts[1] || '00:00:00';
+                   localIsoStr = `${dPart}T${tPart}Z`;
                 }
               }
 
               return {
+                id: activityId,
                 type: row.Type || row['Activity Type'] || 'Run',
                 distance: dist,
                 moving_time: movingTimeSec,
@@ -185,13 +191,16 @@ export default function Sidebar({ apiFetch }) {
       console.error('Lỗi khi đọc importedActivities', e);
     }
 
+    const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
     const allMap = new Map();
     const getActivityKey = (act) => {
-       const d = act.start_date_local || '';
+       if (act.id) return `id_${act.id}`;
+       const d = (act.start_date_local || '').substring(0, 16); // Chuẩn hóa tới phút YYYY-MM-DDTHH:mm
        const t = act.moving_time || 0;
-       const dist = act.distance || 0;
-       const name = `${act.athlete?.firstname || ''}_${act.athlete?.lastname || ''}`;
-       return `${name}_${d}_${t}_${dist}`;
+       const dist = Math.round(act.distance || 0);
+       const athId = act.athlete?.id || '';
+       const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
+       return `comp_${athId || name}_${d}_${t}_${dist}`;
     };
 
     existingActivities.forEach(act => allMap.set(getActivityKey(act), act));
@@ -317,7 +326,7 @@ export default function Sidebar({ apiFetch }) {
                         </span>
                       </div>
                       <div className={`sidebar__checkbox ${isSelected ? 'sidebar__checkbox--active' : ''}`}>
-                        {isSelected && <Check size={12} color="white" />}
+                        {isSelected && <Check size={12} color="#00A3A6" strokeWidth={3} />}
                       </div>
                     </div>
                   );
@@ -354,14 +363,14 @@ export default function Sidebar({ apiFetch }) {
           </button>
 
           <div style={{ display: 'flex', gap: '8px' }}>
-            <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
+            <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(0, 45, 84, 0.05)', color: '#002D54', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
               <Upload size={16} style={{ marginRight: 6 }} />
-              Chọn File
+              {t('selectFile')}
               <input type="file" accept=".csv" multiple onChange={handleCsvUpload} style={{ display: 'none' }} />
             </label>
-            <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
+            <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(0, 45, 84, 0.05)', color: '#002D54', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
               <Upload size={16} style={{ marginRight: 6 }} />
-              Chọn Folder
+              {t('selectFolder')}
               <input type="file" webkitdirectory="true" onChange={handleCsvUpload} style={{ display: 'none' }} />
             </label>
           </div>
