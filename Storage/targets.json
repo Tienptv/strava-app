@@ -22,6 +22,10 @@
     "penalty": true
   },
   "Tien_P._2026_8": {
+    "target": 50,
+    "penalty": true
+  },
+  "pham_T._2026_8": {
     "target": 200,
     "penalty": true
   },

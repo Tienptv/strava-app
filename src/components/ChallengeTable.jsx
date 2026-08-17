@@ -19,28 +19,21 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     const normFname = normalize(athlete.firstname);
     const normLname = normalize(athlete.lastname);
 
-    // 1. Exact Strava Athlete ID match (Ưu tiên số 1)
+    // 1. Khớp tuyệt đối theo ID vận động viên Strava (Chuẩn xác nhất)
     if (athId) {
       const matchById = challengeData.find(row => row.member?.id && String(row.member.id) === athId);
       if (matchById) return matchById;
     }
 
-    // 2. Tìm tất cả candidate khớp tên (cả xuôi và ngược Họ - Tên)
-    const candidates = challengeData.filter(row => {
+    // 2. Khớp đúng thứ tự Tên - Họ (Tuyệt đối không đảo Họ Tên)
+    const matchByDirect = challengeData.find(row => {
       const mF = normalize(row.member?.firstname);
       const mL = normalize(row.member?.lastname);
-      const direct = mF === normFname && (mL === normLname || (normLname && mL.startsWith(normLname.charAt(0))) || (mL && normLname.startsWith(mL)));
-      const reverse = mF === normLname && (mL === normFname || (normFname && mL.startsWith(normFname.charAt(0))) || (mL && normFname.startsWith(mL)));
-      return direct || reverse;
+      if (mF !== normFname) return false;
+      if (!normLname) return true;
+      return mL === normLname || (normLname && mL.startsWith(normLname.charAt(0))) || (mL && normLname.startsWith(mL));
     });
-
-    if (candidates.length === 1) return candidates[0];
-    if (candidates.length > 1) {
-      // Ưu tiên dòng đang có hoạt động chạy (active runner trong bảng)
-      const withDistance = candidates.find(c => c.totalDistance > 0);
-      if (withDistance) return withDistance;
-      return candidates[0];
-    }
+    if (matchByDirect) return matchByDirect;
 
     return null;
   }, [athlete, challengeData]);

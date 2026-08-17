@@ -29,33 +29,25 @@ export function getAthleteMatchKey(athlete, participants = {}) {
     if (keyById) return keyById;
   }
 
-  // 2. Khớp xuôi trước: First = First & Last = Last (Ưu tiên cao nhất)
+  // 2. Khớp đúng thứ tự Tên - Họ (Tuyệt đối không đảo ngược Tên - Họ để tránh nhầm 2 runner khác nhau)
   const keyByDirectName = Object.keys(participants || {}).find(k => {
     const p = participants[k];
     if (!p) return false;
     const pFname = normalize(p.firstname);
     const pLname = normalize(p.lastname);
-    return pFname === normFname && (
+    
+    // Firstname bắt buộc phải khớp chính xác
+    if (pFname !== normFname) return false;
+    
+    // Lastname phải khớp hoặc khớp chữ cái đầu
+    if (!normLname) return true;
+    return (
       pLname === normLname || 
       pLname.startsWith(normLname) || 
       normLname.startsWith(pLname)
     );
   });
   if (keyByDirectName) return keyByDirectName;
-
-  // 3. Khớp đảo Họ - Tên (Chỉ khi không khớp xuôi được): First = Last & Last = First
-  const keyByReverseName = Object.keys(participants || {}).find(k => {
-    const p = participants[k];
-    if (!p) return false;
-    const pFname = normalize(p.firstname);
-    const pLname = normalize(p.lastname);
-    return pFname === normLname && (
-      pLname === normFname || 
-      pLname.startsWith(normFname) || 
-      normFname.startsWith(pLname)
-    );
-  });
-  if (keyByReverseName) return keyByReverseName;
 
   // 3. Fallback định dạng chuẩn Strava: Firstname_L. (vd: Tien_P.)
   const lastInitial = athlete.lastname ? (athlete.lastname.trim().charAt(0) + '.') : '';
