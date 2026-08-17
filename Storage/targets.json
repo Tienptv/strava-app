@@ -5,5 +5,12 @@
   },
   "Thanh_X.": {
     "penalty": false
+  },
+  "Sơn_N._2026_7": {
+    "penalty": true
+  },
+  "Sơn_N._2026_8": {
+    "target": "200",
+    "penalty": false
   }
 }

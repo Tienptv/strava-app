@@ -96,11 +96,13 @@ function App() {
     );
   }
 
+  const isAdmin = athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID;
+
   return (
     <BrowserRouter>
       {athlete && <Navbar athlete={athlete} onLogout={handleLogout} />}
       <div className={athlete ? "app-layout" : ""}>
-        {athlete && <Sidebar apiFetch={apiFetch} />}
+        {athlete && isAdmin && <Sidebar apiFetch={apiFetch} />}
         <main className={athlete ? "app-main" : ""}>
           <Routes>
             <Route

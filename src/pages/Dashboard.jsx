@@ -65,17 +65,18 @@ export default function Dashboard({ athlete, apiFetch }) {
   };
 
   const checkChallengeData = async () => {
-    const savedParts = localStorage.getItem('challengeParticipants');
-    const savedClubId = localStorage.getItem('challengeClubId');
-    if (savedParts && savedClubId) {
-      const parsedParts = JSON.parse(savedParts);
-      setChallengeParticipants(parsedParts);
-      if (Object.keys(parsedParts).length > 0) {
+    try {
+      const config = await apiFetch('/challenge/config').catch(() => null);
+      if (config && config.participants && Object.keys(config.participants).length > 0) {
+        setChallengeParticipants(config.participants);
         setViewMode('challenge');
-        loadChallengeActivities(savedClubId, parsedParts);
+        loadChallengeActivities(config.clubId, config.participants);
       } else {
         setViewMode('overview');
       }
+    } catch (e) {
+      console.error('Lỗi checkChallengeData', e);
+      setViewMode('overview');
     }
   };
 
@@ -116,12 +117,12 @@ export default function Dashboard({ athlete, apiFetch }) {
         return true;
       });
       
-      // Load imported activities from localStorage (Strava Clubs Reports CSV)
+      // Load imported activities from backend
       let importedActivities = [];
       try {
-        const saved = localStorage.getItem('importedActivities');
-        if (saved) {
-          importedActivities = JSON.parse(saved);
+        const importedData = await apiFetch('/challenge/imported').catch(() => []);
+        if (Array.isArray(importedData)) {
+          importedActivities = importedData;
         }
       } catch (e) {
         console.error('Lỗi khi đọc importedActivities', e);

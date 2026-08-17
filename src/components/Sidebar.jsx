@@ -12,10 +12,17 @@ export default function Sidebar({ apiFetch }) {
   const [searchQuery, setSearchQuery] = useState('');
   
   // State quản lý challenge participants: { [athleteId]: true/false }
-  const [participants, setParticipants] = useState(() => {
-    const saved = localStorage.getItem('challengeParticipants');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [participants, setParticipants] = useState({});
+
+  useEffect(() => {
+    // Load saved config on mount
+    apiFetch('/challenge/config')
+      .then(data => {
+        if (data.clubId) setSelectedClubId(data.clubId);
+        if (data.participants) setParticipants(data.participants);
+      })
+      .catch(err => console.error('Lỗi tải config:', err));
+  }, [apiFetch]);
 
   const [savedMessage, setSavedMessage] = useState(false);
 
@@ -52,16 +59,23 @@ export default function Sidebar({ apiFetch }) {
     });
   };
 
-  // Lưu xuống localStorage
-  const handleSave = () => {
-    localStorage.setItem('challengeParticipants', JSON.stringify(participants));
-    if (selectedClubId) {
-      localStorage.setItem('challengeClubId', selectedClubId);
+  const handleSave = async () => {
+    try {
+      await apiFetch('/challenge/config', {
+        method: 'POST',
+        body: JSON.stringify({
+          clubId: selectedClubId,
+          participants: participants
+        })
+      });
+      window.dispatchEvent(new Event('challengeUpdated'));
+      
+      setSavedMessage(true);
+      setTimeout(() => setSavedMessage(false), 3000);
+    } catch (err) {
+      console.error('Lỗi lưu config:', err);
+      alert('Không thể lưu cấu hình, vui lòng thử lại.');
     }
-    window.dispatchEvent(new Event('challengeUpdated'));
-    
-    setSavedMessage(true);
-    setTimeout(() => setSavedMessage(false), 3000);
   };
 
   const handleCsvUpload = (e) => {
@@ -71,7 +85,7 @@ export default function Sidebar({ apiFetch }) {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: function(results) {
+      complete: async function(results) {
         const data = results.data;
         const importedActivities = data.map(row => {
           let dist = parseFloat(String(row.Distance || 0).replace(',', '.').replace(/[^\d.-]/g, ''));
@@ -89,10 +103,9 @@ export default function Sidebar({ apiFetch }) {
           let athleteId = null;
           let athleteName = row.Name || row.Athlete || '';
           
-          // Nếu cột Athlete chứa URL ID (VD: /athletes/123456)
           if (row.Athlete && row.Athlete.includes('/athletes/')) {
             athleteId = parseInt(row.Athlete.replace('/athletes/', ''), 10);
-            athleteName = row.Name || ''; // Dùng cột Name cho tên
+            athleteName = row.Name || '';
           }
 
           let nameParts = athleteName.trim().split(' ');
@@ -100,20 +113,16 @@ export default function Sidebar({ apiFetch }) {
           let firstname = nameParts.join(' ');
 
           let dateStr = row.Date || '';
-          // Xử lý định dạng DD/MM/YYYY hoặc D/M/YYYY
           if (dateStr.includes('/')) {
              let dParts = dateStr.split('/');
              if (dParts.length === 3) {
-                // Nếu phần đầu tiên là năm (YYYY/MM/DD) thì giữ nguyên
                 if (dParts[0].length === 4) {
                    dateStr = `${dParts[0]}/${dParts[1]}/${dParts[2]}`;
                 } else {
-                   // Giả định là DD/MM/YYYY -> chuyển thành MM/DD/YYYY cho new Date()
                    dateStr = `${dParts[1]}/${dParts[0]}/${dParts[2]}`;
                 }
              }
           } else {
-             // Sửa lỗi timezone bị thiếu phút trong CSV (vd: +07 -> +07:00)
              dateStr = dateStr.replace(/([+-]\d{2})$/, '$1:00');
           }
           let startDate = new Date(dateStr);
@@ -121,7 +130,6 @@ export default function Sidebar({ apiFetch }) {
           let localIsoStr = null;
           if (!isNaN(startDate.getTime())) {
             if (dateStr.includes('T')) {
-               // CSV chứa sẵn giờ địa phương + múi giờ, ta lấy đúng phần YYYY-MM-DDTHH:mm:ss
                localIsoStr = dateStr.substring(0, 19) + 'Z';
             } else {
                localIsoStr = startDate.getFullYear() + '-' + 
@@ -148,9 +156,13 @@ export default function Sidebar({ apiFetch }) {
 
         let existingActivities = [];
         try {
-          const saved = localStorage.getItem('importedActivities');
-          if (saved) existingActivities = JSON.parse(saved);
-        } catch (e) {}
+          const importedData = await apiFetch('/challenge/imported').catch(() => []);
+          if (Array.isArray(importedData)) {
+            existingActivities = importedData;
+          }
+        } catch (e) {
+          console.error('Lỗi khi đọc importedActivities', e);
+        }
 
         const allMap = new Map();
         const getActivityKey = (act) => {
@@ -165,9 +177,18 @@ export default function Sidebar({ apiFetch }) {
         importedActivities.forEach(act => allMap.set(getActivityKey(act), act));
 
         const finalActivities = Array.from(allMap.values());
-        localStorage.setItem('importedActivities', JSON.stringify(finalActivities));
-        window.dispatchEvent(new Event('challengeUpdated'));
-        alert(t('importSuccess') + ` (${importedActivities.length} activities merged)`);
+        
+        try {
+          await apiFetch('/challenge/imported', {
+            method: 'POST',
+            body: JSON.stringify(finalActivities)
+          });
+          window.dispatchEvent(new Event('challengeUpdated'));
+          alert(t('importSuccess') + ` (${importedActivities.length} activities merged)`);
+        } catch (e) {
+          console.error('Lỗi lưu importedActivities', e);
+          alert(t('importError'));
+        }
       },
       error: function() {
         alert(t('importError'));

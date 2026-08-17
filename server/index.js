@@ -11,6 +11,8 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const TARGETS_FILE = path.join(__dirname, '../Storage/targets.json');
+const CONFIG_FILE = path.join(__dirname, '../Storage/challenge_config.json');
+const IMPORTED_FILE = path.join(__dirname, '../Storage/imported_activities.json');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -253,6 +255,68 @@ app.post('/api/challenge/targets', (req, res) => {
   } catch (error) {
     console.error('Lỗi lưu targets:', error.message);
     res.status(500).json({ error: 'Không thể lưu dữ liệu' });
+  }
+});
+
+// ==========================================
+// CONFIG & IMPORTED ROUTES
+// ==========================================
+
+// Đọc cấu hình (participants, clubId)
+app.get('/api/challenge/config', (req, res) => {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const data = fs.readFileSync(CONFIG_FILE, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json({ participants: {}, clubId: '' });
+    }
+  } catch (error) {
+    console.error('Lỗi đọc config:', error.message);
+    res.status(500).json({ error: 'Không thể đọc cấu hình' });
+  }
+});
+
+// Lưu cấu hình
+app.post('/api/challenge/config', (req, res) => {
+  try {
+    const data = req.body;
+    const dir = path.dirname(CONFIG_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
+    res.json(data);
+  } catch (error) {
+    console.error('Lỗi lưu config:', error.message);
+    res.status(500).json({ error: 'Không thể lưu cấu hình' });
+  }
+});
+
+// Đọc imported activities
+app.get('/api/challenge/imported', (req, res) => {
+  try {
+    if (fs.existsSync(IMPORTED_FILE)) {
+      const data = fs.readFileSync(IMPORTED_FILE, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.error('Lỗi đọc imported:', error.message);
+    res.status(500).json({ error: 'Không thể đọc dữ liệu imported' });
+  }
+});
+
+// Lưu imported activities
+app.post('/api/challenge/imported', (req, res) => {
+  try {
+    const data = req.body;
+    const dir = path.dirname(IMPORTED_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(IMPORTED_FILE, JSON.stringify(data, null, 2));
+    res.json(data);
+  } catch (error) {
+    console.error('Lỗi lưu imported:', error.message);
+    res.status(500).json({ error: 'Không thể lưu dữ liệu imported' });
   }
 });
 

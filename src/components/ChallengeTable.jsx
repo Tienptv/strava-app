@@ -22,23 +22,26 @@ export default function ChallengeTable({ challengeData, year, month }) {
   };
 
   const handleTargetChange = (matchKey, value) => {
+    const key = `${matchKey}_${year}_${month}`;
     setUserData(prev => {
-      const newData = { ...prev, [matchKey]: { ...prev[matchKey], target: value } };
+      const newData = { ...prev, [key]: { ...prev[key], target: value } };
       return newData;
     });
     // For a real app, maybe debounce this. For now, just save on change/blur
   };
 
   const handleTargetBlur = (matchKey, value) => {
-    saveToApi({ matchKey, target: value });
+    const key = `${matchKey}_${year}_${month}`;
+    saveToApi({ matchKey: key, target: value });
   };
 
   const handlePenaltyChange = (matchKey, checked) => {
+    const key = `${matchKey}_${year}_${month}`;
     setUserData(prev => {
-      const newData = { ...prev, [matchKey]: { ...prev[matchKey], penalty: checked } };
+      const newData = { ...prev, [key]: { ...prev[key], penalty: checked } };
       return newData;
     });
-    saveToApi({ matchKey, penalty: checked });
+    saveToApi({ matchKey: key, penalty: checked });
   };
 
   // Calculate days in month
@@ -131,7 +134,7 @@ export default function ChallengeTable({ challengeData, year, month }) {
                   <input 
                     type="number" 
                     placeholder="100" 
-                    value={userData[row.matchKey]?.target || ''}
+                    value={userData[`${row.matchKey}_${year}_${month}`]?.target || ''}
                     onChange={(e) => handleTargetChange(row.matchKey, e.target.value)}
                     onBlur={(e) => handleTargetBlur(row.matchKey, e.target.value)}
                     style={{ width: '50px', background: 'transparent', color: 'inherit', border: '1px solid var(--border-color, #333)', borderRadius: '4px', textAlign: 'center', padding: '2px' }} 
@@ -140,7 +143,7 @@ export default function ChallengeTable({ challengeData, year, month }) {
                 <td className="sum-cell sticky-right col-penalty">
                   <input 
                     type="checkbox" 
-                    checked={userData[row.matchKey]?.penalty || false}
+                    checked={userData[`${row.matchKey}_${year}_${month}`]?.penalty || false}
                     onChange={(e) => handlePenaltyChange(row.matchKey, e.target.checked)}
                     style={{ cursor: 'pointer' }} 
                   />
