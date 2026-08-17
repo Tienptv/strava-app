@@ -78,122 +78,141 @@ export default function Sidebar({ apiFetch }) {
     }
   };
 
-  const handleCsvUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleCsvUpload = async (e) => {
+    const files = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.csv'));
+    if (!files.length) {
+       alert('Không tìm thấy file CSV nào hợp lệ.');
+       return;
+    }
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async function(results) {
-        const data = results.data;
-        const importedActivities = data.map(row => {
-          let dist = parseFloat(String(row.Distance || 0).replace(',', '.').replace(/[^\d.-]/g, ''));
-          dist = isNaN(dist) ? 0 : dist * 1000;
-          
-          let movingTimeStr = row['Duration'] || row['Moving Time'] || row['Time'] || '00:00:00';
-          let timeParts = movingTimeStr.split(':').map(Number);
-          let movingTimeSec = 0;
-          if (timeParts.length === 3) {
-            movingTimeSec = timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2];
-          } else if (timeParts.length === 2) {
-            movingTimeSec = timeParts[0] * 60 + timeParts[1];
-          }
+    let allImportedActivities = [];
 
-          let athleteId = null;
-          let athleteName = row.Name || row.Athlete || '';
-          
-          if (row.Athlete && row.Athlete.includes('/athletes/')) {
-            athleteId = parseInt(row.Athlete.replace('/athletes/', ''), 10);
-            athleteName = row.Name || '';
-          }
+    const parseFile = (file) => {
+      return new Promise((resolve) => {
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function(results) {
+            const data = results.data;
+            const importedActivities = data.map(row => {
+              let dist = parseFloat(String(row.Distance || 0).replace(',', '.').replace(/[^\d.-]/g, ''));
+              dist = isNaN(dist) ? 0 : dist * 1000;
+              
+              let movingTimeStr = row['Duration'] || row['Moving Time'] || row['Time'] || '00:00:00';
+              let timeParts = movingTimeStr.split(':').map(Number);
+              let movingTimeSec = 0;
+              if (timeParts.length === 3) {
+                movingTimeSec = timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2];
+              } else if (timeParts.length === 2) {
+                movingTimeSec = timeParts[0] * 60 + timeParts[1];
+              }
 
-          let nameParts = athleteName.trim().split(' ');
-          let lastname = nameParts.length > 1 ? nameParts.pop() : '';
-          let firstname = nameParts.join(' ');
+              let athleteId = null;
+              let athleteName = row.Name || row.Athlete || '';
+              
+              if (row.Athlete && row.Athlete.includes('/athletes/')) {
+                athleteId = parseInt(row.Athlete.replace('/athletes/', ''), 10);
+                athleteName = row.Name || '';
+              }
 
-          let dateStr = row.Date || '';
-          if (dateStr.includes('/')) {
-             let dParts = dateStr.split('/');
-             if (dParts.length === 3) {
-                if (dParts[0].length === 4) {
-                   dateStr = `${dParts[0]}/${dParts[1]}/${dParts[2]}`;
+              let nameParts = athleteName.trim().split(' ');
+              let lastname = nameParts.length > 1 ? nameParts.pop() : '';
+              let firstname = nameParts.join(' ');
+
+              let dateStr = row.Date || '';
+              if (dateStr.includes('/')) {
+                 let dParts = dateStr.split('/');
+                 if (dParts.length === 3) {
+                    if (dParts[0].length === 4) {
+                       dateStr = `${dParts[0]}/${dParts[1]}/${dParts[2]}`;
+                    } else {
+                       dateStr = `${dParts[1]}/${dParts[0]}/${dParts[2]}`;
+                    }
+                 }
+              } else {
+                 dateStr = dateStr.replace(/([+-]\d{2})$/, '$1:00');
+              }
+              let startDate = new Date(dateStr);
+
+              let localIsoStr = null;
+              if (!isNaN(startDate.getTime())) {
+                if (dateStr.includes('T')) {
+                   localIsoStr = dateStr.substring(0, 19) + 'Z';
                 } else {
-                   dateStr = `${dParts[1]}/${dParts[0]}/${dParts[2]}`;
+                   localIsoStr = startDate.getFullYear() + '-' + 
+                     String(startDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(startDate.getDate()).padStart(2, '0') + 'T' + 
+                     String(startDate.getHours()).padStart(2, '0') + ':' + 
+                     String(startDate.getMinutes()).padStart(2, '0') + ':' + 
+                     String(startDate.getSeconds()).padStart(2, '0') + 'Z';
                 }
-             }
-          } else {
-             dateStr = dateStr.replace(/([+-]\d{2})$/, '$1:00');
-          }
-          let startDate = new Date(dateStr);
+              }
 
-          let localIsoStr = null;
-          if (!isNaN(startDate.getTime())) {
-            if (dateStr.includes('T')) {
-               localIsoStr = dateStr.substring(0, 19) + 'Z';
-            } else {
-               localIsoStr = startDate.getFullYear() + '-' + 
-                 String(startDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                 String(startDate.getDate()).padStart(2, '0') + 'T' + 
-                 String(startDate.getHours()).padStart(2, '0') + ':' + 
-                 String(startDate.getMinutes()).padStart(2, '0') + ':' + 
-                 String(startDate.getSeconds()).padStart(2, '0') + 'Z';
-            }
+              return {
+                type: row.Type || row['Activity Type'] || 'Run',
+                distance: dist,
+                moving_time: movingTimeSec,
+                start_date_local: localIsoStr,
+                athlete: {
+                  id: athleteId,
+                  firstname: firstname,
+                  lastname: lastname
+                }
+              };
+            });
+            resolve(importedActivities);
+          },
+          error: function(err) {
+            console.error('Lỗi parse CSV', err);
+            resolve([]);
           }
-
-          return {
-            type: row.Type || row['Activity Type'] || 'Run',
-            distance: dist,
-            moving_time: movingTimeSec,
-            start_date_local: localIsoStr,
-            athlete: {
-              id: athleteId,
-              firstname: firstname,
-              lastname: lastname
-            }
-          };
         });
+      });
+    };
 
-        let existingActivities = [];
-        try {
-          const importedData = await apiFetch('/challenge/imported').catch(() => []);
-          if (Array.isArray(importedData)) {
-            existingActivities = importedData;
-          }
-        } catch (e) {
-          console.error('Lỗi khi đọc importedActivities', e);
-        }
+    for (const file of files) {
+      const activities = await parseFile(file);
+      allImportedActivities = [...allImportedActivities, ...activities];
+    }
 
-        const allMap = new Map();
-        const getActivityKey = (act) => {
-           const d = act.start_date_local || '';
-           const t = act.moving_time || 0;
-           const dist = act.distance || 0;
-           const name = `${act.athlete?.firstname || ''}_${act.athlete?.lastname || ''}`;
-           return `${name}_${d}_${t}_${dist}`;
-        };
-
-        existingActivities.forEach(act => allMap.set(getActivityKey(act), act));
-        importedActivities.forEach(act => allMap.set(getActivityKey(act), act));
-
-        const finalActivities = Array.from(allMap.values());
-        
-        try {
-          await apiFetch('/challenge/imported', {
-            method: 'POST',
-            body: JSON.stringify(finalActivities)
-          });
-          window.dispatchEvent(new Event('challengeUpdated'));
-          alert(t('importSuccess') + ` (${importedActivities.length} activities merged)`);
-        } catch (e) {
-          console.error('Lỗi lưu importedActivities', e);
-          alert(t('importError'));
-        }
-      },
-      error: function() {
-        alert(t('importError'));
+    let existingActivities = [];
+    try {
+      const importedData = await apiFetch('/challenge/imported').catch(() => []);
+      if (Array.isArray(importedData)) {
+        existingActivities = importedData;
       }
-    });
+    } catch (e) {
+      console.error('Lỗi khi đọc importedActivities', e);
+    }
+
+    const allMap = new Map();
+    const getActivityKey = (act) => {
+       const d = act.start_date_local || '';
+       const t = act.moving_time || 0;
+       const dist = act.distance || 0;
+       const name = `${act.athlete?.firstname || ''}_${act.athlete?.lastname || ''}`;
+       return `${name}_${d}_${t}_${dist}`;
+    };
+
+    existingActivities.forEach(act => allMap.set(getActivityKey(act), act));
+    allImportedActivities.forEach(act => allMap.set(getActivityKey(act), act));
+
+    const finalActivities = Array.from(allMap.values());
+    
+    try {
+      await apiFetch('/challenge/imported', {
+        method: 'POST',
+        body: JSON.stringify(finalActivities)
+      });
+      window.dispatchEvent(new Event('challengeUpdated'));
+      alert(t('importSuccess') + ` (${allImportedActivities.length} activities merged from ${files.length} files)`);
+    } catch (e) {
+      console.error('Lỗi lưu importedActivities', e);
+      alert(t('importError'));
+    }
+
+    // Reset input
+    e.target.value = null;
   };
 
   const selectAll = () => {
@@ -334,11 +353,18 @@ export default function Sidebar({ apiFetch }) {
             {savedMessage ? t('challengeSaved') : t('saveChallenge')}
           </button>
 
-          <label className="btn btn--secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 16px', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '14px', fontWeight: 'bold' }}>
-            <Upload size={16} style={{ marginRight: 6 }} />
-            {t('importCsv')}
-            <input type="file" accept=".csv" onChange={handleCsvUpload} style={{ display: 'none' }} />
-          </label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
+              <Upload size={16} style={{ marginRight: 6 }} />
+              Chọn File
+              <input type="file" accept=".csv" multiple onChange={handleCsvUpload} style={{ display: 'none' }} />
+            </label>
+            <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
+              <Upload size={16} style={{ marginRight: 6 }} />
+              Chọn Folder
+              <input type="file" webkitdirectory="true" onChange={handleCsvUpload} style={{ display: 'none' }} />
+            </label>
+          </div>
         </div>
       </div>
     </aside>

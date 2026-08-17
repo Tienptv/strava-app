@@ -172,3 +172,69 @@ export function processChallengeData(activities, participantsMap, year, month) {
 
   return result;
 }
+
+/**
+ * Tính tổng km của toàn bộ các tháng trong năm
+ * Loại bỏ trùng lặp cho các hoạt động không có ngày tháng (từ club API)
+ */
+export function getCombinedDistance(activities, participantsMap, year) {
+  let sum = 0;
+  
+  // Khởi tạo map chứa dữ liệu của các participants
+  const runnerStats = {};
+  Object.keys(participantsMap).forEach(key => {
+    runnerStats[key] = {
+      member: participantsMap[key]
+    };
+  });
+
+  const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
+
+  activities.forEach(act => {
+    if (act.distance === undefined || act.distance < 5) return;
+
+    let matchKey = null;
+
+    // 1. Thử match bằng ID trước
+    if (act.athlete?.id) {
+      const foundIdKey = Object.keys(runnerStats).find(k => runnerStats[k].member.id === act.athlete.id);
+      if (foundIdKey) matchKey = foundIdKey;
+    } 
+    
+    // 2. Fallback match bằng tên
+    if (!matchKey) {
+      const fname = normalize(act.athlete?.firstname);
+      const lname = normalize(act.athlete?.lastname);
+      
+      const foundKey = Object.keys(runnerStats).find(k => {
+        const mem = runnerStats[k].member;
+        const memFname = normalize(mem.firstname);
+        const memLname = normalize(mem.lastname);
+        return memFname === fname && 
+               (memLname === lname || memLname.startsWith(lname) || lname.startsWith(memLname));
+      });
+
+      if (foundKey) matchKey = foundKey;
+    }
+
+    if (matchKey) {
+      const distanceKm = (act.distance || 0) / 1000;
+
+      if (act.start_date_local) {
+        const localDateStr = act.start_date_local.endsWith('Z') ? act.start_date_local.slice(0, -1) : act.start_date_local;
+        const date = new Date(localDateStr);
+        const actYear = date.getFullYear();
+        const actMonth = date.getMonth() + 1;
+
+        if (actYear === year) {
+          sum += distanceKm;
+        }
+      } else {
+        // Cộng luôn các hoạt động club không có ngày tháng (chỉ cộng 1 lần cho tổng cộng dồn)
+        sum += distanceKm;
+      }
+    }
+  });
+
+  return Math.round(sum * 100) / 100;
+}

@@ -6,7 +6,7 @@ import StatsChart from '../components/StatsChart';
 import ChallengeTable from '../components/ChallengeTable';
 import PersonalGoal from '../components/PersonalGoal';
 import ClubGoalProgress from '../components/ClubGoalProgress';
-import { processChallengeData } from '../utils/challengeStats';
+import { processChallengeData, getCombinedDistance } from '../utils/challengeStats';
 import { useLang } from '../i18n/LangContext';
 
 export default function Dashboard({ athlete, apiFetch }) {
@@ -24,6 +24,7 @@ export default function Dashboard({ athlete, apiFetch }) {
   const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
   const [allChallengeActivities, setAllChallengeActivities] = useState([]);
   const [challengeData, setChallengeData] = useState([]);
+  const [combinedTotalDistance, setCombinedTotalDistance] = useState(0);
   const [loadingChallenge, setLoadingChallenge] = useState(false);
   const [challengeParticipants, setChallengeParticipants] = useState({});
 
@@ -31,6 +32,9 @@ export default function Dashboard({ athlete, apiFetch }) {
     if (viewMode === 'challenge' && !loadingChallenge) {
       const processed = processChallengeData(allChallengeActivities, challengeParticipants, challengeYear, challengeMonth);
       setChallengeData(processed);
+      
+      const combined = getCombinedDistance(allChallengeActivities, challengeParticipants, challengeYear);
+      setCombinedTotalDistance(combined);
     }
   }, [allChallengeActivities, challengeParticipants, challengeMonth, challengeYear, viewMode, loadingChallenge]);
 
@@ -277,7 +281,7 @@ export default function Dashboard({ athlete, apiFetch }) {
 
       {viewMode === 'challenge' ? (
         <div className="challenge-view">
-          <ClubGoalProgress challengeData={challengeData} />
+          <ClubGoalProgress totalDistance={combinedTotalDistance} />
           
           <div className="tabs" style={{ marginBottom: '16px' }}>
             <button

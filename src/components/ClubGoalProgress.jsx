@@ -2,15 +2,12 @@ import React from 'react';
 import { useLang } from '../i18n/LangContext';
 import { Map, MapPin } from 'lucide-react';
 
-export default function ClubGoalProgress({ challengeData }) {
+export default function ClubGoalProgress({ totalDistance = 0 }) {
   const { t } = useLang();
   
   // Default goal: Xuyên Việt (2360 km)
   const CLUB_GOAL_KM = 2360;
 
-  // Calculate total distance of all members in the current challenge
-  const totalDistance = challengeData.reduce((sum, row) => sum + row.totalDistance, 0);
-  
   const percent = Math.min(Math.round((totalDistance / CLUB_GOAL_KM) * 100) || 0, 100);
 
   return (
@@ -44,10 +41,15 @@ export default function ClubGoalProgress({ challengeData }) {
           {/* Moving Car / Runner icon */}
           <div 
             className="map-vehicle"
-            style={{ left: `calc(${percent}% - 24px)` }}
+            style={{ 
+              left: `calc(${percent}% - 24px)`, 
+              display: 'flex', 
+              alignItems: 'center' 
+            }}
             title={`${percent}%`}
           >
-            🏃‍♂️
+            <span style={{ marginRight: '-50px', fontSize: '1.1em', zIndex: 1 }}>🏃‍♀️</span>
+            <span style={{ fontSize: '1.2em', zIndex: 2 }}>🏃‍♂️</span>
           </div>
           
           {/* Destination Pin */}

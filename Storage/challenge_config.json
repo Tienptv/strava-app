@@ -113,14 +113,6 @@
       "admin": false,
       "owner": false
     },
-    "Sơn_N.": {
-      "resource_state": 2,
-      "firstname": "Sơn",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": true,
-      "owner": false
-    },
     "Tam_N.": {
       "resource_state": 2,
       "firstname": "Tam",
