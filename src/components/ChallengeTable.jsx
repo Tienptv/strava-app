@@ -1,18 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLang } from '../i18n/LangContext';
+import { normalize } from '../utils/challengeStats';
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false }) {
   const { t } = useLang();
   
   const [userData, setUserData] = useState({});
 
-  useEffect(() => {
+  const loadTargets = useCallback(() => {
     if (apiFetch) {
       apiFetch('/challenge/targets', { cache: 'no-store' })
         .then(data => setUserData(data || {}))
         .catch(e => console.error("Error loading user data from API", e));
     }
   }, [apiFetch]);
+
+  useEffect(() => {
+    loadTargets();
+
+    const handleTargetsUpdated = () => {
+      loadTargets();
+    };
+
+    window.addEventListener('challengeTargetsUpdated', handleTargetsUpdated);
+    return () => window.removeEventListener('challengeTargetsUpdated', handleTargetsUpdated);
+  }, [loadTargets]);
 
   const saveToApi = (updates) => {
     if (apiFetch) {
@@ -30,6 +42,11 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch })
       [key]: { ...prev[key], [field]: value }
     }));
     saveToApi({ matchKey: key, [field]: value });
+    
+    // Broadcast change so PersonalGoal and other views update immediately
+    window.dispatchEvent(new CustomEvent('challengeTargetsUpdated', {
+      detail: { matchKey, year, month, [field]: value }
+    }));
   };
 
   const handleTargetChange = (matchKey, val) => {
@@ -140,11 +157,25 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch })
           <tbody>
             {challengeData.map((row, index) => {
               const userKey = `${row.matchKey}_${year}_${month}`;
-              const userTarget = parseFloat(userData[userKey]?.target || 0);
-              const hasPenalty = Boolean(userData[userKey]?.penalty);
+              const userTarget = parseFloat(userData[userKey]?.target !== undefined ? userData[userKey]?.target : (userData[row.matchKey]?.target || 0));
+              const hasPenalty = Boolean(userData[userKey]?.penalty !== undefined ? userData[userKey]?.penalty : userData[row.matchKey]?.penalty);
               const showTrackBar = userTarget > 0;
               const progressPct = showTrackBar ? Math.min(100, Math.round((row.totalDistance / userTarget) * 100)) : 0;
               const isCompleted = progressPct >= 100;
+
+              // Check if this row is the logged in athlete
+              const isMe = Boolean(
+                athlete && (
+                  (row.member.id && String(row.member.id) === String(athlete.id)) ||
+                  (normalize(row.member.firstname) === normalize(athlete.firstname) &&
+                    (normalize(row.member.lastname) === normalize(athlete.lastname) ||
+                      normalize(row.member.lastname).startsWith(normalize(athlete.lastname)) ||
+                      normalize(athlete.lastname).startsWith(normalize(row.member.lastname))))
+                )
+              );
+
+              // Admin can edit all; normal user can edit their own row
+              const canEdit = Boolean(isAdmin || isMe);
 
               // Tính tiền phạt phải nộp: Chỉ áp dụng khi có tick checkbox penalty và target > 0
               // max 200k, tỷ lệ theo số km chưa hoàn thành, làm tròn lên mốc 10k (ví dụ: 64k -> 70k, 86k -> 90k, 106k -> 110k)
@@ -160,12 +191,13 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch })
               }
 
               return (
-                <tr key={index} className={`runner-row rank-${index + 1}`}>
+                <tr key={index} className={`runner-row rank-${index + 1} ${isMe ? 'runner-row--me' : ''}`}>
                   <td className="sticky-col first-col">
                     <div className="runner-info">
                       <span className="runner-rank">{index + 1}.</span>
                       <span className="runner-name">
                         {row.member.firstname} {row.member.lastname}
+                        {isMe && <span className="runner-me-badge" title="Tài khoản của bạn">{t('you')}</span>}
                         {row.rank === 1 && <span title="Top 1" style={{ marginLeft: 4 }}>🥇</span>}
                         {row.rank === 2 && <span title="Top 2" style={{ marginLeft: 4 }}>🥈</span>}
                         {row.rank === 3 && <span title="Top 3" style={{ marginLeft: 4 }}>🥉</span>}
@@ -194,7 +226,9 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch })
 
                   <td className="sum-cell sticky-right col-target">
                     {(() => {
-                      const rawTarget = userData[userKey]?.target;
+                      const rawTarget = userData[userKey]?.target !== undefined 
+                        ? userData[userKey]?.target 
+                        : userData[row.matchKey]?.target;
                       const displayTarget = (rawTarget !== undefined && rawTarget !== '') 
                         ? (isNaN(Number(rawTarget)) ? '' : Number(rawTarget)) 
                         : '';
@@ -208,7 +242,9 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch })
                           onChange={(e) => handleTargetChange(row.matchKey, e.target.value)}
                           onBlur={(e) => handleTargetBlur(row.matchKey, e.target.value)}
                           onKeyDown={handleTargetKeyDown}
-                          className={`target-input ${isZeroVal ? 'is-zero-target' : ''}`}
+                          disabled={!canEdit}
+                          title={!canEdit ? 'Chỉ vận động viên hoặc Admin mới có quyền sửa' : 'Nhập mục tiêu km'}
+                          className={`target-input ${isZeroVal ? 'is-zero-target' : ''} ${!canEdit ? 'target-input--readonly' : ''} ${isMe ? 'target-input--me' : ''}`}
                         />
                       );
                     })()}
@@ -218,7 +254,10 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch })
                       type="checkbox" 
                       checked={hasPenalty}
                       onChange={(e) => handlePenaltyChange(row.matchKey, e.target.checked)}
-                      style={{ cursor: 'pointer' }} 
+                      disabled={!canEdit}
+                      title={!canEdit ? 'Chỉ vận động viên hoặc Admin mới có quyền sửa' : 'Tick tham gia cam kết nộp phạt'}
+                      style={{ cursor: canEdit ? 'pointer' : 'default', opacity: canEdit ? 1 : 0.8 }} 
+                      className={isMe ? 'penalty-checkbox--me' : ''}
                     />
                   </td>
                   <td className="sum-cell sticky-right col-due">

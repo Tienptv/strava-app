@@ -119,6 +119,7 @@ function App() {
                 athlete
                   ? <Dashboard 
                       athlete={athlete} 
+                      isAdmin={isAdmin}
                       apiFetch={apiFetch} 
                       challengeMonth={challengeMonth}
                       challengeYear={challengeYear}

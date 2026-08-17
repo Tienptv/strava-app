@@ -229,23 +229,43 @@ app.get('/api/challenge/targets', (req, res) => {
 // Cập nhật dữ liệu target/penalty
 app.post('/api/challenge/targets', (req, res) => {
   try {
-    const updates = req.body; // Expecting { matchKey, target, penalty }
+    const payload = req.body;
     let data = {};
     if (fs.existsSync(TARGETS_FILE)) {
-      data = JSON.parse(fs.readFileSync(TARGETS_FILE, 'utf8'));
+      try {
+        data = JSON.parse(fs.readFileSync(TARGETS_FILE, 'utf8'));
+      } catch (e) {
+        data = {};
+      }
     }
     
-    const { matchKey, target, penalty } = updates;
-    if (!matchKey) {
-      return res.status(400).json({ error: 'Thiếu matchKey' });
+    if (Array.isArray(payload)) {
+      payload.forEach(item => {
+        if (item && item.matchKey) {
+          if (!data[item.matchKey]) data[item.matchKey] = {};
+          if (item.target !== undefined) data[item.matchKey].target = item.target;
+          if (item.penalty !== undefined) data[item.matchKey].penalty = item.penalty;
+        }
+      });
+    } else if (payload && payload.matchKey) {
+      const { matchKey, target, penalty } = payload;
+      if (!data[matchKey]) {
+        data[matchKey] = {};
+      }
+      if (target !== undefined) data[matchKey].target = target;
+      if (penalty !== undefined) data[matchKey].penalty = penalty;
+    } else if (payload && typeof payload === 'object') {
+      // Direct object map { [matchKey]: { target, penalty } }
+      Object.keys(payload).forEach(key => {
+        if (payload[key] && typeof payload[key] === 'object') {
+          if (!data[key]) data[key] = {};
+          if (payload[key].target !== undefined) data[key].target = payload[key].target;
+          if (payload[key].penalty !== undefined) data[key].penalty = payload[key].penalty;
+        }
+      });
+    } else {
+      return res.status(400).json({ error: 'Dữ liệu không hợp lệ' });
     }
-
-    if (!data[matchKey]) {
-      data[matchKey] = {};
-    }
-    
-    if (target !== undefined) data[matchKey].target = target;
-    if (penalty !== undefined) data[matchKey].penalty = penalty;
 
     // Đảm bảo thư mục tồn tại
     const dir = path.dirname(TARGETS_FILE);
@@ -257,7 +277,7 @@ app.post('/api/challenge/targets', (req, res) => {
     res.json(data);
   } catch (error) {
     console.error('Lỗi lưu targets:', error.message);
-    res.status(500).json({ error: 'Không thể lưu dữ liệu' });
+    res.status(500).json({ error: 'Không thể lưu dữ liệu targets' });
   }
 });
 

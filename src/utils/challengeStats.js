@@ -9,6 +9,45 @@ export const removeVietnameseTones = (str) => {
 
 export const normalize = (n) => removeVietnameseTones(n || '').trim().toLowerCase().replace(/[\.\s_-]/g, '');
 
+/**
+ * Tìm matchKey của athlete hiện tại trong danh sách participants
+ * @param {Object} athlete - Thông tin athlete đang đăng nhập ({ id, firstname, lastname })
+ * @param {Object} participants - Danh sách participants của tháng/nhóm
+ * @returns {string|null} Key đại diện cho athlete (vd: "Tien_P.", "Sang_N.", "133066813"...)
+ */
+export function getAthleteMatchKey(athlete, participants = {}) {
+  if (!athlete) return null;
+  const normFname = normalize(athlete.firstname);
+  const normLname = normalize(athlete.lastname);
+
+  // 1. Khớp theo ID nếu có
+  if (athlete.id) {
+    const keyById = Object.keys(participants || {}).find(k => {
+      const p = participants[k];
+      return (p && p.id && String(p.id) === String(athlete.id)) || (k === String(athlete.id));
+    });
+    if (keyById) return keyById;
+  }
+
+  // 2. Khớp theo firstname và lastname trong danh sách participants
+  const keyByName = Object.keys(participants || {}).find(k => {
+    const p = participants[k];
+    if (!p) return false;
+    const pFname = normalize(p.firstname);
+    const pLname = normalize(p.lastname);
+    return pFname === normFname && (
+      pLname === normLname || 
+      pLname.startsWith(normLname) || 
+      normLname.startsWith(pLname)
+    );
+  });
+  if (keyByName) return keyByName;
+
+  // 3. Fallback định dạng chuẩn Strava: Firstname_L. (vd: Tien_P.)
+  const lastInitial = athlete.lastname ? (athlete.lastname.trim().charAt(0) + '.') : '';
+  return lastInitial ? `${athlete.firstname}_${lastInitial}` : (athlete.firstname || String(athlete.id || 'runner'));
+}
+
 // Dữ liệu baseline Total-km tính đến 17/08/2026 từ file Storage/Total-km-17-08-2026.csv
 export const DEFAULT_TOTAL_KM_BASE = {
   cutoffDate: '2026-08-17T23:59:59.999Z',

@@ -13,6 +13,7 @@ import historicalActivitiesFallback from '../../Storage/historical_activities.js
 export default function Dashboard({ 
   athlete, 
   apiFetch, 
+  isAdmin,
   challengeMonth: propMonth, 
   challengeYear: propYear, 
   setChallengeMonth: propSetMonth, 
@@ -386,12 +387,22 @@ export default function Dashboard({
               year={challengeYear} 
               month={challengeMonth} 
               apiFetch={apiFetch}
+              athlete={athlete}
+              isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
             />
           )}
         </div>
       ) : (
         <>
-          <PersonalGoal activities={activities} />
+          <PersonalGoal 
+            activities={activities} 
+            athlete={athlete}
+            apiFetch={apiFetch}
+            challengeMonth={challengeMonth}
+            challengeYear={challengeYear}
+            challengeParticipants={challengeParticipants}
+            challengeData={challengeData}
+          />
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-card__header">

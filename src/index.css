@@ -1688,11 +1688,12 @@ img {
    Goal Tracking (Personal & Club)
    ========================================================================== */
 
+/* Personal Goal & Club Goal Cards */
 .personal-goal-card, .club-goal-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 1.25rem;
+  padding: 1.25rem 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 45, 84, 0.05), 0 1px 2px rgba(0, 45, 84, 0.03);
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -1701,9 +1702,9 @@ img {
 }
 
 .personal-goal-card:hover, .club-goal-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   border-color: rgba(0, 163, 166, 0.35);
-  box-shadow: 0 12px 28px -4px rgba(0, 45, 84, 0.12), 0 6px 12px -2px rgba(0, 45, 84, 0.06);
+  box-shadow: 0 10px 24px -4px rgba(0, 45, 84, 0.1), 0 4px 10px -2px rgba(0, 45, 84, 0.05);
 }
 
 .personal-goal__header, .club-goal__header {
@@ -1716,17 +1717,54 @@ img {
 .personal-goal__title, .club-goal__title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  gap: 10px;
+}
+
+.personal-goal__icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 163, 166, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.personal-goal__main-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.personal-goal__month-subtitle {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.btn-edit-goal {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(0, 163, 166, 0.08);
+  color: var(--accent);
+  border: 1px solid rgba(0, 163, 166, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit-goal:hover {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 163, 166, 0.3);
 }
 
 .personal-goal__stats {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .club-goal__stats {
@@ -1738,86 +1776,361 @@ img {
 .goal-numbers {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 6px;
 }
 
 .current-dist {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  letter-spacing: -0.5px;
 }
 
 .total-goal {
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
-.goal-percent {
+.goal-percent-badge {
   font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 800;
+  color: var(--accent);
+  background: rgba(0, 163, 166, 0.08);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 163, 166, 0.2);
 }
 
-.personal-goal__edit {
+.goal-percent-badge.is-complete {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Edit form in PersonalGoal */
+.personal-goal__edit-form {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.personal-goal__edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.compact-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.input-with-unit {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 1rem;
+  max-width: 180px;
 }
 
-.goal-input {
-  width: 80px;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-size: 1rem;
+.goal-input-premium {
+  width: 100%;
+  padding: 8px 38px 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  background: #ffffff;
   outline: none;
+  transition: all 0.2s ease;
 }
 
-.goal-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(252, 76, 2, 0.2);
+.goal-input-premium:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 163, 166, 0.18);
 }
 
-.goal-unit {
-  color: var(--text-secondary);
+.goal-unit-badge {
+  position: absolute;
+  right: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.penalty-toggle-group {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.penalty-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.custom-penalty-checkbox {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.penalty-label-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.penalty-label-text strong {
   font-size: 0.9rem;
+  color: var(--primary-navy);
 }
 
-.btn-icon {
+.penalty-label-text small {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.personal-goal__edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 45, 84, 0.08);
+}
+
+.btn-primary-sm {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 163, 166, 0.25);
+}
+
+.btn-primary-sm:hover:not(:disabled) {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 163, 166, 0.35);
+}
+
+.btn-primary-sm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary-sm {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary-sm:hover {
+  background: var(--bg-glass-hover);
+  color: var(--text-primary);
+}
+
+/* Penalty Footer & Status Box in PersonalGoal */
+.personal-goal__penalty-footer {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.penalty-status-box {
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.penalty-status-active {
+  background: rgba(225, 29, 72, 0.05);
+  border: 1px solid rgba(225, 29, 72, 0.2);
+}
+
+.penalty-status-safe {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.penalty-status-none {
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
+
+.penalty-status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.penalty-icon.warning {
+  color: #e11d48;
+}
+
+.penalty-icon.safe {
+  color: #059669;
+}
+
+.penalty-status-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.penalty-amount-badge {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.penalty-amount-badge.owing {
+  color: #e11d48;
+  background: rgba(225, 29, 72, 0.12);
+  border: 1px solid rgba(225, 29, 72, 0.25);
+}
+
+.penalty-amount-badge.safe {
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.penalty-status-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn-link-penalty {
   background: none;
   border: none;
-  color: var(--text-secondary);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  display: flex;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.btn-link-penalty:hover {
+  text-decoration: underline;
+  background: rgba(0, 163, 166, 0.08);
+}
+
+.sync-success-pill {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.08);
+  padding: 2px 8px;
+  border-radius: 6px;
+  align-self: flex-start;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.btn-icon:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+/* Challenge Table - Runner Row Me & You Badge */
+.runner-row--me {
+  background: rgba(0, 163, 166, 0.06) !important;
+  font-weight: 600;
 }
 
-.btn-save {
-  color: var(--success);
-}
-.btn-save:hover {
-  color: #fff;
-  background: var(--success);
+.runner-row--me td.sticky-col {
+  background: #f0fdfa !important;
+  border-left: 3px solid var(--accent) !important;
 }
 
-.btn-cancel {
-  color: var(--error);
+.runner-row--me td.sticky-right {
+  background: #f0fdfa !important;
 }
-.btn-cancel:hover {
-  color: #fff;
-  background: var(--error);
+
+.runner-me-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  box-shadow: 0 1px 4px rgba(0, 163, 166, 0.3);
+  vertical-align: middle;
+}
+
+.target-input--me {
+  border-color: var(--accent) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 1px rgba(0, 163, 166, 0.25) !important;
+}
+
+.target-input--readonly {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  cursor: default;
+}
+
+.target-input--readonly:hover {
+  border-color: transparent !important;
+}
+
+.penalty-checkbox--me {
+  transform: scale(1.15);
+  accent-color: var(--accent);
 }
 
 .progress-bar-container {
