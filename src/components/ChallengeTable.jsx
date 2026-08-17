@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useLang } from '../i18n/LangContext';
 
-export default function ChallengeTable({ challengeData, year, month }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch }) {
   const { t } = useLang();
   
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
-    fetch('/api/challenge/targets', { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => setUserData(data))
-      .catch(e => console.error("Error loading user data from API", e));
-  }, []);
+    if (apiFetch) {
+      apiFetch('/challenge/targets', { cache: 'no-store' })
+        .then(data => setUserData(data || {}))
+        .catch(e => console.error("Error loading user data from API", e));
+    }
+  }, [apiFetch]);
 
   const saveToApi = (updates) => {
-    fetch('/api/challenge/targets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    }).catch(e => console.error("Error saving data", e));
+    if (apiFetch) {
+      apiFetch('/challenge/targets', {
+        method: 'POST',
+        body: JSON.stringify(updates)
+      }).catch(e => console.error("Error saving data", e));
+    }
   };
 
   const handleTargetChange = (matchKey, value) => {
@@ -27,11 +29,6 @@ export default function ChallengeTable({ challengeData, year, month }) {
       const newData = { ...prev, [key]: { ...prev[key], target: value } };
       return newData;
     });
-    // For a real app, maybe debounce this. For now, just save on change/blur
-  };
-
-  const handleTargetBlur = (matchKey, value) => {
-    const key = `${matchKey}_${year}_${month}`;
     saveToApi({ matchKey: key, target: value });
   };
 
@@ -136,7 +133,6 @@ export default function ChallengeTable({ challengeData, year, month }) {
                     placeholder="100" 
                     value={userData[`${row.matchKey}_${year}_${month}`]?.target || ''}
                     onChange={(e) => handleTargetChange(row.matchKey, e.target.value)}
-                    onBlur={(e) => handleTargetBlur(row.matchKey, e.target.value)}
                     style={{ width: '50px', background: 'transparent', color: 'inherit', border: '1px solid var(--border-color, #333)', borderRadius: '4px', textAlign: 'center', padding: '2px' }} 
                   />
                 </td>

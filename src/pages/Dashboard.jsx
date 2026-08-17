@@ -313,6 +313,7 @@ export default function Dashboard({ athlete, apiFetch }) {
               challengeData={challengeData} 
               year={challengeYear} 
               month={challengeMonth} 
+              apiFetch={apiFetch}
             />
           )}
         </div>
