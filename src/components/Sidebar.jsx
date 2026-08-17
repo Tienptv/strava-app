@@ -377,9 +377,9 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
       </div>
 
       <div className="sidebar__footer">
-        <div className="sidebar__stats">
-          <span>{t('participants')} ({t('month')} {activeMonth}/{activeYear}):</span>
-          <strong>{participantCount}</strong>
+        <div className="sidebar__stats" style={{ color: '#002D54', fontWeight: 600 }}>
+          <span style={{ color: '#002D54' }}>{t('participants')}:</span>
+          <strong style={{ color: '#002D54' }}>{participantCount}</strong>
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>

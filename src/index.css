@@ -1083,11 +1083,13 @@ img {
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  font-weight: 600;
+  color: #002D54;
 }
 
 .sidebar__stats strong {
-  color: var(--text-primary);
+  color: #002D54;
+  font-weight: 700;
 }
 
 .sidebar__btn-save {

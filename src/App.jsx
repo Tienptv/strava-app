@@ -13,6 +13,8 @@ function App() {
   const [athlete, setAthlete] = useState(null);
   const [athleteId, setAthleteId] = useState(localStorage.getItem('athleteId'));
   const [loading, setLoading] = useState(true);
+  const [challengeMonth, setChallengeMonth] = useState(new Date().getMonth() + 1);
+  const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
   const { t } = useLang();
 
   // Kiểm tra đã đăng nhập chưa
@@ -97,8 +99,6 @@ function App() {
   }
 
   const isAdmin = athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID;
-  const [challengeMonth, setChallengeMonth] = useState(new Date().getMonth() + 1);
-  const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
 
   return (
     <BrowserRouter>
