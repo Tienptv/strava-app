@@ -174,31 +174,40 @@ export default function Dashboard({ athlete, apiFetch }) {
         }
       });
 
-      // Lọc các hoạt động từ tháng 8 trở đi của chính mình trong importedActivities để thay bằng myActivities từ Strava API
-      const myFnameNorm = normalize(myFname);
-      const myLnameNorm = normalize(myLname);
+      // Gộp và khử trùng lặp myAugActivities và importedActivities bằng Map
       const myAugActivities = myActivities.filter(a => a.start_date_local && a.start_date_local >= '2026-08-01T00:00:00');
-      
-      const filteredImportedActivities = importedActivities.filter(impAct => {
-        if (athlete && athlete.id && String(impAct.athlete?.id) === String(athlete.id)) return false;
-        const impFnameNorm = normalize(impAct.athlete?.firstname);
-        const impLnameNorm = normalize(impAct.athlete?.lastname);
-        const isMe = impFnameNorm === myFnameNorm && (impLnameNorm === myLnameNorm || impLnameNorm.startsWith(myLnameNorm) || myLnameNorm.startsWith(impLnameNorm));
-        return !isMe;
+      const augMap = new Map();
+      const getActKey = (act) => {
+        if (act.id) return `id_${act.id}`;
+        const d = (act.start_date_local || '').substring(0, 16);
+        const t = act.moving_time || 0;
+        const dist = Math.round(act.distance || 0);
+        const athId = act.athlete?.id || '';
+        const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
+        return `comp_${athId || name}_${d}_${t}_${dist}`;
+      };
+
+      importedActivities.forEach(act => augMap.set(getActKey(act), act));
+      myAugActivities.forEach(act => {
+        if (athlete) {
+          act.athlete = {
+            id: athlete.id,
+            firstname: athlete.firstname,
+            lastname: athlete.lastname
+          };
+        }
+        augMap.set(getActKey(act), act);
       });
 
-      // Gộp: Tháng 1-7 lấy từ historicalActivities, Tháng 8+ lấy từ importedActivities + myAugActivities
-      const currentAugActivities = [...myAugActivities, ...filteredImportedActivities];
+      const currentAugActivities = Array.from(augMap.values());
       const allActivities = [...historicalActivities, ...currentAugActivities];
 
-      // Tự động đồng bộ các bài chạy Tháng 8+ của tài khoản đang đăng nhập vào server
-      if (myAugActivities.length > 0 && importedActivities.length > 0) {
-        if (currentAugActivities.length !== importedActivities.length) {
-          apiFetch('/challenge/imported', {
-            method: 'POST',
-            body: JSON.stringify(currentAugActivities)
-          }).catch(e => console.error('Lỗi tự động sync activities:', e));
-        }
+      // Tự động đồng bộ các bài chạy Tháng 8+ của tài khoản đang đăng nhập vào server nếu có bài mới
+      if (myAugActivities.length > 0 && currentAugActivities.length > importedActivities.length) {
+        apiFetch('/challenge/imported', {
+          method: 'POST',
+          body: JSON.stringify(currentAugActivities)
+        }).catch(e => console.error('Lỗi tự động sync activities:', e));
       }
       
       // Inject authenticated athlete ID into participants to map personal activities

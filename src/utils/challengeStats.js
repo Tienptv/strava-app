@@ -151,7 +151,7 @@ export function processChallengeData(activities, participantsMap, year, month, t
 
     // 1. Thử match bằng ID trước (ưu tiên cao nhất vì chính xác tuyệt đối)
     if (act.athlete?.id) {
-      const foundIdKey = Object.keys(runnerStats).find(k => runnerStats[k].member.id === act.athlete.id);
+      const foundIdKey = Object.keys(runnerStats).find(k => runnerStats[k].member.id && String(runnerStats[k].member.id) === String(act.athlete.id));
       if (foundIdKey) {
         matchKey = foundIdKey;
       }
@@ -351,7 +351,7 @@ export function getCombinedDistance(activities, participantsMap, year) {
 
     // 1. Thử match bằng ID trước
     if (act.athlete?.id) {
-      const foundIdKey = Object.keys(runnerStats).find(k => runnerStats[k].member.id === act.athlete.id);
+      const foundIdKey = Object.keys(runnerStats).find(k => runnerStats[k].member.id && String(runnerStats[k].member.id) === String(act.athlete.id));
       if (foundIdKey) matchKey = foundIdKey;
     } 
     

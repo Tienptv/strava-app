@@ -4,7 +4,9 @@
     "athlete": {
       "id": 133066813,
       "id_str": "133066813",
-      "resource_state": 1
+      "resource_state": 1,
+      "firstname": "Tien",
+      "lastname": "P."
     },
     "name": "Morning Run",
     "distance": 4281.4,
@@ -69,7 +71,9 @@
     "athlete": {
       "id": 133066813,
       "id_str": "133066813",
-      "resource_state": 1
+      "resource_state": 1,
+      "firstname": "Tien",
+      "lastname": "P."
     },
     "name": "Morning Run",
     "distance": 2684.4,
@@ -143,7 +147,9 @@
     "athlete": {
       "id": 133066813,
       "id_str": "133066813",
-      "resource_state": 1
+      "resource_state": 1,
+      "firstname": "Tien",
+      "lastname": "P."
     },
     "name": "Night Run",
     "distance": 21454.8,
@@ -217,7 +223,9 @@
     "athlete": {
       "id": 133066813,
       "id_str": "133066813",
-      "resource_state": 1
+      "resource_state": 1,
+      "firstname": "Tien",
+      "lastname": "P."
     },
     "name": "Evening Run",
     "distance": 100,

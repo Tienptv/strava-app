@@ -7,7 +7,8 @@
       "lastname": "V.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 73380484
     },
     "An_H.": {
       "resource_state": 2,
@@ -15,7 +16,8 @@
       "lastname": "H.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 110041582
     },
     "Benjamin_D.": {
       "resource_state": 2,
@@ -23,7 +25,8 @@
       "lastname": "D.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 83759389
     },
     "Chi_N.": {
       "resource_state": 2,
@@ -31,7 +34,8 @@
       "lastname": "N.",
       "membership": "member",
       "admin": true,
-      "owner": false
+      "owner": false,
+      "id": 53686864
     },
     "Huy_H.": {
       "resource_state": 2,
@@ -39,7 +43,8 @@
       "lastname": "H.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 103943712
     },
     "Katy_N.": {
       "resource_state": 2,
@@ -47,7 +52,8 @@
       "lastname": "N.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 149162660
     },
     "Khương_P.": {
       "resource_state": 2,
@@ -55,7 +61,8 @@
       "lastname": "P.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 129623990
     },
     "Lieu_V.": {
       "resource_state": 2,
@@ -63,7 +70,8 @@
       "lastname": "V.",
       "membership": "member",
       "admin": true,
-      "owner": true
+      "owner": true,
+      "id": 72851794
     },
     "Phuong_T.": {
       "resource_state": 2,
@@ -71,7 +79,8 @@
       "lastname": "T.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 48977253
     },
     "Quy_T.": {
       "resource_state": 2,
@@ -79,7 +88,8 @@
       "lastname": "T.",
       "membership": "member",
       "admin": true,
-      "owner": false
+      "owner": false,
+      "id": 79037203
     },
     "Sang_N.": {
       "resource_state": 2,
@@ -87,7 +97,8 @@
       "lastname": "N.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 125487039
     },
     "Tam_N.": {
       "resource_state": 2,
@@ -95,7 +106,8 @@
       "lastname": "N.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 106178600
     },
     "Thanh_D.": {
       "resource_state": 2,
@@ -103,7 +115,8 @@
       "lastname": "D.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 87080139
     },
     "Thanh_X.": {
       "resource_state": 2,
@@ -111,7 +124,8 @@
       "lastname": "X.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 106101923
     },
     "Thinh_V.": {
       "resource_state": 2,
@@ -119,7 +133,8 @@
       "lastname": "V.",
       "membership": "member",
       "admin": true,
-      "owner": false
+      "owner": false,
+      "id": 77523597
     },
     "Trong_T.": {
       "resource_state": 2,
@@ -127,7 +142,8 @@
       "lastname": "T.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 81517643
     },
     "俊宇_杨.": {
       "resource_state": 2,
@@ -135,7 +151,8 @@
       "lastname": "杨.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 118715057
     },
     "Nguyen_H.": {
       "resource_state": 2,
@@ -151,7 +168,8 @@
       "lastname": "P.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 133066813
     },
     "Huy_V.": {
       "resource_state": 2,
@@ -159,7 +177,8 @@
       "lastname": "V.",
       "membership": "member",
       "admin": false,
-      "owner": false
+      "owner": false,
+      "id": 51364143
     }
   }
 }
