@@ -13,7 +13,9 @@ const __dirname = path.dirname(__filename);
 const TARGETS_FILE = path.join(__dirname, '../Storage/targets.json');
 const CONFIG_FILE = path.join(__dirname, '../Storage/challenge_config.json');
 const IMPORTED_FILE = path.join(__dirname, '../Storage/imported_activities.json');
+const HISTORICAL_FILE = path.join(__dirname, '../Storage/historical_activities.json');
 const TOTAL_KM_FILE = path.join(__dirname, '../Storage/Total-km-17-08-2026.csv');
+const GOAL_FILE = path.join(__dirname, '../Storage/club_goal.json');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -292,7 +294,65 @@ app.post('/api/challenge/config', (req, res) => {
   }
 });
 
-// Đọc imported activities
+// Đọc mục tiêu câu lạc bộ (Club Goal)
+app.get('/api/challenge/goal', (req, res) => {
+  try {
+    if (fs.existsSync(GOAL_FILE)) {
+      const data = fs.readFileSync(GOAL_FILE, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json({ targetKm: 9000, customTitle: null, customSubtitle: null });
+    }
+  } catch (error) {
+    console.error('Lỗi đọc goal:', error.message);
+    res.status(500).json({ error: 'Không thể đọc mục tiêu câu lạc bộ' });
+  }
+});
+
+// Lưu mục tiêu câu lạc bộ (Club Goal)
+app.post('/api/challenge/goal', (req, res) => {
+  try {
+    const data = req.body;
+    const dir = path.dirname(GOAL_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(GOAL_FILE, JSON.stringify(data, null, 2));
+    res.json(data);
+  } catch (error) {
+    console.error('Lỗi lưu goal:', error.message);
+    res.status(500).json({ error: 'Không thể lưu mục tiêu câu lạc bộ' });
+  }
+});
+
+// Đọc historical activities (Tháng 7/2026 trở về trước)
+app.get('/api/challenge/historical', (req, res) => {
+  try {
+    if (fs.existsSync(HISTORICAL_FILE)) {
+      const data = fs.readFileSync(HISTORICAL_FILE, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.error('Lỗi đọc historical:', error.message);
+    res.status(500).json({ error: 'Không thể đọc dữ liệu historical' });
+  }
+});
+
+// Lưu historical activities
+app.post('/api/challenge/historical', (req, res) => {
+  try {
+    const data = req.body;
+    const dir = path.dirname(HISTORICAL_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(HISTORICAL_FILE, JSON.stringify(data, null, 2));
+    res.json(data);
+  } catch (error) {
+    console.error('Lỗi lưu historical:', error.message);
+    res.status(500).json({ error: 'Không thể lưu dữ liệu historical' });
+  }
+});
+
+// Đọc imported activities (Tháng 8/2026 trở đi)
 app.get('/api/challenge/imported', (req, res) => {
   try {
     if (fs.existsSync(IMPORTED_FILE)) {

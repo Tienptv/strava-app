@@ -203,10 +203,13 @@ export default function Sidebar({ apiFetch }) {
        return `comp_${athId || name}_${d}_${t}_${dist}`;
     };
 
-    existingActivities.forEach(act => allMap.set(getActivityKey(act), act));
-    allImportedActivities.forEach(act => allMap.set(getActivityKey(act), act));
+    // Chỉ update các hoạt động từ tháng 8/2026 trở đi vào importedActivities (các tháng 1-7 đã lưu riêng trong historical)
+    const augImportedActivities = allImportedActivities.filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
 
-    const finalActivities = Array.from(allMap.values());
+    existingActivities.forEach(act => allMap.set(getActivityKey(act), act));
+    augImportedActivities.forEach(act => allMap.set(getActivityKey(act), act));
+
+    const finalActivities = Array.from(allMap.values()).filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
     
     try {
       await apiFetch('/challenge/imported', {

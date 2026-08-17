@@ -1,18 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { Compass, Edit2, X } from 'lucide-react';
 
-export default function ClubGoalProgress({ totalDistance = 0 }) {
+export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
   const { t } = useLang();
   
-  const [targetKm, setTargetKm] = useState(() => {
-    const saved = localStorage.getItem('clubGoalKm');
-    if (!saved || saved === '2360') return 9000;
-    return parseInt(saved) || 9000;
-  });
-  
-  const [customTitle, setCustomTitle] = useState(() => localStorage.getItem('clubGoalTitle_custom'));
-  const [customSubtitle, setCustomSubtitle] = useState(() => localStorage.getItem('clubGoalSubtitle_custom'));
+  const [targetKm, setTargetKm] = useState(9000);
+  const [customTitle, setCustomTitle] = useState(null);
+  const [customSubtitle, setCustomSubtitle] = useState(null);
+
+  useEffect(() => {
+    if (apiFetch) {
+      apiFetch('/challenge/goal')
+        .then(data => {
+          if (data) {
+            if (data.targetKm) setTargetKm(data.targetKm);
+            if (data.customTitle !== undefined) setCustomTitle(data.customTitle);
+            if (data.customSubtitle !== undefined) setCustomSubtitle(data.customSubtitle);
+          }
+        })
+        .catch(err => console.error('Lỗi tải club goal:', err));
+    }
+  }, [apiFetch]);
 
   const goalTitle = customTitle || t('clubGoalTitle');
   const goalSubtitle = customSubtitle || t('runAcrossVietnam');
@@ -29,31 +38,32 @@ export default function ClubGoalProgress({ totalDistance = 0 }) {
     setIsEditing(true);
   };
 
-  const handleSaveGoal = (e) => {
+  const handleSaveGoal = async (e) => {
     e.preventDefault();
     const val = parseInt(tempTarget);
-    if (val > 0) {
-      setTargetKm(val);
-      localStorage.setItem('clubGoalKm', val);
-    }
-    
-    if (tempTitle && tempTitle !== t('clubGoalTitle')) {
-      setCustomTitle(tempTitle);
-      localStorage.setItem('clubGoalTitle_custom', tempTitle);
-    } else {
-      setCustomTitle(null);
-      localStorage.removeItem('clubGoalTitle_custom');
-    }
-    
-    if (tempSubtitle && tempSubtitle !== t('runAcrossVietnam')) {
-      setCustomSubtitle(tempSubtitle);
-      localStorage.setItem('clubGoalSubtitle_custom', tempSubtitle);
-    } else {
-      setCustomSubtitle(null);
-      localStorage.removeItem('clubGoalSubtitle_custom');
-    }
+    const newTarget = (val > 0) ? val : targetKm;
+    const newTitle = (tempTitle && tempTitle !== t('clubGoalTitle')) ? tempTitle : null;
+    const newSubtitle = (tempSubtitle && tempSubtitle !== t('runAcrossVietnam')) ? tempSubtitle : null;
 
+    setTargetKm(newTarget);
+    setCustomTitle(newTitle);
+    setCustomSubtitle(newSubtitle);
     setIsEditing(false);
+
+    if (apiFetch) {
+      try {
+        await apiFetch('/challenge/goal', {
+          method: 'POST',
+          body: JSON.stringify({
+            targetKm: newTarget,
+            customTitle: newTitle,
+            customSubtitle: newSubtitle
+          })
+        });
+      } catch (err) {
+        console.error('Lỗi lưu club goal lên server:', err);
+      }
+    }
   };
 
   const percent = Math.min(Math.round((totalDistance / targetKm) * 100) || 0, 100);

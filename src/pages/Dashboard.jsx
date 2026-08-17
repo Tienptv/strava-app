@@ -8,6 +8,7 @@ import PersonalGoal from '../components/PersonalGoal';
 import ClubGoalProgress from '../components/ClubGoalProgress';
 import { processChallengeData, getCombinedDistance } from '../utils/challengeStats';
 import { useLang } from '../i18n/LangContext';
+import historicalActivitiesFallback from '../../Storage/historical_activities.json';
 
 export default function Dashboard({ athlete, apiFetch }) {
   const [activities, setActivities] = useState([]);
@@ -122,7 +123,18 @@ export default function Dashboard({ athlete, apiFetch }) {
         return true;
       });
       
-      // Load imported activities from backend
+      // Load historical activities (Tháng 7/2026 trở về trước)
+      let historicalActivities = historicalActivitiesFallback || [];
+      try {
+        const histData = await apiFetch('/challenge/historical').catch(() => []);
+        if (Array.isArray(histData) && histData.length > 0) {
+          historicalActivities = histData;
+        }
+      } catch (e) {
+        console.error('Lỗi khi đọc historicalActivities', e);
+      }
+
+      // Load imported activities from backend (Tháng 8/2026 trở đi)
       let importedActivities = [];
       try {
         const importedData = await apiFetch('/challenge/imported').catch(() => []);
@@ -145,26 +157,28 @@ export default function Dashboard({ athlete, apiFetch }) {
 
       const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
 
-      // Enrich participants with athlete IDs from imported activities
-      importedActivities.forEach(impAct => {
-        if (impAct.athlete?.id) {
-          const impFname = normalize(impAct.athlete.firstname);
-          const impLname = normalize(impAct.athlete.lastname);
+      // Enrich participants with athlete IDs from historical & imported activities
+      [...historicalActivities, ...importedActivities].forEach(act => {
+        if (act.athlete?.id) {
+          const actFname = normalize(act.athlete.firstname);
+          const actLname = normalize(act.athlete.lastname);
           const foundKey = Object.keys(participants).find(k => {
             const p = participants[k];
             const pFname = normalize(p.firstname);
             const pLname = normalize(p.lastname);
-            return pFname === impFname && (pLname === impLname || pLname.startsWith(impLname) || impLname.startsWith(pLname));
+            return pFname === actFname && (pLname === actLname || pLname.startsWith(actLname) || actLname.startsWith(pLname));
           });
           if (foundKey && !participants[foundKey].id) {
-            participants[foundKey].id = impAct.athlete.id;
+            participants[foundKey].id = act.athlete.id;
           }
         }
       });
 
-      // Loại bỏ các hoạt động của chính mình trong importedActivities vì đã có myActivities (đầy đủ hơn)
+      // Lọc các hoạt động từ tháng 8 trở đi của chính mình trong importedActivities để thay bằng myActivities từ Strava API
       const myFnameNorm = normalize(myFname);
       const myLnameNorm = normalize(myLname);
+      const myAugActivities = myActivities.filter(a => a.start_date_local && a.start_date_local >= '2026-08-01T00:00:00');
+      
       const filteredImportedActivities = importedActivities.filter(impAct => {
         if (athlete && athlete.id && String(impAct.athlete?.id) === String(athlete.id)) return false;
         const impFnameNorm = normalize(impAct.athlete?.firstname);
@@ -173,24 +187,19 @@ export default function Dashboard({ athlete, apiFetch }) {
         return !isMe;
       });
 
-      // Deduplicate clubActivities against importedActivities and myActivities
-      const isDuplicate = (clubAct) => {
-         const match = (act) => {
-            const sameDistTime = act.distance === clubAct.distance && act.moving_time === clubAct.moving_time;
-            const sameFname = normalize(act.athlete?.firstname) === normalize(clubAct.athlete?.firstname);
-            const lnameA = normalize(act.athlete?.lastname);
-            const lnameB = normalize(clubAct.athlete?.lastname);
-            const sameLname = lnameA === lnameB || lnameA.startsWith(lnameB) || lnameB.startsWith(lnameA);
-            return sameDistTime && sameFname && sameLname;
-         };
-         return filteredImportedActivities.some(match) || myActivities.some(match);
-      };
-      
-      // Merge all activities together
-      // Nếu có CSV import, ta bỏ qua clubActivities (vì API không có ngày tháng dễ sinh trùng lặp/ảo)
-      const allActivities = importedActivities.length > 0 
-         ? [...myActivities, ...filteredImportedActivities] 
-         : [...clubActivities, ...myActivities];
+      // Gộp: Tháng 1-7 lấy từ historicalActivities, Tháng 8+ lấy từ importedActivities + myAugActivities
+      const currentAugActivities = [...myAugActivities, ...filteredImportedActivities];
+      const allActivities = [...historicalActivities, ...currentAugActivities];
+
+      // Tự động đồng bộ các bài chạy Tháng 8+ của tài khoản đang đăng nhập vào server
+      if (myAugActivities.length > 0 && importedActivities.length > 0) {
+        if (currentAugActivities.length !== importedActivities.length) {
+          apiFetch('/challenge/imported', {
+            method: 'POST',
+            body: JSON.stringify(currentAugActivities)
+          }).catch(e => console.error('Lỗi tự động sync activities:', e));
+        }
+      }
       
       // Inject authenticated athlete ID into participants to map personal activities
       if (athlete && athlete.id) {
@@ -309,7 +318,7 @@ export default function Dashboard({ athlete, apiFetch }) {
 
       {viewMode === 'challenge' ? (
         <div className="challenge-view">
-          <ClubGoalProgress totalDistance={combinedTotalDistance} />
+          <ClubGoalProgress totalDistance={combinedTotalDistance} apiFetch={apiFetch} />
           
           <div className="tabs" style={{ marginBottom: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {[1, 2, 3, 4, 5, 6, 7, 8].map(m => (

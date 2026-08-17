@@ -342,6 +342,7 @@ export function getCombinedDistance(activities, participantsMap, year) {
   });
 
   const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
+  const seenCombinedKeys = new Set();
 
   activities.forEach(act => {
     if (act.distance === undefined || act.distance < 5) return;
@@ -376,15 +377,21 @@ export function getCombinedDistance(activities, participantsMap, year) {
       if (act.start_date_local) {
         const localDateStr = act.start_date_local.endsWith('Z') ? act.start_date_local.slice(0, -1) : act.start_date_local;
         const date = new Date(localDateStr);
+        if (isNaN(date.getTime())) return;
         const actYear = date.getFullYear();
-        const actMonth = date.getMonth() + 1;
 
         if (actYear === year) {
-          sum += distanceKm;
+          const actId = act.id ? String(act.id) : null;
+          const timeMinute = localDateStr.substring(0, 16);
+          const distMeter = Math.round(act.distance);
+          const moveSec = act.moving_time || 0;
+          const actKey = actId ? `id_${actId}` : `comp_${matchKey}_${timeMinute}_${distMeter}_${moveSec}`;
+
+          if (!seenCombinedKeys.has(actKey)) {
+            seenCombinedKeys.add(actKey);
+            sum += distanceKm;
+          }
         }
-      } else {
-        // Cộng luôn các hoạt động club không có ngày tháng (chỉ cộng 1 lần cho tổng cộng dồn)
-        sum += distanceKm;
       }
     }
   });
