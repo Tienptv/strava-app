@@ -12,22 +12,37 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
   const [isSavingQuick, setIsSavingQuick] = useState(false);
   const [quickSaveSuccess, setQuickSaveSuccess] = useState(false);
 
-  // Identify the logged in runner row
-  const myRow = challengeData.find(row => 
-    athlete && (
-      (row.member.id && String(row.member.id) === String(athlete.id)) ||
-      // Direct match
-      (normalize(row.member.firstname) === normalize(athlete.firstname) &&
-        (normalize(row.member.lastname) === normalize(athlete.lastname) ||
-          normalize(row.member.lastname).startsWith(normalize(athlete.lastname)) ||
-          normalize(athlete.lastname).startsWith(normalize(row.member.lastname)))) ||
-      // Reverse match (Họ & Tên đảo)
-      (normalize(row.member.firstname) === normalize(athlete.lastname) &&
-        (normalize(row.member.lastname) === normalize(athlete.firstname) ||
-          normalize(row.member.lastname).startsWith(normalize(athlete.firstname)) ||
-          normalize(athlete.firstname).startsWith(normalize(row.member.lastname))))
-    )
-  );
+  // Identify the SINGLE best matching row for the logged-in athlete
+  const myRow = React.useMemo(() => {
+    if (!athlete || !challengeData || challengeData.length === 0) return null;
+    const athId = athlete.id ? String(athlete.id) : null;
+    const normFname = normalize(athlete.firstname);
+    const normLname = normalize(athlete.lastname);
+
+    // 1. Exact Strava Athlete ID match (Ưu tiên số 1)
+    if (athId) {
+      const matchById = challengeData.find(row => row.member?.id && String(row.member.id) === athId);
+      if (matchById) return matchById;
+    }
+
+    // 2. Direct name match (First = First, Last = Last) (Ưu tiên số 2)
+    const matchByDirect = challengeData.find(row => {
+      const mF = normalize(row.member?.firstname);
+      const mL = normalize(row.member?.lastname);
+      return mF === normFname && (mL === normLname || (normLname && mL.startsWith(normLname.charAt(0))) || (mL && normLname.startsWith(mL)));
+    });
+    if (matchByDirect) return matchByDirect;
+
+    // 3. Reverse name match (First = Last, Last = First) (Chỉ dùng khi không khớp xuôi được)
+    const matchByReverse = challengeData.find(row => {
+      const mF = normalize(row.member?.firstname);
+      const mL = normalize(row.member?.lastname);
+      return mF === normLname && (mL === normFname || (normFname && mL.startsWith(normFname.charAt(0))) || (mL && normFname.startsWith(mL)));
+    });
+    if (matchByReverse) return matchByReverse;
+
+    return null;
+  }, [athlete, challengeData]);
 
   const myMatchKey = myRow ? myRow.matchKey : (athlete ? `${athlete.firstname}_${athlete.lastname ? athlete.lastname.trim().charAt(0) + '.' : ''}` : null);
   const myUserKey = myMatchKey ? `${myMatchKey}_${year}_${month}` : null;
@@ -322,21 +337,8 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               const isCompleted = progressPct >= 100;
 
               // Check if this row is the logged in athlete
-              const isMe = Boolean(
-                athlete && (
-                  (row.member.id && String(row.member.id) === String(athlete.id)) ||
-                  // Direct match
-                  (normalize(row.member.firstname) === normalize(athlete.firstname) &&
-                    (normalize(row.member.lastname) === normalize(athlete.lastname) ||
-                      normalize(row.member.lastname).startsWith(normalize(athlete.lastname)) ||
-                      normalize(athlete.lastname).startsWith(normalize(row.member.lastname)))) ||
-                  // Reverse match
-                  (normalize(row.member.firstname) === normalize(athlete.lastname) &&
-                    (normalize(row.member.lastname) === normalize(athlete.firstname) ||
-                      normalize(row.member.lastname).startsWith(normalize(athlete.firstname)) ||
-                      normalize(athlete.firstname).startsWith(normalize(row.member.lastname))))
-                )
-              );
+              // Check if this row is the logged in athlete (Chỉ 1 dòng duy nhất được gán isMe)
+              const isMe = Boolean(myRow && myRow.matchKey === row.matchKey);
 
               // Admin can edit all; normal user can edit their own row
               const canEdit = Boolean(isAdmin || isMe);

@@ -29,30 +29,33 @@ export function getAthleteMatchKey(athlete, participants = {}) {
     if (keyById) return keyById;
   }
 
-  // 2. Khớp theo firstname và lastname trong danh sách participants (cả xuôi và ngược Họ - Tên)
-  const keyByName = Object.keys(participants || {}).find(k => {
+  // 2. Khớp xuôi trước: First = First & Last = Last (Ưu tiên cao nhất)
+  const keyByDirectName = Object.keys(participants || {}).find(k => {
     const p = participants[k];
     if (!p) return false;
     const pFname = normalize(p.firstname);
     const pLname = normalize(p.lastname);
-    
-    // Khớp xuôi: First = First & Last = Last
-    const directMatch = pFname === normFname && (
+    return pFname === normFname && (
       pLname === normLname || 
       pLname.startsWith(normLname) || 
       normLname.startsWith(pLname)
     );
-    
-    // Khớp ngược: First = Last & Last = First (vd: pham tien vs Tien P.)
-    const reverseMatch = pFname === normLname && (
+  });
+  if (keyByDirectName) return keyByDirectName;
+
+  // 3. Khớp đảo Họ - Tên (Chỉ khi không khớp xuôi được): First = Last & Last = First
+  const keyByReverseName = Object.keys(participants || {}).find(k => {
+    const p = participants[k];
+    if (!p) return false;
+    const pFname = normalize(p.firstname);
+    const pLname = normalize(p.lastname);
+    return pFname === normLname && (
       pLname === normFname || 
       pLname.startsWith(normFname) || 
       normFname.startsWith(pLname)
     );
-
-    return directMatch || reverseMatch;
   });
-  if (keyByName) return keyByName;
+  if (keyByReverseName) return keyByReverseName;
 
   // 3. Fallback định dạng chuẩn Strava: Firstname_L. (vd: Tien_P.)
   const lastInitial = athlete.lastname ? (athlete.lastname.trim().charAt(0) + '.') : '';
