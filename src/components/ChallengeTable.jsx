@@ -235,7 +235,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
       </div>
 
       {/* User Quick Goal & Penalty Bar */}
-      {athlete && (
+      {athlete && showQuickGoalBox && (
         <div className="runner-quick-goal-bar">
           <div className="quick-goal-header">
             <div className="quick-goal-icon">

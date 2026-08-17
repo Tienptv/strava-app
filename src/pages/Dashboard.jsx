@@ -390,6 +390,7 @@ export default function Dashboard({
               athlete={athlete}
               isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
               allowEditOthers={challengeConfig?.allowEditOthers}
+              showQuickGoalBox={challengeConfig?.showQuickGoalBox !== undefined ? challengeConfig.showQuickGoalBox : true}
             />
           )}
         </div>

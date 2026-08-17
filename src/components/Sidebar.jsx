@@ -16,6 +16,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
   const [monthlyParticipants, setMonthlyParticipants] = useState({});
   const [rawConfig, setRawConfig] = useState(null);
   const [allowEditOthers, setAllowEditOthers] = useState(false);
+  const [showQuickGoalBox, setShowQuickGoalBox] = useState(true);
 
   const activeMonth = currentMonth || (new Date().getMonth() + 1);
   const activeYear = currentYear || new Date().getFullYear();
@@ -28,6 +29,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
         setRawConfig(data);
         if (data.clubId) setSelectedClubId(data.clubId);
         if (data.allowEditOthers !== undefined) setAllowEditOthers(data.allowEditOthers);
+        if (data.showQuickGoalBox !== undefined) setShowQuickGoalBox(data.showQuickGoalBox);
         if (data.monthlyParticipants) {
           setMonthlyParticipants(data.monthlyParticipants);
           const currentKey = `${activeYear}_${activeMonth}`;
@@ -91,7 +93,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
           monthKey: monthKey,
           participants: participants,
           monthlyParticipants: updatedMonthly,
-          allowEditOthers: allowEditOthers
+          allowEditOthers: allowEditOthers,
+          showQuickGoalBox: showQuickGoalBox
         })
       });
       window.dispatchEvent(new CustomEvent('challengeUpdated', { detail: { year: activeYear, month: activeMonth } }));
@@ -396,6 +399,18 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
             />
             <label htmlFor="allowEditOthers" style={{ fontSize: '12px', color: '#002D54', cursor: 'pointer', fontWeight: 500, lineHeight: 1.3 }}>
               Cho phép mọi runner tự sửa mục tiêu / tiền phạt của người khác
+            </label>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <input
+              type="checkbox"
+              id="showQuickGoalBox"
+              checked={showQuickGoalBox}
+              onChange={(e) => setShowQuickGoalBox(e.target.checked)}
+              style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+            />
+            <label htmlFor="showQuickGoalBox" style={{ fontSize: '12px', color: '#002D54', cursor: 'pointer', fontWeight: 500, lineHeight: 1.3 }}>
+              Hiển thị khung Nhập Mục Tiêu Nhanh ở trên bảng
             </label>
           </div>
           <button className="btn btn--primary sidebar__btn-save" onClick={handleSave}>
