@@ -15,6 +15,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
   const [participants, setParticipants] = useState({});
   const [monthlyParticipants, setMonthlyParticipants] = useState({});
   const [rawConfig, setRawConfig] = useState(null);
+  const [allowEditOthers, setAllowEditOthers] = useState(false);
 
   const activeMonth = currentMonth || (new Date().getMonth() + 1);
   const activeYear = currentYear || new Date().getFullYear();
@@ -26,6 +27,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
         if (!data) return;
         setRawConfig(data);
         if (data.clubId) setSelectedClubId(data.clubId);
+        if (data.allowEditOthers !== undefined) setAllowEditOthers(data.allowEditOthers);
         if (data.monthlyParticipants) {
           setMonthlyParticipants(data.monthlyParticipants);
           const currentKey = `${activeYear}_${activeMonth}`;
@@ -88,7 +90,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
           clubId: selectedClubId,
           monthKey: monthKey,
           participants: participants,
-          monthlyParticipants: updatedMonthly
+          monthlyParticipants: updatedMonthly,
+          allowEditOthers: allowEditOthers
         })
       });
       window.dispatchEvent(new CustomEvent('challengeUpdated', { detail: { year: activeYear, month: activeMonth } }));
@@ -383,6 +386,18 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <input
+              type="checkbox"
+              id="allowEditOthers"
+              checked={allowEditOthers}
+              onChange={(e) => setAllowEditOthers(e.target.checked)}
+              style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+            />
+            <label htmlFor="allowEditOthers" style={{ fontSize: '12px', color: '#002D54', cursor: 'pointer', fontWeight: 500, lineHeight: 1.3 }}>
+              Cho phép mọi runner tự sửa mục tiêu / tiền phạt của người khác
+            </label>
+          </div>
           <button className="btn btn--primary sidebar__btn-save" onClick={handleSave}>
             <Save size={16} style={{ marginRight: 6 }} />
             {savedMessage ? t('challengeSaved') : t('saveChallenge')}

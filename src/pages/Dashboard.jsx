@@ -389,6 +389,7 @@ export default function Dashboard({
               apiFetch={apiFetch}
               athlete={athlete}
               isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
+              allowEditOthers={challengeConfig?.allowEditOthers}
             />
           )}
         </div>

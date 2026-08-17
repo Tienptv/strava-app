@@ -3,7 +3,7 @@ import { useLang } from '../i18n/LangContext';
 import { normalize } from '../utils/challengeStats';
 import { Save, CheckCircle2, Target, ShieldAlert, ShieldCheck } from 'lucide-react';
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false }) {
   const { t } = useLang();
   
   const [userData, setUserData] = useState({});
@@ -334,8 +334,8 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               // Check if this row is the logged in athlete (Chỉ 1 dòng duy nhất được gán isMe)
               const isMe = Boolean(myRow && myRow.matchKey === row.matchKey);
 
-              // Admin can edit all; normal user can edit their own row
-              const canEdit = Boolean(isAdmin || isMe);
+              // Admin can edit all; normal user can edit their own row, unless allowEditOthers is true
+              const canEdit = Boolean(isAdmin || isMe || allowEditOthers);
 
               // Tính tiền phạt phải nộp: Chỉ áp dụng khi có tick checkbox penalty và target > 0
               // max 200k, tỷ lệ theo số km chưa hoàn thành, làm tròn lên mốc 10k (ví dụ: 64k -> 70k, 86k -> 90k, 106k -> 110k)
