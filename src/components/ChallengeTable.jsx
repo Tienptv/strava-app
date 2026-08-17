@@ -16,10 +16,16 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
   const myRow = challengeData.find(row => 
     athlete && (
       (row.member.id && String(row.member.id) === String(athlete.id)) ||
+      // Direct match
       (normalize(row.member.firstname) === normalize(athlete.firstname) &&
         (normalize(row.member.lastname) === normalize(athlete.lastname) ||
           normalize(row.member.lastname).startsWith(normalize(athlete.lastname)) ||
-          normalize(athlete.lastname).startsWith(normalize(row.member.lastname))))
+          normalize(athlete.lastname).startsWith(normalize(row.member.lastname)))) ||
+      // Reverse match (Họ & Tên đảo)
+      (normalize(row.member.firstname) === normalize(athlete.lastname) &&
+        (normalize(row.member.lastname) === normalize(athlete.firstname) ||
+          normalize(row.member.lastname).startsWith(normalize(athlete.firstname)) ||
+          normalize(athlete.firstname).startsWith(normalize(row.member.lastname))))
     )
   );
 
@@ -41,8 +47,21 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
       loadTargets();
     };
 
+    const handleFocus = () => {
+      loadTargets();
+    };
+
     window.addEventListener('challengeTargetsUpdated', handleTargetsUpdated);
-    return () => window.removeEventListener('challengeTargetsUpdated', handleTargetsUpdated);
+    window.addEventListener('focus', handleFocus);
+
+    // Live auto-sync: Poll every 8s so Admin and other athletes see updates in real time
+    const interval = setInterval(loadTargets, 8000);
+
+    return () => {
+      window.removeEventListener('challengeTargetsUpdated', handleTargetsUpdated);
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
   }, [loadTargets]);
 
   // Sync quickTarget and quickPenalty from userData whenever userData or month/year changes
@@ -306,10 +325,16 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               const isMe = Boolean(
                 athlete && (
                   (row.member.id && String(row.member.id) === String(athlete.id)) ||
+                  // Direct match
                   (normalize(row.member.firstname) === normalize(athlete.firstname) &&
                     (normalize(row.member.lastname) === normalize(athlete.lastname) ||
                       normalize(row.member.lastname).startsWith(normalize(athlete.lastname)) ||
-                      normalize(athlete.lastname).startsWith(normalize(row.member.lastname))))
+                      normalize(athlete.lastname).startsWith(normalize(row.member.lastname)))) ||
+                  // Reverse match
+                  (normalize(row.member.firstname) === normalize(athlete.lastname) &&
+                    (normalize(row.member.lastname) === normalize(athlete.firstname) ||
+                      normalize(row.member.lastname).startsWith(normalize(athlete.firstname)) ||
+                      normalize(athlete.firstname).startsWith(normalize(row.member.lastname))))
                 )
               );
 

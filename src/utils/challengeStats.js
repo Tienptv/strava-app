@@ -29,17 +29,28 @@ export function getAthleteMatchKey(athlete, participants = {}) {
     if (keyById) return keyById;
   }
 
-  // 2. Khớp theo firstname và lastname trong danh sách participants
+  // 2. Khớp theo firstname và lastname trong danh sách participants (cả xuôi và ngược Họ - Tên)
   const keyByName = Object.keys(participants || {}).find(k => {
     const p = participants[k];
     if (!p) return false;
     const pFname = normalize(p.firstname);
     const pLname = normalize(p.lastname);
-    return pFname === normFname && (
+    
+    // Khớp xuôi: First = First & Last = Last
+    const directMatch = pFname === normFname && (
       pLname === normLname || 
       pLname.startsWith(normLname) || 
       normLname.startsWith(pLname)
     );
+    
+    // Khớp ngược: First = Last & Last = First (vd: pham tien vs Tien P.)
+    const reverseMatch = pFname === normLname && (
+      pLname === normFname || 
+      pLname.startsWith(normFname) || 
+      normFname.startsWith(pLname)
+    );
+
+    return directMatch || reverseMatch;
   });
   if (keyByName) return keyByName;
 

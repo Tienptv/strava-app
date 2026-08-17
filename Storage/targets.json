@@ -34,8 +34,8 @@
     "target": 0
   },
   "Lieu_V._2026_8": {
-    "target": 100,
-    "penalty": true
+    "target": 0,
+    "penalty": false
   },
   "Phuong_N._2026_8": {
     "penalty": false,
