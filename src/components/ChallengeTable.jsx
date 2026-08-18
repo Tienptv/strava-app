@@ -3,7 +3,7 @@ import { useLang } from '../i18n/LangContext';
 import { normalize } from '../utils/challengeStats';
 import { Save, CheckCircle2, Target, ShieldAlert, ShieldCheck } from 'lucide-react';
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, showQuickGoalBox = true }) {
   const { t } = useLang();
   
   const [userData, setUserData] = useState({});

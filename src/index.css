@@ -2728,3 +2728,279 @@ img {
   align-self: flex-start;
   animation: fadeIn 0.3s ease-out;
 }
+
+/* ==========================================================================
+   PERSONAL GOAL & QUICK GOAL DESIGN
+   ========================================================================== */
+
+.personal-goal-card, .runner-quick-goal-bar {
+  background: rgba(30, 30, 35, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  color: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.personal-goal-card:hover, .runner-quick-goal-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.personal-goal__header, .quick-goal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.personal-goal__title, .quick-goal-title-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.personal-goal__icon-badge, .quick-goal-icon {
+  background: rgba(0, 163, 166, 0.15);
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.personal-goal__main-title, .quick-goal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.personal-goal__month-subtitle, .quick-goal-subtitle {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+}
+
+.goal-numbers {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.current-dist {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #00A3A6;
+  text-shadow: 0 0 20px rgba(0, 163, 166, 0.3);
+}
+
+.total-goal {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.progress-bar-container, .runner-track-bar-bg {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 16px 0;
+  position: relative;
+}
+
+.progress-bar-fill, .runner-track-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+.goal-input-premium, .quick-number-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-radius: 12px;
+  width: 120px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.goal-input-premium:focus, .quick-number-input:focus {
+  border-color: #00A3A6;
+  box-shadow: 0 0 0 3px rgba(0, 163, 166, 0.2);
+}
+
+.penalty-checkbox-label, .quick-penalty-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.penalty-checkbox-label:hover, .quick-penalty-box:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.custom-penalty-checkbox, .quick-checkbox {
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+}
+
+.custom-penalty-checkbox:checked, .quick-checkbox:checked {
+  background: #E84C3D;
+  border-color: #E84C3D;
+}
+
+.custom-penalty-checkbox:checked::after, .quick-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 3px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.penalty-label-text, .quick-penalty-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.penalty-label-text strong, .quick-penalty-text strong {
+  font-size: 1rem;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.penalty-label-text small, .quick-penalty-text small {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.penalty-status-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.penalty-status-active {
+  background: rgba(232, 76, 61, 0.1);
+  border: 1px solid rgba(232, 76, 61, 0.2);
+}
+
+.penalty-status-safe {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.penalty-status-none {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  flex-direction: row;
+  align-items: center;
+}
+
+.penalty-status-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.penalty-amount-badge {
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.penalty-amount-badge.owing {
+  background: rgba(232, 76, 61, 0.2);
+  color: #E84C3D;
+}
+
+.penalty-amount-badge.safe {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.btn-edit-goal, .btn-primary-sm, .btn-secondary-sm, .btn-quick-save {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-primary-sm, .btn-quick-save {
+  background: linear-gradient(135deg, #00A3A6 0%, #00878A 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 163, 166, 0.3);
+}
+
+.btn-primary-sm:hover, .btn-quick-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 163, 166, 0.4);
+}
+
+.btn-secondary-sm {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.btn-secondary-sm:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.personal-goal__edit-actions, .quick-goal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.input-with-unit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.goal-unit-badge {
+  position: absolute;
+  right: 16px;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  pointer-events: none;
+}
+
