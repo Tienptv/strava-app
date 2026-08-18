@@ -228,28 +228,45 @@ export default function Dashboard({
         }
       });
 
-      const combinedAug = [...importedActivities, ...clubActivities, ...myAugActivities];
+      const isBetterRecord = (a, b) => {
+        if (!b) return true;
+        if (a.start_date_local && !b.start_date_local) return true;
+        if (!a.start_date_local && b.start_date_local) return false;
+        const aLastname = a.athlete?.lastname || '';
+        const bLastname = b.athlete?.lastname || '';
+        if (aLastname.length > 2 && bLastname.length <= 2) return true;
+        return false;
+      };
+
       const augUniqueMap = new Map();
-      const withId = combinedAug.filter(a => a.id);
-      const withoutId = combinedAug.filter(a => !a.id);
-
-      withId.forEach(act => {
-        augUniqueMap.set(`id_${act.id}`, act);
-        augUniqueMap.set(getCompKey(act), act);
-      });
-
-      withoutId.forEach(act => {
+      const addRecord = (act) => {
+        if (!act) return;
+        const idKey = act.id ? `id_${act.id}` : null;
         const cKey = getCompKey(act);
-        if (!augUniqueMap.has(cKey)) {
+
+        if (idKey) {
+          const existing = augUniqueMap.get(idKey);
+          if (!existing || isBetterRecord(act, existing)) {
+            augUniqueMap.set(idKey, act);
+          }
+        }
+        const existingComp = augUniqueMap.get(cKey);
+        if (!existingComp || isBetterRecord(act, existingComp)) {
           augUniqueMap.set(cKey, act);
         }
-      });
+      };
+
+      // Ưu tiên importedActivities (có đầy đủ ngày giờ và tên) và myAugActivities trước
+      importedActivities.forEach(addRecord);
+      myAugActivities.forEach(addRecord);
+      clubActivities.forEach(addRecord);
 
       const currentAugActivities = Array.from(new Set(augUniqueMap.values()));
       const allActivities = [...historicalActivities, ...currentAugActivities];
 
       // Tự động đồng bộ các bài chạy Tháng 8+ của tài khoản đang đăng nhập vào server nếu có bài mới
-      if (myAugActivities.length > 0 && currentAugActivities.length > importedActivities.length) {
+      const hasOnlyValidDates = currentAugActivities.every(a => a.start_date_local);
+      if (myAugActivities.length > 0 && currentAugActivities.length > importedActivities.length && hasOnlyValidDates) {
         apiFetch('/challenge/imported', {
           method: 'POST',
           body: JSON.stringify(currentAugActivities)

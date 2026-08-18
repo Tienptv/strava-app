@@ -16,6 +16,7 @@ const IMPORTED_FILE = path.join(__dirname, '../Storage/imported_activities.json'
 const HISTORICAL_FILE = path.join(__dirname, '../Storage/historical_activities.json');
 const TOTAL_KM_FILE = path.join(__dirname, '../Storage/Total-km-17-08-2026.csv');
 const GOAL_FILE = path.join(__dirname, '../Storage/club_goal.json');
+const TOKENS_FILE = path.join(__dirname, '../Storage/tokens.json');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,13 +27,244 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 
-// Lưu trữ token tạm thời (trong production nên dùng database)
+// Quản lý token xác thực Strava (lưu trữ cố định trong Storage/tokens.json)
 const tokenStore = new Map();
+
+function loadTokens() {
+  try {
+    if (fs.existsSync(TOKENS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(TOKENS_FILE, 'utf8'));
+      Object.keys(data).forEach(id => tokenStore.set(id, data[id]));
+    }
+  } catch (err) {
+    console.error('Lỗi nạp tokens:', err.message);
+  }
+}
+
+function saveTokens() {
+  try {
+    const dir = path.dirname(TOKENS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const obj = {};
+    for (const [k, v] of tokenStore.entries()) {
+      obj[k] = v;
+    }
+    fs.writeFileSync(TOKENS_FILE, JSON.stringify(obj, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Lỗi lưu tokens:', err.message);
+  }
+}
+
+// Nạp token khi khởi động server
+loadTokens();
 
 const strava = new StravaAPI(
   process.env.STRAVA_CLIENT_ID,
   process.env.STRAVA_CLIENT_SECRET
 );
+
+// ==========================================
+// CSV PARSING & STORAGE AUTO-SYNC HELPERS
+// ==========================================
+const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
+
+function parseCSVLine(text) {
+  let row = [''], inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    let c = text[i];
+    if (c === '"') {
+      if (inQuotes && text[i+1] === '"') { row[row.length-1] += '"'; i++; }
+      else { inQuotes = !inQuotes; }
+    } else if (c === ',' && !inQuotes) {
+      row.push('');
+    } else {
+      row[row.length-1] += c;
+    }
+  }
+  return row.map(s => s.trim().replace(/^["']|["']$/g, ''));
+}
+
+function parseStorageCSV(content) {
+  const lines = content.split(/\r?\n/).filter(l => l.trim().length > 0);
+  if (lines.length === 0) return [];
+  const rawHeaders = parseCSVLine(lines[0]);
+  const headers = rawHeaders.map(h => h.replace(/["']/g, '').trim());
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = parseCSVLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
+    rows.push(obj);
+  }
+  
+  const activities = [];
+  rows.forEach(row => {
+    // Bỏ qua các hoạt động ẩn
+    const isPrivate = String(row.private || row.Private || 'false').toLowerCase() === 'true';
+    const hideFromHome = String(row.hide_from_home || row.Hide_from_home || 'false').toLowerCase() === 'true';
+    const visibility = row.visibility || row.Visibility;
+    if (isPrivate || hideFromHome || (visibility && String(visibility).toLowerCase() !== 'everyone')) {
+      return;
+    }
+
+    let dist = parseFloat(String(row.Distance || 0).replace(',', '.').replace(/[^\d.-]/g, ''));
+    dist = isNaN(dist) ? 0 : dist * 1000;
+    
+    let movingTimeStr = row['Duration'] || row['Moving Time'] || row['Time'] || '00:00:00';
+    let timeParts = movingTimeStr.split(':').map(Number);
+    let movingTimeSec = 0;
+    if (timeParts.length === 3) movingTimeSec = timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2];
+    else if (timeParts.length === 2) movingTimeSec = timeParts[0] * 60 + timeParts[1];
+
+    let athleteId = null;
+    let athleteName = row.Name || row.Athlete || '';
+    if (row.Athlete && String(row.Athlete).includes('/athletes/')) {
+      athleteId = parseInt(String(row.Athlete).replace('/athletes/', ''), 10);
+      athleteName = row.Name || '';
+    }
+
+    let activityId = null;
+    if (row.Activity) {
+      const match = String(row.Activity).match(/\d+/);
+      if (match) activityId = match[0];
+    } else if (row['Activity ID'] || row.id || row.Id) {
+      activityId = String(row['Activity ID'] || row.id || row.Id);
+    }
+
+    let nameParts = athleteName.trim().split(' ');
+    let lastname = nameParts.length > 1 ? nameParts.pop() : '';
+    let firstname = nameParts.join(' ');
+
+    let dateStr = row.Date || '';
+    let localIsoStr = null;
+    if (dateStr.includes('T')) {
+      localIsoStr = dateStr.substring(0, 19) + 'Z';
+    } else if (dateStr) {
+      if (dateStr.includes('/')) {
+        let dParts = dateStr.split(' ')[0].split('/');
+        let tPart = dateStr.split(' ')[1] || '00:00:00';
+        if (dParts.length === 3) {
+          if (dParts[0].length === 4) {
+            dateStr = `${dParts[0]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[2]).padStart(2, '0')}T${tPart}Z`;
+          } else {
+            dateStr = `${dParts[2]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[0]).padStart(2, '0')}T${tPart}Z`;
+          }
+          localIsoStr = dateStr;
+        }
+      } else if (dateStr.includes('-')) {
+        let parts = dateStr.split(' ');
+        let dPart = parts[0];
+        let tPart = parts[1] || '00:00:00';
+        localIsoStr = `${dPart}T${tPart}Z`;
+      }
+    }
+
+    if (dist > 0 && localIsoStr) {
+      activities.push({
+        id: activityId,
+        type: row.Type || row['Activity Type'] || 'Run',
+        distance: dist,
+        moving_time: movingTimeSec,
+        start_date_local: localIsoStr,
+        athlete: {
+          id: athleteId,
+          firstname: firstname,
+          lastname: lastname
+        }
+      });
+    }
+  });
+  return activities;
+}
+
+function getCompKey(act) {
+  const d = (act.start_date_local || '').substring(0, 16);
+  const t = act.moving_time || 0;
+  const dist = Math.round(act.distance || 0);
+  const athId = act.athlete?.id || '';
+  const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
+  return `comp_${athId || name}_${d}_${t}_${dist}`;
+}
+
+function isBetterRecord(a, b) {
+  if (!b) return true;
+  if (a.start_date_local && !b.start_date_local) return true;
+  if (!a.start_date_local && b.start_date_local) return false;
+  const aLastname = a.athlete?.lastname || '';
+  const bLastname = b.athlete?.lastname || '';
+  if (aLastname.length > 2 && bLastname.length <= 2) return true;
+  return false;
+}
+
+function mergeActivitiesList(existingList, newList) {
+  const uniqueMap = new Map();
+
+  const addRecord = (act) => {
+    if (!act) return;
+    const idKey = act.id ? `id_${act.id}` : null;
+    const cKey = getCompKey(act);
+
+    if (idKey) {
+      const existing = uniqueMap.get(idKey);
+      if (!existing || isBetterRecord(act, existing)) {
+        uniqueMap.set(idKey, act);
+      }
+    }
+    
+    const existingComp = uniqueMap.get(cKey);
+    if (!existingComp || isBetterRecord(act, existingComp)) {
+      uniqueMap.set(cKey, act);
+    }
+  };
+
+  (existingList || []).forEach(addRecord);
+  (newList || []).forEach(addRecord);
+
+  const finalSet = new Set(uniqueMap.values());
+  return Array.from(finalSet).filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
+}
+
+function syncAllStorageCsv() {
+  try {
+    const storageDir = path.join(__dirname, '../Storage');
+    if (!fs.existsSync(storageDir)) return [];
+
+    let existingActivities = [];
+    if (fs.existsSync(IMPORTED_FILE)) {
+      try {
+        existingActivities = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
+        if (!Array.isArray(existingActivities)) existingActivities = [];
+      } catch (e) {
+        existingActivities = [];
+      }
+    }
+
+    const csvFiles = fs.readdirSync(storageDir).filter(f => f.startsWith('data-') && f.endsWith('.csv'));
+    let csvActivities = [];
+    for (const f of csvFiles) {
+      try {
+        const content = fs.readFileSync(path.join(storageDir, f), 'utf8');
+        const acts = parseStorageCSV(content);
+        csvActivities = csvActivities.concat(acts);
+      } catch (err) {
+        console.error(`Lỗi đọc file CSV ${f}:`, err.message);
+      }
+    }
+
+    if (csvActivities.length > 0) {
+      const merged = mergeActivitiesList(existingActivities, csvActivities);
+      fs.writeFileSync(IMPORTED_FILE, JSON.stringify(merged, null, 2), 'utf8');
+      return merged;
+    }
+    return existingActivities;
+  } catch (err) {
+    console.error('Lỗi syncAllStorageCsv:', err.message);
+    return [];
+  }
+}
+
+// Đồng bộ CSV khi khởi động server
+syncAllStorageCsv();
 
 // ==========================================
 // AUTH ROUTES
@@ -64,6 +296,7 @@ app.post('/api/auth/token', async (req, res) => {
       refresh_token: tokenData.refresh_token,
       expires_at: tokenData.expires_at,
     });
+    saveTokens();
 
     res.json({
       athlete: tokenData.athlete,
@@ -79,15 +312,38 @@ app.post('/api/auth/token', async (req, res) => {
 // ==========================================
 // MIDDLEWARE: Lấy token từ header
 // ==========================================
-function getToken(req, res, next) {
+async function getToken(req, res, next) {
   const athleteId = req.headers['x-athlete-id'];
   if (!athleteId) {
     return res.status(401).json({ error: 'Thiếu athlete ID' });
   }
-  const tokenData = tokenStore.get(athleteId);
+  let tokenData = tokenStore.get(athleteId);
+  if (!tokenData) {
+    loadTokens();
+    tokenData = tokenStore.get(athleteId);
+  }
   if (!tokenData) {
     return res.status(401).json({ error: 'Chưa đăng nhập' });
   }
+
+  // Tự động refresh token nếu token hết hạn hoặc sắp hết hạn trong 5 phút
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (tokenData.expires_at && tokenData.expires_at - nowSec < 300 && tokenData.refresh_token) {
+    try {
+      console.log(`🔄 Tự động refresh token cho athlete ${athleteId}...`);
+      const refreshed = await strava.refreshToken(tokenData.refresh_token);
+      tokenData = {
+        access_token: refreshed.access_token,
+        refresh_token: refreshed.refresh_token || tokenData.refresh_token,
+        expires_at: refreshed.expires_at,
+      };
+      tokenStore.set(athleteId, tokenData);
+      saveTokens();
+    } catch (err) {
+      console.error('Lỗi refresh token:', err.message);
+    }
+  }
+
   req.accessToken = tokenData.access_token;
   req.athleteId = athleteId;
   next();
@@ -395,15 +651,22 @@ app.post('/api/challenge/historical', (req, res) => {
 // Đọc imported activities (Tháng 8/2026 trở đi)
 app.get('/api/challenge/imported', (req, res) => {
   try {
-    if (fs.existsSync(IMPORTED_FILE)) {
-      const data = fs.readFileSync(IMPORTED_FILE, 'utf8');
-      res.json(JSON.parse(data));
-    } else {
-      res.json([]);
-    }
+    const data = syncAllStorageCsv();
+    res.json(data);
   } catch (error) {
     console.error('Lỗi đọc imported:', error.message);
     res.status(500).json({ error: 'Không thể đọc dữ liệu imported' });
+  }
+});
+
+// Endpoint kích hoạt quét & đồng bộ toàn bộ file CSV trong Storage
+app.post('/api/challenge/sync-storage', (req, res) => {
+  try {
+    const data = syncAllStorageCsv();
+    res.json({ success: true, count: data.length, activities: data });
+  } catch (error) {
+    console.error('Lỗi sync-storage:', error.message);
+    res.status(500).json({ error: 'Không thể đồng bộ file CSV trong Storage' });
   }
 });
 
@@ -411,10 +674,21 @@ app.get('/api/challenge/imported', (req, res) => {
 app.post('/api/challenge/imported', (req, res) => {
   try {
     const data = req.body;
+    let existing = [];
+    if (fs.existsSync(IMPORTED_FILE)) {
+      try {
+        existing = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
+        if (!Array.isArray(existing)) existing = [];
+      } catch (e) {
+        existing = [];
+      }
+    }
+    const merged = Array.isArray(data) ? mergeActivitiesList(existing, data) : existing;
+
     const dir = path.dirname(IMPORTED_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(IMPORTED_FILE, JSON.stringify(data, null, 2));
-    res.json(data);
+    fs.writeFileSync(IMPORTED_FILE, JSON.stringify(merged, null, 2), 'utf8');
+    res.json(merged);
   } catch (error) {
     console.error('Lỗi lưu imported:', error.message);
     res.status(500).json({ error: 'Không thể lưu dữ liệu imported' });
@@ -517,9 +791,11 @@ app.post('/api/auth/logout', getToken, async (req, res) => {
   try {
     await strava.deauthorize(req.accessToken);
     tokenStore.delete(req.athleteId);
+    saveTokens();
     res.json({ message: 'Đã đăng xuất' });
   } catch (error) {
     tokenStore.delete(req.athleteId);
+    saveTokens();
     res.json({ message: 'Đã đăng xuất' });
   }
 });

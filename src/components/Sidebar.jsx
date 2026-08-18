@@ -121,6 +121,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
         Papa.parse(file, {
           header: true,
           skipEmptyLines: true,
+          transformHeader: (h) => h.trim().replace(/^["']|["']$/g, '').trim(),
           complete: function(results) {
             const data = results.data;
             const importedActivities = data.map(row => {
@@ -190,6 +191,10 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                 }
               }
 
+              if (dist <= 0 || !localIsoStr) {
+                return null;
+              }
+
               return {
                 id: activityId,
                 type: row.Type || row['Activity Type'] || 'Run',
@@ -239,24 +244,38 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
        return `comp_${athId || name}_${d}_${t}_${dist}`;
     };
 
+    const isBetterRecord = (a, b) => {
+      if (!b) return true;
+      if (a.start_date_local && !b.start_date_local) return true;
+      if (!a.start_date_local && b.start_date_local) return false;
+      const aLastname = a.athlete?.lastname || '';
+      const bLastname = b.athlete?.lastname || '';
+      if (aLastname.length > 2 && bLastname.length <= 2) return true;
+      return false;
+    };
+
+    const addRecord = (act) => {
+      if (!act) return;
+      const idKey = act.id ? `id_${act.id}` : null;
+      const cKey = getCompKey(act);
+
+      if (idKey) {
+        const existing = uniqueMap.get(idKey);
+        if (!existing || isBetterRecord(act, existing)) {
+          uniqueMap.set(idKey, act);
+        }
+      }
+      const existingComp = uniqueMap.get(cKey);
+      if (!existingComp || isBetterRecord(act, existingComp)) {
+        uniqueMap.set(cKey, act);
+      }
+    };
+
     // Chỉ update các hoạt động từ tháng 8/2026 trở đi vào importedActivities (các tháng 1-7 đã lưu riêng trong historical)
     const augImportedActivities = allImportedActivities.filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
     
-    const combined = [...existingActivities, ...augImportedActivities];
-    const withId = combined.filter(a => a.id);
-    const withoutId = combined.filter(a => !a.id);
-
-    withId.forEach(act => {
-      uniqueMap.set(`id_${act.id}`, act);
-      uniqueMap.set(getCompKey(act), act);
-    });
-
-    withoutId.forEach(act => {
-      const cKey = getCompKey(act);
-      if (!uniqueMap.has(cKey)) {
-        uniqueMap.set(cKey, act);
-      }
-    });
+    existingActivities.forEach(addRecord);
+    augImportedActivities.forEach(addRecord);
 
     const finalSet = new Set(uniqueMap.values());
     const finalActivities = Array.from(finalSet).filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
