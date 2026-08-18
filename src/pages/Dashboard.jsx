@@ -84,9 +84,9 @@ export default function Dashboard({
         apiFetch('/athlete/stats').catch(() => null),
         apiFetch('/clubs').catch(() => []),
       ]);
-      setActivities(activitiesData);
+      setActivities(Array.isArray(activitiesData) ? activitiesData : []);
       setStats(statsData);
-      setClubs(clubsData);
+      setClubs(Array.isArray(clubsData) ? clubsData : []);
     } catch (error) {
       console.error('Lỗi tải dữ liệu:', error);
     } finally {
@@ -130,8 +130,12 @@ export default function Dashboard({
       // Lọc các hoạt động (Chỉ lấy Run, VirtualRun, TrailRun)
       const validTypes = ['Run', 'VirtualRun', 'TrailRun'];
       
+      // Đảm bảo dữ liệu trả về là mảng (tránh crash khi Strava trả về error object cho user không có quyền)
+      const rawClubActivitiesSafe = Array.isArray(rawClubActivities) ? rawClubActivities : [];
+      const rawMyActivitiesSafe = Array.isArray(rawMyActivities) ? rawMyActivities : [];
+      
       // Loại bỏ các hoạt động của user hiện tại khỏi clubActivities để tránh tính đúp
-      const clubActivities = rawClubActivities.filter(act => {
+      const clubActivities = rawClubActivitiesSafe.filter(act => {
         if (!validTypes.includes(act.type)) return false;
         const fname = act.athlete?.firstname || '';
         const lname = act.athlete?.lastname || '';
@@ -141,7 +145,7 @@ export default function Dashboard({
         return true;
       });
 
-      const myActivities = rawMyActivities.filter(act => {
+      const myActivities = rawMyActivitiesSafe.filter(act => {
         if (!validTypes.includes(act.type)) return false;
         // Loại bỏ các hoạt động không public (bao gồm only_me, followers_only)
         if (act.private === true || act.visibility !== 'everyone' || act.hide_from_home === true) {
