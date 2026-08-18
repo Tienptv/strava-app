@@ -322,15 +322,17 @@ export function processChallengeData(activities, participantsMap, year, month, t
       return false;
     });
 
+    // Lấy chuỗi YYYY-MM-DD của cutoffDate để so sánh chuỗi (bỏ qua timezone)
+    const cutoffDateStr = effectiveTotalKmBase.cutoffDate ? effectiveTotalKmBase.cutoffDate.substring(0, 10) : '2026-08-17';
+
     // Tính khoảng cách các hoạt động sau mốc 17/08/2026
     let postCutoffDistance = 0;
     activities.forEach(act => {
       if (!act.start_date_local || act.distance === undefined || act.distance < 5) return;
-      const localDateStr = act.start_date_local.endsWith('Z') ? act.start_date_local.slice(0, -1) : act.start_date_local;
-      const actDate = new Date(localDateStr);
+      const actDateStr = act.start_date_local.substring(0, 10);
       
       // Chỉ tính các hoạt động có ngày sau ngày 17/08/2026
-      if (actDate > cutoffDate) {
+      if (actDateStr > cutoffDateStr) {
         let isActMatch = false;
         if (act.athlete?.id && stat.member.id && act.athlete.id === stat.member.id) {
           isActMatch = true;

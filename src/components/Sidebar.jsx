@@ -435,7 +435,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
               style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
             />
             <label htmlFor="allowEditOthers" style={{ fontSize: '12px', color: '#002D54', cursor: 'pointer', fontWeight: 500, lineHeight: 1.3 }}>
-              Cho phép mọi runner tự sửa mục tiêu / tiền phạt của người khác
+              {t('allowEditOthers')}
             </label>
           </div>
           <button className="btn btn--primary sidebar__btn-save" onClick={handleSave}>

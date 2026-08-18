@@ -143,6 +143,7 @@ const translations = {
     searchMembers: 'Tìm kiếm thành viên...',
     selectAll: 'Chọn tất cả',
     deselectAll: 'Bỏ chọn tất cả',
+    allowEditOthers: 'Cho phép mọi runner tự sửa mục tiêu / tiền phạt của người khác',
   },
 
   en: {
@@ -289,6 +290,7 @@ const translations = {
     searchMembers: 'Search members...',
     selectAll: 'Select All',
     deselectAll: 'Deselect All',
+    allowEditOthers: 'Allow all runners to edit targets / penalties of others',
   },
 };
 
