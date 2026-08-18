@@ -1914,7 +1914,7 @@ img {
 
 .penalty-label-text small {
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: var(--primary-navy);
   line-height: 1.3;
 }
 
