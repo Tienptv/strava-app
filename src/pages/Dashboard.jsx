@@ -201,11 +201,10 @@ export default function Dashboard({
         }
       });
 
-      // Gộp và khử trùng lặp myAugActivities và importedActivities bằng Map
+      // Gộp và khử trùng lặp myAugActivities và importedActivities
       const myAugActivities = myActivities.filter(a => a.start_date_local && a.start_date_local >= '2026-08-01T00:00:00');
-      const augMap = new Map();
-      const getActKey = (act) => {
-        if (act.id) return `id_${act.id}`;
+      
+      const getCompKey = (act) => {
         const d = (act.start_date_local || '').substring(0, 16);
         const t = act.moving_time || 0;
         const dist = Math.round(act.distance || 0);
@@ -214,7 +213,7 @@ export default function Dashboard({
         return `comp_${athId || name}_${d}_${t}_${dist}`;
       };
 
-      importedActivities.forEach(act => augMap.set(getActKey(act), act));
+      // Áp dụng ID cho myAugActivities (do lấy từ Strava token của user đang đăng nhập)
       myAugActivities.forEach(act => {
         if (athlete) {
           act.athlete = {
@@ -223,10 +222,26 @@ export default function Dashboard({
             lastname: athlete.lastname
           };
         }
-        augMap.set(getActKey(act), act);
       });
 
-      const currentAugActivities = Array.from(augMap.values());
+      const combinedAug = [...importedActivities, ...myAugActivities];
+      const augUniqueMap = new Map();
+      const withId = combinedAug.filter(a => a.id);
+      const withoutId = combinedAug.filter(a => !a.id);
+
+      withId.forEach(act => {
+        augUniqueMap.set(`id_${act.id}`, act);
+        augUniqueMap.set(getCompKey(act), act);
+      });
+
+      withoutId.forEach(act => {
+        const cKey = getCompKey(act);
+        if (!augUniqueMap.has(cKey)) {
+          augUniqueMap.set(cKey, act);
+        }
+      });
+
+      const currentAugActivities = Array.from(new Set(augUniqueMap.values()));
       const allActivities = [...historicalActivities, ...currentAugActivities];
 
       // Tự động đồng bộ các bài chạy Tháng 8+ của tài khoản đang đăng nhập vào server nếu có bài mới

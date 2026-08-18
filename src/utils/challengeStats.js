@@ -146,6 +146,11 @@ export function processChallengeData(activities, participantsMap, year, month, t
   // Lọc các hoạt động trong tháng hiện tại và loại bỏ trùng lặp
   const seenActKeys = new Set();
   const currentMonthActivities = activities.filter(act => {
+    // Bỏ qua các hoạt động ẩn (private, hide_from_home, visibility != everyone)
+    if (act.private === true || act.private === 'true' || act.private === 'TRUE') return false;
+    if (act.hide_from_home === true || act.hide_from_home === 'true' || act.hide_from_home === 'TRUE') return false;
+    if (act.visibility !== undefined && String(act.visibility).toLowerCase() !== 'everyone') return false;
+
     // Chỉ lấy các hoạt động có quãng đường >= 0.005km (5 mét)
     if (act.distance === undefined || act.distance < 5) {
       return false;
@@ -180,11 +185,14 @@ export function processChallengeData(activities, participantsMap, year, month, t
       const distMeter = Math.round(act.distance);
       const moveSec = act.moving_time || 0;
 
-      const actKey = actId ? `id_${actId}` : `composite_${athleteId || athleteName}_${timeMinute}_${distMeter}_${moveSec}`;
-      if (seenActKeys.has(actKey)) {
-        return false;
-      }
-      seenActKeys.add(actKey);
+      const compKey = `composite_${athleteId || athleteName}_${timeMinute}_${distMeter}_${moveSec}`;
+      const idKey = actId ? `id_${actId}` : null;
+
+      if (idKey && seenActKeys.has(idKey)) return false;
+      if (seenActKeys.has(compKey)) return false;
+
+      if (idKey) seenActKeys.add(idKey);
+      seenActKeys.add(compKey);
       return true;
     }
     return false;

@@ -124,6 +124,14 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
           complete: function(results) {
             const data = results.data;
             const importedActivities = data.map(row => {
+              // Bỏ qua các hoạt động ẩn (nếu có cột chỉ định)
+              const isPrivate = String(row.private || row.Private || 'false').toLowerCase() === 'true';
+              const hideFromHome = String(row.hide_from_home || row.Hide_from_home || 'false').toLowerCase() === 'true';
+              const visibility = row.visibility || row.Visibility;
+              if (isPrivate || hideFromHome || (visibility && String(visibility).toLowerCase() !== 'everyone')) {
+                 return null;
+              }
+
               let dist = parseFloat(String(row.Distance || 0).replace(',', '.').replace(/[^\d.-]/g, ''));
               dist = isNaN(dist) ? 0 : dist * 1000;
               
@@ -195,7 +203,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                 }
               };
             });
-            resolve(importedActivities);
+            resolve(importedActivities.filter(Boolean));
           },
           error: function(err) {
             console.error('Lỗi parse CSV', err);
@@ -221,9 +229,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
     }
 
     const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
-    const allMap = new Map();
-    const getActivityKey = (act) => {
-       if (act.id) return `id_${act.id}`;
+    const uniqueMap = new Map();
+    const getCompKey = (act) => {
        const d = (act.start_date_local || '').substring(0, 16); // Chuẩn hóa tới phút YYYY-MM-DDTHH:mm
        const t = act.moving_time || 0;
        const dist = Math.round(act.distance || 0);
@@ -234,11 +241,25 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
 
     // Chỉ update các hoạt động từ tháng 8/2026 trở đi vào importedActivities (các tháng 1-7 đã lưu riêng trong historical)
     const augImportedActivities = allImportedActivities.filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
+    
+    const combined = [...existingActivities, ...augImportedActivities];
+    const withId = combined.filter(a => a.id);
+    const withoutId = combined.filter(a => !a.id);
 
-    existingActivities.forEach(act => allMap.set(getActivityKey(act), act));
-    augImportedActivities.forEach(act => allMap.set(getActivityKey(act), act));
+    withId.forEach(act => {
+      uniqueMap.set(`id_${act.id}`, act);
+      uniqueMap.set(getCompKey(act), act);
+    });
 
-    const finalActivities = Array.from(allMap.values()).filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
+    withoutId.forEach(act => {
+      const cKey = getCompKey(act);
+      if (!uniqueMap.has(cKey)) {
+        uniqueMap.set(cKey, act);
+      }
+    });
+
+    const finalSet = new Set(uniqueMap.values());
+    const finalActivities = Array.from(finalSet).filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
     
     try {
       await apiFetch('/challenge/imported', {
