@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { normalize } from '../utils/challengeStats';
 import { Save, CheckCircle2, ShieldAlert, ShieldCheck } from 'lucide-react';
+import ProgressBar from './ProgressBar';
 
 export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false }) {
   const { t } = useLang();
@@ -313,20 +314,12 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                   </td>
                   <td className="sum-cell sticky-right col-progress">
                     {showTrackBar ? (
-                      <div 
-                        className="runner-track-bar-container" 
-                        title={`${row.totalDistance.toFixed(1)} / ${userTarget} km (${progressPct}%)`}
-                      >
-                        <div className="runner-track-bar-bg">
-                          <div 
-                            className={`runner-track-bar-fill ${isCompleted ? 'completed' : ''}`}
-                            style={{ width: `${Math.max(progressPct, 2)}%` }}
-                          />
-                        </div>
-                        <span className={`runner-track-bar-label ${isCompleted ? 'completed-label' : ''}`}>
-                          {progressPct}% {isCompleted ? '🎯' : ''}
-                        </span>
-                      </div>
+                      <ProgressBar 
+                        current={row.totalDistance}
+                        target={userTarget}
+                        isCompleted={isCompleted}
+                        percent={progressPct}
+                      />
                     ) : (
                       <span className="text-muted" style={{ opacity: 0.4 }}>-</span>
                     )}

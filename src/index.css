@@ -1583,7 +1583,7 @@ img {
 }
 
 /* Track Bar cho từng runner */
-.runner-track-bar-container {
+.table-progress-container {
   position: relative;
   width: 100%;
   height: 18px;
@@ -1593,7 +1593,7 @@ img {
   user-select: none;
 }
 
-.runner-track-bar-bg {
+.table-progress-bg {
   position: absolute;
   top: 0;
   left: 0;
@@ -1606,7 +1606,7 @@ img {
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.runner-track-bar-fill {
+.table-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #329f95 0%, #5cb961 50%, #96d63d 100%);
   border-radius: 9px;
@@ -1614,12 +1614,12 @@ img {
   box-shadow: 0 0 8px rgba(50, 160, 150, 0.35);
 }
 
-.runner-track-bar-fill.completed {
+.table-progress-fill.completed {
   background: linear-gradient(90deg, #329f95 0%, #5cb961 50%, #96d63d 100%);
   box-shadow: 0 0 10px rgba(150, 214, 61, 0.55);
 }
 
-.runner-track-bar-label {
+.table-progress-label {
   position: relative;
   z-index: 2;
   font-size: 11px;
@@ -1632,7 +1632,7 @@ img {
   gap: 2px;
 }
 
-.runner-track-bar-label.completed-label {
+.table-progress-label.completed-label {
   color: #065f46;
 }
 
@@ -2610,7 +2610,7 @@ img {
   font-weight: 500;
 }
 
-.progress-bar-container, .runner-track-bar-bg {
+.progress-bar-container {
   height: 12px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
@@ -2619,7 +2619,7 @@ img {
   position: relative;
 }
 
-.progress-bar-fill, .runner-track-bar-fill {
+.progress-bar-fill {
   height: 100%;
   border-radius: 6px;
   transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
