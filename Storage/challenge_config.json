@@ -2740,5 +2740,6 @@
       }
     }
   },
-  "monthKey": "2026_8"
+  "monthKey": "2026_8",
+  "allowEditOthers": false
 }

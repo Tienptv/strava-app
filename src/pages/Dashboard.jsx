@@ -8,7 +8,7 @@ import PersonalGoal from '../components/PersonalGoal';
 import ClubGoalProgress from '../components/ClubGoalProgress';
 import { processChallengeData, getCombinedDistance } from '../utils/challengeStats';
 import { useLang } from '../i18n/LangContext';
-import historicalActivitiesFallback from '../../Storage/historical_activities.json';
+import { loadChallengeData } from '../utils/challengeDataLoader';
 
 export default function Dashboard({ 
   athlete, 
@@ -116,66 +116,6 @@ export default function Dashboard({
   const loadChallengeActivities = async (clubId, participants) => {
     setLoadingChallenge(true);
     try {
-      // Strava API: /clubs/{id}/activities không trả về ngày tháng
-      // Lấy thêm hoạt động của bản thân để có chi tiết ngày tháng
-      const [rawClubActivities, rawMyActivities] = await Promise.all([
-        apiFetch(`/clubs/${clubId}/activities?per_page=200`).catch(() => []),
-        apiFetch('/activities?per_page=200').catch(() => [])
-      ]);
-      console.log('Sample club activity:', rawClubActivities[0]);
-      
-      const myFname = athlete?.firstname || '';
-      const myLname = athlete?.lastname || '';
-      
-      // Lọc các hoạt động (Chỉ lấy Run, VirtualRun, TrailRun)
-      const validTypes = ['Run', 'VirtualRun', 'TrailRun'];
-      
-      // Đảm bảo dữ liệu trả về là mảng (tránh crash khi Strava trả về error object cho user không có quyền)
-      const rawClubActivitiesSafe = Array.isArray(rawClubActivities) ? rawClubActivities : [];
-      const rawMyActivitiesSafe = Array.isArray(rawMyActivities) ? rawMyActivities : [];
-      
-      // Loại bỏ các hoạt động của user hiện tại khỏi clubActivities để tránh tính đúp
-      const clubActivities = rawClubActivitiesSafe.filter(act => {
-        if (!validTypes.includes(act.type)) return false;
-        const fname = act.athlete?.firstname || '';
-        const lname = act.athlete?.lastname || '';
-        if (fname === myFname && (lname === myLname || lname === (myLname ? myLname.charAt(0) + '.' : ''))) {
-          return false; // Bỏ qua vì đã lấy ở myActivities
-        }
-        return true;
-      });
-
-      const myActivities = rawMyActivitiesSafe.filter(act => {
-        if (!validTypes.includes(act.type)) return false;
-        // Loại bỏ các hoạt động không public (bao gồm only_me, followers_only)
-        if (act.private === true || act.visibility !== 'everyone' || act.hide_from_home === true) {
-          return false;
-        }
-        return true;
-      });
-      
-      // Load historical activities (Tháng 7/2026 trở về trước)
-      let historicalActivities = historicalActivitiesFallback || [];
-      try {
-        const histData = await apiFetch('/challenge/historical').catch(() => []);
-        if (Array.isArray(histData) && histData.length > 0) {
-          historicalActivities = histData;
-        }
-      } catch (e) {
-        console.error('Lỗi khi đọc historicalActivities', e);
-      }
-
-      // Load imported activities from backend (Tháng 8/2026 trở đi)
-      let importedActivities = [];
-      try {
-        const importedData = await apiFetch('/challenge/imported').catch(() => []);
-        if (Array.isArray(importedData)) {
-          importedActivities = importedData;
-        }
-      } catch (e) {
-        console.error('Lỗi khi đọc importedActivities', e);
-      }
-
       // Load Total-km baseline from backend
       try {
         const totalKmData = await apiFetch('/challenge/total-km').catch(() => null);
@@ -186,109 +126,9 @@ export default function Dashboard({
         console.error('Lỗi khi đọc Total-km base', e);
       }
 
-      const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
-
-      // Enrich participants with athlete IDs from historical & imported activities
-      [...historicalActivities, ...importedActivities].forEach(act => {
-        if (act.athlete?.id) {
-          const actFname = normalize(act.athlete.firstname);
-          const actLname = normalize(act.athlete.lastname);
-          const foundKey = Object.keys(participants).find(k => {
-            const p = participants[k];
-            const pFname = normalize(p.firstname);
-            const pLname = normalize(p.lastname);
-            return pFname === actFname && (pLname === actLname || pLname.startsWith(actLname) || actLname.startsWith(pLname));
-          });
-          if (foundKey && !participants[foundKey].id) {
-            participants[foundKey].id = act.athlete.id;
-          }
-        }
-      });
-
-      // Gộp và khử trùng lặp myAugActivities và importedActivities
-      const myAugActivities = myActivities.filter(a => a.start_date_local && a.start_date_local >= '2026-08-01T00:00:00');
+      // Load activities strictly from CSV sources (historical and imported) via module
+      const allActivities = await loadChallengeData(apiFetch, athlete, participants);
       
-      const getCompKey = (act) => {
-        const d = (act.start_date_local || '').substring(0, 16);
-        const t = act.moving_time || 0;
-        const dist = Math.round(act.distance || 0);
-        const athId = act.athlete?.id || '';
-        const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
-        return `comp_${athId || name}_${d}_${t}_${dist}`;
-      };
-
-      // Áp dụng ID cho myAugActivities (do lấy từ Strava token của user đang đăng nhập)
-      myAugActivities.forEach(act => {
-        if (athlete) {
-          act.athlete = {
-            id: athlete.id,
-            firstname: athlete.firstname,
-            lastname: athlete.lastname
-          };
-        }
-      });
-
-      const isBetterRecord = (a, b) => {
-        if (!b) return true;
-        if (a.start_date_local && !b.start_date_local) return true;
-        if (!a.start_date_local && b.start_date_local) return false;
-        const aLastname = a.athlete?.lastname || '';
-        const bLastname = b.athlete?.lastname || '';
-        if (aLastname.length > 2 && bLastname.length <= 2) return true;
-        return false;
-      };
-
-      const augUniqueMap = new Map();
-      const addRecord = (act) => {
-        if (!act) return;
-        const idKey = act.id ? `id_${act.id}` : null;
-        const cKey = getCompKey(act);
-
-        if (idKey) {
-          const existing = augUniqueMap.get(idKey);
-          if (!existing || isBetterRecord(act, existing)) {
-            augUniqueMap.set(idKey, act);
-          }
-        }
-        const existingComp = augUniqueMap.get(cKey);
-        if (!existingComp || isBetterRecord(act, existingComp)) {
-          augUniqueMap.set(cKey, act);
-        }
-      };
-
-      // Ưu tiên importedActivities (có đầy đủ ngày giờ và tên) và myAugActivities trước
-      importedActivities.forEach(addRecord);
-      myAugActivities.forEach(addRecord);
-      clubActivities.forEach(addRecord);
-
-      const currentAugActivities = Array.from(new Set(augUniqueMap.values()));
-      const allActivities = [...historicalActivities, ...currentAugActivities];
-
-      // Tự động đồng bộ các bài chạy Tháng 8+ của tài khoản đang đăng nhập vào server nếu có bài mới
-      const hasOnlyValidDates = currentAugActivities.every(a => a.start_date_local);
-      if (myAugActivities.length > 0 && currentAugActivities.length > importedActivities.length && hasOnlyValidDates) {
-        apiFetch('/challenge/imported', {
-          method: 'POST',
-          body: JSON.stringify(currentAugActivities)
-        }).catch(e => console.error('Lỗi tự động sync activities:', e));
-      }
-      
-      // Inject authenticated athlete ID into participants to map personal activities
-      if (athlete && athlete.id) {
-        const myFnameNorm = normalize(myFname);
-        const myLnameNorm = normalize(myLname);
-        
-        const meKey = Object.keys(participants).find(k => {
-          const p = participants[k];
-          const pFnameNorm = normalize(p.firstname);
-          const pLnameNorm = normalize(p.lastname);
-          return pFnameNorm === myFnameNorm && (pLnameNorm === myLnameNorm || pLnameNorm.startsWith(myLnameNorm) || myLnameNorm.startsWith(pLnameNorm));
-        });
-        if (meKey) {
-          participants[meKey].id = athlete.id;
-        }
-      }
-
       setAllChallengeActivities(allActivities);
     } catch (err) {
       console.error('Lỗi tải challenge:', err);
