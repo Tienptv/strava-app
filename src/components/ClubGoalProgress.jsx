@@ -140,7 +140,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
           <div 
             className="map-vehicle"
             style={{ 
-              left: `calc(${vehiclePos}% - 12px)`, 
+              left: `calc(${vehiclePos}% - 45px)`, 
               display: 'flex', 
               alignItems: 'center' 
             }}
