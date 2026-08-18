@@ -16,6 +16,10 @@ const translations = {
 
     // Dashboard
     greeting: 'Xin chào, runner',
+    greetingMorning: 'Chào buổi sáng, runner',
+    greetingNoon: 'Chào buổi trưa, runner',
+    greetingAfternoon: 'Chào buổi chiều, runner',
+    greetingEvening: 'Chào buổi tối, runner',
     totalDistance: 'Tổng quãng đường',
     allActivities: 'Tất cả hoạt động',
     totalTime: 'Tổng thời gian',
@@ -163,6 +167,10 @@ const translations = {
 
     // Dashboard
     greeting: 'Hello, runner',
+    greetingMorning: 'Good morning, runner',
+    greetingNoon: 'Good noon, runner',
+    greetingAfternoon: 'Good afternoon, runner',
+    greetingEvening: 'Good evening, runner',
     totalDistance: 'Total Distance',
     allActivities: 'All activities',
     totalTime: 'Total Time',

@@ -200,12 +200,22 @@ export default function Dashboard({
     );
   }
 
+  const currentHour = new Date().getHours();
+  let greetingKey = 'greetingMorning';
+  if (currentHour >= 18 || currentHour < 5) {
+    greetingKey = 'greetingEvening';
+  } else if (currentHour >= 11 && currentHour <= 13) {
+    greetingKey = 'greetingNoon';
+  } else if (currentHour > 13 && currentHour < 18) {
+    greetingKey = 'greetingAfternoon';
+  }
+
   return (
     <div className="dashboard">
       <div className="dashboard__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h1 className="dashboard__greeting">
-            {t('greeting')} <span>{athlete.firstname || 'Athlete'}</span> 👋
+            {t(greetingKey)} <span>{athlete.firstname || 'Athlete'}</span> 👋
           </h1>
           <p className="dashboard__date">{today}</p>
         </div>
