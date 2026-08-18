@@ -223,7 +223,6 @@ export default function Dashboard({
           <button 
             className={`btn ${viewMode === 'overview' ? 'btn--primary' : 'btn--secondary'}`}
             onClick={() => setViewMode('overview')}
-            style={{ marginRight: '10px' }}
           >
             <LayoutDashboard size={16} style={{marginRight: 6}} />
             {t('overview')}
@@ -232,7 +231,7 @@ export default function Dashboard({
             className={`btn ${viewMode === 'challenge' ? 'btn--primary' : 'btn--secondary'}`}
             onClick={() => setViewMode('challenge')}
           >
-            <Target size={16} style={{marginRight: 6}} />
+            <img src="/haskoning-star-transparent.png" alt="Challenge" style={{ width: 24, height: 24, marginRight: 6, objectFit: 'contain', filter: 'drop-shadow(1px 0px 0px rgba(255,255,255,0.2)) drop-shadow(0px 1px 0px rgba(255,255,255,0.2)) drop-shadow(-1px 0px 0px rgba(255,255,255,0.2)) drop-shadow(0px -1px 0px rgba(255,255,255,0.2))' }} />
             {t('challengeTab')}
           </button>
         </div>

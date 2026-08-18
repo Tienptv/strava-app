@@ -1127,6 +1127,8 @@ img {
 
 .view-mode-toggle {
   display: flex;
+  align-items: stretch;
+  gap: 4px;
   background: rgba(255, 255, 255, 0.03);
   padding: 4px;
   border-radius: var(--radius-sm);
@@ -1134,7 +1136,7 @@ img {
 }
 
 .view-mode-toggle .btn {
-  padding: 8px 16px;
+  padding: 4px 16px;
   font-size: 0.85rem;
 }
 
