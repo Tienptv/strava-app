@@ -74,10 +74,7 @@ const translations = {
     you: 'Bạn',
     targetKm: 'Mục tiêu (km)',
     syncedWithAdmin: 'Đã đồng bộ với Admin & Bảng Challenge',
-    yourMonthlyGoal: 'Thiết lập Mục tiêu & Phạt của bạn',
-    saveGoalAndPenalty: 'Lưu Mục Tiêu',
-    savedSuccessAdmin: 'Đã lưu & đồng bộ với Admin!',
-    quickSetupHint: 'Thiết lập mục tiêu km và tick cam kết nộp phạt của bạn cho tháng này:',
+
 
     // ChallengeTable
     noChallengeData: 'Không có dữ liệu Challenge',
@@ -223,10 +220,7 @@ const translations = {
     you: 'You',
     targetKm: 'Target Distance (km)',
     syncedWithAdmin: 'Synced with Admin & Challenge Table',
-    yourMonthlyGoal: 'Your Monthly Goal & Penalty Setup',
-    saveGoalAndPenalty: 'Save Goal',
-    savedSuccessAdmin: 'Saved & synced with Admin!',
-    quickSetupHint: 'Set your target distance (km) and penalty commitment for this month:',
+
 
     // ChallengeTable
     noChallengeData: 'No Challenge Data',

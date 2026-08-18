@@ -2534,206 +2534,13 @@ img {
   filter: brightness(1.06);
 }
 
-/* ==========================================
-   RUNNER QUICK GOAL & PENALTY BAR (CHALLENGE VIEW)
-   ========================================== */
-.runner-quick-goal-bar {
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
-  border: 1.5px solid rgba(0, 163, 166, 0.25);
-  border-radius: var(--radius-lg);
-  padding: 16px 22px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 14px rgba(0, 45, 84, 0.05), 0 1px 3px rgba(0, 163, 166, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  animation: fadeIn 0.3s ease-out;
-}
 
-.quick-goal-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.quick-goal-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(0, 163, 166, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.quick-goal-title-area {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.quick-goal-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--primary-navy);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.quick-goal-subtitle {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.quick-goal-form {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding-top: 10px;
-  border-top: 1px solid rgba(0, 45, 84, 0.06);
-}
-
-.quick-goal-inputs {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.quick-input-field {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.quick-field-label {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--primary-navy);
-  white-space: nowrap;
-}
-
-.quick-input-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 110px;
-}
-
-.quick-number-input {
-  width: 100%;
-  padding: 8px 30px 8px 12px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--primary-navy);
-  background: #ffffff;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.quick-number-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0, 163, 166, 0.18);
-}
-
-.quick-unit-label {
-  position: absolute;
-  right: 10px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  pointer-events: none;
-}
-
-.quick-penalty-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.quick-penalty-box:hover {
-  border-color: var(--accent);
-  background: rgba(0, 163, 166, 0.04);
-}
-
-.quick-checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.quick-penalty-text {
-  font-size: 0.86rem;
-  color: var(--primary-navy);
-}
-
-.quick-goal-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.btn-quick-save {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 9px 20px;
-  border-radius: 8px;
-  background: var(--accent);
-  color: #ffffff;
-  font-size: 0.9rem;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 8px rgba(0, 163, 166, 0.28);
-  white-space: nowrap;
-}
-
-.btn-quick-save:hover:not(:disabled) {
-  background: var(--accent-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 163, 166, 0.38);
-}
-
-.btn-quick-save:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.quick-save-alert {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #059669;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  padding: 6px 14px;
-  border-radius: 8px;
-  align-self: flex-start;
-  animation: fadeIn 0.3s ease-out;
-}
 
 /* ==========================================================================
-   PERSONAL GOAL & QUICK GOAL DESIGN
+   PERSONAL GOAL DESIGN
    ========================================================================== */
 
-.personal-goal-card, .runner-quick-goal-bar {
+.personal-goal-card {
   background: rgba(30, 30, 35, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2745,25 +2552,25 @@ img {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.personal-goal-card:hover, .runner-quick-goal-bar:hover {
+.personal-goal-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
-.personal-goal__header, .quick-goal-header {
+.personal-goal__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.personal-goal__title, .quick-goal-title-area {
+.personal-goal__title {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.personal-goal__icon-badge, .quick-goal-icon {
+.personal-goal__icon-badge {
   background: rgba(0, 163, 166, 0.15);
   padding: 10px;
   border-radius: 12px;
@@ -2772,13 +2579,13 @@ img {
   justify-content: center;
 }
 
-.personal-goal__main-title, .quick-goal-title {
+.personal-goal__main-title {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
-.personal-goal__month-subtitle, .quick-goal-subtitle {
+.personal-goal__month-subtitle {
   color: rgba(255, 255, 255, 0.5);
   font-size: 0.9rem;
 }
@@ -2819,7 +2626,7 @@ img {
   box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
 }
 
-.goal-input-premium, .quick-number-input {
+.goal-input-premium {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
@@ -2832,12 +2639,12 @@ img {
   transition: all 0.2s ease;
 }
 
-.goal-input-premium:focus, .quick-number-input:focus {
+.goal-input-premium:focus {
   border-color: #00A3A6;
   box-shadow: 0 0 0 3px rgba(0, 163, 166, 0.2);
 }
 
-.penalty-checkbox-label, .quick-penalty-box {
+.penalty-checkbox-label {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -2849,11 +2656,11 @@ img {
   transition: background 0.2s ease;
 }
 
-.penalty-checkbox-label:hover, .quick-penalty-box:hover {
+.penalty-checkbox-label:hover {
   background: rgba(255, 255, 255, 0.06);
 }
 
-.custom-penalty-checkbox, .quick-checkbox {
+.custom-penalty-checkbox {
   appearance: none;
   width: 24px;
   height: 24px;
@@ -2867,12 +2674,12 @@ img {
   transition: all 0.2s ease;
 }
 
-.custom-penalty-checkbox:checked, .quick-checkbox:checked {
+.custom-penalty-checkbox:checked {
   background: #E84C3D;
   border-color: #E84C3D;
 }
 
-.custom-penalty-checkbox:checked::after, .quick-checkbox:checked::after {
+.custom-penalty-checkbox:checked::after {
   content: '';
   position: absolute;
   left: 7px;
@@ -2884,18 +2691,18 @@ img {
   transform: rotate(45deg);
 }
 
-.penalty-label-text, .quick-penalty-text {
+.penalty-label-text {
   display: flex;
   flex-direction: column;
 }
 
-.penalty-label-text strong, .quick-penalty-text strong {
+.penalty-label-text strong {
   font-size: 1rem;
   color: #fff;
   margin-bottom: 4px;
 }
 
-.penalty-label-text small, .quick-penalty-text small {
+.penalty-label-text small {
   color: rgba(255, 255, 255, 0.5);
   font-size: 0.85rem;
   line-height: 1.4;

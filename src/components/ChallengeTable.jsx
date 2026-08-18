@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { normalize } from '../utils/challengeStats';
-import { Save, CheckCircle2, Target, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Save, CheckCircle2, ShieldAlert, ShieldCheck } from 'lucide-react';
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, showQuickGoalBox = true }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false }) {
   const { t } = useLang();
   
   const [userData, setUserData] = useState({});
-  const [quickTarget, setQuickTarget] = useState('');
-  const [quickPenalty, setQuickPenalty] = useState(false);
-  const [isSavingQuick, setIsSavingQuick] = useState(false);
-  const [quickSaveSuccess, setQuickSaveSuccess] = useState(false);
 
   // Identify the SINGLE best matching row for the logged-in athlete
   const myRow = React.useMemo(() => {
@@ -73,21 +69,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     };
   }, [loadTargets]);
 
-  // Sync quickTarget and quickPenalty from userData whenever userData or month/year changes
-  useEffect(() => {
-    if (myUserKey && userData[myUserKey]) {
-      const tgt = userData[myUserKey].target;
-      setQuickTarget(tgt !== undefined && tgt !== '' ? String(tgt) : '');
-      setQuickPenalty(Boolean(userData[myUserKey].penalty));
-    } else if (myMatchKey && userData[myMatchKey]) {
-      const tgt = userData[myMatchKey].target;
-      setQuickTarget(tgt !== undefined && tgt !== '' ? String(tgt) : '');
-      setQuickPenalty(Boolean(userData[myMatchKey].penalty));
-    } else {
-      setQuickTarget('');
-      setQuickPenalty(false);
-    }
-  }, [userData, myUserKey, myMatchKey]);
+
 
   const saveToApi = (updates) => {
     if (apiFetch) {
@@ -112,40 +94,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     }));
   };
 
-  const handleSaveQuickGoal = async (e) => {
-    if (e) e.preventDefault();
-    if (!myMatchKey) return;
-    setIsSavingQuick(true);
-    const cleanStr = String(quickTarget).trim().replace(/^0+(?=\d)/, '');
-    const num = cleanStr === '' ? '' : parseInt(cleanStr, 10);
-    const validTarget = isNaN(num) ? '' : num;
-    const isPen = Boolean(quickPenalty);
 
-    const key = `${myMatchKey}_${year}_${month}`;
-    setUserData(prev => ({
-      ...prev,
-      [key]: { ...prev[key], target: validTarget, penalty: isPen }
-    }));
-
-    if (apiFetch) {
-      try {
-        await apiFetch('/challenge/targets', {
-          method: 'POST',
-          body: JSON.stringify({ matchKey: key, target: validTarget, penalty: isPen })
-        });
-      } catch (err) {
-        console.error('Error saving quick goal:', err);
-      }
-    }
-
-    window.dispatchEvent(new CustomEvent('challengeTargetsUpdated', {
-      detail: { matchKey: myMatchKey, year, month, target: validTarget, penalty: isPen }
-    }));
-
-    setIsSavingQuick(false);
-    setQuickSaveSuccess(true);
-    setTimeout(() => setQuickSaveSuccess(false), 3000);
-  };
 
   const handleTargetChange = (matchKey, val) => {
     if (val === '') {
@@ -234,74 +183,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
         )}
       </div>
 
-      {/* User Quick Goal & Penalty Bar */}
-      {athlete && showQuickGoalBox && (
-        <div className="runner-quick-goal-bar">
-          <div className="quick-goal-header">
-            <div className="quick-goal-icon">
-              <Target size={20} color="#00A3A6" />
-            </div>
-            <div className="quick-goal-title-area">
-              <div className="quick-goal-title">
-                <strong>{t('yourMonthlyGoal')}</strong> ({month}/{year})
-                {myRow && <span className="runner-me-badge">{t('you')}</span>}
-              </div>
-              <div className="quick-goal-subtitle">
-                {t('quickSetupHint')}
-              </div>
-            </div>
-          </div>
 
-          <form className="quick-goal-form" onSubmit={handleSaveQuickGoal}>
-            <div className="quick-goal-inputs">
-              <div className="quick-input-field">
-                <label className="quick-field-label">{t('targetKm')}:</label>
-                <div className="quick-input-box">
-                  <input 
-                    type="number"
-                    value={quickTarget}
-                    onChange={(e) => setQuickTarget(e.target.value)}
-                    placeholder="0"
-                    className="quick-number-input"
-                    min="0"
-                  />
-                  <span className="quick-unit-label">km</span>
-                </div>
-              </div>
-
-              <label className="quick-penalty-box">
-                <input 
-                  type="checkbox"
-                  checked={quickPenalty}
-                  onChange={(e) => setQuickPenalty(e.target.checked)}
-                  className="quick-checkbox"
-                />
-                <span className="quick-penalty-text">
-                  <strong>{t('joinPenaltyChallenge')}</strong>
-                </span>
-              </label>
-            </div>
-
-            <div className="quick-goal-actions">
-              <button 
-                type="submit" 
-                className="btn-quick-save"
-                disabled={isSavingQuick}
-              >
-                <Save size={16} style={{ marginRight: 6 }} />
-                {isSavingQuick ? t('saving') : t('saveGoalAndPenalty')}
-              </button>
-            </div>
-          </form>
-
-          {quickSaveSuccess && (
-            <div className="quick-save-alert">
-              <CheckCircle2 size={16} color="#10b981" />
-              <span>{t('savedSuccessAdmin')}</span>
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="challenge-table-wrapper">
         <table className="challenge-table">
