@@ -224,7 +224,7 @@ export default function Dashboard({
         }
       });
 
-      const combinedAug = [...importedActivities, ...myAugActivities];
+      const combinedAug = [...importedActivities, ...clubActivities, ...myAugActivities];
       const augUniqueMap = new Map();
       const withId = combinedAug.filter(a => a.id);
       const withoutId = combinedAug.filter(a => !a.id);
