@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { StravaAPI } from './strava.js';
+import { GoogleGenAI } from '@google/genai';
 
 dotenv.config();
 
@@ -590,6 +591,42 @@ app.post('/api/challenge/config', (req, res) => {
   }
 });
 
+async function generateRouteMilestones(start, destination) {
+  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+    console.warn("GEMINI_API_KEY is not configured.");
+    return null;
+  }
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const prompt = `You are a helpful routing assistant for a run-across-the-world challenge.
+The user is running from ${start} to ${destination}.
+Generate exactly 5 milestones (cities, capitals, or notable places) along the route, roughly evenly spaced, from start to destination. The 5th milestone MUST be the destination itself.
+Return the result strictly as a JSON array of objects. Do not include markdown code blocks, just the JSON array.
+Each object must have:
+- name: string (Name of the location)
+- percent: number (Percentage of distance from start, 5th should be 100)
+- icon: string (A single relevant emoji for this location)
+- pos: string (Either 'top' or 'bottom', alternating is best)
+Example format:
+[
+  { "name": "Hanoi", "icon": "🍜", "percent": 15, "pos": "top" },
+  { "name": "Beijing", "icon": "🐼", "percent": 38, "pos": "bottom" }
+]`;
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+          responseMimeType: "application/json",
+      }
+    });
+    
+    return JSON.parse(response.text);
+  } catch (err) {
+    console.error("Gemini API Error:", err);
+    return null;
+  }
+}
+
 // Đọc mục tiêu câu lạc bộ (Club Goal)
 app.get('/api/challenge/goal', (req, res) => {
   try {
@@ -597,7 +634,7 @@ app.get('/api/challenge/goal', (req, res) => {
       const data = fs.readFileSync(GOAL_FILE, 'utf8');
       res.json(JSON.parse(data));
     } else {
-      res.json({ targetKm: 9000, customTitle: null, customSubtitle: null });
+      res.json({ targetKm: 9000, customTitle: null, customSubtitle: null, destination: null, milestones: null });
     }
   } catch (error) {
     console.error('Lỗi đọc goal:', error.message);
@@ -606,11 +643,31 @@ app.get('/api/challenge/goal', (req, res) => {
 });
 
 // Lưu mục tiêu câu lạc bộ (Club Goal)
-app.post('/api/challenge/goal', (req, res) => {
+app.post('/api/challenge/goal', async (req, res) => {
   try {
     const data = req.body;
     const dir = path.dirname(GOAL_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    let oldData = {};
+    if (fs.existsSync(GOAL_FILE)) {
+        try {
+            oldData = JSON.parse(fs.readFileSync(GOAL_FILE, 'utf8'));
+        } catch (e) {}
+    }
+
+    if (data.destination && (data.destination !== oldData.destination || !data.milestones)) {
+        console.log(`Generating new milestones for destination: ${data.destination}`);
+        const newMilestones = await generateRouteMilestones('TP.HCM, Việt Nam', data.destination);
+        if (newMilestones && Array.isArray(newMilestones)) {
+            data.milestones = newMilestones;
+        } else {
+            data.milestones = oldData.milestones || [];
+        }
+    } else if (!data.milestones && oldData.milestones) {
+        data.milestones = oldData.milestones;
+    }
+
     fs.writeFileSync(GOAL_FILE, JSON.stringify(data, null, 2));
     res.json(data);
   } catch (error) {

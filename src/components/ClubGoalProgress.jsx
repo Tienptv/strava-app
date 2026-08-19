@@ -8,6 +8,14 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
   const [targetKm, setTargetKm] = useState(9000);
   const [customTitle, setCustomTitle] = useState(null);
   const [customSubtitle, setCustomSubtitle] = useState(null);
+  const [destination, setDestination] = useState('Bắc Cực');
+  const [milestones, setMilestones] = useState([
+    { name: 'Hà Nội', icon: '🍜', percent: 13, pos: 'top' },
+    { name: 'Bắc Kinh', icon: '🐼', percent: 38, pos: 'bottom' },
+    { name: 'Ulaanbaatar', icon: '🐎', percent: 52, pos: 'top' },
+    { name: 'Irkutsk', icon: '🐻', percent: 65, pos: 'bottom' },
+    { name: 'Norilsk', icon: '⛄', percent: 80, pos: 'top' }
+  ]);
 
   useEffect(() => {
     if (apiFetch) {
@@ -17,6 +25,8 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
             if (data.targetKm) setTargetKm(data.targetKm);
             if (data.customTitle !== undefined) setCustomTitle(data.customTitle);
             if (data.customSubtitle !== undefined) setCustomSubtitle(data.customSubtitle);
+            if (data.destination) setDestination(data.destination);
+            if (data.milestones && data.milestones.length > 0) setMilestones(data.milestones);
           }
         })
         .catch(err => console.error('Lỗi tải club goal:', err));
@@ -30,11 +40,13 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
   const [tempTarget, setTempTarget] = useState(targetKm);
   const [tempTitle, setTempTitle] = useState('');
   const [tempSubtitle, setTempSubtitle] = useState('');
+  const [tempDestination, setTempDestination] = useState('');
 
   const handleOpenEdit = () => {
     setTempTarget(targetKm);
     setTempTitle(goalTitle);
     setTempSubtitle(goalSubtitle);
+    setTempDestination(destination);
     setIsEditing(true);
   };
 
@@ -44,22 +56,29 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
     const newTarget = (val > 0) ? val : targetKm;
     const newTitle = (tempTitle && tempTitle !== t('clubGoalTitle')) ? tempTitle : null;
     const newSubtitle = (tempSubtitle && tempSubtitle !== t('runAcrossVietnam')) ? tempSubtitle : null;
+    const newDestination = tempDestination || 'Bắc Cực';
 
     setTargetKm(newTarget);
     setCustomTitle(newTitle);
     setCustomSubtitle(newSubtitle);
+    setDestination(newDestination);
     setIsEditing(false);
 
     if (apiFetch) {
       try {
-        await apiFetch('/challenge/goal', {
+        const response = await apiFetch('/challenge/goal', {
           method: 'POST',
           body: JSON.stringify({
             targetKm: newTarget,
             customTitle: newTitle,
-            customSubtitle: newSubtitle
+            customSubtitle: newSubtitle,
+            destination: newDestination
           })
         });
+        
+        if (response && response.milestones && response.milestones.length > 0) {
+            setMilestones(response.milestones);
+        }
       } catch (err) {
         console.error('Lỗi lưu club goal lên server:', err);
       }
@@ -71,14 +90,8 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
   // Giới hạn logo không vượt quá chiều dài thanh bar
   const vehiclePos = percent > 96 ? 96 : percent;
 
-  // Các thủ đô, thành phố lớn các nước trên đường đi từ TP.HCM đến Bắc Cực (~9.000 km)
-  const milestones = [
-    { name: t('hanoi'), icon: '🍜', percent: 13, pos: 'top' },
-    { name: t('beijing'), icon: '🐼', percent: 38, pos: 'bottom' },
-    { name: t('ulaanbaatar'), icon: '🐎', percent: 52, pos: 'top' },
-    { name: t('irkutsk'), icon: '🐻', percent: 65, pos: 'bottom' },
-    { name: t('norilsk'), icon: '⛄', percent: 80, pos: 'top' }
-  ];
+  const midMilestones = milestones.filter(ms => ms.percent < 99);
+  const endMilestone = milestones.find(ms => ms.percent >= 99) || { icon: '🐻‍❄️' };
 
   return (
     <div className="club-goal-card">
@@ -103,7 +116,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
       <div className="vietnam-map-progress">
         <div className="map-labels">
           <span className="map-label start-label">{t('startLocation')}</span>
-          <span className="map-label end-label">{t('endLocation')}</span>
+          <span className="map-label end-label">{destination}</span>
         </div>
         
         <div className="map-track-container">
@@ -121,7 +134,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
           <div className="map-track-fill" style={{ width: `${percent}%` }}></div>
           
           {/* Milestones / Capitals & Cities with Fun Icons */}
-          {milestones.map((ms, i) => {
+          {midMilestones.map((ms, i) => {
             const isPassed = percent >= ms.percent;
             return (
               <div key={i} className={`map-milestone milestone-${ms.pos}`} style={{ left: `${ms.percent}%` }}>
@@ -151,9 +164,9 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
           </div>
           
           {/* Destination Pin */}
-          <div className="map-pin-end" title={t('endLocation')}>
+          <div className="map-pin-end" title={destination}>
             <div className="destination-badge">
-              <span>🐻‍❄️</span>
+              <span>{endMilestone.icon}</span>
             </div>
           </div>
         </div>
@@ -202,6 +215,16 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
                   onChange={(e) => setTempTarget(e.target.value)}
                   className="modal-input"
                   min="1"
+                />
+              </div>
+              <div className="form-group">
+                <label>Điểm đến (Destination)</label>
+                <input 
+                  type="text" 
+                  value={tempDestination} 
+                  onChange={(e) => setTempDestination(e.target.value)}
+                  className="modal-input"
+                  placeholder="Bắc Cực"
                 />
               </div>
               <div className="modal-actions">

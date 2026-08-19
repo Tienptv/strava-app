@@ -1,5 +1,7 @@
 {
   "targetKm": 8801,
   "customTitle": null,
-  "customSubtitle": null
+  "customSubtitle": null,
+  "destination": "Paris",
+  "milestones": []
 }
