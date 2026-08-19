@@ -18,32 +18,72 @@ const dotenv = require('dotenv');
   
   const today = new Date();
   const dateStr = today.toISOString().split('T')[0];
-  const OUT_FILE = path.join(__dirname, `../Storage/data-activities_${dateStr}.csv`);
+  const OUT_FILE = path.join(__dirname, `../Storage/activities_export_${dateStr}.csv`);
 
   if (!fs.existsSync(TOKENS_FILE)) {
     console.error('Không tìm thấy tokens.json. Bạn cần Admin đăng nhập Strava trước.');
     process.exit(1);
   }
 
-  // Đọc danh sách member để mapping ID
+  // Đọc danh sách file Total-km*.csv và data-*.csv để làm từ điển mapping tên (khôi phục Full Name và ID từ tên rút gọn)
   const memberMap = new Map();
-  if (fs.existsSync(CLUB_MEMBERS_FILE)) {
-    const lines = fs.readFileSync(CLUB_MEMBERS_FILE, 'utf8').split('\n').filter(l => l.trim());
-    if (lines.length > 1) {
-      // Bỏ qua header
-      for (let i = 1; i < lines.length; i++) {
-        const parts = lines[i].split(',');
-        if (parts.length >= 3) {
-          const id = parts[0].trim();
-          const fName = parts[1].trim();
-          const lName = parts[2].trim();
-          const fullName = `${fName} ${lName}`.trim();
-          if (id && id !== 'undefined') {
-            memberMap.set(fullName, id);
-          }
+  const storageDir = path.join(__dirname, '../Storage');
+  if (fs.existsSync(storageDir)) {
+    const allFiles = fs.readdirSync(storageDir);
+    const totalKmFiles = allFiles.filter(f => f.toLowerCase().startsWith('total-km') && f.endsWith('.csv'));
+    const dataFiles = allFiles.filter(f => f.startsWith('data-') && f.endsWith('.csv'));
+    
+    // Hàm phụ trợ để xử lý tên và map
+    const mapName = (id, fullName) => {
+      if (fullName && fullName !== 'Name' && fullName !== 'name') {
+        const nameParts = fullName.split(' ');
+        if (nameParts.length > 1) {
+          const lastName = nameParts.pop();
+          const firstName = nameParts.join(' ');
+          const abbrName = firstName + ' ' + lastName[0].toUpperCase() + '.';
+          memberMap.set(abbrName, { id, fullName });
+        } else {
+          memberMap.set(fullName, { id, fullName });
         }
       }
-    }
+    };
+
+    // 1. Quét Total-km*.csv trước
+    totalKmFiles.forEach(f => {
+      try {
+        const content = fs.readFileSync(path.join(storageDir, f), 'utf8').split('\n');
+        for (let i = 1; i < content.length; i++) {
+          const line = content[i].trim();
+          if (!line) continue;
+          const parts = line.split(',');
+          if (parts.length >= 2) {
+            let fullName = parts[0].trim();
+            let idStr = parts[1].trim();
+            if (idStr.includes('/athletes/')) {
+              let id = idStr.replace('/athletes/', '');
+              mapName(id, fullName);
+            }
+          }
+        }
+      } catch (err) {}
+    });
+
+    // 2. Quét data-*.csv sau (sẽ ghi đè nếu trùng lặp vì name ở đây chính xác hơn)
+    dataFiles.forEach(f => {
+      try {
+        const content = fs.readFileSync(path.join(storageDir, f), 'utf8').split('\n');
+        for (let i = 1; i < content.length; i++) {
+          const line = content[i].trim();
+          if (!line) continue;
+          const parts = line.split(',');
+          if (parts.length >= 5) {
+            let id = parts[0].replace(/"/g, '').replace('/athletes/', '');
+            let fullName = parts[4].replace(/"/g, '').trim();
+            mapName(id, fullName);
+          }
+        }
+      } catch (err) {}
+    });
   }
 
   const tokensData = JSON.parse(fs.readFileSync(TOKENS_FILE, 'utf8'));
@@ -114,19 +154,24 @@ const dotenv = require('dotenv');
       
       const actName = `"${(act.name || '').replace(/"/g, '""')}"`;
       
-      // Lấy tên VĐV từ API Club
+      // Lấy tên VĐV rút gọn từ API Club (ví dụ: Katy N.)
       const firstName = act.athlete?.firstname || '';
       const lastName = act.athlete?.lastname || '';
-      const fullName = `${firstName} ${lastName}`.trim();
-      const vdvName = `"${fullName}"`;
+      const abbrName = `${firstName} ${lastName}`.trim();
       
-      // Mapping ID
+      // Mapping ID & Full Name từ từ điển
       let actAthleteId = 'Unknown';
-      if (memberMap.has(fullName)) {
-        actAthleteId = memberMap.get(fullName);
+      let finalFullName = abbrName; // Mặc định dùng tên rút gọn nếu không map được
+      
+      if (memberMap.has(abbrName)) {
+        const mappedData = memberMap.get(abbrName);
+        actAthleteId = mappedData.id;
+        finalFullName = mappedData.fullName;
       } else if (act.athlete?.id) {
         actAthleteId = act.athlete.id;
       }
+
+      const vdvName = `"${finalFullName}"`;
 
       // VÌ Club API không trả về start_date_local, ta sẽ lấy ngày giờ hiện tại
       // để import vào ngày hôm nay

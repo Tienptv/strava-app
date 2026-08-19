@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 import { StravaAPI } from './strava.js';
 
 dotenv.config();
@@ -210,12 +211,12 @@ function parseStorageCSV(content) {
 }
 
 function getCompKey(act) {
-  const d = (act.start_date_local || '').substring(0, 16);
   const t = act.moving_time || 0;
   const dist = Math.round(act.distance || 0);
   const athId = act.athlete?.id || '';
   const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
-  return `comp_${athId || name}_${d}_${t}_${dist}`;
+  // Bỏ qua ngày giờ trong chuỗi so sánh vì Club API không trả về ngày giờ chính xác
+  return `comp_${athId || name}_${t}_${dist}`;
 }
 
 function isBetterRecord(a, b) {
@@ -271,7 +272,10 @@ function syncAllStorageCsv() {
       }
     }
 
-    const csvFiles = fs.readdirSync(storageDir).filter(f => f.startsWith('data-') && f.endsWith('.csv'));
+    const csvFiles = fs.readdirSync(storageDir).filter(f => 
+      (f.startsWith('data-') && f.endsWith('.csv')) ||
+      (f.startsWith('activities_export_') && f.endsWith('.csv'))
+    );
     let csvActivities = [];
     for (const f of csvFiles) {
       try {
@@ -571,8 +575,6 @@ app.get('/api/clubs/:id/activities', getToken, async (req, res) => {
 
 // Auto-Sync Data (Execute background script and parse CSV)
 app.post('/api/challenge/auto-sync', (req, res) => {
-  const { exec } = require('child_process');
-  
   exec('node server/export_activities_csv.cjs', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
     if (error) {
       console.error(`Lỗi chạy auto-sync script: ${error.message}`);
