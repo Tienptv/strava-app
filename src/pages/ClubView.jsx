@@ -4,7 +4,7 @@ import { ArrowLeft, Users, RefreshCw } from 'lucide-react';
 import ActivityCard from '../components/ActivityCard';
 import { useLang } from '../i18n/LangContext';
 
-export default function ClubView({ apiFetch }) {
+export default function ClubView({ apiFetch, refreshKey }) {
   const { clubId } = useParams();
   const navigate = useNavigate();
   const [club, setClub] = useState(null);
@@ -16,7 +16,7 @@ export default function ClubView({ apiFetch }) {
 
   useEffect(() => {
     loadClubData();
-  }, [clubId]);
+  }, [clubId, refreshKey]);
 
   const loadClubData = async () => {
     setLoading(true);

@@ -58,6 +58,38 @@ function saveTokens() {
 // Nạp token khi khởi động server
 loadTokens();
 
+// ==========================================
+// SERVER-SENT EVENTS (SSE) SETUP
+// ==========================================
+const sseClients = new Set();
+
+function broadcastUpdate() {
+  const message = `data: ${JSON.stringify({ type: 'update' })}\n\n`;
+  for (const client of sseClients) {
+    try {
+      client.write(message);
+    } catch (e) {
+      sseClients.delete(client);
+    }
+  }
+}
+
+app.get('/api/stream', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders(); // flush the headers to establish SSE
+
+  // Tín hiệu kết nối thành công
+  res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
+
+  sseClients.add(res);
+
+  req.on('close', () => {
+    sseClients.delete(res);
+  });
+});
+
 const strava = new StravaAPI(
   process.env.STRAVA_CLIENT_ID,
   process.env.STRAVA_CLIENT_SECRET
@@ -448,6 +480,80 @@ app.get('/api/clubs/:id/members', getToken, async (req, res) => {
   }
 });
 
+// ==========================================
+// STRAVA WEBHOOK ENDPOINTS
+// ==========================================
+const VERIFY_TOKEN = 'strava_tracker_webhook_token';
+
+// 1. Xác thực Webhook Subscription (Strava gọi khi tạo subscription)
+app.get('/api/strava/webhook', (req, res) => {
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  if (mode && token) {
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      console.log('WEBHOOK_VERIFIED');
+      res.json({ 'hub.challenge': challenge });
+    } else {
+      res.sendStatus(403);
+    }
+  } else {
+    res.sendStatus(400);
+  }
+});
+
+// 2. Nhận sự kiện từ Strava
+app.post('/api/strava/webhook', (req, res) => {
+  console.log('Webhook event received!', req.body);
+  
+  // Xác nhận đã nhận event với Strava càng sớm càng tốt (bắt buộc trả 200 OK)
+  res.status(200).send('EVENT_RECEIVED');
+  
+  // Xử lý logic nghiệp vụ sau khi đã trả về 200 OK
+  const event = req.body;
+  if (event.object_type === 'activity' && (event.aspect_type === 'create' || event.aspect_type === 'update' || event.aspect_type === 'delete')) {
+    // Có sự thay đổi về hoạt động, ta sẽ thông báo cho toàn bộ các Client đang kết nối
+    console.log(`Activity ${event.aspect_type} by user ${event.owner_id}, broadcasting update via SSE...`);
+    
+    // Nếu ứng dụng của bạn cache activities trong file JSON (syncAllStorageCsv), 
+    // bạn có thể gọi syncAllStorageCsv() hoặc gọi lại Strava API ở đây nếu cần.
+    // Ở mức cơ bản nhất, ta báo cho frontend biết để tải lại dữ liệu.
+    broadcastUpdate();
+  }
+});
+
+// 3. API để chủ động đăng ký Webhook với Strava
+app.post('/api/strava/subscribe', async (req, res) => {
+  try {
+    // URL backend của bạn trên mạng public (Render hoặc ngrok)
+    const callbackUrl = req.body.callback_url || process.env.VITE_API_PROXY_TARGET + '/api/strava/webhook';
+    
+    if (!callbackUrl || callbackUrl.includes('localhost')) {
+      return res.status(400).json({ error: 'callback_url phải là một URL public trên Internet, không phải localhost.'});
+    }
+
+    const response = await fetch('https://www.strava.com/api/v3/push_subscriptions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        client_id: process.env.STRAVA_CLIENT_ID,
+        client_secret: process.env.STRAVA_CLIENT_SECRET,
+        callback_url: callbackUrl,
+        verify_token: VERIFY_TOKEN
+      })
+    });
+
+    const result = await response.json();
+    res.json(result);
+  } catch (error) {
+    console.error('Lỗi khi đăng ký webhook:', error);
+    res.status(500).json({ error: 'Không thể đăng ký webhook' });
+  }
+});
+
 // Lấy activities gần đây của club
 app.get('/api/clubs/:id/activities', getToken, async (req, res) => {
   try {
@@ -461,6 +567,28 @@ app.get('/api/clubs/:id/activities', getToken, async (req, res) => {
     console.error('Lỗi lấy club activities:', error.message);
     res.status(500).json({ error: 'Không thể lấy hoạt động câu lạc bộ' });
   }
+});
+
+// Auto-Sync Data (Execute background script and parse CSV)
+app.post('/api/challenge/auto-sync', (req, res) => {
+  const { exec } = require('child_process');
+  
+  exec('node server/export_activities_csv.cjs', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Lỗi chạy auto-sync script: ${error.message}`);
+      return res.status(500).json({ success: false, error: 'Lỗi đồng bộ dữ liệu', details: error.message });
+    }
+    
+    // Script chạy xong sẽ ghi ra thư mục Storage/ một file data-activities_YYYY-MM-DD.csv mới
+    // Kích hoạt engine parse toàn bộ Storage CSV
+    try {
+      const mergedData = syncAllStorageCsv();
+      res.json({ success: true, count: mergedData.length, message: 'Đồng bộ thành công' });
+    } catch (parseError) {
+      console.error('Lỗi khi parse CSV sau khi sync:', parseError.message);
+      res.status(500).json({ success: false, error: 'Lỗi nạp dữ liệu vào bộ nhớ', details: parseError.message });
+    }
+  });
 });
 
 // ==========================================
@@ -668,6 +796,29 @@ app.post('/api/challenge/sync-storage', (req, res) => {
     console.error('Lỗi sync-storage:', error.message);
     res.status(500).json({ error: 'Không thể đồng bộ file CSV trong Storage' });
   }
+});
+
+// Chạy tự động script export_activities_csv và đồng bộ
+app.post('/api/challenge/auto-sync', (req, res) => {
+  const { exec } = require('child_process');
+  // Chạy script lấy dữ liệu
+  exec('node server/export_activities_csv.cjs', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Lỗi thực thi script lấy dữ liệu Strava: ${error.message}`);
+      return res.status(500).json({ error: 'Lỗi khi lấy dữ liệu Strava', details: error.message });
+    }
+    console.log(stdout);
+    if (stderr) console.error(stderr);
+    
+    // Sau khi xuất CSV thành công, gọi hàm đồng bộ CSV
+    try {
+      const data = syncAllStorageCsv();
+      res.json({ success: true, count: data.length, activities: data });
+    } catch (e) {
+      console.error('Lỗi sync sau khi export:', e.message);
+      res.status(500).json({ error: 'Lỗi đồng bộ dữ liệu sau khi xuất file' });
+    }
+  });
 });
 
 // Lưu imported activities

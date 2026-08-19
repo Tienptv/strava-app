@@ -104,6 +104,26 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
     }
   };
 
+  const [syncing, setSyncing] = useState(false);
+  const handleAutoSync = async () => {
+    if (!window.confirm("Hệ thống sẽ chạy lấy dữ liệu từ Strava và update bảng xếp hạng (có thể mất vài phút). Bạn có muốn tiếp tục?")) return;
+    setSyncing(true);
+    try {
+      const response = await apiFetch('/challenge/auto-sync', { method: 'POST' });
+      if (response && response.success) {
+        alert(`Thành công! Đã đồng bộ ${response.count} hoạt động.`);
+        window.dispatchEvent(new CustomEvent('challengeUpdated', { detail: { year: activeYear, month: activeMonth } }));
+      } else {
+         alert('Có lỗi xảy ra khi đồng bộ.');
+      }
+    } catch (err) {
+      console.error('Lỗi auto sync:', err);
+      alert('Không thể tự động đồng bộ. Vui lòng thử lại.');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const handleCsvUpload = async (e) => {
     const files = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.csv'));
     if (!files.length) {
@@ -455,6 +475,15 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
               <input type="file" webkitdirectory="true" onChange={handleCsvUpload} style={{ display: 'none' }} />
             </label>
           </div>
+          
+          <button 
+            className="btn btn--primary" 
+            style={{ marginTop: '8px', background: '#FC4C02', color: '#fff', border: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            onClick={handleAutoSync}
+            disabled={syncing}
+          >
+            {syncing ? 'Đang đồng bộ...' : 'Auto Sync & Update (Strava)'}
+          </button>
         </div>
       </div>
     </aside>

@@ -17,7 +17,8 @@ export default function Dashboard({
   challengeMonth: propMonth, 
   challengeYear: propYear, 
   setChallengeMonth: propSetMonth, 
-  setChallengeYear: propSetYear 
+  setChallengeYear: propSetYear,
+  refreshKey
 }) {
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
@@ -74,7 +75,7 @@ export default function Dashboard({
 
     window.addEventListener('challengeUpdated', handleChallengeUpdated);
     return () => window.removeEventListener('challengeUpdated', handleChallengeUpdated);
-  }, []);
+  }, [refreshKey]);
 
   const loadData = async () => {
     setLoading(true);

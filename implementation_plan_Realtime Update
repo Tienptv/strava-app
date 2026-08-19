@@ -1,0 +1,45 @@
+# Tích hợp Real-time Updates (Cập nhật thời gian thực)
+
+Tính năng này sẽ giúp ứng dụng tự động cập nhật bảng xếp hạng và các thống kê ngay khi người dùng hoàn thành một hoạt động trên Strava, loại bỏ hoàn toàn việc phải load lại trang (F5) hay đợi đồng bộ thủ công.
+
+## User Review Required
+
+> [!WARNING]
+> **Strava Webhooks yêu cầu một Public URL (HTTPS)**
+> Vì Strava cần gọi HTTP POST đến server của bạn khi có hoạt động mới, server của bạn phải có địa chỉ Public trên Internet.
+> - **Khi chạy trên Render (Production):** Sẽ hoạt động bình thường với domain `https://strava-app-86t5.onrender.com`.
+> - **Khi chạy ở Local (máy tính của bạn):** Strava không thể gọi vào `http://localhost:3001`. Nếu muốn test ở local, bạn phải dùng các công cụ như `ngrok` hoặc `localtunnel` để public cổng 3001, và dùng URL đó để đăng ký Webhook.
+
+## Open Questions
+
+> [!IMPORTANT]
+> 1. Webhook subscription của Strava cần được đăng ký (gọi API tạo Subscription 1 lần duy nhất). Bạn muốn mình viết thêm một API nhỏ (ví dụ `/api/strava/subscribe`) để bạn có thể tự gọi đăng ký webhook, hay muốn tạo một script chạy riêng lẻ để đăng ký?
+> 2. Có cần tự động cập nhật dữ liệu của cả Câu lạc bộ (Club Goal) và Bảng xếp hạng cá nhân, hay chỉ Bảng xếp hạng? (Mặc định mình sẽ làm để frontend tự tải lại cả hai khi có thông báo mới).
+
+## Proposed Changes
+
+### Backend (`server/index.js`)
+Sẽ bổ sung kiến trúc SSE và endpoint cho Strava Webhooks:
+- **[NEW] Server-Sent Events (SSE)**
+  - Tạo endpoint `GET /api/stream` cho phép Client kết nối và duy trì kết nối (keep-alive).
+  - Quản lý danh sách các Client đang kết nối (`connectedClients`).
+- **[NEW] Webhook Endpoints**
+  - `GET /api/strava/webhook`: Dùng để Strava xác thực webhook (Verify webhook subscription bằng cách trả về `hub.challenge`).
+  - `POST /api/strava/webhook`: Nhận payload sự kiện từ Strava (khi user tạo/sửa/xóa activity).
+  - Khi nhận POST từ Strava, Server sẽ gọi Strava API để kéo dữ liệu mới của User đó, cập nhật vào file lưu trữ nội bộ (như `imported_activities.json`), và **gửi tín hiệu (emit)** qua SSE cho tất cả các Client đang kết nối.
+
+### Frontend 
+Sẽ tích hợp Web APIs (EventSource) để lắng nghe SSE từ Backend:
+#### [MODIFY] `src/App.jsx` hoặc Context cung cấp dữ liệu
+- Mở kết nối `EventSource` tới endpoint `/api/stream`.
+- Lắng nghe sự kiện `message`. Khi nhận được tín hiệu `{"type": "update"}`, frontend sẽ tự động gọi lại các API lấy dữ liệu (Club Goal, Leaderboard) để làm mới giao diện.
+
+## Verification Plan
+
+### Automated Tests
+- Gửi HTTP GET giả lập Strava Verification để kiểm tra endpoint `GET /api/strava/webhook` hoạt động đúng (trả đúng `hub.challenge`).
+
+### Manual Verification
+- Bạn sẽ chạy server, có thể dùng `ngrok` để test hoặc push code lên Render.
+- Đăng ký Webhook subscription với Strava bằng URL thật (chỉ đăng ký 1 lần).
+- Bạn thử dùng app Strava trên điện thoại tạo một "Manual Activity" (Hoạt động thủ công). Ngay khi lưu xong, màn hình máy tính của bạn sẽ tự động nhảy số km và xếp hạng mà không cần bấm gì cả!

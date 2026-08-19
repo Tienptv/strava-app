@@ -15,6 +15,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [challengeMonth, setChallengeMonth] = useState(new Date().getMonth() + 1);
   const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
+  const [refreshKey, setRefreshKey] = useState(0);
   const { t } = useLang();
 
   // Kiểm tra đã đăng nhập chưa
@@ -26,6 +27,32 @@ function App() {
       setAthlete(JSON.parse(storedAthlete));
     }
     setLoading(false);
+  }, []);
+
+  // Thiết lập SSE (Real-time Updates)
+  useEffect(() => {
+    const eventSource = new EventSource(`${API_BASE}/stream`);
+    
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'update') {
+          console.log('Received real-time update from server, refreshing data...');
+          setRefreshKey(prev => prev + 1);
+        }
+      } catch (err) {
+        console.error('Error parsing SSE data:', err);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
   }, []);
 
   // Hàm gọi API có kèm athlete ID
@@ -125,6 +152,7 @@ function App() {
                       challengeYear={challengeYear}
                       setChallengeMonth={setChallengeMonth}
                       setChallengeYear={setChallengeYear}
+                      refreshKey={refreshKey}
                     />
                   : <Login onLogin={handleLogin} />
               }
@@ -137,7 +165,7 @@ function App() {
               path="/clubs/:clubId"
               element={
                 athlete
-                  ? <ClubView apiFetch={apiFetch} />
+                  ? <ClubView apiFetch={apiFetch} refreshKey={refreshKey} />
                   : <Navigate to="/" replace />
               }
             />
