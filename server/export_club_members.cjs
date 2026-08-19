@@ -84,13 +84,37 @@ const dotenv = require('dotenv');
 
   console.log(`Đã lấy thành công tổng cộng: ${allMembers.length} thành viên.`);
 
+  // Load full names mapping
+  const athleteNamesFile = path.join(__dirname, '../Storage/AthleteID_Name.csv');
+  const fullNameMap = {};
+  if (fs.existsSync(athleteNamesFile)) {
+    const lines = fs.readFileSync(athleteNamesFile, 'utf8').split('\n');
+    lines.forEach(line => {
+      const parts = line.trim().split(',');
+      if (parts.length >= 2) {
+        const fullName = parts.slice(1).join(',').trim(); // in case name has commas
+        if (fullName && fullName !== 'Name') {
+          const nameParts = fullName.split(' ');
+          const fn = nameParts[0];
+          const ln = nameParts.slice(1).join(' ');
+          if (ln) {
+            const initial = ln.charAt(0).toUpperCase() + '.';
+            const matchKey = `${fn}_${initial}`;
+            fullNameMap[matchKey] = fullName;
+          }
+        }
+      }
+    });
+  }
+
   // Ghi ra file CSV
-  let csvContent = 'Match Key,First Name,Last Name,Admin,Owner\n';
+  let csvContent = 'Match Key,First Name,Last Name,Full Name,Admin,Owner\n';
   allMembers.forEach(m => {
     const fn = (m.firstname || '').replace(/,/g, '');
     const ln = (m.lastname || '').replace(/,/g, '');
     const matchKey = `${fn}_${ln}`;
-    csvContent += `${matchKey},${fn},${ln},${m.admin},${m.owner}\n`;
+    const fullName = fullNameMap[matchKey] || `${fn} ${ln}`.trim();
+    csvContent += `${matchKey},${fn},${ln},${fullName},${m.admin},${m.owner}\n`;
   });
 
   fs.writeFileSync(OUT_FILE, csvContent, 'utf8');
