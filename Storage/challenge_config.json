@@ -129,14 +129,6 @@
       "admin": false,
       "owner": false
     },
-    "Tam_N.": {
-      "resource_state": 2,
-      "firstname": "Tam",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
     "Thoa_N.": {
       "resource_state": 2,
       "firstname": "Thoa",
@@ -177,22 +169,6 @@
       "admin": false,
       "owner": false
     },
-    "Đạt_N.": {
-      "resource_state": 2,
-      "firstname": "Đạt",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Trong_T.": {
-      "resource_state": 2,
-      "firstname": "Trong",
-      "lastname": "T.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
     "Khuong_P.": {
       "resource_state": 2,
       "firstname": "Khuong",
@@ -225,28 +201,12 @@
       "admin": false,
       "owner": false
     },
-    "Pha_V.": {
-      "resource_state": 2,
-      "firstname": "Pha",
-      "lastname": "V.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
     "Truc_H.": {
       "resource_state": 2,
       "firstname": "Truc",
       "lastname": "H.",
       "membership": "member",
       "admin": false,
-      "owner": false
-    },
-    "Khoa_L.": {
-      "resource_state": 2,
-      "firstname": "Khoa",
-      "lastname": "L.",
-      "membership": "member",
-      "admin": true,
       "owner": false
     },
     "Son_N.": {
@@ -257,34 +217,10 @@
       "admin": false,
       "owner": false
     },
-    "Chi_N.": {
-      "resource_state": 2,
-      "firstname": "Chi",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": true,
-      "owner": false
-    },
     "Benjamin_D.": {
       "resource_state": 2,
       "firstname": "Benjamin",
       "lastname": "D.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Học_P.": {
-      "resource_state": 2,
-      "firstname": "Học",
-      "lastname": "P.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Khương_P.": {
-      "resource_state": 2,
-      "firstname": "Khương",
-      "lastname": "P.",
       "membership": "member",
       "admin": false,
       "owner": false
@@ -297,138 +233,10 @@
       "admin": false,
       "owner": false
     },
-    "Tran_M.": {
-      "resource_state": 2,
-      "firstname": "Tran",
-      "lastname": "M.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "俊宇_杨.": {
-      "resource_state": 2,
-      "firstname": "俊宇",
-      "lastname": "杨.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Andie_L.": {
-      "resource_state": 2,
-      "firstname": "Andie",
-      "lastname": "L.",
-      "membership": "member",
-      "admin": true,
-      "owner": false
-    },
-    "binh_N.": {
-      "resource_state": 2,
-      "firstname": "binh",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Dũng_N.": {
-      "resource_state": 2,
-      "firstname": "Dũng",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Hendrien_N.": {
-      "resource_state": 2,
-      "firstname": "Hendrien",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Herman_V.": {
-      "resource_state": 2,
-      "firstname": "Herman",
-      "lastname": "V.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Huy_N.": {
-      "resource_state": 2,
-      "firstname": "Huy",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": true,
-      "owner": false
-    },
     "Huynh_N.": {
       "resource_state": 2,
       "firstname": "Huynh",
       "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Ilse_V.": {
-      "resource_state": 2,
-      "firstname": "Ilse",
-      "lastname": "V.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Kha_M.": {
-      "resource_state": 2,
-      "firstname": "Kha",
-      "lastname": "M.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Nam_N.": {
-      "resource_state": 2,
-      "firstname": "Nam",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Nguyen_H.": {
-      "resource_state": 2,
-      "firstname": "Nguyen",
-      "lastname": "H.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Peter_V.": {
-      "resource_state": 2,
-      "firstname": "Peter",
-      "lastname": "V.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Phú_N.": {
-      "resource_state": 2,
-      "firstname": "Phú",
-      "lastname": "N.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "Thắm_Đ.": {
-      "resource_state": 2,
-      "firstname": "Thắm",
-      "lastname": "Đ.",
-      "membership": "member",
-      "admin": false,
-      "owner": false
-    },
-    "vu_D.": {
-      "resource_state": 2,
-      "firstname": "vu",
-      "lastname": "D.",
       "membership": "member",
       "admin": false,
       "owner": false
@@ -3050,14 +2858,6 @@
         "admin": false,
         "owner": false
       },
-      "Tam_N.": {
-        "resource_state": 2,
-        "firstname": "Tam",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
       "Thoa_N.": {
         "resource_state": 2,
         "firstname": "Thoa",
@@ -3098,22 +2898,6 @@
         "admin": false,
         "owner": false
       },
-      "Đạt_N.": {
-        "resource_state": 2,
-        "firstname": "Đạt",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Trong_T.": {
-        "resource_state": 2,
-        "firstname": "Trong",
-        "lastname": "T.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
       "Khuong_P.": {
         "resource_state": 2,
         "firstname": "Khuong",
@@ -3146,28 +2930,12 @@
         "admin": false,
         "owner": false
       },
-      "Pha_V.": {
-        "resource_state": 2,
-        "firstname": "Pha",
-        "lastname": "V.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
       "Truc_H.": {
         "resource_state": 2,
         "firstname": "Truc",
         "lastname": "H.",
         "membership": "member",
         "admin": false,
-        "owner": false
-      },
-      "Khoa_L.": {
-        "resource_state": 2,
-        "firstname": "Khoa",
-        "lastname": "L.",
-        "membership": "member",
-        "admin": true,
         "owner": false
       },
       "Son_N.": {
@@ -3178,34 +2946,10 @@
         "admin": false,
         "owner": false
       },
-      "Chi_N.": {
-        "resource_state": 2,
-        "firstname": "Chi",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": true,
-        "owner": false
-      },
       "Benjamin_D.": {
         "resource_state": 2,
         "firstname": "Benjamin",
         "lastname": "D.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Học_P.": {
-        "resource_state": 2,
-        "firstname": "Học",
-        "lastname": "P.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Khương_P.": {
-        "resource_state": 2,
-        "firstname": "Khương",
-        "lastname": "P.",
         "membership": "member",
         "admin": false,
         "owner": false
@@ -3218,138 +2962,10 @@
         "admin": false,
         "owner": false
       },
-      "Tran_M.": {
-        "resource_state": 2,
-        "firstname": "Tran",
-        "lastname": "M.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "俊宇_杨.": {
-        "resource_state": 2,
-        "firstname": "俊宇",
-        "lastname": "杨.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Andie_L.": {
-        "resource_state": 2,
-        "firstname": "Andie",
-        "lastname": "L.",
-        "membership": "member",
-        "admin": true,
-        "owner": false
-      },
-      "binh_N.": {
-        "resource_state": 2,
-        "firstname": "binh",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Dũng_N.": {
-        "resource_state": 2,
-        "firstname": "Dũng",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Hendrien_N.": {
-        "resource_state": 2,
-        "firstname": "Hendrien",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Herman_V.": {
-        "resource_state": 2,
-        "firstname": "Herman",
-        "lastname": "V.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Huy_N.": {
-        "resource_state": 2,
-        "firstname": "Huy",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": true,
-        "owner": false
-      },
       "Huynh_N.": {
         "resource_state": 2,
         "firstname": "Huynh",
         "lastname": "N.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Ilse_V.": {
-        "resource_state": 2,
-        "firstname": "Ilse",
-        "lastname": "V.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Kha_M.": {
-        "resource_state": 2,
-        "firstname": "Kha",
-        "lastname": "M.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Nam_N.": {
-        "resource_state": 2,
-        "firstname": "Nam",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Nguyen_H.": {
-        "resource_state": 2,
-        "firstname": "Nguyen",
-        "lastname": "H.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Peter_V.": {
-        "resource_state": 2,
-        "firstname": "Peter",
-        "lastname": "V.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Phú_N.": {
-        "resource_state": 2,
-        "firstname": "Phú",
-        "lastname": "N.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "Thắm_Đ.": {
-        "resource_state": 2,
-        "firstname": "Thắm",
-        "lastname": "Đ.",
-        "membership": "member",
-        "admin": false,
-        "owner": false
-      },
-      "vu_D.": {
-        "resource_state": 2,
-        "firstname": "vu",
-        "lastname": "D.",
         "membership": "member",
         "admin": false,
         "owner": false
