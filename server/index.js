@@ -4,8 +4,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
 import { StravaAPI } from './strava.js';
+import { scrapeClubActivities, loginAndGetCookie, getSavedCookie } from './scraper.js';
 
 dotenv.config();
 
@@ -15,9 +15,10 @@ const TARGETS_FILE = path.join(__dirname, '../Storage/targets.json');
 const CONFIG_FILE = path.join(__dirname, '../Storage/challenge_config.json');
 const IMPORTED_FILE = path.join(__dirname, '../Storage/imported_activities.json');
 const HISTORICAL_FILE = path.join(__dirname, '../Storage/historical_activities.json');
-const TOTAL_KM_FILE = path.join(__dirname, '../Storage/Total-km-17-08-2026.csv');
+const TOTAL_KM_FILE = path.join(__dirname, '../Storage/Tong km To 17082026.csv');
 const GOAL_FILE = path.join(__dirname, '../Storage/club_goal.json');
 const TOKENS_FILE = path.join(__dirname, '../Storage/tokens.json');
+const NAME_MAPPING_FILE = path.join(__dirname, '../Storage/name_mapping.json');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -58,38 +59,6 @@ function saveTokens() {
 
 // Nạp token khi khởi động server
 loadTokens();
-
-// ==========================================
-// SERVER-SENT EVENTS (SSE) SETUP
-// ==========================================
-const sseClients = new Set();
-
-function broadcastUpdate() {
-  const message = `data: ${JSON.stringify({ type: 'update' })}\n\n`;
-  for (const client of sseClients) {
-    try {
-      client.write(message);
-    } catch (e) {
-      sseClients.delete(client);
-    }
-  }
-}
-
-app.get('/api/stream', (req, res) => {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders(); // flush the headers to establish SSE
-
-  // Tín hiệu kết nối thành công
-  res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
-
-  sseClients.add(res);
-
-  req.on('close', () => {
-    sseClients.delete(res);
-  });
-});
 
 const strava = new StravaAPI(
   process.env.STRAVA_CLIENT_ID,
@@ -211,21 +180,32 @@ function parseStorageCSV(content) {
 }
 
 function getCompKey(act) {
+  const d = (act.start_date_local || '').substring(0, 16);
   const t = act.moving_time || 0;
   const dist = Math.round(act.distance || 0);
   const athId = act.athlete?.id || '';
   const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
-  // Bỏ qua ngày giờ trong chuỗi so sánh vì Club API không trả về ngày giờ chính xác
-  return `comp_${athId || name}_${t}_${dist}`;
+  return `comp_${athId || name}_${d}_${t}_${dist}`;
 }
 
 function isBetterRecord(a, b) {
   if (!b) return true;
   if (a.start_date_local && !b.start_date_local) return true;
   if (!a.start_date_local && b.start_date_local) return false;
+  
+  if (a.start_date_local && b.start_date_local) {
+    const dateA = new Date(a.start_date_local);
+    const dateB = new Date(b.start_date_local);
+    // Prefer the later date for the same activity (the one with +7 hours timezone fix)
+    if (dateA.getTime() > dateB.getTime()) return true;
+    // Don't return false here yet, let it check lastname below if dates are exactly equal
+  }
+  
+  // Giữ lại bản có tên họ đầy đủ hơn
   const aLastname = a.athlete?.lastname || '';
   const bLastname = b.athlete?.lastname || '';
   if (aLastname.length > 2 && bLastname.length <= 2) return true;
+  
   return false;
 }
 
@@ -272,10 +252,7 @@ function syncAllStorageCsv() {
       }
     }
 
-    const csvFiles = fs.readdirSync(storageDir).filter(f => 
-      (f.startsWith('data-') && f.endsWith('.csv')) ||
-      (f.startsWith('activities_export_') && f.endsWith('.csv'))
-    );
+    const csvFiles = fs.readdirSync(storageDir).filter(f => f.startsWith('data-') && f.endsWith('.csv'));
     let csvActivities = [];
     for (const f of csvFiles) {
       try {
@@ -288,6 +265,20 @@ function syncAllStorageCsv() {
     }
 
     if (csvActivities.length > 0) {
+      csvActivities = mapAthleteNamesUsingCSV(csvActivities);
+      
+      // Xóa các dữ liệu cũ trong existingActivities nếu trùng ngày với dữ liệu trong CSV
+      const newDates = new Set();
+      csvActivities.forEach(act => {
+          if (act.start_date_local) {
+              newDates.add(act.start_date_local.substring(0, 10));
+          }
+      });
+      existingActivities = existingActivities.filter(act => {
+          if (!act.start_date_local) return true;
+          return !newDates.has(act.start_date_local.substring(0, 10));
+      });
+
       const merged = mergeActivitiesList(existingActivities, csvActivities);
       fs.writeFileSync(IMPORTED_FILE, JSON.stringify(merged, null, 2), 'utf8');
       return merged;
@@ -469,92 +460,69 @@ app.get('/api/clubs/:id', getToken, async (req, res) => {
   }
 });
 
+// Hàm hỗ trợ lấy Full Name từ Storage/AthleteID_Name.csv
+function getFullNameMapping() {
+  const athleteNamesFile = path.join(__dirname, '../Storage/AthleteID_Name.csv');
+  const mapping = {};
+  if (fs.existsSync(athleteNamesFile)) {
+    const lines = fs.readFileSync(athleteNamesFile, 'utf8').split('\n');
+    lines.forEach(line => {
+      const parts = line.trim().split(',');
+      if (parts.length >= 2) {
+        const id = parts[0].trim();
+        const fullName = parts.slice(1).join(',').trim();
+        if (fullName && fullName !== 'Name') {
+          const nameParts = fullName.split(' ');
+          const fn = nameParts[0];
+          const ln = nameParts.slice(1).join(' ');
+          
+          if (ln) {
+            const initial = ln.charAt(0).toUpperCase() + '.';
+            const matchKey = `${fn}_${initial}`.toLowerCase();
+            mapping[matchKey] = { firstname: fn, lastname: ln };
+          } else {
+            mapping[fn.toLowerCase()] = { firstname: fn, lastname: '' };
+          }
+        }
+      }
+    });
+  }
+  return mapping;
+}
+
 // Lấy thành viên của club
 app.get('/api/clubs/:id/members', getToken, async (req, res) => {
   try {
     const { page = 1, per_page = 30 } = req.query;
-    const members = await strava.getClubMembers(req.accessToken, req.params.id, {
+    let members = await strava.getClubMembers(req.accessToken, req.params.id, {
       page: parseInt(page),
       per_page: parseInt(per_page),
     });
+    
+    // Gắn Full Name cho danh sách thành viên
+    if (Array.isArray(members)) {
+      const mapping = getFullNameMapping();
+      members = members.map(member => {
+        const fn = member.firstname || '';
+        const ln = member.lastname || '';
+        const initial = ln ? ln.charAt(0).toUpperCase() + '.' : '';
+        const matchKey = `${fn}_${initial}`;
+        
+        if (mapping[matchKey]) {
+          return {
+            ...member,
+            firstname: mapping[matchKey].firstname,
+            lastname: mapping[matchKey].lastname
+          };
+        }
+        return member;
+      });
+    }
+
     res.json(members);
   } catch (error) {
     console.error('Lỗi lấy members:', error.message);
     res.status(500).json({ error: 'Không thể lấy danh sách thành viên' });
-  }
-});
-
-// ==========================================
-// STRAVA WEBHOOK ENDPOINTS
-// ==========================================
-const VERIFY_TOKEN = 'strava_tracker_webhook_token';
-
-// 1. Xác thực Webhook Subscription (Strava gọi khi tạo subscription)
-app.get('/api/strava/webhook', (req, res) => {
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
-
-  if (mode && token) {
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('WEBHOOK_VERIFIED');
-      res.json({ 'hub.challenge': challenge });
-    } else {
-      res.sendStatus(403);
-    }
-  } else {
-    res.sendStatus(400);
-  }
-});
-
-// 2. Nhận sự kiện từ Strava
-app.post('/api/strava/webhook', (req, res) => {
-  console.log('Webhook event received!', req.body);
-  
-  // Xác nhận đã nhận event với Strava càng sớm càng tốt (bắt buộc trả 200 OK)
-  res.status(200).send('EVENT_RECEIVED');
-  
-  // Xử lý logic nghiệp vụ sau khi đã trả về 200 OK
-  const event = req.body;
-  if (event.object_type === 'activity' && (event.aspect_type === 'create' || event.aspect_type === 'update' || event.aspect_type === 'delete')) {
-    // Có sự thay đổi về hoạt động, ta sẽ thông báo cho toàn bộ các Client đang kết nối
-    console.log(`Activity ${event.aspect_type} by user ${event.owner_id}, broadcasting update via SSE...`);
-    
-    // Nếu ứng dụng của bạn cache activities trong file JSON (syncAllStorageCsv), 
-    // bạn có thể gọi syncAllStorageCsv() hoặc gọi lại Strava API ở đây nếu cần.
-    // Ở mức cơ bản nhất, ta báo cho frontend biết để tải lại dữ liệu.
-    broadcastUpdate();
-  }
-});
-
-// 3. API để chủ động đăng ký Webhook với Strava
-app.post('/api/strava/subscribe', async (req, res) => {
-  try {
-    // URL backend của bạn trên mạng public (Render hoặc ngrok)
-    const callbackUrl = req.body.callback_url || process.env.VITE_API_PROXY_TARGET + '/api/strava/webhook';
-    
-    if (!callbackUrl || callbackUrl.includes('localhost')) {
-      return res.status(400).json({ error: 'callback_url phải là một URL public trên Internet, không phải localhost.'});
-    }
-
-    const response = await fetch('https://www.strava.com/api/v3/push_subscriptions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams({
-        client_id: process.env.STRAVA_CLIENT_ID,
-        client_secret: process.env.STRAVA_CLIENT_SECRET,
-        callback_url: callbackUrl,
-        verify_token: VERIFY_TOKEN
-      })
-    });
-
-    const result = await response.json();
-    res.json(result);
-  } catch (error) {
-    console.error('Lỗi khi đăng ký webhook:', error);
-    res.status(500).json({ error: 'Không thể đăng ký webhook' });
   }
 });
 
@@ -571,26 +539,6 @@ app.get('/api/clubs/:id/activities', getToken, async (req, res) => {
     console.error('Lỗi lấy club activities:', error.message);
     res.status(500).json({ error: 'Không thể lấy hoạt động câu lạc bộ' });
   }
-});
-
-// Auto-Sync Data (Execute background script and parse CSV)
-app.post('/api/challenge/auto-sync', (req, res) => {
-  exec('node server/export_activities_csv.cjs', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Lỗi chạy auto-sync script: ${error.message}`);
-      return res.status(500).json({ success: false, error: 'Lỗi đồng bộ dữ liệu', details: error.message });
-    }
-    
-    // Script chạy xong sẽ ghi ra thư mục Storage/ một file data-activities_YYYY-MM-DD.csv mới
-    // Kích hoạt engine parse toàn bộ Storage CSV
-    try {
-      const mergedData = syncAllStorageCsv();
-      res.json({ success: true, count: mergedData.length, message: 'Đồng bộ thành công' });
-    } catch (parseError) {
-      console.error('Lỗi khi parse CSV sau khi sync:', parseError.message);
-      res.status(500).json({ success: false, error: 'Lỗi nạp dữ liệu vào bộ nhớ', details: parseError.message });
-    }
-  });
 });
 
 // ==========================================
@@ -671,12 +619,53 @@ app.post('/api/challenge/targets', (req, res) => {
 // CONFIG & IMPORTED ROUTES
 // ==========================================
 
+// Lấy file mapping tên
+app.get('/api/challenge/name-mapping', (req, res) => {
+  try {
+    if (fs.existsSync(NAME_MAPPING_FILE)) {
+      const data = fs.readFileSync(NAME_MAPPING_FILE, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json({});
+    }
+  } catch (error) {
+    console.error('Error reading name mapping:', error);
+    res.json({});
+  }
+});
+
 // Đọc cấu hình (participants, clubId)
 app.get('/api/challenge/config', (req, res) => {
   try {
     if (fs.existsSync(CONFIG_FILE)) {
       const data = fs.readFileSync(CONFIG_FILE, 'utf8');
-      res.json(JSON.parse(data));
+      const config = JSON.parse(data);
+      
+      // Gắn Full Name tự động cho config để UI luôn hiển thị đúng
+      const mapping = getFullNameMapping();
+      
+      if (config.participants) {
+        Object.keys(config.participants).forEach(key => {
+          if (mapping[key]) {
+            config.participants[key].firstname = mapping[key].firstname;
+            config.participants[key].lastname = mapping[key].lastname;
+          }
+        });
+      }
+      
+      if (config.monthlyParticipants) {
+        Object.keys(config.monthlyParticipants).forEach(month => {
+          const monthData = config.monthlyParticipants[month];
+          Object.keys(monthData).forEach(key => {
+            if (mapping[key]) {
+              monthData[key].firstname = mapping[key].firstname;
+              monthData[key].lastname = mapping[key].lastname;
+            }
+          });
+        });
+      }
+      
+      res.json(config);
     } else {
       res.json({ participants: {}, clubId: '' });
     }
@@ -800,33 +789,227 @@ app.post('/api/challenge/sync-storage', (req, res) => {
   }
 });
 
-// Chạy tự động script export_activities_csv và đồng bộ
-app.post('/api/challenge/auto-sync', (req, res) => {
-  const { exec } = require('child_process');
-  // Chạy script lấy dữ liệu
-  exec('node server/export_activities_csv.cjs', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Lỗi thực thi script lấy dữ liệu Strava: ${error.message}`);
-      return res.status(500).json({ error: 'Lỗi khi lấy dữ liệu Strava', details: error.message });
-    }
-    console.log(stdout);
-    if (stderr) console.error(stderr);
+// Tự động lấy hoạt động của club từ Strava, tạo CSV và đồng bộ
+app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
+  try {
+    const clubId = req.params.id;
+    // 1. Get up to 50 activities from Strava
+    const stravaActivities = await strava.getClubActivities(req.accessToken, clubId, { page: 1, per_page: 50 });
     
-    // Sau khi xuất CSV thành công, gọi hàm đồng bộ CSV
-    try {
-      const data = syncAllStorageCsv();
-      res.json({ success: true, count: data.length, activities: data });
-    } catch (e) {
-      console.error('Lỗi sync sau khi export:', e.message);
-      res.status(500).json({ error: 'Lỗi đồng bộ dữ liệu sau khi xuất file' });
+    // 2. Filter for 'Run' activities
+    const runActivities = stravaActivities.filter(act => act.type === 'Run');
+    
+    // 3. Format as CSV
+    // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
+    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
+    runActivities.forEach(act => {
+      const name = act.athlete ? `${act.athlete.firstname || ''} ${act.athlete.lastname || ''}`.trim() : 'Unknown Athlete';
+      const id = act.id || '';
+      const date = act.start_date_local || act.start_date || '';
+      const title = `"${(act.name || '').replace(/"/g, '""')}"`;
+      const distance = ((act.distance || 0) / 1000).toFixed(2);
+      const calories = 0;
+      
+      const totalSeconds = act.moving_time || 0;
+      const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+      const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+      const s = (totalSeconds % 60).toString().padStart(2, '0');
+      const time = `${h}:${m}:${s}`;
+      
+      const type = 'Run';
+      
+      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
+    });
+    
+    // 4. Save to Storage
+    const storageDir = path.join(__dirname, '../Storage');
+    if (!fs.existsSync(storageDir)) {
+      fs.mkdirSync(storageDir, { recursive: true });
     }
-  });
+    
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+    const filename = `data-autosync-${timestamp}.csv`;
+    const filepath = path.join(storageDir, filename);
+    
+    fs.writeFileSync(filepath, csvContent, 'utf8');
+    
+    // 5. Trigger syncAllStorageCsv
+    const mergedData = syncAllStorageCsv();
+    
+    res.json({ success: true, count: mergedData.length, activities: mergedData, synced_from_strava: runActivities.length, filename });
+  } catch (error) {
+    console.error('Lỗi auto-sync club activities:', error.message);
+    res.json({ success: false, error: error.message, stack: error.stack });
+  }
 });
+
+// Mở Chrome để user đăng nhập Strava, tự động lấy cookie
+app.post('/api/strava/login', async (req, res) => {
+  try {
+    const cookie = await loginAndGetCookie();
+    res.json({ success: true, cookie });
+  } catch (error) {
+    console.error('Lỗi login Strava:', error.message);
+    res.json({ success: false, error: error.message });
+  }
+});
+
+// Lấy cookie đã lưu
+app.get('/api/strava/cookie', (req, res) => {
+  const cookie = getSavedCookie();
+  res.json({ hasCookie: !!cookie, cookie: cookie || '' });
+});
+
+// Tự động cạo dữ liệu của club bằng Puppeteer
+app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
+  try {
+    const clubId = req.params.id;
+    let cookie = req.body.cookie;
+    let limit = req.body.limit || 50;
+    
+    // Auto-use saved cookie if none provided
+    if (!cookie) {
+      cookie = getSavedCookie();
+    }
+    
+    if (!cookie) {
+      return res.status(400).json({ success: false, error: 'Thiếu Strava Session Cookie. Vui lòng đăng nhập trước.' });
+    }
+
+    // 1. Scrape activities using Puppeteer
+    const scrapedActivities = await scrapeClubActivities(clubId, cookie, limit);
+    
+    // 2. Filter for 'Run' activities
+    const runActivities = scrapedActivities.filter(act => act.type === 'Run');
+    
+    // 3. Format as CSV
+    // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
+    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
+    runActivities.forEach(act => {
+      const name = `"${(act.athleteName || 'Unknown Athlete').replace(/"/g, '""')}"`;
+      const id = act.id || '';
+      const date = act.date || '';
+      const title = `"${(act.title || '').replace(/"/g, '""')}"`;
+      
+      const distance = `"${act.distance}"`;
+      const calories = 0;
+      
+      // Parse time like "1h 45m" or "45m 30s" to HH:mm:ss
+      let rawTime = act.time.toLowerCase();
+      let h = 0, m = 0, s = 0;
+      const hMatch = rawTime.match(/(\d+)h/);
+      const mMatch = rawTime.match(/(\d+)m/);
+      const sMatch = rawTime.match(/(\d+)s/);
+      if (hMatch) h = parseInt(hMatch[1]);
+      if (mMatch) m = parseInt(mMatch[1]);
+      if (sMatch) s = parseInt(sMatch[1]);
+      const time = `"${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}"`;
+      
+      const type = 'Run';
+      
+      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
+    });
+    
+    // 4. Save to Storage
+    const storageDir = path.join(__dirname, '../Storage');
+    if (!fs.existsSync(storageDir)) {
+      fs.mkdirSync(storageDir, { recursive: true });
+    }
+    
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+    const filename = `data-autosync-scrape-${timestamp}.csv`;
+    const filepath = path.join(storageDir, filename);
+    
+    fs.writeFileSync(filepath, csvContent, 'utf8');
+    
+    // 5. Trigger syncAllStorageCsv
+    const mergedData = syncAllStorageCsv();
+    
+    res.json({ success: true, count: mergedData.length, activities: mergedData, scraped_count: runActivities.length, filename });
+  } catch (error) {
+    console.error('Lỗi auto-sync-scrape:', error.message);
+    res.json({ success: false, error: error.message, stack: error.stack });
+  }
+});
+
+
+// Hàm hỗ trợ map tên dựa trên AthleteID_Name.csv
+function mapAthleteNamesUsingCSV(activities) {
+  const mappingFile = path.join(__dirname, '../Storage/AthleteID_Name.csv');
+  const mappingById = {};
+  const mappingByName = {};
+  
+  if (fs.existsSync(mappingFile)) {
+      const lines = fs.readFileSync(mappingFile, 'utf8').split('\n');
+      lines.forEach(line => {
+          const parts = line.trim().split(',');
+          if (parts.length >= 2) {
+              const id = parts[0].trim();
+              const fullName = parts.slice(1).join(',').trim();
+              
+              if (fullName && fullName !== 'Name') {
+                  const nameParts = fullName.split(' ');
+                  const fn = nameParts[0];
+                  const ln = nameParts.slice(1).join(' ');
+                  const mappedName = { firstname: fn, lastname: ln };
+                  
+                  if (id && id !== 'Athlete ID') {
+                      mappingById[id] = mappedName;
+                  }
+                  
+                  if (ln) {
+                      const initial = ln.charAt(0).toUpperCase() + '.';
+                      const matchKey = `${fn}_${initial}`.toLowerCase();
+                      mappingByName[matchKey] = mappedName;
+                  }
+              }
+          }
+      });
+  }
+
+  return activities.map(act => {
+      if (act.athlete) {
+          let newName = null;
+          // 1. Try mapping by ID
+          if (act.athlete.id && mappingById[act.athlete.id]) {
+              newName = mappingById[act.athlete.id];
+          } 
+          // 2. Try mapping by Match Key
+          else if (act.athlete.firstname) {
+              const fn = act.athlete.firstname;
+              const ln = act.athlete.lastname || '';
+              const initial = ln ? ln.charAt(0).toUpperCase() + '.' : '';
+              const matchKey = `${fn}_${initial}`.toLowerCase();
+              if (mappingByName[matchKey]) {
+                  newName = mappingByName[matchKey];
+              }
+          }
+
+          if (newName) {
+              return {
+                  ...act,
+                  athlete: {
+                      ...act.athlete,
+                      firstname: newName.firstname,
+                      lastname: newName.lastname
+                  }
+              };
+          }
+      }
+      return act;
+  });
+}
 
 // Lưu imported activities
 app.post('/api/challenge/imported', (req, res) => {
   try {
-    const data = req.body;
+    let data = req.body;
+    if (Array.isArray(data)) {
+        data = mapAthleteNamesUsingCSV(data);
+    }
+
     let existing = [];
     if (fs.existsSync(IMPORTED_FILE)) {
       try {
@@ -836,6 +1019,22 @@ app.post('/api/challenge/imported', (req, res) => {
         existing = [];
       }
     }
+
+    // Nếu có query replaceByDate, xóa các activity cũ trùng ngày trước khi merge
+    if (req.query.replaceByDate === 'true' && Array.isArray(data)) {
+        const newDates = new Set();
+        data.forEach(act => {
+            if (act.start_date_local) {
+                newDates.add(act.start_date_local.substring(0, 10)); // YYYY-MM-DD
+            }
+        });
+        existing = existing.filter(act => {
+            if (!act.start_date_local) return true;
+            const date = act.start_date_local.substring(0, 10);
+            return !newDates.has(date);
+        });
+    }
+
     const merged = Array.isArray(data) ? mergeActivitiesList(existing, data) : existing;
 
     const dir = path.dirname(IMPORTED_FILE);
@@ -852,14 +1051,19 @@ app.post('/api/challenge/imported', (req, res) => {
 // TOTAL-KM BASELINE ROUTES
 // ==========================================
 
-// Đọc dữ liệu All-Time km từ file CSV Total-km-17-08-2026.csv
+// Đọc dữ liệu All-Time km từ file CSV Tong km To 17082026.csv
 app.get('/api/challenge/total-km', (req, res) => {
   try {
     let filePath = TOTAL_KM_FILE;
     if (!fs.existsSync(filePath)) {
       const storageDir = path.join(__dirname, '../Storage');
       if (fs.existsSync(storageDir)) {
-        const files = fs.readdirSync(storageDir).filter(f => f.startsWith('Total-km') && f.endsWith('.csv'));
+        // Find 'Tong km*.csv' first
+        let files = fs.readdirSync(storageDir).filter(f => f.startsWith('Tong km') && f.endsWith('.csv'));
+        if (files.length === 0) {
+          // Fallback to 'Total-km*.csv'
+          files = fs.readdirSync(storageDir).filter(f => f.startsWith('Total-km') && f.endsWith('.csv'));
+        }
         if (files.length > 0) {
           filePath = path.join(storageDir, files[0]);
         }
@@ -867,33 +1071,28 @@ app.get('/api/challenge/total-km', (req, res) => {
     }
 
     if (!fs.existsSync(filePath)) {
-      return res.json({ cutoffDate: '2026-08-17T23:59:59.999Z', items: [] });
+      return res.json({ cutoffDate: '2026-07-31T23:59:59.999Z', items: [] });
     }
 
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split(/\r?\n/).filter(line => line.trim().length > 0);
     const items = [];
 
-    // Header: name,Dthletes,Distance
+    // Header: Athlete ID,Name,km
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
       const parts = line.split(',');
-      if (parts.length >= 2) {
-        const name = (parts[0] || '').trim();
-        const athleteUrl = (parts[1] || '').trim();
-        const rawDist = (parts[2] || '').replace(/[^\d.]/g, '').trim();
+      if (parts.length >= 3) {
+        const rawId = (parts[0] || '').trim().replace(/^\uFEFF/, '');
+        const name = (parts[1] || '').trim();
+        const rawDist = (parts[2] || '').trim();
         const dist = rawDist ? parseFloat(rawDist) : null;
 
-        let athleteId = null;
-        const idMatch = athleteUrl.match(/\/athletes\/(\d+)/);
-        if (idMatch) {
-          athleteId = parseInt(idMatch[1], 10);
-        }
+        const athleteId = rawId ? parseInt(rawId, 10) : null;
 
         if (name || athleteId) {
           items.push({
             name,
-            athleteUrl,
             athleteId,
             baseDistance: dist !== null && !isNaN(dist) ? dist : null
           });
@@ -902,7 +1101,7 @@ app.get('/api/challenge/total-km', (req, res) => {
     }
 
     res.json({
-      cutoffDate: '2026-08-17T23:59:59.999Z',
+      cutoffDate: '2026-07-31T23:59:59.999Z',
       items
     });
   } catch (error) {

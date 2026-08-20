@@ -1,0 +1,452 @@
+{
+  "Abba V.": {
+    "key": "Abba_V.",
+    "fullName": "Abba Vũ",
+    "athleteId": "73380484"
+  },
+  "Abba_V.": {
+    "abbreviatedName": "Abba V.",
+    "fullName": "Abba Vũ",
+    "athleteId": "73380484"
+  },
+  "An H.": {
+    "key": "An_H.",
+    "fullName": "An Ha",
+    "athleteId": "110041582"
+  },
+  "An_H.": {
+    "abbreviatedName": "An H.",
+    "fullName": "An Ha",
+    "athleteId": "110041582"
+  },
+  "Benjamin D.": {
+    "key": "Benjamin_D.",
+    "fullName": "Benjamin Dang",
+    "athleteId": "83759389"
+  },
+  "Benjamin_D.": {
+    "abbreviatedName": "Benjamin D.",
+    "fullName": "Benjamin Dang",
+    "athleteId": "83759389"
+  },
+  "Chi N.": {
+    "key": "Chi_N.",
+    "fullName": "Chi Nguyen-Thanh",
+    "athleteId": "53686864"
+  },
+  "Chi_N.": {
+    "abbreviatedName": "Chi N.",
+    "fullName": "Chi Nguyen-Thanh",
+    "athleteId": "53686864"
+  },
+  "Cuong N.": {
+    "key": "Cuong_N.",
+    "fullName": "Cuong Nguyen",
+    "athleteId": "50684496"
+  },
+  "Cuong_N.": {
+    "abbreviatedName": "Cuong N.",
+    "fullName": "Cuong Nguyen",
+    "athleteId": "50684496"
+  },
+  "Huy H.": {
+    "key": "Huy_H.",
+    "fullName": "Huy Hoang",
+    "athleteId": "103943712"
+  },
+  "Huy_H.": {
+    "abbreviatedName": "Huy H.",
+    "fullName": "Huy Hoang",
+    "athleteId": "103943712"
+  },
+  "Học P.": {
+    "key": "Học_P.",
+    "fullName": "Học Phạm Thái",
+    "athleteId": "99613505"
+  },
+  "Học_P.": {
+    "abbreviatedName": "Học P.",
+    "fullName": "Học Phạm Thái",
+    "athleteId": "99613505"
+  },
+  "Katy N.": {
+    "key": "Katy_N.",
+    "fullName": "Katy Nguyen",
+    "athleteId": "149162660"
+  },
+  "Katy_N.": {
+    "abbreviatedName": "Katy N.",
+    "fullName": "Katy Nguyen",
+    "athleteId": "149162660"
+  },
+  "Khương P.": {
+    "key": "Khương_P.",
+    "fullName": "Khương Phạm",
+    "athleteId": "129623990"
+  },
+  "Khương_P.": {
+    "abbreviatedName": "Khương P.",
+    "fullName": "Khương Phạm",
+    "athleteId": "129623990"
+  },
+  "Lieu V.": {
+    "key": "Lieu_V.",
+    "fullName": "Lieu Vo",
+    "athleteId": "72851794"
+  },
+  "Lieu_V.": {
+    "abbreviatedName": "Lieu V.",
+    "fullName": "Lieu Vo",
+    "athleteId": "72851794"
+  },
+  "Phuong N.": {
+    "key": "Phuong_N.",
+    "fullName": "Phuong Ngo",
+    "athleteId": "126486870"
+  },
+  "Phuong_N.": {
+    "abbreviatedName": "Phuong N.",
+    "fullName": "Phuong Ngo",
+    "athleteId": "126486870"
+  },
+  "Phuong T.": {
+    "key": "Phuong_T.",
+    "fullName": "Phuong Tran",
+    "athleteId": "48977253"
+  },
+  "Phuong_T.": {
+    "abbreviatedName": "Phuong T.",
+    "fullName": "Phuong Tran",
+    "athleteId": "48977253"
+  },
+  "Quy T.": {
+    "key": "Quy_T.",
+    "fullName": "Quy Truong",
+    "athleteId": "79037203"
+  },
+  "Quy_T.": {
+    "abbreviatedName": "Quy T.",
+    "fullName": "Quy Truong",
+    "athleteId": "79037203"
+  },
+  "Sang N.": {
+    "key": "Sang_N.",
+    "fullName": "Sang Nguyen",
+    "athleteId": "125487039"
+  },
+  "Sang_N.": {
+    "abbreviatedName": "Sang N.",
+    "fullName": "Sang Nguyen",
+    "athleteId": "125487039"
+  },
+  "Sơn N.": {
+    "key": "Sơn_N.",
+    "fullName": "Sơn Nguyễn-Lê",
+    "athleteId": "78216355"
+  },
+  "Sơn_N.": {
+    "abbreviatedName": "Sơn N.",
+    "fullName": "Sơn Nguyễn-Lê",
+    "athleteId": "78216355"
+  },
+  "Tam N.": {
+    "key": "Tam_N.",
+    "fullName": "Tam Nguyen",
+    "athleteId": "106178600"
+  },
+  "Tam_N.": {
+    "abbreviatedName": "Tam N.",
+    "fullName": "Tam Nguyen",
+    "athleteId": "106178600"
+  },
+  "Thanh D.": {
+    "key": "Thanh_D.",
+    "fullName": "Thanh Dao",
+    "athleteId": "87080139"
+  },
+  "Thanh_D.": {
+    "abbreviatedName": "Thanh D.",
+    "fullName": "Thanh Dao",
+    "athleteId": "87080139"
+  },
+  "Thanh X.": {
+    "key": "Thanh_X.",
+    "fullName": "Thanh Xuan",
+    "athleteId": "106101923"
+  },
+  "Thanh_X.": {
+    "abbreviatedName": "Thanh X.",
+    "fullName": "Thanh Xuan",
+    "athleteId": "106101923"
+  },
+  "Thinh V.": {
+    "key": "Thinh_V.",
+    "fullName": "Thinh Vu",
+    "athleteId": "77523597"
+  },
+  "Thinh_V.": {
+    "abbreviatedName": "Thinh V.",
+    "fullName": "Thinh Vu",
+    "athleteId": "77523597"
+  },
+  "Tran M.": {
+    "key": "Tran_M.",
+    "fullName": "Tran Mai Nga",
+    "athleteId": "82514882"
+  },
+  "Tran_M.": {
+    "abbreviatedName": "Tran M.",
+    "fullName": "Tran Mai Nga",
+    "athleteId": "82514882"
+  },
+  "Trong T.": {
+    "key": "Trong_T.",
+    "fullName": "Trong Tran",
+    "athleteId": "81517643"
+  },
+  "Trong_T.": {
+    "abbreviatedName": "Trong T.",
+    "fullName": "Trong Tran",
+    "athleteId": "81517643"
+  },
+  "Đạt N.": {
+    "key": "Đạt_N.",
+    "fullName": "Đạt Nguyễn",
+    "athleteId": "108464598"
+  },
+  "Đạt_N.": {
+    "abbreviatedName": "Đạt N.",
+    "fullName": "Đạt Nguyễn",
+    "athleteId": "108464598"
+  },
+  "俊宇 杨": {
+    "key": "俊宇_杨",
+    "fullName": "",
+    "athleteId": null
+  },
+  "俊宇_杨": {
+    "abbreviatedName": "俊宇 杨",
+    "fullName": "",
+    "athleteId": null
+  },
+  "Andie L.": {
+    "key": "Andie_L.",
+    "fullName": "Andie Le",
+    "athleteId": "82871822"
+  },
+  "Andie_L.": {
+    "abbreviatedName": "Andie L.",
+    "fullName": "Andie Le",
+    "athleteId": "82871822"
+  },
+  "binh N.": {
+    "key": "binh_N.",
+    "fullName": "binh ngo",
+    "athleteId": "47556665"
+  },
+  "binh_N.": {
+    "abbreviatedName": "binh N.",
+    "fullName": "binh ngo",
+    "athleteId": "47556665"
+  },
+  "Dũng N.": {
+    "key": "Dũng_N.",
+    "fullName": "Dũng Nguyễn",
+    "athleteId": "102790720"
+  },
+  "Dũng_N.": {
+    "abbreviatedName": "Dũng N.",
+    "fullName": "Dũng Nguyễn",
+    "athleteId": "102790720"
+  },
+  "Hendrien N.": {
+    "key": "Hendrien_N.",
+    "fullName": "Hendrien Nel",
+    "athleteId": "34217516"
+  },
+  "Hendrien_N.": {
+    "abbreviatedName": "Hendrien N.",
+    "fullName": "Hendrien Nel",
+    "athleteId": "34217516"
+  },
+  "Herman V.": {
+    "key": "Herman_V.",
+    "fullName": "Herman van den Bosch",
+    "athleteId": "78524143"
+  },
+  "Herman_V.": {
+    "abbreviatedName": "Herman V.",
+    "fullName": "Herman van den Bosch",
+    "athleteId": "78524143"
+  },
+  "Huy N.": {
+    "key": "Huy_N.",
+    "fullName": "Huy Nguyễn",
+    "athleteId": "56445371"
+  },
+  "Huy_N.": {
+    "abbreviatedName": "Huy N.",
+    "fullName": "Huy Nguyễn",
+    "athleteId": "56445371"
+  },
+  "Huy V.": {
+    "key": "Huy_V.",
+    "fullName": "Huy Vu",
+    "athleteId": "51364143"
+  },
+  "Huy_V.": {
+    "abbreviatedName": "Huy V.",
+    "fullName": "Huy Vu",
+    "athleteId": "51364143"
+  },
+  "Huynh N.": {
+    "key": "Huynh_N.",
+    "fullName": "Huynh Nguyen",
+    "athleteId": "25463522"
+  },
+  "Huynh_N.": {
+    "abbreviatedName": "Huynh N.",
+    "fullName": "Huynh Nguyen",
+    "athleteId": "25463522"
+  },
+  "Ilse V.": {
+    "key": "Ilse_V.",
+    "fullName": "Ilse van den Bosch",
+    "athleteId": "52287099"
+  },
+  "Ilse_V.": {
+    "abbreviatedName": "Ilse V.",
+    "fullName": "Ilse van den Bosch",
+    "athleteId": "52287099"
+  },
+  "Kha M.": {
+    "key": "Kha_M.",
+    "fullName": "Kha Mai Le",
+    "athleteId": "82860849"
+  },
+  "Kha_M.": {
+    "abbreviatedName": "Kha M.",
+    "fullName": "Kha Mai Le",
+    "athleteId": "82860849"
+  },
+  "Khoa L.": {
+    "key": "Khoa_L.",
+    "fullName": "Khoa Le",
+    "athleteId": "79129542"
+  },
+  "Khoa_L.": {
+    "abbreviatedName": "Khoa L.",
+    "fullName": "Khoa Le",
+    "athleteId": "79129542"
+  },
+  "Nam N.": {
+    "key": "Nam_N.",
+    "fullName": "Nam Nguyen",
+    "athleteId": "83767014"
+  },
+  "Nam_N.": {
+    "abbreviatedName": "Nam N.",
+    "fullName": "Nam Nguyen",
+    "athleteId": "83767014"
+  },
+  "Nguyen H.": {
+    "key": "Nguyen_H.",
+    "fullName": "Nguyen Hien",
+    "athleteId": "107853634"
+  },
+  "Nguyen_H.": {
+    "abbreviatedName": "Nguyen H.",
+    "fullName": "Nguyen Hien",
+    "athleteId": "107853634"
+  },
+  "Peter V.": {
+    "key": "Peter_V.",
+    "fullName": "Peter Vkhanh",
+    "athleteId": "82620973"
+  },
+  "Peter_V.": {
+    "abbreviatedName": "Peter V.",
+    "fullName": "Peter Vkhanh",
+    "athleteId": "82620973"
+  },
+  "Pha V.": {
+    "key": "Pha_V.",
+    "fullName": "Pha Vo",
+    "athleteId": "134088880"
+  },
+  "Pha_V.": {
+    "abbreviatedName": "Pha V.",
+    "fullName": "Pha Vo",
+    "athleteId": "134088880"
+  },
+  "pham T.": {
+    "key": "pham_T.",
+    "fullName": "pham tien",
+    "athleteId": "120540594"
+  },
+  "pham_T.": {
+    "abbreviatedName": "pham T.",
+    "fullName": "pham tien",
+    "athleteId": "120540594"
+  },
+  "Phú N.": {
+    "key": "Phú_N.",
+    "fullName": "Phú Nguyễn Thiên",
+    "athleteId": "167860841"
+  },
+  "Phú_N.": {
+    "abbreviatedName": "Phú N.",
+    "fullName": "Phú Nguyễn Thiên",
+    "athleteId": "167860841"
+  },
+  "Thắm Đ.": {
+    "key": "Thắm_Đ.",
+    "fullName": "Thắm Đỗ",
+    "athleteId": "108300453"
+  },
+  "Thắm_Đ.": {
+    "abbreviatedName": "Thắm Đ.",
+    "fullName": "Thắm Đỗ",
+    "athleteId": "108300453"
+  },
+  "Tien P.": {
+    "key": "Tien_P.",
+    "fullName": "Tien PhamTV",
+    "athleteId": "133066813"
+  },
+  "Tien_P.": {
+    "abbreviatedName": "Tien P.",
+    "fullName": "Tien PhamTV",
+    "athleteId": "133066813"
+  },
+  "vu D.": {
+    "key": "vu_D.",
+    "fullName": "vu duong",
+    "athleteId": "101067787"
+  },
+  "vu_D.": {
+    "abbreviatedName": "vu D.",
+    "fullName": "vu duong",
+    "athleteId": "101067787"
+  },
+  "Vuong  N.": {
+    "key": "Vuong _N.",
+    "fullName": "Vuong  N.",
+    "athleteId": null
+  },
+  "Vuong _N.": {
+    "abbreviatedName": "Vuong  N.",
+    "fullName": "Vuong  N.",
+    "athleteId": null
+  },
+  "Vĩnh P.": {
+    "key": "Vĩnh_P.",
+    "fullName": "Vĩnh Phạm",
+    "athleteId": "5391817"
+  },
+  "Vĩnh_P.": {
+    "abbreviatedName": "Vĩnh P.",
+    "fullName": "Vĩnh Phạm",
+    "athleteId": "5391817"
+  }
+}

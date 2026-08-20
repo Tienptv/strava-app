@@ -17,8 +17,7 @@ export default function Dashboard({
   challengeMonth: propMonth, 
   challengeYear: propYear, 
   setChallengeMonth: propSetMonth, 
-  setChallengeYear: propSetYear,
-  refreshKey
+  setChallengeYear: propSetYear 
 }) {
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
@@ -44,6 +43,7 @@ export default function Dashboard({
   const [challengeParticipants, setChallengeParticipants] = useState({});
   const [challengeConfig, setChallengeConfig] = useState(null);
   const [totalKmBase, setTotalKmBase] = useState(null);
+  const [nameMapping, setNameMapping] = useState({});
 
   useEffect(() => {
     if (viewMode === 'challenge' && !loadingChallenge) {
@@ -75,7 +75,7 @@ export default function Dashboard({
 
     window.addEventListener('challengeUpdated', handleChallengeUpdated);
     return () => window.removeEventListener('challengeUpdated', handleChallengeUpdated);
-  }, [refreshKey]);
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -120,9 +120,13 @@ export default function Dashboard({
       // Load Total-km baseline from backend
       try {
         const totalKmData = await apiFetch('/challenge/total-km').catch(() => null);
-        if (totalKmData) {
+        if (totalKmData && Array.isArray(totalKmData.items)) {
           setTotalKmBase(totalKmData);
         }
+        
+        const mappingData = await apiFetch('/challenge/name-mapping').catch(() => ({}));
+        setNameMapping(mappingData || {});
+
       } catch (e) {
         console.error('Lỗi khi đọc Total-km base', e);
       }
@@ -276,6 +280,7 @@ export default function Dashboard({
               athlete={athlete}
               isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
               allowEditOthers={challengeConfig?.allowEditOthers}
+              nameMapping={nameMapping}
             />
           )}
         </div>

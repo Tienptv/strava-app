@@ -4,7 +4,7 @@ import { normalize } from '../utils/challengeStats';
 import { Save, CheckCircle2, ShieldAlert, ShieldCheck } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, nameMapping = {} }) {
   const { t } = useLang();
   
   const [userData, setUserData] = useState({});
@@ -239,7 +239,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     <div className="runner-info">
                       <span className="runner-rank">{index + 1}.</span>
                       <span className="runner-name">
-                        {row.member.firstname} {row.member.lastname}
+                        {nameMapping[`${row.member.firstname} ${row.member.lastname}`]?.fullName || `${row.member.firstname} ${row.member.lastname}`}
                         {isMe && <span className="runner-me-badge" title="Tài khoản của bạn">{t('you')}</span>}
                         {row.rank === 1 && <span title="Top 1" style={{ marginLeft: 4 }}>🥇</span>}
                         {row.rank === 2 && <span title="Top 2" style={{ marginLeft: 4 }}>🥈</span>}
@@ -327,7 +327,11 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                   <td className="sum-cell sticky-right col-km highlight-total">{row.totalDistance.toFixed(1)}</td>
                   <td className="sum-cell sticky-right col-days">{row.totalDays}</td>
                   <td className="sum-cell sticky-right col-time">{formatTime(row.totalMovingTime)}</td>
-                  <td className="sum-cell sticky-right col-all-time">{row.allTimeDistance ? row.allTimeDistance.toFixed(1) : '-'}</td>
+                  <td className="sum-cell sticky-right col-all-time">
+                    {row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0 
+                      ? row.allTimeDistance.toFixed(1) 
+                      : (row.allTimeDistance === 0 ? '0.0' : '-')}
+                  </td>
                 </tr>
               );
             })}
@@ -383,7 +387,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               <td className="sum-cell sticky-right col-time">-</td>
               <td className="sum-cell sticky-right col-all-time">
                 <strong>
-                  {challengeData.some(row => row.allTimeDistance) 
+                  {challengeData.some(row => row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0) 
                     ? challengeData.reduce((sum, row) => sum + (row.allTimeDistance || 0), 0).toFixed(1)
                     : '-'}
                 </strong>

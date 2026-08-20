@@ -25,7 +25,7 @@ export async function loadChallengeData(apiFetch, athlete, participants) {
     // 2. Load imported activities from backend (Tháng 8/2026 trở đi)
     let importedActivities = [];
     try {
-      const importedData = await apiFetch('/challenge/imported').catch(() => []);
+      const importedData = await apiFetch('/challenge/imported', { cache: 'no-store' }).catch(() => []);
       if (Array.isArray(importedData)) {
         importedActivities = importedData;
       }

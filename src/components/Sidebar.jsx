@@ -10,7 +10,24 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
   const [members, setMembers] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [stravaCookie, setStravaCookie] = useState(localStorage.getItem('stravaCookie') || '');
+  const [syncLimit, setSyncLimit] = useState(50);
   
+  // Tự động kiểm tra trạng thái cookie thật trên Server khi mở app
+  useEffect(() => {
+    apiFetch('/strava/cookie')
+      .then(res => {
+        if (!res.hasCookie) {
+          setStravaCookie('');
+          localStorage.removeItem('stravaCookie');
+        } else {
+          setStravaCookie(res.cookie);
+          localStorage.setItem('stravaCookie', res.cookie);
+        }
+      })
+      .catch(err => console.error('Lỗi kiểm tra cookie:', err));
+  }, [apiFetch]);
+
   // State quản lý challenge participants: { [athleteId]: true/false }
   const [participants, setParticipants] = useState({});
   const [monthlyParticipants, setMonthlyParticipants] = useState({});
@@ -101,26 +118,6 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
     } catch (err) {
       console.error('Lỗi lưu config:', err);
       alert('Không thể lưu cấu hình, vui lòng thử lại.');
-    }
-  };
-
-  const [syncing, setSyncing] = useState(false);
-  const handleAutoSync = async () => {
-    if (!window.confirm("Hệ thống sẽ chạy lấy dữ liệu từ Strava và update bảng xếp hạng (có thể mất vài phút). Bạn có muốn tiếp tục?")) return;
-    setSyncing(true);
-    try {
-      const response = await apiFetch('/challenge/auto-sync', { method: 'POST' });
-      if (response && response.success) {
-        alert(`Thành công! Đã đồng bộ ${response.count} hoạt động.`);
-        window.dispatchEvent(new CustomEvent('challengeUpdated', { detail: { year: activeYear, month: activeMonth } }));
-      } else {
-         alert('Có lỗi xảy ra khi đồng bộ.');
-      }
-    } catch (err) {
-      console.error('Lỗi auto sync:', err);
-      alert('Không thể tự động đồng bộ. Vui lòng thử lại.');
-    } finally {
-      setSyncing(false);
     }
   };
 
@@ -240,15 +237,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
       allImportedActivities = [...allImportedActivities, ...activities];
     }
 
+    // KHÔNG fetch existingActivities nữa, backend sẽ lo việc xóa dữ liệu trùng ngày và merge
     let existingActivities = [];
-    try {
-      const importedData = await apiFetch('/challenge/imported').catch(() => []);
-      if (Array.isArray(importedData)) {
-        existingActivities = importedData;
-      }
-    } catch (e) {
-      console.error('Lỗi khi đọc importedActivities', e);
-    }
 
     const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
     const uniqueMap = new Map();
@@ -291,14 +281,14 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
     // Chỉ update các hoạt động từ tháng 8/2026 trở đi vào importedActivities (các tháng 1-7 đã lưu riêng trong historical)
     const augImportedActivities = allImportedActivities.filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
     
-    existingActivities.forEach(addRecord);
+    // Chỉ deduplicate nội bộ các file vừa upload
     augImportedActivities.forEach(addRecord);
 
     const finalSet = new Set(uniqueMap.values());
     const finalActivities = Array.from(finalSet).filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
     
     try {
-      await apiFetch('/challenge/imported', {
+      await apiFetch('/challenge/imported?replaceByDate=true', {
         method: 'POST',
         body: JSON.stringify(finalActivities)
       });
@@ -475,15 +465,114 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
               <input type="file" webkitdirectory="true" onChange={handleCsvUpload} style={{ display: 'none' }} />
             </label>
           </div>
-          
-          <button 
-            className="btn btn--primary" 
-            style={{ marginTop: '8px', background: '#FC4C02', color: '#fff', border: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-            onClick={handleAutoSync}
-            disabled={syncing}
-          >
-            {syncing ? 'Đang đồng bộ...' : 'Auto Sync & Update (Strava)'}
-          </button>
+          <div style={{ marginTop: '8px' }}>
+            <button 
+              className="btn btn--secondary"
+              onClick={async () => {
+                try {
+                  const res = await apiFetch('/strava/cookie');
+                  if (res.hasCookie) {
+                    setStravaCookie(res.cookie);
+                    localStorage.setItem('stravaCookie', res.cookie);
+                    alert('✅ Đã có cookie Strava sẵn sàng! Bạn có thể bấm Auto Sync.');
+                  } else {
+                    setStravaCookie('');
+                    localStorage.removeItem('stravaCookie');
+                    if (confirm('Chưa có cookie. Mở Chrome để đăng nhập Strava?')) {
+                      const loginRes = await apiFetch('/strava/login', { method: 'POST' });
+                      if (loginRes.success) {
+                        setStravaCookie(loginRes.cookie);
+                        localStorage.setItem('stravaCookie', loginRes.cookie);
+                        alert('✅ Đăng nhập thành công! Cookie đã được lưu tự động.');
+                      } else {
+                        alert('❌ Lỗi: ' + (loginRes.error || 'Unknown'));
+                      }
+                    }
+                  }
+                } catch (e) {
+                  alert('Lỗi: ' + e.message);
+                }
+              }}
+              style={{ 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
+                padding: '10px 8px', background: stravaCookie ? '#e8f5e9' : '#fff3e0', 
+                color: '#002D54', 
+                border: `1px solid ${stravaCookie ? '#66bb6a' : '#ffb74d'}`, borderRadius: '6px', fontSize: '13px', 
+                fontWeight: 'bold', width: '100%', marginBottom: '6px'
+              }}
+            >
+              <svg style={{ marginRight: 6 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              {stravaCookie ? '🟢 Cookie Strava OK' : '🔑 Đăng nhập Strava'}
+            </button>
+            <input 
+              type="text" 
+              placeholder="Nhập thủ công _strava4_session" 
+              value={stravaCookie}
+              onChange={(e) => {
+                const val = e.target.value;
+                setStravaCookie(val);
+                localStorage.setItem('stravaCookie', val);
+              }}
+              style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input 
+              type="number" 
+              value={syncLimit}
+              onChange={(e) => setSyncLimit(e.target.value)}
+              title="Số lượng hoạt động muốn tải về"
+              style={{ width: '60px', padding: '8px', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', textAlign: 'center', fontWeight: 'bold', color: '#002D54', background: '#fff' }}
+              min="1"
+            />
+            <button 
+              className="btn btn--secondary"
+              onClick={async () => {
+                if (!selectedClubId) {
+                  alert('Vui lòng chọn một nhóm (Challenge Group) trước khi đồng bộ.');
+                  return;
+                }
+                const cookieToUse = stravaCookie || '';
+                try {
+                  const data = await apiFetch(`/clubs/${selectedClubId}/auto-sync-scrape`, { 
+                    method: 'POST',
+                    body: JSON.stringify({ cookie: cookieToUse || undefined, limit: Number(syncLimit) })
+                  });
+                  if (data.success) {
+                    alert(`✅ Đồng bộ dữ liệu thành công!\n\n• Đã cập nhật ${data.scraped_count} hoạt động chạy bộ mới nhất từ nhóm Strava.\n• Dữ liệu đã được lưu và tính toán vào bảng thử thách!`);
+                    window.location.reload();
+                  } else {
+                    if (data.error && (data.error.includes('Cookie') || data.error.includes('Phiên đăng nhập đã hết hạn'))) {
+                      setStravaCookie('');
+                      localStorage.removeItem('stravaCookie');
+                      if (confirm(data.error + '\n\nBạn có muốn mở Chrome để đăng nhập Strava ngay không?')) {
+                        const loginRes = await apiFetch('/strava/login', { method: 'POST' });
+                        if (loginRes.success) {
+                          setStravaCookie(loginRes.cookie);
+                          localStorage.setItem('stravaCookie', loginRes.cookie);
+                          alert('✅ Đăng nhập thành công! Vui lòng bấm Đồng bộ lại.');
+                        }
+                      }
+                    } else {
+                      alert('❌ Lỗi: ' + (data.error || 'Có lỗi xảy ra khi đồng bộ'));
+                    }
+                  }
+                } catch (e) {
+                  console.error(e);
+                  alert('❌ Lỗi kết nối server: ' + e.message);
+                }
+              }}
+              style={{ 
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
+                padding: '10px 8px', background: '#e3f2fd', color: '#002D54', 
+                border: '1px solid #90caf9', borderRadius: '6px', fontSize: '13px', 
+                fontWeight: 'bold'
+              }}
+            >
+              <svg style={{ marginRight: 6 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+              Tự động đồng bộ Strava
+            </button>
+          </div>
         </div>
       </div>
     </aside>

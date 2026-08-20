@@ -11,6 +11,9 @@ export default defineConfig(({ mode }) => {
       ViteRestart({ restart: ['.env'] })
     ],
     server: {
+      watch: {
+        ignored: ['**/Storage/**', '**/.chrome_session/**', '**/scraper-error.*']
+      },
       proxy: {
         '/api': {
           target: env.VITE_API_PROXY_TARGET || 'http://localhost:3001',
