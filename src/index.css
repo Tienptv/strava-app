@@ -1400,6 +1400,19 @@ img {
    RESPONSIVE
    ========================================== */
 @media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+  }
+
   .navbar {
     padding: 0 16px;
   }
@@ -1436,6 +1449,30 @@ img {
 
   .navbar__nav {
     display: none;
+  }
+
+  .section__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .navbar__user span {
+    display: none;
+  }
+
+  .navbar__brand-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+  
+  .navbar__brand {
+    font-size: 1.1rem;
+  }
+
+  .sidebar__footer {
+    padding-bottom: 24px;
   }
 }
 
