@@ -245,11 +245,14 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
       } catch (e) {}
     }
 
-    // Scroll to fetch more if limit > allActivities.size
+    // Scroll to fetch more if limit > runCount
     let noNewDataCount = 0;
     const maxEmptyScrolls = 10; // Tối đa 10 lần cuộn không có dữ liệu mới
     
-    while (allActivities.size < limit && noNewDataCount < maxEmptyScrolls) {
+    let getRunCount = () => Array.from(allActivities.values()).filter(a => a.type === 'Run').length;
+    let runCount = getRunCount();
+
+    while (runCount < limit && noNewDataCount < maxEmptyScrolls) {
       const prevSize = allActivities.size;
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       await new Promise(r => setTimeout(r, 2000)); // Chờ 2s để API load
@@ -260,14 +263,14 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
         noNewDataCount = 0;
       }
       
-      console.log(`Đang cuộn lấy thêm dữ liệu: ${allActivities.size}/${limit}`);
+      runCount = getRunCount();
+      console.log(`Đang cuộn lấy thêm dữ liệu: ${runCount}/${limit} Run (Tổng act: ${allActivities.size})`);
     }
 
     await browser.close();
     
-    // Convert to array and slice to exact limit
-    const finalArray = Array.from(allActivities.values()).slice(0, limit);
-    return finalArray;
+    // Convert to array and return all. The caller will filter and slice.
+    return Array.from(allActivities.values());
   } catch (error) {
     try { await browser.close(); } catch(e) {}
     throw error;

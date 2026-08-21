@@ -911,8 +911,8 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
     // 1. Scrape activities using Puppeteer
     const scrapedActivities = await scrapeClubActivities(clubId, cookie, limit);
     
-    // 2. Filter for 'Run' activities
-    const runActivities = scrapedActivities.filter(act => act.type === 'Run');
+    // 2. Filter for 'Run' activities and limit to the requested amount
+    const runActivities = scrapedActivities.filter(act => act.type === 'Run').slice(0, limit);
     
     // 3. Format as CSV
     // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
