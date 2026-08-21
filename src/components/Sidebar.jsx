@@ -11,7 +11,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [stravaCookie, setStravaCookie] = useState(sessionStorage.getItem('stravaCookie') || '');
-  const [syncLimit, setSyncLimit] = useState(500);
+  const [syncLimit, setSyncLimit] = useState(20);
 
   // State quản lý challenge participants: { [athleteId]: true/false }
   const [participants, setParticipants] = useState({});
