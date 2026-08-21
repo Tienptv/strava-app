@@ -1440,6 +1440,39 @@ img {
   .activity-card__metrics {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Challenge table responsive */
+  .challenge-table {
+    font-size: 0.75rem;
+  }
+  
+  .sticky-col.first-col {
+    min-width: 130px;
+  }
+  
+  .runner-name-text {
+    max-width: 70px;
+  }
+  
+  .runner-header, .total-footer {
+    padding-left: 8px !important;
+  }
+
+  .challenge-table th, 
+  .challenge-table td {
+    padding: 4px 2px;
+  }
+
+  .challenge-table th.sum-col {
+    min-width: 48px;
+  }
+
+  .challenge-table th.day-col,
+  .challenge-table td.day-cell {
+    width: 28px;
+    min-width: 28px;
+    max-width: 28px;
+  }
 }
 
 @media (max-width: 480px) {
