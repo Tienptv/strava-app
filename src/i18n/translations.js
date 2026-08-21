@@ -96,6 +96,10 @@ const translations = {
     importSuccess: 'Đã tải thành công dữ liệu từ file CSV!',
     importError: 'Có lỗi khi đọc file CSV.',
     importCsv: 'Import CSV (Club Reports)',
+    importCsvPlaceholder: 'Nhập thẻ công _dauvat_vasoran',
+    stravaLogin: 'Đăng nhập Strava',
+    stravaCookieOk: 'Cookie Strava OK',
+    autoSyncStrava: 'Tự động đồng bộ Strava',
     selectFile: 'Chọn File',
     selectFolder: 'Chọn Folder',
 
@@ -247,6 +251,10 @@ const translations = {
     importSuccess: 'Successfully loaded data from CSV file!',
     importError: 'Error reading CSV file.',
     importCsv: 'Import CSV (Club Reports)',
+    importCsvPlaceholder: 'Enter token _dauvat_vasoran',
+    stravaLogin: 'Login Strava',
+    stravaCookieOk: 'Strava Cookie OK',
+    autoSyncStrava: 'Auto sync Strava',
     selectFile: 'Select File',
     selectFolder: 'Select Folder',
 

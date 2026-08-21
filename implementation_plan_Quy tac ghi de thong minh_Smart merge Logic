@@ -1,0 +1,51 @@
+# Triển khai Quy tắc Ghi đè Thông minh (Smart Merge Logic)
+
+Theo yêu cầu của bạn, tôi sẽ triển khai quy tắc xóa và ghi đè dữ liệu khi người dùng thực hiện **Import CSV thủ công** hoặc **Tự động đồng bộ Strava**.
+
+## Quy trình hoạt động (Logic Flow)
+
+Khi một file CSV mới (hoặc dữ liệu cạo tự động) được nạp vào, hệ thống sẽ thực hiện theo các bước sau:
+
+1. **Phân tích ngày (Date Extraction):**
+   - Đọc toàn bộ các hoạt động có trong dữ liệu tải về (ví dụ file `data-2026-8-20-22 - Copy.csv`).
+   - Quét qua tất cả các dòng để tìm ra ngày nhỏ nhất (`minDate`, ví dụ: `2026-08-01`) và ngày lớn nhất (`maxDate`, ví dụ: `2026-08-20`).
+
+2. **Dọn dẹp Bảng Challenge (Data Wiping):**
+   - Đọc dữ liệu hiện tại đang hiển thị trên bảng challenge (nằm trong file `imported_activities.json`).
+   - Xóa bỏ **toàn bộ** các hoạt động có ngày chạy nằm trong khoảng từ `minDate` đến `maxDate`.
+
+3. **Ghi đè Dữ liệu Mới (Overwriting/Merging):**
+   - Đưa toàn bộ dữ liệu từ file CSV mới tải về vào bảng challenge.
+   - Quá trình này đảm bảo nếu có một hoạt động bị người dùng xóa trên Strava (nên không còn trong file CSV mới), nó cũng sẽ biến mất khỏi bảng challenge vì đã bị bước 2 xóa sạch.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Về các file dữ liệu khác (Backup CSVs):**
+> Bạn có nhắc đến "có thể các file lưu dữ liệu khác". Hiện tại, bảng challenge chỉ lấy dữ liệu từ một nguồn duy nhất là `imported_activities.json`. 
+> Các file CSV nằm trong thư mục `Storage/` chỉ đóng vai trò là "lịch sử tải xuống" (backup). Do đó, quy tắc xóa đè này sẽ **CHỈ TÁC ĐỘNG** lên `imported_activities.json` để cập nhật giao diện web. Hệ thống sẽ **KHÔNG XÓA** lịch sử lưu trong các file CSV cũ ở thư mục `Storage/` để đảm bảo bạn luôn có dữ liệu gốc dự phòng.
+
+## Open Questions
+
+> [!CAUTION]
+> **Rủi ro mất dữ liệu khi Tự động đồng bộ (Auto Sync):**
+> Nút Tự động đồng bộ mặc định chỉ lấy 50 hoạt động gần nhất. Nếu 50 hoạt động này chỉ kéo dài từ ngày 12/08 đến 20/08, hệ thống sẽ xóa toàn bộ dữ liệu từ 12/08 đến 20/08. Nếu trong khoảng 12-20/08 có 60 hoạt động (10 hoạt động cũ hơn không nằm trong top 50), 10 hoạt động đó sẽ bị mất vĩnh viễn trên bảng challenge.
+> 
+> **Giải pháp:** Tôi đã tăng giới hạn mặc định của nút Tự động đồng bộ từ 50 lên **500** để đảm bảo nó luôn lấy trọn vẹn toàn bộ tháng, tránh việc bị khuyết dữ liệu. Bạn có đồng ý với giải pháp này không?
+
+## Proposed Changes
+
+### Backend Logic (`server/index.js`)
+- [MODIFY] Endpoint `POST /api/challenge/imported`: Sẽ tính toán `minDate` và `maxDate` của payload, filter xóa trong `imported_activities.json`, và merge dữ liệu mới.
+- [MODIFY] Endpoint `POST /api/clubs/:id/auto-sync-scrape`: Sẽ lấy dữ liệu cạo được, tự động áp dụng hàm tính `minDate/maxDate`, xóa trong `imported_activities.json`, merge, và trả về cho client.
+- [MODIFY] Hàm `syncAllStorageCsv()`: Được chuyển về dạng merge thông thường, loại bỏ chức năng xóa theo ngày, để đảm bảo không bị lỗi xóa nhầm khi đọc lại các file CSV lịch sử.
+
+### Frontend Logic (`src/components/Sidebar.jsx`)
+- [MODIFY] Cập nhật state `syncLimit` mặc định từ 50 lên 500 để đảm bảo cạo đủ dữ liệu cho chu kỳ ghi đè ngày.
+
+## Verification Plan
+
+### Manual Verification
+1. Import file `data-2026-8-20-22 - Copy.csv` qua nút Import CSV.
+2. Kiểm tra xem các hoạt động trong khoảng từ 01/08 đến 20/08 (ví dụ như bài chạy bị khuyết trước đó của runner) có được cập nhật chính xác vào bảng challenge mà không lưu lại dữ liệu rác cũ không.
+3. Refresh (F5) trang web để đảm bảo dữ liệu không bị biến mất.

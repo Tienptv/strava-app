@@ -10,23 +10,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
   const [members, setMembers] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [stravaCookie, setStravaCookie] = useState(localStorage.getItem('stravaCookie') || '');
-  const [syncLimit, setSyncLimit] = useState(50);
-  
-  // Tự động kiểm tra trạng thái cookie thật trên Server khi mở app
-  useEffect(() => {
-    apiFetch('/strava/cookie')
-      .then(res => {
-        if (!res.hasCookie) {
-          setStravaCookie('');
-          localStorage.removeItem('stravaCookie');
-        } else {
-          setStravaCookie(res.cookie);
-          localStorage.setItem('stravaCookie', res.cookie);
-        }
-      })
-      .catch(err => console.error('Lỗi kiểm tra cookie:', err));
-  }, [apiFetch]);
+  const [stravaCookie, setStravaCookie] = useState(sessionStorage.getItem('stravaCookie') || '');
+  const [syncLimit, setSyncLimit] = useState(500);
 
   // State quản lý challenge participants: { [athleteId]: true/false }
   const [participants, setParticipants] = useState({});
@@ -473,16 +458,16 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                   const res = await apiFetch('/strava/cookie');
                   if (res.hasCookie) {
                     setStravaCookie(res.cookie);
-                    localStorage.setItem('stravaCookie', res.cookie);
+                    sessionStorage.setItem('stravaCookie', res.cookie);
                     alert('✅ Đã có cookie Strava sẵn sàng! Bạn có thể bấm Auto Sync.');
                   } else {
                     setStravaCookie('');
-                    localStorage.removeItem('stravaCookie');
-                    if (confirm('Chưa có cookie. Mở Chrome để đăng nhập Strava?')) {
+                    sessionStorage.removeItem('stravaCookie');
+                    if (confirm(t('noActivitiesHint'))) {
                       const loginRes = await apiFetch('/strava/login', { method: 'POST' });
                       if (loginRes.success) {
                         setStravaCookie(loginRes.cookie);
-                        localStorage.setItem('stravaCookie', loginRes.cookie);
+                        sessionStorage.setItem('stravaCookie', loginRes.cookie);
                         alert('✅ Đăng nhập thành công! Cookie đã được lưu tự động.');
                       } else {
                         alert('❌ Lỗi: ' + (loginRes.error || 'Unknown'));
@@ -502,16 +487,16 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
               }}
             >
               <svg style={{ marginRight: 6 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              {stravaCookie ? '🟢 Cookie Strava OK' : '🔑 Đăng nhập Strava'}
+              {stravaCookie ? `🟢 ${t('stravaCookieOk')}` : `🔑 ${t('stravaLogin')}`}
             </button>
             <input 
               type="text" 
-              placeholder="Nhập thủ công _strava4_session" 
+              placeholder={t('importCsvPlaceholder')} 
               value={stravaCookie}
               onChange={(e) => {
                 const val = e.target.value;
                 setStravaCookie(val);
-                localStorage.setItem('stravaCookie', val);
+                sessionStorage.setItem('stravaCookie', val);
               }}
               style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box' }}
             />
@@ -544,12 +529,12 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                   } else {
                     if (data.error && (data.error.includes('Cookie') || data.error.includes('Phiên đăng nhập đã hết hạn'))) {
                       setStravaCookie('');
-                      localStorage.removeItem('stravaCookie');
+                      sessionStorage.removeItem('stravaCookie');
                       if (confirm(data.error + '\n\nBạn có muốn mở Chrome để đăng nhập Strava ngay không?')) {
                         const loginRes = await apiFetch('/strava/login', { method: 'POST' });
                         if (loginRes.success) {
                           setStravaCookie(loginRes.cookie);
-                          localStorage.setItem('stravaCookie', loginRes.cookie);
+                          sessionStorage.setItem('stravaCookie', loginRes.cookie);
                           alert('✅ Đăng nhập thành công! Vui lòng bấm Đồng bộ lại.');
                         }
                       }
@@ -570,7 +555,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
               }}
             >
               <svg style={{ marginRight: 6 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
-              Tự động đồng bộ Strava
+              <span>{t('autoSyncStrava')}</span>
             </button>
           </div>
         </div>

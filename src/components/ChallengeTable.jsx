@@ -178,7 +178,9 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
         {challengeData.length > 0 && challengeData[0].totalDistance > 0 && (
           <div className="runner-of-the-month" title="Runner of the Month">
              <span className="rotm-icon">🏆</span>
-             <span className="rotm-name">{challengeData[0].member.firstname} {challengeData[0].member.lastname}</span>
+             <span className="rotm-name">
+                {nameMapping[`${challengeData[0].member.firstname} ${challengeData[0].member.lastname}`]?.fullName || `${challengeData[0].member.firstname} ${challengeData[0].member.lastname}`}
+             </span>
              <span className="rotm-dist">{challengeData[0].totalDistance.toFixed(1)} km</span>
           </div>
         )}
@@ -190,7 +192,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
         <table className="challenge-table">
           <thead>
             <tr>
-              <th className="sticky-col first-col">{t('runner')}</th>
+              <th className="sticky-col first-col runner-header">RUNNER</th>
               {daysArray.map(day => (
                 <th key={day} className="day-col">{day}</th>
               ))}
@@ -239,13 +241,17 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     <div className="runner-info">
                       <span className="runner-rank">{index + 1}.</span>
                       <span className="runner-name">
-                        {nameMapping[`${row.member.firstname} ${row.member.lastname}`]?.fullName || `${row.member.firstname} ${row.member.lastname}`}
+                        <span className="runner-name-text" title={nameMapping[`${row.member.firstname} ${row.member.lastname}`]?.fullName || `${row.member.firstname} ${row.member.lastname}`}>
+                          {nameMapping[`${row.member.firstname} ${row.member.lastname}`]?.fullName || `${row.member.firstname} ${row.member.lastname}`}
+                        </span>
                         {isMe && <span className="runner-me-badge" title="Tài khoản của bạn">{t('you')}</span>}
-                        {row.rank === 1 && <span title="Top 1" style={{ marginLeft: 4 }}>🥇</span>}
-                        {row.rank === 2 && <span title="Top 2" style={{ marginLeft: 4 }}>🥈</span>}
-                        {row.rank === 3 && <span title="Top 3" style={{ marginLeft: 4 }}>🥉</span>}
-                        {row.maxStreak >= 3 && <span title={`Streak ${row.maxStreak}!`} style={{ marginLeft: 4 }}>🔥</span>}
-                        {row.isTurtle && <span title="Turtle" style={{ marginLeft: 4 }}>🐢</span>}
+                        <span className="runner-achievements">
+                          {row.rank === 1 && <span title="Top 1">🥇</span>}
+                          {row.rank === 2 && <span title="Top 2">🥈</span>}
+                          {row.rank === 3 && <span title="Top 3">🥉</span>}
+                          {row.maxStreak >= 3 && <span title={`Streak ${row.maxStreak}!`} className={row.maxStreak >= 5 ? 'streak-fire-blue' : ''}>🔥</span>}
+                          {row.isTurtle && <span title="Turtle">🐌</span>}
+                        </span>
                       </span>
                     </div>
                   </td>
@@ -340,7 +346,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
           {/* Footer with totals (optional, but good for summary) */}
           <tfoot>
             <tr className="totals-row">
-              <td className="sticky-col first-col"><strong>{t('total')}</strong></td>
+              <td className="sticky-col first-col total-footer"><strong>TOTAL</strong></td>
               {daysArray.map(day => {
                 const dayTotal = challengeData.reduce((sum, row) => sum + row.dailyDistances[day], 0);
                 return (

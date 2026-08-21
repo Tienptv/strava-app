@@ -252,36 +252,29 @@ function syncAllStorageCsv() {
       }
     }
 
-    const csvFiles = fs.readdirSync(storageDir).filter(f => f.startsWith('data-') && f.endsWith('.csv'));
-    let csvActivities = [];
+    let csvFiles = fs.readdirSync(storageDir).filter(f => f.startsWith('data-') && f.endsWith('.csv'));
+    csvFiles.sort(); // Sắp xếp theo tên (tên chứa thời gian nên sẽ tăng dần)
+    
+    let isUpdated = false;
+
     for (const f of csvFiles) {
       try {
         const content = fs.readFileSync(path.join(storageDir, f), 'utf8');
-        const acts = parseStorageCSV(content);
-        csvActivities = csvActivities.concat(acts);
+        let fileActivities = parseStorageCSV(content);
+        
+        if (fileActivities.length > 0) {
+          fileActivities = mapAthleteNamesUsingCSV(fileActivities);
+          
+          existingActivities = mergeActivitiesList(existingActivities, fileActivities);
+          isUpdated = true;
+        }
       } catch (err) {
         console.error(`Lỗi đọc file CSV ${f}:`, err.message);
       }
     }
 
-    if (csvActivities.length > 0) {
-      csvActivities = mapAthleteNamesUsingCSV(csvActivities);
-      
-      // Xóa các dữ liệu cũ trong existingActivities nếu trùng ngày với dữ liệu trong CSV
-      const newDates = new Set();
-      csvActivities.forEach(act => {
-          if (act.start_date_local) {
-              newDates.add(act.start_date_local.substring(0, 10));
-          }
-      });
-      existingActivities = existingActivities.filter(act => {
-          if (!act.start_date_local) return true;
-          return !newDates.has(act.start_date_local.substring(0, 10));
-      });
-
-      const merged = mergeActivitiesList(existingActivities, csvActivities);
-      fs.writeFileSync(IMPORTED_FILE, JSON.stringify(merged, null, 2), 'utf8');
-      return merged;
+    if (isUpdated) {
+      fs.writeFileSync(IMPORTED_FILE, JSON.stringify(existingActivities, null, 2), 'utf8');
     }
     return existingActivities;
   } catch (err) {
@@ -290,8 +283,8 @@ function syncAllStorageCsv() {
   }
 }
 
-// Đồng bộ CSV khi khởi động server
-syncAllStorageCsv();
+// Không tự động đồng bộ CSV khi khởi động server nữa
+// syncAllStorageCsv();
 
 // ==========================================
 // AUTH ROUTES
@@ -770,8 +763,12 @@ app.post('/api/challenge/historical', (req, res) => {
 // Đọc imported activities (Tháng 8/2026 trở đi)
 app.get('/api/challenge/imported', (req, res) => {
   try {
-    const data = syncAllStorageCsv();
-    res.json(data);
+    if (fs.existsSync(IMPORTED_FILE)) {
+      const data = fs.readFileSync(IMPORTED_FILE, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json([]);
+    }
   } catch (error) {
     console.error('Lỗi đọc imported:', error.message);
     res.status(500).json({ error: 'Không thể đọc dữ liệu imported' });
@@ -834,10 +831,44 @@ app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
     
     fs.writeFileSync(filepath, csvContent, 'utf8');
     
-    // 5. Trigger syncAllStorageCsv
-    const mergedData = syncAllStorageCsv();
-    
-    res.json({ success: true, count: mergedData.length, activities: mergedData, synced_from_strava: runActivities.length, filename });
+    // 5. Update imported_activities.json directly with smart wipe logic
+    let fileActivities = parseStorageCSV(csvContent);
+    if (fileActivities.length > 0) {
+      fileActivities = mapAthleteNamesUsingCSV(fileActivities);
+      
+      let existing = [];
+      if (fs.existsSync(IMPORTED_FILE)) {
+        try {
+          existing = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
+          if (!Array.isArray(existing)) existing = [];
+        } catch (e) { existing = []; }
+      }
+      
+      let minDate = null;
+      let maxDate = null;
+      fileActivities.forEach(act => {
+        if (act.start_date_local) {
+          const dateStr = act.start_date_local.substring(0, 10);
+          if (!minDate || dateStr < minDate) minDate = dateStr;
+          if (!maxDate || dateStr > maxDate) maxDate = dateStr;
+        }
+      });
+      
+      if (minDate && maxDate) {
+        existing = existing.filter(act => {
+          if (!act.start_date_local) return true;
+          const dateStr = act.start_date_local.substring(0, 10);
+          return dateStr < minDate || dateStr > maxDate;
+        });
+      }
+      
+      const mergedData = mergeActivitiesList(existing, fileActivities);
+      fs.writeFileSync(IMPORTED_FILE, JSON.stringify(mergedData, null, 2), 'utf8');
+      
+      res.json({ success: true, count: mergedData.length, activities: mergedData, synced_from_strava: runActivities.length, filename });
+    } else {
+      res.json({ success: true, count: 0, activities: [], synced_from_strava: 0, filename });
+    }
   } catch (error) {
     console.error('Lỗi auto-sync club activities:', error.message);
     res.json({ success: false, error: error.message, stack: error.stack });
@@ -924,10 +955,44 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
     
     fs.writeFileSync(filepath, csvContent, 'utf8');
     
-    // 5. Trigger syncAllStorageCsv
-    const mergedData = syncAllStorageCsv();
-    
-    res.json({ success: true, count: mergedData.length, activities: mergedData, scraped_count: runActivities.length, filename });
+    // 5. Update imported_activities.json directly with smart wipe logic
+    let fileActivities = parseStorageCSV(csvContent);
+    if (fileActivities.length > 0) {
+      fileActivities = mapAthleteNamesUsingCSV(fileActivities);
+      
+      let existing = [];
+      if (fs.existsSync(IMPORTED_FILE)) {
+        try {
+          existing = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
+          if (!Array.isArray(existing)) existing = [];
+        } catch (e) { existing = []; }
+      }
+      
+      let minDate = null;
+      let maxDate = null;
+      fileActivities.forEach(act => {
+        if (act.start_date_local) {
+          const dateStr = act.start_date_local.substring(0, 10);
+          if (!minDate || dateStr < minDate) minDate = dateStr;
+          if (!maxDate || dateStr > maxDate) maxDate = dateStr;
+        }
+      });
+      
+      if (minDate && maxDate) {
+        existing = existing.filter(act => {
+          if (!act.start_date_local) return true;
+          const dateStr = act.start_date_local.substring(0, 10);
+          return dateStr < minDate || dateStr > maxDate;
+        });
+      }
+      
+      const mergedData = mergeActivitiesList(existing, fileActivities);
+      fs.writeFileSync(IMPORTED_FILE, JSON.stringify(mergedData, null, 2), 'utf8');
+      
+      res.json({ success: true, count: mergedData.length, activities: mergedData, scraped_count: runActivities.length, filename });
+    } else {
+      res.json({ success: true, count: 0, activities: [], scraped_count: 0, filename });
+    }
   } catch (error) {
     console.error('Lỗi auto-sync-scrape:', error.message);
     res.json({ success: false, error: error.message, stack: error.stack });
@@ -1020,19 +1085,27 @@ app.post('/api/challenge/imported', (req, res) => {
       }
     }
 
-    // Nếu có query replaceByDate, xóa các activity cũ trùng ngày trước khi merge
-    if (req.query.replaceByDate === 'true' && Array.isArray(data)) {
-        const newDates = new Set();
+    // Nếu có query replaceByDate, tìm khoảng thời gian (min, max) của file tải lên
+    // và xóa tất cả các activity cũ nằm trong khoảng thời gian đó.
+    if (req.query.replaceByDate === 'true' && Array.isArray(data) && data.length > 0) {
+        let minDate = null;
+        let maxDate = null;
+
         data.forEach(act => {
             if (act.start_date_local) {
-                newDates.add(act.start_date_local.substring(0, 10)); // YYYY-MM-DD
+                const dateStr = act.start_date_local.substring(0, 10); // YYYY-MM-DD
+                if (!minDate || dateStr < minDate) minDate = dateStr;
+                if (!maxDate || dateStr > maxDate) maxDate = dateStr;
             }
         });
-        existing = existing.filter(act => {
-            if (!act.start_date_local) return true;
-            const date = act.start_date_local.substring(0, 10);
-            return !newDates.has(date);
-        });
+
+        if (minDate && maxDate) {
+            existing = existing.filter(act => {
+                if (!act.start_date_local) return true;
+                const dateStr = act.start_date_local.substring(0, 10);
+                return dateStr < minDate || dateStr > maxDate;
+            });
+        }
     }
 
     const merged = Array.isArray(data) ? mergeActivitiesList(existing, data) : existing;

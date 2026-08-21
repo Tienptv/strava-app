@@ -233,7 +233,7 @@ export default function Dashboard({
             {t('overview')}
           </button>
           <button 
-            className={`btn ${viewMode === 'challenge' ? 'btn--primary' : 'btn--secondary'}`}
+            className={`btn ${viewMode === 'challenge' ? 'btn--primary' : 'btn--secondary btn-challenge-tab'}`}
             onClick={() => setViewMode('challenge')}
           >
             <img src="/haskoning-star-transparent.png" alt="Challenge" style={{ width: 24, height: 24, marginRight: 6, objectFit: 'contain', filter: 'drop-shadow(1px 0px 0px rgba(255,255,255,0.2)) drop-shadow(0px 1px 0px rgba(255,255,255,0.2)) drop-shadow(-1px 0px 0px rgba(255,255,255,0.2)) drop-shadow(0px -1px 0px rgba(255,255,255,0.2))' }} />

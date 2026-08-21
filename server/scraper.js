@@ -22,7 +22,6 @@ export async function loginAndGetCookie() {
   const browser = await puppeteer.launch({
     executablePath: CHROME_PATH,
     headless: false,
-    userDataDir: PUPPETEER_DATA_DIR,
     ignoreDefaultArgs: ['--enable-automation'],
     args: [
       '--no-sandbox', 
@@ -68,8 +67,15 @@ export async function loginAndGetCookie() {
     });
 
     console.log(`✅ Đăng nhập thành công! Phiên đăng nhập đã được lưu.`);
+    
+    // Extract actual _strava4_session cookie
+    const cookies = await page.cookies();
+    const sessionCookie = cookies.find(c => c.name === '_strava4_session');
+    const cookieValue = sessionCookie ? sessionCookie.value : 'session_saved';
+    
+    // Save to a simple text file (removed to ensure reset on close)
     await browser.close();
-    return 'session_saved';
+    return cookieValue;
   } catch (error) {
     try { await browser.close(); } catch(e) {}
     throw error;
@@ -78,13 +84,9 @@ export async function loginAndGetCookie() {
 
 /**
  * Get saved cookies from file.
- * Returns the _strava4_session value for backward compat.
+ * Returns null as we no longer persist cookies on backend.
  */
 export function getSavedCookie() {
-  // Always return a placeholder, because userDataDir manages cookies internally.
-  if (fs.existsSync(PUPPETEER_DATA_DIR)) {
-     return 'session_saved';
-  }
   return null;
 }
 
@@ -96,7 +98,6 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
   const browser = await puppeteer.launch({
     executablePath: CHROME_PATH,
     headless: false,
-    userDataDir: PUPPETEER_DATA_DIR,
     ignoreDefaultArgs: ['--enable-automation'],
     args: [
       '--no-sandbox',

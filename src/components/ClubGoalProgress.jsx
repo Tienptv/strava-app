@@ -140,14 +140,13 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch }) {
           <div 
             className="map-vehicle"
             style={{ 
-              left: `calc(${vehiclePos}% - 45px)`, 
+              left: `calc(${vehiclePos}% - 96px)`, 
               display: 'flex', 
               alignItems: 'center' 
             }}
             title={`${percent}%`}
           >
-            <span style={{ marginRight: '-50px', fontSize: '1.1em', zIndex: 1 }}>🏃‍♀️</span>
-            <span style={{ fontSize: '1.2em', zIndex: 2 }}>🏃‍♂️</span>
+            <img src="/icegif-449-transparent.gif" alt="Runners" style={{ width: '192px', height: '192px', objectFit: 'contain', transform: 'scaleX(-1) translateY(calc(-31% - 54px))' }} />
           </div>
           
           {/* Destination Pin */}

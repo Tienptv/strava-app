@@ -12,7 +12,7 @@ start "Strava Frontend" cmd /c "npm run dev"
 
 :: Wait for a few seconds to let the servers start
 echo Waiting for servers to initialize...
-timeout /t 3 /nobreak > nul
+timeout /t 6 /nobreak > nul
 
 :: Open Google Chrome directly to the app URL
 start chrome http://localhost:5173
