@@ -1,0 +1,46 @@
+[
+  {
+    "athlete": {
+      "id": "73380484",
+      "firstName": "Abba",
+      "lastName": "Vũ",
+      "badge": {
+        "badgeType": "Free"
+      },
+      "profileImageUrl": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/73380484/46056528/1/large.jpg"
+    }
+  },
+  {
+    "athlete": {
+      "id": "110041582",
+      "firstName": "An",
+      "lastName": "Ha",
+      "badge": {
+        "badgeType": "Free"
+      },
+      "profileImageUrl": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/110041582/26257318/2/large.jpg"
+    }
+  },
+  {
+    "athlete": {
+      "id": "82871822",
+      "firstName": "Andie",
+      "lastName": "Le",
+      "badge": {
+        "badgeType": "Free"
+      },
+      "profileImageUrl": "https://lh3.googleusercontent.com/a/ACg8ocIyITSdAcAUv05JMGWc4uv_QAlBsOWBJkNew6q253fn=s96-c"
+    }
+  },
+  {
+    "athlete": {
+      "id": "83759389",
+      "firstName": "Benjamin",
+      "lastName": "Dang",
+      "badge": {
+        "badgeType": "Free"
+      },
+      "profileImageUrl": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/83759389/20099140/3/large.jpg"
+    }
+  }
+]

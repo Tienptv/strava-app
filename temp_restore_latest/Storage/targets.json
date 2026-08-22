@@ -1,0 +1,55 @@
+{
+  "Tien_P.": {
+    "target": "100",
+    "penalty": true
+  },
+  "Thanh_X.": {
+    "penalty": false
+  },
+  "Sơn_N._2026_7": {
+    "penalty": true
+  },
+  "Sơn_N._2026_8": {
+    "target": "",
+    "penalty": false
+  },
+  "Huy_H._2026_8": {
+    "target": 0,
+    "penalty": false
+  },
+  "Sang_N._2026_8": {
+    "target": 50,
+    "penalty": true
+  },
+  "Tien_P._2026_8": {
+    "target": 50,
+    "penalty": true
+  },
+  "pham_T._2026_8": {
+    "target": "",
+    "penalty": false
+  },
+  "Thinh_V._2026_8": {
+    "target": 46,
+    "penalty": true
+  },
+  "Thanh_X._2026_8": {
+    "penalty": false,
+    "target": 0
+  },
+  "Lieu_V._2026_8": {
+    "target": "",
+    "penalty": false
+  },
+  "Phuong_N._2026_8": {
+    "penalty": false,
+    "target": 0
+  },
+  "Tien_P._2026_6": {
+    "penalty": false,
+    "target": ""
+  },
+  "Thanh_X._2026_6": {
+    "target": ""
+  }
+}

@@ -968,21 +968,31 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
         } catch (e) { existing = []; }
       }
       
-      let minDate = null;
-      let maxDate = null;
+      const dailyRanges = {};
       fileActivities.forEach(act => {
         if (act.start_date_local) {
           const dateStr = act.start_date_local.substring(0, 10);
-          if (!minDate || dateStr < minDate) minDate = dateStr;
-          if (!maxDate || dateStr > maxDate) maxDate = dateStr;
+          const actTime = new Date(act.start_date_local).getTime();
+          if (!dailyRanges[dateStr]) {
+            dailyRanges[dateStr] = { min: actTime, max: actTime };
+          } else {
+            if (actTime < dailyRanges[dateStr].min) dailyRanges[dateStr].min = actTime;
+            if (actTime > dailyRanges[dateStr].max) dailyRanges[dateStr].max = actTime;
+          }
         }
       });
       
-      if (minDate && maxDate) {
+      const intervals = Object.values(dailyRanges).map(range => ({
+        min: range.min - 4000,
+        max: range.max + 4000
+      }));
+      
+      if (intervals.length > 0) {
         existing = existing.filter(act => {
           if (!act.start_date_local) return true;
-          const dateStr = act.start_date_local.substring(0, 10);
-          return dateStr < minDate || dateStr > maxDate;
+          const actTime = new Date(act.start_date_local).getTime();
+          const isWithinAnyInterval = intervals.some(interval => actTime >= interval.min && actTime <= interval.max);
+          return !isWithinAnyInterval;
         });
       }
       
@@ -1088,22 +1098,34 @@ app.post('/api/challenge/imported', (req, res) => {
     // Nếu có query replaceByDate, tìm khoảng thời gian (min, max) của file tải lên
     // và xóa tất cả các activity cũ nằm trong khoảng thời gian đó.
     if (req.query.replaceByDate === 'true' && Array.isArray(data) && data.length > 0) {
-        let minDate = null;
-        let maxDate = null;
+        const dailyRanges = {};
 
         data.forEach(act => {
             if (act.start_date_local) {
                 const dateStr = act.start_date_local.substring(0, 10); // YYYY-MM-DD
-                if (!minDate || dateStr < minDate) minDate = dateStr;
-                if (!maxDate || dateStr > maxDate) maxDate = dateStr;
+                const actTime = new Date(act.start_date_local).getTime();
+                if (!dailyRanges[dateStr]) {
+                    dailyRanges[dateStr] = { min: actTime, max: actTime };
+                } else {
+                    if (actTime < dailyRanges[dateStr].min) dailyRanges[dateStr].min = actTime;
+                    if (actTime > dailyRanges[dateStr].max) dailyRanges[dateStr].max = actTime;
+                }
             }
         });
 
-        if (minDate && maxDate) {
+        const intervals = Object.values(dailyRanges).map(range => ({
+            min: range.min - 4000, // nới rộng 4s
+            max: range.max + 4000  // nới rộng 4s
+        }));
+
+        if (intervals.length > 0) {
             existing = existing.filter(act => {
                 if (!act.start_date_local) return true;
-                const dateStr = act.start_date_local.substring(0, 10);
-                return dateStr < minDate || dateStr > maxDate;
+                const actTime = new Date(act.start_date_local).getTime();
+                // Check if actTime falls into ANY of the intervals
+                const isWithinAnyInterval = intervals.some(interval => actTime >= interval.min && actTime <= interval.max);
+                // Keep it if it does NOT fall into any interval
+                return !isWithinAnyInterval;
             });
         }
     }

@@ -1188,11 +1188,12 @@ img {
 
 .challenge-table th.day-col,
 .challenge-table td.day-cell {
-  width: 36px;
-  min-width: 36px;
-  max-width: 36px;
-  padding: 4px 2px;
+  width: 26px;
+  min-width: 26px;
+  max-width: 26px;
+  padding: 4px 1px;
   box-sizing: border-box;
+  font-size: 9px !important;
 }
 
 .challenge-table th.day-col {
@@ -1203,9 +1204,12 @@ img {
 }
 
 .challenge-table th.sum-col {
-  min-width: 64px;
   background: rgba(0, 163, 166, 0.1);
   color: var(--accent-dark);
+  font-size: 10px;
+  white-space: nowrap;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 
 .sticky-col.first-col {
@@ -1214,7 +1218,7 @@ img {
   background: var(--bg-card);
   z-index: 20;
   text-align: left;
-  min-width: 220px;
+  min-width: 190px;
   box-shadow: 2px 0 5px rgba(0, 45, 84, 0.05);
 }
 
@@ -1251,6 +1255,14 @@ img {
   padding-left: 8px;
 }
 
+.runner-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .runner-rank {
   color: var(--text-secondary);
   font-weight: bold;
@@ -1260,7 +1272,7 @@ img {
   text-align: right;
 }
 
-.runner-name {
+.runner-name-container {
   display: flex;
   align-items: center;
 }
@@ -1269,7 +1281,7 @@ img {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px;
+  max-width: 80px;
   display: inline-block;
   font-weight: 500;
 }
@@ -1330,7 +1342,9 @@ img {
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   transition: all 0.2s;
-  font-size: 0.75rem;
+  font-size: 9px;
+  padding-left: 1px !important;
+  padding-right: 1px !important;
 }
 
 .day-cell.has-run {
@@ -1346,11 +1360,11 @@ img {
 .sum-cell {
   background: var(--bg-secondary);
   font-weight: 600;
+  font-size: 11px;
 }
 
 .highlight-total {
   color: var(--primary-navy);
-  font-size: 0.95rem;
 }
 
 .totals-row td {
@@ -1602,63 +1616,63 @@ img {
 
 .col-all-time {
   right: 0;
-  width: 90px !important;
-  min-width: 90px !important;
-  max-width: 90px !important;
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
   box-sizing: border-box;
   background: var(--bg-secondary) !important;
   border-left: 1px solid var(--border);
 }
 
 .col-time {
-  right: 90px;
-  width: 80px !important;
-  min-width: 80px !important;
-  max-width: 80px !important;
+  right: 60px;
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
   box-sizing: border-box;
 }
 
 .col-days {
-  right: 170px;
-  width: 70px !important;
-  min-width: 70px !important;
-  max-width: 70px !important;
+  right: 120px;
+  width: 50px !important;
+  min-width: 50px !important;
+  max-width: 50px !important;
   box-sizing: border-box;
 }
 
 .col-km {
-  right: 240px;
-  width: 70px !important;
-  min-width: 70px !important;
-  max-width: 70px !important;
+  right: 170px;
+  width: 50px !important;
+  min-width: 50px !important;
+  max-width: 50px !important;
   box-sizing: border-box;
 }
 
-/* Cột Track Bar có độ rộng 140px = 2 lần cột tổng ngày (70px * 2) */
+/* Cột Track Bar */
 .col-progress {
-  right: 310px;
-  width: 140px !important;
-  min-width: 140px !important;
-  max-width: 140px !important;
+  right: 220px;
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
   box-sizing: border-box;
-  padding: 4px 8px !important;
+  padding: 4px 6px !important;
 }
 
 /* Cột $$$ Phải nộp */
 .col-due {
-  right: 450px;
-  width: 85px !important;
-  min-width: 85px !important;
-  max-width: 85px !important;
+  right: 310px;
+  width: 55px !important;
+  min-width: 55px !important;
+  max-width: 55px !important;
   box-sizing: border-box;
   text-align: center;
 }
 
 .penalty-due-badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px 4px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.3px;
 }
@@ -1676,31 +1690,31 @@ img {
 }
 
 .col-penalty {
-  right: 535px;
-  width: 70px !important;
-  min-width: 70px !important;
-  max-width: 70px !important;
+  right: 365px;
+  width: 45px !important;
+  min-width: 45px !important;
+  max-width: 45px !important;
   box-sizing: border-box;
 }
 
 .col-target {
-  right: 605px;
-  width: 70px !important;
-  min-width: 70px !important;
-  max-width: 70px !important;
+  right: 410px;
+  width: 50px !important;
+  min-width: 50px !important;
+  max-width: 50px !important;
   box-sizing: border-box;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.08);
 }
 
 .col-target input {
-  width: 48px;
+  width: 40px;
   background: transparent;
   color: var(--text-primary);
   border: 1px solid var(--border);
   border-radius: 4px;
   text-align: center;
-  padding: 2px;
-  font-size: 13px;
+  padding: 2px 0;
+  font-size: 11px;
   font-weight: 500;
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;

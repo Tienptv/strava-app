@@ -109,14 +109,28 @@ const dotenv = require('dotenv');
 
   // Ghi ra file CSV
   let csvContent = 'Match Key,First Name,Last Name,Full Name,Admin,Owner\n';
+  const avatars = {};
+
   allMembers.forEach(m => {
     const fn = (m.firstname || '').replace(/,/g, '');
     const ln = (m.lastname || '').replace(/,/g, '');
     const matchKey = `${fn}_${ln}`;
     const fullName = fullNameMap[matchKey] || `${fn} ${ln}`.trim();
     csvContent += `${matchKey},${fn},${ln},${fullName},${m.admin},${m.owner}\n`;
+
+    // Lưu link avatar
+    if (m.profile_medium || m.profile) {
+      avatars[matchKey] = {
+        profile_medium: m.profile_medium,
+        profile: m.profile
+      };
+    }
   });
 
   fs.writeFileSync(OUT_FILE, csvContent, 'utf8');
   console.log(`Đã lưu danh sách vào file: ${OUT_FILE}`);
+
+  const AVATARS_FILE = path.join(__dirname, '../Storage/avatars.json');
+  fs.writeFileSync(AVATARS_FILE, JSON.stringify(avatars, null, 2), 'utf8');
+  console.log(`Đã lưu avatar vào file: ${AVATARS_FILE}`);
 })();

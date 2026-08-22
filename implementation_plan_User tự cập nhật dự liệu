@@ -1,0 +1,53 @@
+# Kế hoạch Đồng bộ Dữ liệu Cá nhân (Triển khai lên Render)
+
+Dựa trên yêu cầu của bạn: *User truy cập web qua link Render, chạy thuật toán login lấy cookie để cạo dữ liệu của chính user đó, cập nhật lên bảng và lưu file riêng.*
+
+## Phân tích Hạn chế của hệ thống hiện tại
+Code cạo dữ liệu (Scraping) hiện tại của chúng ta đang sử dụng thư viện **Puppeteer** (giả lập trình duyệt Chrome). 
+Tuy nhiên, nếu bạn đưa app lên **Render** (hoặc bất kỳ cloud hosting nào), bạn sẽ gặp phải **những vấn đề nghiêm trọng** sau:
+1. **Không có giao diện đồ họa (Headless):** Render chạy trên server Linux không có màn hình. Nó không thể mở cửa sổ Chrome lên để user nhập tài khoản.
+2. **Strava chặn IP Cloud (Anti-Bot):** Nếu chạy ở chế độ ẩn (headless), IP của Render sẽ ngay lập tức bị Strava Cloudflare chặn lại, hoặc yêu cầu giải mã reCAPTCHA. Server không có mắt để giải Captcha, nên sẽ bị treo mãi ở màn hình Login.
+3. **Hiểu lầm về Client-Server:** Khi user truy cập web từ điện thoại, con bot Puppeteer sẽ chạy ở **trên Server (Render)** chứ không chạy trên điện thoại của user. Do đó user không thể tương tác trực tiếp với cái trình duyệt ảo đó được.
+
+> [!CAUTION]
+> Phương án dùng Puppeteer để cạo dữ liệu **chỉ phù hợp khi chạy nội bộ (Local) trên máy tính cá nhân**. Đưa lên Render để cho nhiều user login qua Puppeteer là **bất khả thi**.
+
+---
+
+## Phương án Tối ưu nhất: Sử dụng Strava API chính thức (OAuth 2.0)
+
+Cách tiêu chuẩn và chuyên nghiệp nhất mà mọi app thể thao (như Relive, Garmin, Smashrun) sử dụng là **Strava API**. Nó sinh ra chính xác để giải quyết bài toán này.
+
+### Ưu điểm tuyệt đối:
+- **Chạy hoàn hảo trên Render:** Không cần trình duyệt ảo, tiết kiệm 90% RAM và CPU cho server.
+- **Bảo mật & Tiện lợi:** User click nút, chuyển sang app/web Strava để nhấn nút "Đồng ý" (Authorize) rồi chuyển ngược lại web của bạn. Không cần phải nhập password nguy hiểm.
+- **Truy xuất dữ liệu siêu tốc:** API trả về ngay lập tức file JSON chứa toàn bộ dữ liệu chạy bộ của riêng user đó (rất sạch và đầy đủ thông số).
+- **Không bao giờ bị chặn:** Vì đây là cổng giao tiếp hợp pháp do chính Strava cấp phép.
+
+### Kế hoạch Triển khai (Đề xuất)
+
+#### Bước 1: Khởi tạo App trên Strava Developers
+- Bạn cần truy cập `https://www.strava.com/settings/api` tạo một ứng dụng.
+- Cấu hình domain của Render vào ô `Authorization Callback Domain`.
+- Lấy `Client ID` và `Client Secret` cấp cho hệ thống.
+
+#### Bước 2: Xây dựng luồng Login API (Backend)
+- Xóa bỏ luồng login bằng Puppeteer cũ. Thay bằng 2 routes:
+  - `GET /api/strava/auth`: Chuyển hướng user sang trang xác thực của Strava.
+  - `GET /api/strava/callback`: Nhận mã xác nhận từ Strava để quy đổi thành `access_token` (đại diện cho quyền truy cập dữ liệu của user).
+
+#### Bước 3: Lấy Dữ liệu Cá nhân & Lưu trữ
+- Gọi API `/athlete/activities` bằng `access_token` vừa nhận để lấy các cuốc chạy gần nhất.
+- Lọc các dữ liệu này theo chuẩn hiện có (Khoảng cách, Thời gian, Tên,...).
+- **Lưu file riêng:** Lưu vào file riêng lẻ cho từng user, ví dụ: `Storage/personal_<athlete_id>.json`.
+- **Cập nhật Bảng chung:** Gộp dữ liệu mới lấy vào file `imported_activities.json` chính, đồng thời áp dụng thuật toán **MinTime-MaxTime** để tránh trùng lặp.
+
+#### Bước 4: Nâng cấp Frontend
+- Sửa nút "Đăng nhập" ở Sidebar thành "Connect with Strava".
+- Sửa nút "Sync" để gọi API đồng bộ thay vì gọi Puppeteer scraping.
+
+## User Review Required
+> [!IMPORTANT]
+> Việc dùng Puppeteer cạo dữ liệu trên Cloud (Render) là hướng đi sẽ gặp ngõ cụt do chính sách chống Bot của Strava. Mình rất khuyên bạn nên chuyển sang dùng **Strava API**.
+> 
+> Bạn có đồng ý với Kế hoạch chuyển đổi sang **Strava API** như trên không? Nếu có, mình sẽ bắt đầu viết mã để tích hợp OAuth 2.0.

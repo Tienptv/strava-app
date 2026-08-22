@@ -168,6 +168,14 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     return `${h}h ${m}m`;
   };
 
+  const getAvatar = (member, size = 32) => {
+    const p = member.profile_medium || member.profile;
+    if (!p || p.includes('avatar/athlete') || p.includes('logo-strava-lg.png')) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(member.firstname + ' ' + (member.lastname || ''))}&background=random&color=fff&size=${size}`;
+    }
+    return p;
+  };
+
   return (
     <div className="challenge-container">
       <div className="challenge-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -178,6 +186,11 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
         {challengeData.length > 0 && challengeData[0].totalDistance > 0 && (
           <div className="runner-of-the-month" title="Runner of the Month">
              <span className="rotm-icon">🏆</span>
+             <img 
+                src={getAvatar(challengeData[0].member, 24)} 
+                alt="avatar" 
+                className="runner-avatar" 
+              />
              <span className="rotm-name">
                 {nameMapping[`${challengeData[0].member.firstname} ${challengeData[0].member.lastname}`]?.fullName || `${challengeData[0].member.firstname} ${challengeData[0].member.lastname}`}
              </span>
@@ -238,9 +251,14 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               return (
                 <tr key={index} className={`runner-row rank-${index + 1} ${isMe ? 'runner-row--me' : ''}`}>
                   <td className="sticky-col first-col">
-                    <div className="runner-info">
-                      <span className="runner-rank">{index + 1}.</span>
-                      <span className="runner-name">
+                  <div className="runner-info">
+                    <span className="runner-rank">{index + 1}</span>
+                    <img 
+                      src={getAvatar(row.member, 32)} 
+                      alt="avatar" 
+                      className="runner-avatar" 
+                    />
+                    <div className="runner-name-container">
                         <span className="runner-name-text" title={nameMapping[`${row.member.firstname} ${row.member.lastname}`]?.fullName || `${row.member.firstname} ${row.member.lastname}`}>
                           {nameMapping[`${row.member.firstname} ${row.member.lastname}`]?.fullName || `${row.member.firstname} ${row.member.lastname}`}
                         </span>
@@ -252,8 +270,8 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                           {row.maxStreak >= 3 && <span title={`Streak ${row.maxStreak}!`} className={row.maxStreak >= 5 ? 'streak-fire-blue' : ''}>🔥</span>}
                           {row.isTurtle && <span title="Turtle">🐌</span>}
                         </span>
-                      </span>
                     </div>
+                  </div>
                   </td>
                   
                   {daysArray.map(day => {

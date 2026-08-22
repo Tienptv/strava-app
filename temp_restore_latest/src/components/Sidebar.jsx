@@ -1,0 +1,565 @@
+import { useState, useEffect } from 'react';
+import { Target, Users, Search, Check, Save, Upload } from 'lucide-react';
+import Papa from 'papaparse';
+import { useLang } from '../i18n/LangContext';
+
+export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
+  const { t } = useLang();
+  const [clubs, setClubs] = useState([]);
+  const [selectedClubId, setSelectedClubId] = useState('');
+  const [members, setMembers] = useState([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [stravaCookie, setStravaCookie] = useState(sessionStorage.getItem('stravaCookie') || '');
+  const [syncLimit, setSyncLimit] = useState(20);
+
+  // State quản lý challenge participants: { [athleteId]: true/false }
+  const [participants, setParticipants] = useState({});
+  const [monthlyParticipants, setMonthlyParticipants] = useState({});
+  const [rawConfig, setRawConfig] = useState(null);
+  const [allowEditOthers, setAllowEditOthers] = useState(false);
+
+  const activeMonth = currentMonth || (new Date().getMonth() + 1);
+  const activeYear = currentYear || new Date().getFullYear();
+
+  useEffect(() => {
+    // Load saved config on mount or when active month/year changes
+    apiFetch('/challenge/config')
+      .then(data => {
+        if (!data) return;
+        setRawConfig(data);
+        if (data.clubId) setSelectedClubId(data.clubId);
+        if (data.allowEditOthers !== undefined) setAllowEditOthers(data.allowEditOthers);
+        if (data.monthlyParticipants) {
+          setMonthlyParticipants(data.monthlyParticipants);
+          const currentKey = `${activeYear}_${activeMonth}`;
+          const currentParts = data.monthlyParticipants[currentKey] || data.participants || {};
+          setParticipants(currentParts);
+        } else if (data.participants) {
+          setParticipants(data.participants);
+        }
+      })
+      .catch(err => console.error('Lỗi tải config:', err));
+  }, [apiFetch, activeMonth, activeYear]);
+
+  const [savedMessage, setSavedMessage] = useState(false);
+
+  // Lấy danh sách clubs của user khi Sidebar render
+  useEffect(() => {
+    apiFetch('/clubs')
+      .then(data => setClubs(data || []))
+      .catch(err => console.error('Lỗi tải clubs:', err));
+  }, [apiFetch]);
+
+  // Khi chọn một club, tải danh sách thành viên
+  useEffect(() => {
+    if (selectedClubId) {
+      setLoadingMembers(true);
+      apiFetch(`/clubs/${selectedClubId}/members?per_page=200`)
+        .then(data => setMembers(data || []))
+        .catch(err => console.error('Lỗi tải members:', err))
+        .finally(() => setLoadingMembers(false));
+    } else {
+      setMembers([]);
+    }
+  }, [selectedClubId, apiFetch]);
+
+  // Toggle thành viên
+  const toggleParticipant = (athleteId, memberData) => {
+    setParticipants(prev => {
+      const newState = { ...prev };
+      if (newState[athleteId]) {
+        delete newState[athleteId];
+      } else {
+        newState[athleteId] = memberData;
+      }
+      return newState;
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      const monthKey = `${activeYear}_${activeMonth}`;
+      const updatedMonthly = {
+        ...monthlyParticipants,
+        [monthKey]: participants
+      };
+      setMonthlyParticipants(updatedMonthly);
+
+      await apiFetch('/challenge/config', {
+        method: 'POST',
+        body: JSON.stringify({
+          clubId: selectedClubId,
+          monthKey: monthKey,
+          participants: participants,
+          monthlyParticipants: updatedMonthly,
+          allowEditOthers: allowEditOthers
+        })
+      });
+      window.dispatchEvent(new CustomEvent('challengeUpdated', { detail: { year: activeYear, month: activeMonth } }));
+      
+      setSavedMessage(true);
+      setTimeout(() => setSavedMessage(false), 3000);
+    } catch (err) {
+      console.error('Lỗi lưu config:', err);
+      alert(t('saveConfigError'));
+    }
+  };
+
+  const handleCsvUpload = async (e) => {
+    const files = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.csv'));
+    if (!files.length) {
+       alert(t('noCsvFound'));
+       return;
+    }
+
+    let allImportedActivities = [];
+
+    const parseFile = (file) => {
+      return new Promise((resolve) => {
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: (h) => h.trim().replace(/^["']|["']$/g, '').trim(),
+          complete: function(results) {
+            const data = results.data;
+            const importedActivities = data.map(row => {
+              // Bỏ qua các hoạt động ẩn (nếu có cột chỉ định)
+              const isPrivate = String(row.private || row.Private || 'false').toLowerCase() === 'true';
+              const hideFromHome = String(row.hide_from_home || row.Hide_from_home || 'false').toLowerCase() === 'true';
+              const visibility = row.visibility || row.Visibility;
+              if (isPrivate || hideFromHome || (visibility && String(visibility).toLowerCase() !== 'everyone')) {
+                 return null;
+              }
+
+              let dist = parseFloat(String(row.Distance || 0).replace(',', '.').replace(/[^\d.-]/g, ''));
+              dist = isNaN(dist) ? 0 : dist * 1000;
+              
+              let movingTimeStr = row['Duration'] || row['Moving Time'] || row['Time'] || '00:00:00';
+              let timeParts = movingTimeStr.split(':').map(Number);
+              let movingTimeSec = 0;
+              if (timeParts.length === 3) {
+                movingTimeSec = timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2];
+              } else if (timeParts.length === 2) {
+                movingTimeSec = timeParts[0] * 60 + timeParts[1];
+              }
+
+              let athleteId = null;
+              let athleteName = row.Name || row.Athlete || '';
+              
+              if (row.Athlete && String(row.Athlete).includes('/athletes/')) {
+                athleteId = parseInt(String(row.Athlete).replace('/athletes/', ''), 10);
+                athleteName = row.Name || '';
+              }
+
+              let activityId = null;
+              if (row.Activity) {
+                const match = String(row.Activity).match(/\d+/);
+                if (match) activityId = match[0];
+              } else if (row['Activity ID'] || row.id || row.Id) {
+                activityId = String(row['Activity ID'] || row.id || row.Id);
+              }
+
+              let nameParts = athleteName.trim().split(' ');
+              let lastname = nameParts.length > 1 ? nameParts.pop() : '';
+              let firstname = nameParts.join(' ');
+
+              let dateStr = row.Date || '';
+              let localIsoStr = null;
+
+              if (dateStr.includes('T')) {
+                // Định dạng ISO: "2026-08-17T05:56:00.000+07:00" -> lấy đúng phần giờ local YYYY-MM-DDTHH:mm:ssZ
+                localIsoStr = dateStr.substring(0, 19) + 'Z';
+              } else if (dateStr) {
+                if (dateStr.includes('/')) {
+                   let dParts = dateStr.split(' ')[0].split('/');
+                   let tPart = dateStr.split(' ')[1] || '00:00:00';
+                   if (dParts.length === 3) {
+                      if (dParts[0].length === 4) {
+                         dateStr = `${dParts[0]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[2]).padStart(2, '0')}T${tPart}Z`;
+                      } else {
+                         dateStr = `${dParts[2]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[0]).padStart(2, '0')}T${tPart}Z`;
+                      }
+                      localIsoStr = dateStr;
+                   }
+                } else if (dateStr.includes('-')) {
+                   let parts = dateStr.split(' ');
+                   let dPart = parts[0];
+                   let tPart = parts[1] || '00:00:00';
+                   localIsoStr = `${dPart}T${tPart}Z`;
+                }
+              }
+
+              if (dist <= 0 || !localIsoStr) {
+                return null;
+              }
+
+              return {
+                id: activityId,
+                type: row.Type || row['Activity Type'] || 'Run',
+                distance: dist,
+                moving_time: movingTimeSec,
+                start_date_local: localIsoStr,
+                athlete: {
+                  id: athleteId,
+                  firstname: firstname,
+                  lastname: lastname
+                }
+              };
+            });
+            resolve(importedActivities.filter(Boolean));
+          },
+          error: function(err) {
+            console.error('Lỗi parse CSV', err);
+            resolve([]);
+          }
+        });
+      });
+    };
+
+    for (const file of files) {
+      const activities = await parseFile(file);
+      allImportedActivities = [...allImportedActivities, ...activities];
+    }
+
+    // KHÔNG fetch existingActivities nữa, backend sẽ lo việc xóa dữ liệu trùng ngày và merge
+    let existingActivities = [];
+
+    const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
+    const uniqueMap = new Map();
+    const getCompKey = (act) => {
+       const d = (act.start_date_local || '').substring(0, 16); // Chuẩn hóa tới phút YYYY-MM-DDTHH:mm
+       const t = act.moving_time || 0;
+       const dist = Math.round(act.distance || 0);
+       const athId = act.athlete?.id || '';
+       const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
+       return `comp_${athId || name}_${d}_${t}_${dist}`;
+    };
+
+    const isBetterRecord = (a, b) => {
+      if (!b) return true;
+      if (a.start_date_local && !b.start_date_local) return true;
+      if (!a.start_date_local && b.start_date_local) return false;
+      const aLastname = a.athlete?.lastname || '';
+      const bLastname = b.athlete?.lastname || '';
+      if (aLastname.length > 2 && bLastname.length <= 2) return true;
+      return false;
+    };
+
+    const addRecord = (act) => {
+      if (!act) return;
+      const idKey = act.id ? `id_${act.id}` : null;
+      const cKey = getCompKey(act);
+
+      if (idKey) {
+        const existing = uniqueMap.get(idKey);
+        if (!existing || isBetterRecord(act, existing)) {
+          uniqueMap.set(idKey, act);
+        }
+      }
+      const existingComp = uniqueMap.get(cKey);
+      if (!existingComp || isBetterRecord(act, existingComp)) {
+        uniqueMap.set(cKey, act);
+      }
+    };
+
+    // Chỉ update các hoạt động từ tháng 8/2026 trở đi vào importedActivities (các tháng 1-7 đã lưu riêng trong historical)
+    const augImportedActivities = allImportedActivities.filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
+    
+    // Chỉ deduplicate nội bộ các file vừa upload
+    augImportedActivities.forEach(addRecord);
+
+    const finalSet = new Set(uniqueMap.values());
+    const finalActivities = Array.from(finalSet).filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
+    
+    try {
+      await apiFetch('/challenge/imported?replaceByDate=true', {
+        method: 'POST',
+        body: JSON.stringify(finalActivities)
+      });
+      window.dispatchEvent(new Event('challengeUpdated'));
+      alert(t('importSuccess') + ` (${allImportedActivities.length} activities merged from ${files.length} files)`);
+    } catch (e) {
+      console.error('Lỗi lưu importedActivities', e);
+      alert(t('importError'));
+    }
+
+    // Reset input
+    e.target.value = null;
+  };
+
+  const selectAll = () => {
+    setParticipants(prev => {
+      const newState = { ...prev };
+      filteredMembers.forEach(member => {
+        const uniqueId = member.id ? member.id.toString() : `${member.firstname}_${member.lastname}`;
+        newState[uniqueId] = member;
+      });
+      return newState;
+    });
+  };
+
+  const deselectAll = () => {
+    setParticipants(prev => {
+      const newState = { ...prev };
+      filteredMembers.forEach(member => {
+        const uniqueId = member.id ? member.id.toString() : `${member.firstname}_${member.lastname}`;
+        delete newState[uniqueId];
+      });
+      return newState;
+    });
+  };
+
+  // Lọc danh sách thành viên theo từ khóa tìm kiếm
+  const filteredMembers = members.filter(m => {
+    const fullName = `${m.firstname} ${m.lastname}`.toLowerCase();
+    return fullName.includes(searchQuery.toLowerCase());
+  });
+
+  // Đếm số lượng tham gia
+  const participantCount = Object.keys(participants).length;
+
+  return (
+    <aside className="sidebar">
+      <div className="sidebar__header">
+        <Target size={20} className="sidebar__icon" />
+        <h2 className="sidebar__title">{t('challengeGroup')}</h2>
+      </div>
+
+      <div className="sidebar__content">
+        <div className="sidebar__section">
+          <label className="sidebar__label">
+            <Users size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+            {t('selectGroup')}
+          </label>
+          <select 
+            className="sidebar__select"
+            value={selectedClubId}
+            onChange={(e) => {
+              setSelectedClubId(e.target.value);
+              setParticipants({}); // Reset danh sách chọn khi đổi nhóm
+            }}
+          >
+            <option value="">{t('selectGroup')}</option>
+            {clubs.map(club => (
+              <option key={club.id} value={club.id}>
+                {club.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {selectedClubId && (
+          <div className="sidebar__section sidebar__members-section">
+            <div className="sidebar__search-box">
+              <Search size={14} className="sidebar__search-icon" />
+              <input
+                type="text"
+                className="sidebar__search-input"
+                placeholder={t('searchMembers')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <div className="sidebar__members-list">
+              {loadingMembers ? (
+                <div className="sidebar__msg">{t('loadingMembers')}</div>
+              ) : filteredMembers.length > 0 ? (
+                filteredMembers.map((member) => {
+                  // Strava Club Members API often doesn't return athlete 'id'
+                  const uniqueId = member.id ? member.id.toString() : `${member.firstname}_${member.lastname}`;
+                  const isSelected = !!participants[uniqueId];
+                  
+                  return (
+                    <div 
+                      key={uniqueId} 
+                      className={`sidebar__member-item ${isSelected ? 'sidebar__member-item--selected' : ''}`}
+                      onClick={() => toggleParticipant(uniqueId, member)}
+                    >
+                      <div className="sidebar__member-info">
+                        {member.profile_medium ? (
+                          <img src={member.profile_medium} alt="avatar" className="sidebar__member-avatar" />
+                        ) : (
+                          <div className="sidebar__member-avatar sidebar__member-avatar--placeholder">
+                            {(member.firstname || '?')[0]}
+                          </div>
+                        )}
+                        <span className="sidebar__member-name">
+                          {member.firstname} {member.lastname}
+                        </span>
+                      </div>
+                      <div className={`sidebar__checkbox ${isSelected ? 'sidebar__checkbox--active' : ''}`}>
+                        {isSelected && <Check size={12} color="#00A3A6" strokeWidth={3} />}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="sidebar__msg">{t('noMembersFound')}</div>
+              )}
+            </div>
+
+            {filteredMembers.length > 0 && (
+              <div className="sidebar__members-actions">
+                <button className="sidebar__btn-action" onClick={selectAll}>
+                  {t('selectAll')}
+                </button>
+                <button className="sidebar__btn-action" onClick={deselectAll}>
+                  {t('deselectAll')}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="sidebar__footer">
+        <div className="sidebar__stats" style={{ color: '#002D54', fontWeight: 600 }}>
+          <span style={{ color: '#002D54' }}>{t('participants')}:</span>
+          <strong style={{ color: '#002D54' }}>{participantCount}</strong>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <input
+              type="checkbox"
+              id="allowEditOthers"
+              checked={allowEditOthers}
+              onChange={(e) => setAllowEditOthers(e.target.checked)}
+              style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+            />
+            <label htmlFor="allowEditOthers" style={{ fontSize: '12px', color: '#002D54', cursor: 'pointer', fontWeight: 500, lineHeight: 1.3 }}>
+              {t('allowEditOthers')}
+            </label>
+          </div>
+          <button className="btn btn--primary sidebar__btn-save" onClick={handleSave}>
+            <Save size={16} style={{ marginRight: 6 }} />
+            {savedMessage ? t('challengeSaved') : t('saveChallenge')}
+          </button>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(0, 45, 84, 0.05)', color: '#002D54', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
+              <Upload size={16} style={{ marginRight: 6 }} />
+              {t('selectFile')}
+              <input type="file" accept=".csv" multiple onChange={handleCsvUpload} style={{ display: 'none' }} />
+            </label>
+            <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(0, 45, 84, 0.05)', color: '#002D54', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
+              <Upload size={16} style={{ marginRight: 6 }} />
+              {t('selectFolder')}
+              <input type="file" webkitdirectory="true" onChange={handleCsvUpload} style={{ display: 'none' }} />
+            </label>
+          </div>
+          <div style={{ marginTop: '8px' }}>
+            <button 
+              className="btn btn--secondary"
+              onClick={async () => {
+                try {
+                  const res = await apiFetch('/strava/cookie');
+                  if (res.hasCookie) {
+                    setStravaCookie(res.cookie);
+                    sessionStorage.setItem('stravaCookie', res.cookie);
+                    alert(`✅ ${t('cookieReady')}`);
+                  } else {
+                    setStravaCookie('');
+                    sessionStorage.removeItem('stravaCookie');
+                    if (confirm(t('noActivitiesHint'))) {
+                      const loginRes = await apiFetch('/strava/login', { method: 'POST' });
+                      if (loginRes.success) {
+                        setStravaCookie(loginRes.cookie);
+                        sessionStorage.setItem('stravaCookie', loginRes.cookie);
+                        alert(`✅ ${t('cookieLoginSuccess')}`);
+                      } else {
+                        alert(`❌ ${t('errorPrefix')}: ` + (loginRes.error || 'Unknown'));
+                      }
+                    }
+                  }
+                } catch (e) {
+                  alert(`${t('errorPrefix')}: ` + e.message);
+                }
+              }}
+              style={{ 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
+                padding: '10px 8px', background: stravaCookie ? '#e8f5e9' : '#fff3e0', 
+                color: '#002D54', 
+                border: `1px solid ${stravaCookie ? '#66bb6a' : '#ffb74d'}`, borderRadius: '6px', fontSize: '13px', 
+                fontWeight: 'bold', width: '100%', marginBottom: '6px'
+              }}
+            >
+              <svg style={{ marginRight: 6 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              {stravaCookie ? `🟢 ${t('stravaCookieOk')}` : `🔑 ${t('stravaLogin')}`}
+            </button>
+            <input 
+              type="text" 
+              placeholder={t('importCsvPlaceholder')} 
+              value={stravaCookie}
+              onChange={(e) => {
+                const val = e.target.value;
+                setStravaCookie(val);
+                sessionStorage.setItem('stravaCookie', val);
+              }}
+              style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input 
+              type="number" 
+              value={syncLimit}
+              onChange={(e) => setSyncLimit(e.target.value)}
+              title="Số lượng hoạt động muốn tải về"
+              style={{ width: '60px', padding: '8px', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', textAlign: 'center', fontWeight: 'bold', color: '#002D54', background: '#fff' }}
+              min="1"
+            />
+            <button 
+              className="btn btn--secondary"
+              onClick={async () => {
+                if (!selectedClubId) {
+                  alert(t('selectGroupFirst'));
+                  return;
+                }
+                const cookieToUse = stravaCookie || '';
+                try {
+                  const data = await apiFetch(`/clubs/${selectedClubId}/auto-sync-scrape`, { 
+                    method: 'POST',
+                    body: JSON.stringify({ cookie: cookieToUse || undefined, limit: Number(syncLimit) })
+                  });
+                  if (data.success) {
+                    alert(`✅ ${t('syncSuccess')}\n\n• ${t('syncSuccessDetail1').replace('{count}', data.scraped_count)}\n• ${t('syncSuccessDetail2')}`);
+                    window.location.reload();
+                  } else {
+                    if (data.error && (data.error.includes('Cookie') || data.error.includes('Phiên đăng nhập đã hết hạn'))) {
+                      setStravaCookie('');
+                      sessionStorage.removeItem('stravaCookie');
+                      if (confirm(data.error + '\n\n' + t('openChromePrompt'))) {
+                        const loginRes = await apiFetch('/strava/login', { method: 'POST' });
+                        if (loginRes.success) {
+                          setStravaCookie(loginRes.cookie);
+                          sessionStorage.setItem('stravaCookie', loginRes.cookie);
+                          alert(`✅ ${t('loginSuccessSyncNow')}`);
+                        }
+                      }
+                    } else {
+                      alert(`❌ ${t('errorPrefix')}: ` + (data.error || t('syncError')));
+                    }
+                  }
+                } catch (e) {
+                  console.error(e);
+                  alert(`❌ ${t('serverErrorPrefix')}: ` + e.message);
+                }
+              }}
+              style={{ 
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
+                padding: '10px 8px', background: '#e3f2fd', color: '#002D54', 
+                border: '1px solid #90caf9', borderRadius: '6px', fontSize: '13px', 
+                fontWeight: 'bold'
+              }}
+            >
+              <svg style={{ marginRight: 6 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+              <span>{t('autoSyncStrava')}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}

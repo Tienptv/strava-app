@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Target, Users, Search, Check, Save, Upload } from 'lucide-react';
 import Papa from 'papaparse';
+import Swal from 'sweetalert2';
 import { useLang } from '../i18n/LangContext';
 
 export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
@@ -102,14 +103,14 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
       setTimeout(() => setSavedMessage(false), 3000);
     } catch (err) {
       console.error('Lỗi lưu config:', err);
-      alert(t('saveConfigError'));
+      Swal.fire(t('saveConfigError'), '', 'error');
     }
   };
 
   const handleCsvUpload = async (e) => {
     const files = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.csv'));
     if (!files.length) {
-       alert(t('noCsvFound'));
+       Swal.fire(t('noCsvFound'), '', 'warning');
        return;
     }
 
@@ -278,10 +279,10 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
         body: JSON.stringify(finalActivities)
       });
       window.dispatchEvent(new Event('challengeUpdated'));
-      alert(t('importSuccess') + ` (${allImportedActivities.length} activities merged from ${files.length} files)`);
+      Swal.fire(t('importSuccess'), `${allImportedActivities.length} activities merged from ${files.length} files`, 'success');
     } catch (e) {
       console.error('Lỗi lưu importedActivities', e);
-      alert(t('importError'));
+      Swal.fire(t('importError'), '', 'error');
     }
 
     // Reset input
@@ -410,34 +411,51 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                 </button>
               </div>
             )}
+            
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="sidebar__stats" style={{ color: '#002D54', fontWeight: 600, padding: 0 }}>
+                <span style={{ color: '#002D54' }}>{t('participants')}:</span>
+                <strong style={{ color: '#002D54' }}>{participantCount}</strong>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <input
+                  type="checkbox"
+                  id="allowEditOthers"
+                  checked={allowEditOthers}
+                  onChange={(e) => setAllowEditOthers(e.target.checked)}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+                />
+                <label htmlFor="allowEditOthers" style={{ fontSize: '12px', color: '#002D54', cursor: 'pointer', fontWeight: 500, lineHeight: 1.3 }}>
+                  {t('allowEditOthers')}
+                </label>
+              </div>
+              
+              <button className="btn btn--primary sidebar__btn-save" onClick={handleSave}>
+                <Save size={16} style={{ marginRight: 6 }} />
+                {savedMessage ? t('challengeSaved') : t('saveChallenge')}
+              </button>
+              
+              <button 
+                className="btn btn--secondary" 
+                onClick={() => Swal.fire('Đang phát triển', 'Chức năng Administrator đang được phát triển.\n\nCác tính năng dự kiến:\n1. Quản lý cấu hình chung (Challenge Settings)\n2. Quản lý phân quyền (Roles & Permissions)\n3. Nhật ký hoạt động (Audit Logs)\n4. Quản lý dữ liệu hệ thống (Data Management)', 'info')}
+                style={{ 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
+                  padding: '10px 8px', background: '#ffebee', color: '#c62828', 
+                  border: '1px solid #ef9a9a', borderRadius: '6px', fontSize: '13px', 
+                  fontWeight: 'bold', marginTop: '4px'
+                }}
+              >
+                <svg style={{ marginRight: 6 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Administrator
+              </button>
+            </div>
           </div>
         )}
       </div>
 
       <div className="sidebar__footer">
-        <div className="sidebar__stats" style={{ color: '#002D54', fontWeight: 600 }}>
-          <span style={{ color: '#002D54' }}>{t('participants')}:</span>
-          <strong style={{ color: '#002D54' }}>{participantCount}</strong>
-        </div>
-        
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <input
-              type="checkbox"
-              id="allowEditOthers"
-              checked={allowEditOthers}
-              onChange={(e) => setAllowEditOthers(e.target.checked)}
-              style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
-            />
-            <label htmlFor="allowEditOthers" style={{ fontSize: '12px', color: '#002D54', cursor: 'pointer', fontWeight: 500, lineHeight: 1.3 }}>
-              {t('allowEditOthers')}
-            </label>
-          </div>
-          <button className="btn btn--primary sidebar__btn-save" onClick={handleSave}>
-            <Save size={16} style={{ marginRight: 6 }} />
-            {savedMessage ? t('challengeSaved') : t('saveChallenge')}
-          </button>
-
           <div style={{ display: 'flex', gap: '8px' }}>
             <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(0, 45, 84, 0.05)', color: '#002D54', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
               <Upload size={16} style={{ marginRight: 6 }} />
@@ -459,23 +477,32 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                   if (res.hasCookie) {
                     setStravaCookie(res.cookie);
                     sessionStorage.setItem('stravaCookie', res.cookie);
-                    alert(`✅ ${t('cookieReady')}`);
+                    Swal.fire(t('cookieReady'), '', 'success');
                   } else {
                     setStravaCookie('');
                     sessionStorage.removeItem('stravaCookie');
-                    if (confirm(t('noActivitiesHint'))) {
+                    
+                    const confirmRes = await Swal.fire({
+                      text: t('noActivitiesHint'),
+                      icon: 'question',
+                      showCancelButton: true,
+                      confirmButtonText: 'OK',
+                      cancelButtonText: 'Cancel'
+                    });
+                    
+                    if (confirmRes.isConfirmed) {
                       const loginRes = await apiFetch('/strava/login', { method: 'POST' });
                       if (loginRes.success) {
                         setStravaCookie(loginRes.cookie);
                         sessionStorage.setItem('stravaCookie', loginRes.cookie);
-                        alert(`✅ ${t('cookieLoginSuccess')}`);
+                        Swal.fire(t('cookieLoginSuccess'), '', 'success');
                       } else {
-                        alert(`❌ ${t('errorPrefix')}: ` + (loginRes.error || 'Unknown'));
+                        Swal.fire(t('errorPrefix'), loginRes.error || 'Unknown', 'error');
                       }
                     }
                   }
                 } catch (e) {
-                  alert(`${t('errorPrefix')}: ` + e.message);
+                  Swal.fire(t('errorPrefix'), e.message, 'error');
                 }
               }}
               style={{ 
@@ -514,7 +541,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
               className="btn btn--secondary"
               onClick={async () => {
                 if (!selectedClubId) {
-                  alert(t('selectGroupFirst'));
+                  Swal.fire(t('selectGroupFirst'), '', 'warning');
                   return;
                 }
                 const cookieToUse = stravaCookie || '';
@@ -524,27 +551,41 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                     body: JSON.stringify({ cookie: cookieToUse || undefined, limit: Number(syncLimit) })
                   });
                   if (data.success) {
-                    alert(`✅ ${t('syncSuccess')}\n\n• ${t('syncSuccessDetail1').replace('{count}', data.scraped_count)}\n• ${t('syncSuccessDetail2')}`);
+                    await Swal.fire(
+                      t('syncSuccess'), 
+                      `• ${t('syncSuccessDetail1').replace('{count}', data.scraped_count)}\n• ${t('syncSuccessDetail2')}`, 
+                      'success'
+                    );
                     window.location.reload();
                   } else {
                     if (data.error && (data.error.includes('Cookie') || data.error.includes('Phiên đăng nhập đã hết hạn'))) {
                       setStravaCookie('');
                       sessionStorage.removeItem('stravaCookie');
-                      if (confirm(data.error + '\n\n' + t('openChromePrompt'))) {
+                      
+                      const confirmSync = await Swal.fire({
+                        title: data.error,
+                        text: t('openChromePrompt'),
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'OK',
+                        cancelButtonText: 'Cancel'
+                      });
+                      
+                      if (confirmSync.isConfirmed) {
                         const loginRes = await apiFetch('/strava/login', { method: 'POST' });
                         if (loginRes.success) {
                           setStravaCookie(loginRes.cookie);
                           sessionStorage.setItem('stravaCookie', loginRes.cookie);
-                          alert(`✅ ${t('loginSuccessSyncNow')}`);
+                          Swal.fire(t('loginSuccessSyncNow'), '', 'success');
                         }
                       }
                     } else {
-                      alert(`❌ ${t('errorPrefix')}: ` + (data.error || t('syncError')));
+                      Swal.fire(t('errorPrefix'), data.error || t('syncError'), 'error');
                     }
                   }
                 } catch (e) {
                   console.error(e);
-                  alert(`❌ ${t('serverErrorPrefix')}: ` + e.message);
+                  Swal.fire(t('serverErrorPrefix'), e.message, 'error');
                 }
               }}
               style={{ 

@@ -123,7 +123,7 @@ const translations = {
     // Callback
     authenticating: 'Đang xác thực với Strava...',
     loginSuccess: 'Đăng nhập thành công! Đang chuyển hướng...',
-    cookieLoginSuccess: 'Đăng nhập thành công! Cookie đã được lưu tự động.',
+    cookieLoginSuccess: 'Đăng nhập Strava thành công. Thông tin phiên đã được lưu tự động.',
     authFailed: 'Xác thực thất bại. Vui lòng thử lại.',
     backHome: 'Về trang chủ',
     loading: 'Đang tải...',
@@ -293,7 +293,7 @@ const translations = {
     // Callback
     authenticating: 'Authenticating with Strava...',
     loginSuccess: 'Login successful! Redirecting...',
-    cookieLoginSuccess: 'Login successful! Cookie has been saved automatically.',
+    cookieLoginSuccess: 'Strava login successful. Session information was saved automatically.',
     authFailed: 'Authentication failed. Please try again.',
     backHome: 'Back to Home',
     loading: 'Loading...',
