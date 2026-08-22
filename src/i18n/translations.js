@@ -96,7 +96,7 @@ const translations = {
     importSuccess: 'Đã tải thành công dữ liệu từ file CSV!',
     importError: 'Có lỗi khi đọc file CSV.',
     importCsv: 'Import CSV (Club Reports)',
-    importCsvPlaceholder: 'Nhập thẻ công _dauvat_vasoran',
+    importCsvPlaceholder: 'Nhập thủ công Cookies',
     stravaLogin: 'Đăng nhập Strava',
     stravaCookieOk: 'Cookie Strava OK',
     autoSyncStrava: 'Tự động đồng bộ Strava',
@@ -123,6 +123,7 @@ const translations = {
     // Callback
     authenticating: 'Đang xác thực với Strava...',
     loginSuccess: 'Đăng nhập thành công! Đang chuyển hướng...',
+    cookieLoginSuccess: 'Đăng nhập thành công! Cookie đã được lưu tự động.',
     authFailed: 'Xác thực thất bại. Vui lòng thử lại.',
     backHome: 'Về trang chủ',
     loading: 'Đang tải...',
@@ -152,6 +153,20 @@ const translations = {
     selectAll: 'Chọn tất cả',
     deselectAll: 'Bỏ chọn tất cả',
     allowEditOthers: 'Cho phép mọi runner tự sửa mục tiêu / tiền phạt của người khác',
+    
+    // Sidebar Alerts
+    saveConfigError: 'Không thể lưu cấu hình, vui lòng thử lại.',
+    noCsvFound: 'Không tìm thấy file CSV nào hợp lệ.',
+    cookieReady: 'Đã có cookie Strava sẵn sàng! Bạn có thể bấm Auto Sync.',
+    errorPrefix: 'Lỗi',
+    selectGroupFirst: 'Vui lòng chọn một nhóm (Challenge Group) trước khi đồng bộ.',
+    syncSuccess: 'Đồng bộ dữ liệu thành công!',
+    syncSuccessDetail1: 'Đã cập nhật {count} hoạt động chạy bộ mới nhất từ nhóm Strava.',
+    syncSuccessDetail2: 'Dữ liệu đã được lưu và tính toán vào bảng thử thách!',
+    openChromePrompt: 'Bạn có muốn mở Chrome để đăng nhập Strava ngay không?',
+    loginSuccessSyncNow: 'Đăng nhập thành công! Vui lòng bấm Đồng bộ lại.',
+    syncError: 'Có lỗi xảy ra khi đồng bộ',
+    serverErrorPrefix: 'Lỗi kết nối server',
   },
 
   en: {
@@ -251,7 +266,7 @@ const translations = {
     importSuccess: 'Successfully loaded data from CSV file!',
     importError: 'Error reading CSV file.',
     importCsv: 'Import CSV (Club Reports)',
-    importCsvPlaceholder: 'Enter token _dauvat_vasoran',
+    importCsvPlaceholder: 'Enter Cookies manually',
     stravaLogin: 'Login Strava',
     stravaCookieOk: 'Strava Cookie OK',
     autoSyncStrava: 'Auto sync Strava',
@@ -278,6 +293,7 @@ const translations = {
     // Callback
     authenticating: 'Authenticating with Strava...',
     loginSuccess: 'Login successful! Redirecting...',
+    cookieLoginSuccess: 'Login successful! Cookie has been saved automatically.',
     authFailed: 'Authentication failed. Please try again.',
     backHome: 'Back to Home',
     loading: 'Loading...',
@@ -307,6 +323,20 @@ const translations = {
     selectAll: 'Select All',
     deselectAll: 'Deselect All',
     allowEditOthers: 'Allow all runners to edit targets / penalties of others',
+
+    // Sidebar Alerts
+    saveConfigError: 'Cannot save configuration, please try again.',
+    noCsvFound: 'No valid CSV file found.',
+    cookieReady: 'Strava cookie is ready! You can click Auto Sync.',
+    errorPrefix: 'Error',
+    selectGroupFirst: 'Please select a Challenge Group before syncing.',
+    syncSuccess: 'Data synced successfully!',
+    syncSuccessDetail1: 'Updated {count} latest run activities from Strava club.',
+    syncSuccessDetail2: 'Data has been saved and calculated in the challenge board!',
+    openChromePrompt: 'Do you want to open Chrome to login to Strava now?',
+    loginSuccessSyncNow: 'Login successful! Please click Sync again.',
+    syncError: 'An error occurred during sync',
+    serverErrorPrefix: 'Server connection error',
   },
 };
 

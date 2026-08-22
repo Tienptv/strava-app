@@ -178,7 +178,7 @@ export default function PersonalGoal({
   // Format month text
   const monthName = new Date(currentYear, currentMonth - 1, 1).toLocaleDateString(
     lang === 'vi' ? 'vi-VN' : 'en-US', 
-    { month: 'long', year: 'numeric' }
+    { month: 'long', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' }
   );
 
   return (

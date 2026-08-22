@@ -102,14 +102,14 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
       setTimeout(() => setSavedMessage(false), 3000);
     } catch (err) {
       console.error('Lỗi lưu config:', err);
-      alert('Không thể lưu cấu hình, vui lòng thử lại.');
+      alert(t('saveConfigError'));
     }
   };
 
   const handleCsvUpload = async (e) => {
     const files = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.csv'));
     if (!files.length) {
-       alert('Không tìm thấy file CSV nào hợp lệ.');
+       alert(t('noCsvFound'));
        return;
     }
 
@@ -459,7 +459,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                   if (res.hasCookie) {
                     setStravaCookie(res.cookie);
                     sessionStorage.setItem('stravaCookie', res.cookie);
-                    alert('✅ Đã có cookie Strava sẵn sàng! Bạn có thể bấm Auto Sync.');
+                    alert(`✅ ${t('cookieReady')}`);
                   } else {
                     setStravaCookie('');
                     sessionStorage.removeItem('stravaCookie');
@@ -468,14 +468,14 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                       if (loginRes.success) {
                         setStravaCookie(loginRes.cookie);
                         sessionStorage.setItem('stravaCookie', loginRes.cookie);
-                        alert('✅ Đăng nhập thành công! Cookie đã được lưu tự động.');
+                        alert(`✅ ${t('cookieLoginSuccess')}`);
                       } else {
-                        alert('❌ Lỗi: ' + (loginRes.error || 'Unknown'));
+                        alert(`❌ ${t('errorPrefix')}: ` + (loginRes.error || 'Unknown'));
                       }
                     }
                   }
                 } catch (e) {
-                  alert('Lỗi: ' + e.message);
+                  alert(`${t('errorPrefix')}: ` + e.message);
                 }
               }}
               style={{ 
@@ -514,7 +514,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
               className="btn btn--secondary"
               onClick={async () => {
                 if (!selectedClubId) {
-                  alert('Vui lòng chọn một nhóm (Challenge Group) trước khi đồng bộ.');
+                  alert(t('selectGroupFirst'));
                   return;
                 }
                 const cookieToUse = stravaCookie || '';
@@ -524,27 +524,27 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear }) {
                     body: JSON.stringify({ cookie: cookieToUse || undefined, limit: Number(syncLimit) })
                   });
                   if (data.success) {
-                    alert(`✅ Đồng bộ dữ liệu thành công!\n\n• Đã cập nhật ${data.scraped_count} hoạt động chạy bộ mới nhất từ nhóm Strava.\n• Dữ liệu đã được lưu và tính toán vào bảng thử thách!`);
+                    alert(`✅ ${t('syncSuccess')}\n\n• ${t('syncSuccessDetail1').replace('{count}', data.scraped_count)}\n• ${t('syncSuccessDetail2')}`);
                     window.location.reload();
                   } else {
                     if (data.error && (data.error.includes('Cookie') || data.error.includes('Phiên đăng nhập đã hết hạn'))) {
                       setStravaCookie('');
                       sessionStorage.removeItem('stravaCookie');
-                      if (confirm(data.error + '\n\nBạn có muốn mở Chrome để đăng nhập Strava ngay không?')) {
+                      if (confirm(data.error + '\n\n' + t('openChromePrompt'))) {
                         const loginRes = await apiFetch('/strava/login', { method: 'POST' });
                         if (loginRes.success) {
                           setStravaCookie(loginRes.cookie);
                           sessionStorage.setItem('stravaCookie', loginRes.cookie);
-                          alert('✅ Đăng nhập thành công! Vui lòng bấm Đồng bộ lại.');
+                          alert(`✅ ${t('loginSuccessSyncNow')}`);
                         }
                       }
                     } else {
-                      alert('❌ Lỗi: ' + (data.error || 'Có lỗi xảy ra khi đồng bộ'));
+                      alert(`❌ ${t('errorPrefix')}: ` + (data.error || t('syncError')));
                     }
                   }
                 } catch (e) {
                   console.error(e);
-                  alert('❌ Lỗi kết nối server: ' + e.message);
+                  alert(`❌ ${t('serverErrorPrefix')}: ` + e.message);
                 }
               }}
               style={{ 
