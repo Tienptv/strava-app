@@ -1266,10 +1266,11 @@ img {
 .runner-rank {
   color: var(--text-secondary);
   font-weight: bold;
-  font-size: 0.8rem;
-  min-width: 20px;
-  display: inline-block;
-  text-align: right;
+  font-size: 12px;
+  min-width: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .runner-name-container {
@@ -1281,7 +1282,7 @@ img {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 80px;
+  max-width: 100px;
   display: inline-block;
   font-weight: 500;
 }
