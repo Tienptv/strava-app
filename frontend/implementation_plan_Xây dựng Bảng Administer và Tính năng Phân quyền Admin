@@ -1,0 +1,63 @@
+# Xây dựng Bảng Administer và Tính năng Phân quyền Admin
+
+Kế hoạch này mô tả các bước để xây dựng bảng điều khiển "Administer", bắt đầu với tính năng phân quyền cho các Sub-Admin. Tính năng này sẽ do Main Admin (Super Admin) quản lý.
+
+## User Review Required
+
+> [!IMPORTANT]
+> Chức năng phân quyền Admin sẽ dựa vào việc Super Admin (người có Strava ID cấu hình trong `VITE_ADMIN_STRAVA_ID`) cấp quyền cho những người dùng khác. 
+> Việc chọn người để cấp quyền sẽ được thực hiện bằng cách chọn từ danh sách thành viên của câu lạc bộ, tương tự như cách chọn danh sách tham gia Challenge. Bạn có đồng ý với cách tiếp cận này không?
+
+## Open Questions
+
+- Để Sub-Admin có thể sử dụng các chức năng, họ sẽ thấy Sidebar và nút vào Bảng Administer. Hiện tại, Bảng Administer chỉ có chức năng "Phân quyền Admin" (chỉ Super Admin mới thấy). Có chức năng nào khác bạn muốn thêm vào Bảng Administer cho Sub-Admin sử dụng ngay bây giờ không (ví dụ: quản lý cấu hình, xem log), hay chúng ta chỉ để sẵn giao diện trống cho họ?
+- Bạn có muốn lưu trữ danh sách các Sub-admin dưới dạng tệp `Storage/admins.json` không?
+
+## Proposed Changes
+
+### Backend (`server`)
+
+Thay đổi trên file `server/index.js` và thêm mới tệp dữ liệu.
+
+#### [NEW] `Storage/admins.json`
+Tệp dùng để lưu trữ danh sách các Strava ID của những Sub-admin đã được cấp quyền.
+
+#### [MODIFY] `server/index.js`
+- Thêm logic đọc/ghi cho tệp `Storage/admins.json`.
+- Thêm API `GET /api/auth/roles`: Trả về vai trò của user hiện tại dựa trên `x-athlete-id` header (`isSuperAdmin`, `isSubAdmin`).
+- Thêm API `GET /api/admins`: Lấy danh sách thông tin các Sub-admin hiện tại.
+- Thêm API `POST /api/admins`: Cấp quyền admin cho một user. Bắt buộc kiểm tra chỉ Super Admin mới được gọi API này.
+- Thêm API `DELETE /api/admins/:id`: Thu hồi quyền admin của một user. Chỉ Super Admin mới được gọi.
+
+---
+
+### Frontend (`src`)
+
+Cập nhật giao diện và routing.
+
+#### [MODIFY] `src/App.jsx`
+- Thay vì chỉ dựa vào `import.meta.env.VITE_ADMIN_STRAVA_ID` để xác định `isAdmin`, ta sẽ gọi API `/api/auth/roles` lúc ứng dụng khởi chạy (nếu đã có `athleteId`) để lấy chính xác quyền (`isSuperAdmin`, `isSubAdmin`).
+- Cả hai quyền này đều được tính là `isAdmin = true` để hiển thị `Sidebar`.
+- Thêm Route mới cho `/administer`.
+
+#### [MODIFY] `src/components/Sidebar.jsx`
+- Đổi nút "Administrator" đang hiển thị popup `Swal.fire` thành một Link chuyển hướng đến `/administer`.
+
+#### [NEW] `src/pages/Administer.jsx`
+- Tạo trang Bảng Administer.
+- **Nếu `isSuperAdmin` là true**: Hiển thị tính năng "Phân quyền Admin". 
+  - Bao gồm danh sách các admin hiện tại, nút "Xóa quyền".
+  - Giao diện chọn thành viên để "Thêm quyền Admin".
+- **Nếu `isSuperAdmin` là false**: Hiển thị thông báo chào mừng Sub-Admin và cho biết các tính năng dành cho họ đang được phát triển (vì Sub-admin không được thấy chức năng phân quyền).
+
+## Verification Plan
+
+### Manual Verification
+- Đăng nhập với tư cách Super Admin:
+  - Kiểm tra xem nút "Administrator" trên Sidebar có chuyển hướng đến trang `/administer` không.
+  - Kiểm tra xem có thấy giao diện "Phân quyền Admin" không.
+  - Thực hiện cấp quyền admin cho một user bất kỳ và kiểm tra xem danh sách cập nhật đúng không.
+- Đăng xuất và đăng nhập lại bằng tài khoản vừa được cấp quyền (Sub-admin):
+  - Kiểm tra xem có thấy Sidebar và nút "Administrator" không.
+  - Truy cập `/administer` và kiểm tra xem có **bị ẩn** chức năng "Phân quyền Admin" đi không (chỉ thấy thông báo đang phát triển các chức năng khác).
+- Thu hồi quyền của Sub-admin (từ tài khoản Super Admin) và kiểm tra Sub-admin có mất Sidebar không.

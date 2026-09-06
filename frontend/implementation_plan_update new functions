@@ -1,0 +1,55 @@
+# Tầm nhìn & Đề xuất Tính năng Mới (Feature Proposals)
+
+Tài liệu này tổng hợp các ý tưởng phát triển tính năng mới nhằm tăng cường sự tương tác và động lực tập luyện cho ứng dụng Strava nội bộ của HaskoningDHV.
+
+## User Review Required
+> [!IMPORTANT]
+> Vui lòng xem qua các đề xuất dưới đây và chọn ra (các) tính năng mà bạn muốn ưu tiên phát triển trước. Sau khi bạn chốt ý tưởng, tôi sẽ đi sâu vào thiết kế kỹ thuật (database, API, components) và tiến hành viết code.
+
+## Open Questions
+> [!NOTE]
+> - Bạn muốn ưu tiên triển khai tính năng nào nhất trong danh sách dưới đây? (Ví dụ: Tính năng 1 và 5).
+> - Bạn có muốn thay đổi logic hoặc bổ sung thêm ý tưởng nào khác vào danh sách này không?
+
+---
+
+## Các Đề Xuất Phát Triển
+
+### 1. 🏆 Hệ thống Huy hiệu & Thành tựu (Badges & Achievements)
+- **Mục tiêu:** Tự động trao huy hiệu ảo khi người dùng đạt các mốc đặc biệt nhằm tăng động lực.
+- **Kiến trúc kỹ thuật sơ bộ:** 
+  - **Database:** Thêm bảng `badges` (danh mục huy hiệu) và `user_badges` (lịch sử nhận huy hiệu).
+  - **Logic:** Xây dựng cơ chế quét (cron job hoặc trigger sau mỗi lần đồng bộ) để kiểm tra điều kiện. VD: *Early Bird* (chạy trước 6h sáng), *Marathoner* (chạy >= 42km), *Consistency* (đạt mục tiêu 3 tháng liên tiếp).
+  - **UI:** Thêm mục "Thành tựu của tôi" dạng tủ kính trưng bày trong tab Overview.
+
+### 2. ⚔️ Thử thách Đội/Nhóm (Team Battles)
+- **Mục tiêu:** Tạo sự cạnh tranh vui vẻ bằng cách thi đấu quãng đường giữa các phòng ban.
+- **Kiến trúc kỹ thuật sơ bộ:**
+  - **Database:** Thêm bảng `teams` và gán `team_id` cho bảng users.
+  - **API:** Thêm endpoint tổng hợp thống kê theo từng `team_id`.
+  - **UI:** Bổ sung tab **"Teams"** chứa bảng xếp hạng Đội nhóm và biểu đồ so sánh (Bar chart) giữa các đội.
+
+### 3. 🗺️ Tuyến đường ảo (Virtual Club Route)
+- **Mục tiêu:** Vẽ tổng quãng đường cộng dồn của toàn bộ CLB lên một bản đồ ảo để thấy được thành quả chung.
+- **Kiến trúc kỹ thuật sơ bộ:**
+  - **Logic:** Cấu hình một chặng đường mục tiêu (VD: Xuyên Việt dài 1,700km). Tính tổng quãng đường của tất cả users và quy ra %.
+  - **UI:** Sử dụng ProgressBar sinh động hoặc bản đồ trực quan (dùng thư viện `react-simple-maps` hoặc `leaflet`) hiển thị một marker đang di chuyển trên lộ trình.
+
+### 4. 👏 Bảng tin & Tương tác Xã hội (Social Feed & Kudos)
+- **Mục tiêu:** Hiển thị luồng hoạt động mới nhất của các thành viên và cho phép tương tác với nhau.
+- **Kiến trúc kỹ thuật sơ bộ:**
+  - **Database:** Thêm bảng `kudos` (lượt thả tim) và `comments`.
+  - **API:** Bổ sung endpoint lấy danh sách `recent_activities` có phân trang (pagination).
+  - **UI:** Tạo một tab riêng biệt **"Feed"** (Bảng tin) giống giao diện mạng xã hội thu nhỏ.
+
+### 5. 📈 Phân tích cá nhân chuyên sâu (Personal Insights)
+- **Mục tiêu:** Cung cấp biểu đồ trực quan về phong độ cá nhân để user tự theo dõi sự tiến bộ.
+- **Kiến trúc kỹ thuật sơ bộ:**
+  - **UI/Libraries:** Tích hợp thư viện biểu đồ như `recharts` hoặc `chart.js`.
+  - **Component:** Tạo các biểu đồ dạng Cột (Bar chart - theo dõi quãng đường qua các tuần) và Dây (Line chart - theo dõi Pace/Tốc độ). Đặt ngay phía dưới khối Personal Goal hiện tại.
+
+### 6. 🔔 Thông báo thời gian thực (Real-time Updates & Webhooks)
+- **Mục tiêu:** Cập nhật bảng xếp hạng ngay lập tức khi có người hoàn thành bài chạy mà không cần đợi đồng bộ thủ công.
+- **Kiến trúc kỹ thuật sơ bộ:**
+  - **Backend:** Cấu hình và đăng ký webhook endpoint với Strava API để nhận payload sự kiện.
+  - **Frontend:** Tích hợp WebSocket/Socket.io hoặc Server-Sent Events (SSE) để tự động render lại UI khi bảng xếp hạng có sự xáo trộn.

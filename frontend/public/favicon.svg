@@ -1,0 +1,24 @@
+<svg viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="20" y1="20" x2="236" y2="236" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FC5200"/>
+      <stop offset="100%" stop-color="#E03A00"/>
+    </linearGradient>
+    <linearGradient id="highlightGrad" x1="128" y1="12" x2="128" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="badgeShadow" x="0" y="0" width="256" height="256" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#A52600" flood-opacity="0.45"/>
+    </filter>
+    <filter id="chevronShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="52" fill="url(#bgGrad)" filter="url(#badgeShadow)"/>
+  <rect x="12" y="12" width="232" height="116" rx="52" fill="url(#highlightGrad)"/>
+  <g filter="url(#chevronShadow)">
+    <path d="M120 44 L168 140 L140 140 L120 100 L100 140 L72 140 Z" fill="#FFFFFF"/>
+    <path d="M140 140 L166 192 L146 192 L140 180 L134 192 L114 192 Z" fill="#FFA573"/>
+  </g>
+</svg>

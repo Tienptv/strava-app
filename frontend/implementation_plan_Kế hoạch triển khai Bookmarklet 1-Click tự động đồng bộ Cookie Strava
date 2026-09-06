@@ -1,0 +1,55 @@
+# Kế hoạch triển khai: Bookmarklet 1-Click tự động đồng bộ Cookie Strava
+
+Phương án này giúp các Admin tự động cập nhật cookie `_strava4_session` lên máy chủ Render chỉ với một cú nhấp chuột khi đang mở trang Strava, không cần mở DevTools F12 để copy-paste thủ công.
+
+---
+
+## Luồng hoạt động (Workflow)
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant Trình duyệt (Strava.com)
+    participant Server Render
+    
+    Admin->>Server Render: 1. Truy cập App (Giao diện Sidebar hiển thị nút Bookmarklet chứa Token ẩn)
+    Admin->>Trình duyệt (Strava.com): 2. Kéo nút Bookmarklet thả vào thanh Bookmarks của trình duyệt
+    Note over Admin, Trình duyệt (Strava.com): Khi Cookie hết hạn...
+    Admin->>Trình duyệt (Strava.com): 3. Vào trang strava.com & click vào Bookmarklet đã lưu
+    Trình duyệt (Strava.com)->>Server Render: 4. Chạy mã JS tự động đọc Cookie và gửi lên API kèm Token xác thực
+    Server Render-->>Admin: 5. Hiện thông báo "Cập nhật Cookie thành công!"
+```
+
+---
+
+## Chi tiết kỹ thuật & Bảo mật
+
+### 1. Cơ chế Bảo mật (CORS & Token)
+- **Token xác thực**: Để tránh việc kẻ xấu gửi rác lên server, mỗi Admin sẽ có một `syncToken` độc bản. Token này được tạo bằng cách băm (hash) `athleteId` + một chuỗi `SECRET` trên server.
+- **CORS**: Endpoint tiếp nhận cookie trên server Render sẽ được mở cấu hình CORS để cho phép nhận request gửi từ trang `https://www.strava.com`.
+
+### 2. Các tệp cần chỉnh sửa
+
+#### [MODIFY] [`server/index.js`](file:///c:/TIEN.PHAMTV/Script/strava-app-20260817T015557Z-1-001/strava-app/server/index.js)
+- Thêm endpoint `POST /api/auth/save-cookie`:
+  - Xác thực `token` được gửi lên.
+  - Lưu giá trị cookie vào file cục bộ `Storage/strava_cookie.txt` (file này sẽ được thêm vào `.gitignore` để tránh lộ).
+- Bổ sung cấu hình CORS cho phép origin `https://www.strava.com` truy cập endpoint này.
+- Cập nhật `/api/auth/roles` để sinh và trả về `syncToken` cho Admin hiện tại.
+- Cập nhật hàm đồng bộ `/api/clubs/:id/auto-sync-scrape`: nếu frontend không gửi cookie lên, server sẽ tự động đọc cookie mới nhất trong `Storage/strava_cookie.txt`.
+
+#### [MODIFY] [`src/components/Sidebar.jsx`](file:///c:/TIEN.PHAMTV/Script/strava-app-20260817T015557Z-1-001/strava-app/src/components/Sidebar.jsx)
+- Nhận `syncToken` từ thông tin đăng nhập của Admin.
+- Hiển thị khu vực hướng dẫn Bookmarklet trong phần "Đồng bộ Strava" dành cho Admin:
+  - Thiết kế một nút kéo-thả (Drag & Drop) có định dạng liên kết `javascript:...` được cấu hình sẵn token của Admin đó.
+  - Hướng dẫn trực quan: *"Kéo nút này vào thanh dấu trang trình duyệt của bạn -> Sang tab Strava bấm vào để tự động cập nhật"*.
+
+---
+
+## Câu hỏi & Lưu ý cho User
+
+> [!IMPORTANT]
+> 1. Trình duyệt của bạn phải hiển thị **thanh Dấu trang (Bookmarks Bar / Favorites Bar)** để kéo thả (nhấn `Ctrl + Shift + B` trên Windows để bật).
+> 2. File lưu trữ tạm cookie trên Render (`Storage/strava_cookie.txt`) sẽ bị reset mỗi lần bạn deploy code mới, nhưng điều này không sao cả vì Admin chỉ cần bấm lại Bookmarklet 1 click là cookie được nạp lại ngay.
+
+Nếu bạn đồng ý với kế hoạch này, vui lòng bấm **Proceed** để tôi tiến hành viết code!

@@ -1,0 +1,22 @@
+{
+  "version": "1.2.1",
+  "releaseDate": "2026-09-05",
+  "title": "Cập nhật Gộp nút Đồng bộ Strava & Khử trùng lặp",
+  "title_en": "Update: Merged Strava Sync & Member Deduplication",
+  "changelog": [
+    "Loại bỏ triệt để lỗi trùng lặp thành viên câu lạc bộ theo ID và họ tên",
+    "Gộp nút Auto sync Strava và tự động đồng bộ ngay lên Render Cloud",
+    "Cân đối giao diện bảng Challenge và các tab tháng linh hoạt",
+    "Hiển thị số phiên bản ứng dụng rõ ràng ở góc dưới màn hình",
+    "Tích hợp hệ thống 1-Click Auto Update cho Sub-Admin"
+  ],
+  "changelog_en": [
+    "Completely eliminated club member duplicates by ID and athlete name",
+    "Merged Auto Strava Sync to immediately push data to Render Cloud",
+    "Balanced Challenge table layout and flexible month tabs",
+    "Prominently displayed application version number in the footer",
+    "Integrated 1-Click Auto Update system for Sub-Admins"
+  ],
+  "minAppVersion": "1.0.0"
+}
+

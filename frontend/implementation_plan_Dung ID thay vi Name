@@ -1,0 +1,47 @@
+# Refactor System to Use Athlete ID as Primary Key
+
+Chuyển đổi hệ thống sang việc sử dụng **Strava Athlete ID** làm chuẩn (khóa chính) để mapping dữ liệu, thay vì dùng tên rút gọn (ví dụ: `Katy_N.`). Điều này sẽ giải quyết triệt để các vấn đề trùng lặp tên, sai sót do gõ phím, hoặc nhận diện nhầm người do fuzzy matching.
+
+## User Review Required
+
+> [!WARNING]
+> Qua quá trình rà soát dữ liệu hiện tại, tôi phát hiện có **12 người tham gia** (ví dụ: `Tran M.`, `Andie L.`, `Herman V.`...) chưa từng có bất kỳ hoạt động Strava nào và cũng không có ID trong file CSV.
+> 
+> **Câu hỏi cho bạn:** Đối với 12 người này, tạm thời tôi vẫn sẽ giữ nguyên key là tên (ví dụ: `Tran_M.`) cho đến khi họ có hoạt động Strava đầu tiên (lúc đó hệ thống sẽ tự cập nhật ID của họ) nhé? Hay bạn muốn tự tay nhập ID cho họ sau?
+
+## Proposed Changes
+
+---
+
+### Tái cấu trúc file dữ liệu JSON
+
+#### [MODIFY] `Storage/challenge_config.json`
+- Chạy một script di chuyển (migration script) để chuyển đổi tất cả các key trong `participants` và `monthlyParticipants` từ dạng tên (`Katy_N.`) sang chuỗi ID (`149162660`).
+- Nếu user chưa có ID, tạm thời giữ nguyên format cũ làm fallback.
+
+---
+
+### Backend Logic
+
+#### [MODIFY] `server/index.js`
+- Cập nhật các API xử lý việc lưu/cập nhật người chơi (`/api/challenge/config`).
+- Đảm bảo khi lưu, ưu tiên dùng `id` làm key nếu `id` tồn tại, thay vì `firstname_lastname`.
+- Cập nhật logic `sync_athletes` (nếu có sử dụng lại) để ánh xạ theo ID thay vì tên.
+
+---
+
+### Frontend & Utilities
+
+#### [MODIFY] `src/utils/challengeStats.js`
+- Sửa hàm `getAthleteMatchKey`: Xóa bớt các cơ chế so khớp tên phức tạp (fuzzy matching). Ưu tiên tra cứu trực tiếp O(1) theo Athlete ID, điều này cũng sẽ tăng hiệu năng xử lý.
+- Sửa `processChallengeData`: Gán tự động ID khi hoạt động xuất hiện, và dùng ID đó để cộng dồn quãng đường một cách chính xác tuyệt đối.
+
+## Verification Plan
+
+### Automated Tests
+- Chạy thử một tập dữ liệu Strava thô để kiểm tra:
+  - Hoạt động của một người có ID sẽ map đúng vào tài khoản ID đó.
+  - Người mới chưa có ID khi chạy sẽ tự động được gán ID và cập nhật key (nếu cần).
+
+### Manual Verification
+- Bạn (người dùng) sẽ tải lại trang và kiểm tra các số liệu tính toán xem có ai bị rớt km hay sai sót dữ liệu do quá trình di chuyển ID không.

@@ -1,0 +1,44 @@
+# Tính năng: Thêm tuỳ chọn Điểm đến và Tự động sinh trạm dừng (Milestones)
+
+Tính năng này sẽ cập nhật form "Edit Challenge" để cho phép nhập "Điểm đến" (Destination). Khi điểm đến thay đổi, hệ thống sẽ tự động sinh ra các cột mốc (thành phố/thủ đô dọc đường) kèm theo logo (emoji) tương ứng trên thanh tiến trình.
+
+## User Review Required
+
+> [!IMPORTANT]
+> Việc "tự động tính toán các thành phố dọc đường từ xuất phát đến đích và gán logo phù hợp" cho **bất kỳ điểm đến nào** là một bài toán phức tạp đòi hỏi sự hiểu biết về địa lý. 
+> 
+> Để làm được chữ "Tự động" một cách thông minh nhất, giải pháp tối ưu là **tích hợp AI (ví dụ Gemini API)** vào backend. Khi bạn lưu "Điểm đến" mới, server sẽ gọi AI để hỏi: *"Đường từ TP.HCM đến [Điểm đến] đi qua 5 thành phố/thủ đô nào, hãy cho 1 emoji làm logo cho mỗi nơi"*, sau đó lưu kết quả vào file. 
+
+## Open Questions
+
+> [!WARNING]
+> Bạn muốn giải quyết phần "Tự động thêm thành phố dọc đường" theo hướng nào dưới đây?
+> 
+> **Lựa chọn 1 (Khuyên dùng - Thông minh nhất): Sử dụng AI (Gemini API)**
+> Mình sẽ viết một API nhỏ ở server (`server/index.js`). Khi bạn nhập "Paris", server sẽ nhờ AI sinh ra 5 điểm dừng chân (Ví dụ: Bangkok 🐘, New Delhi 🛕, Dubai 🐪, Rome 🍕, Paris 🗼) kèm theo `%` quãng đường, và tự động vẽ lên UI. *(Yêu cầu: Bạn cần có 1 API Key của Gemini/OpenAI để cấu hình vào file `.env`)*.
+> 
+> **Lựa chọn 2: Sử dụng một danh sách định nghĩa sẵn (Predefined Routes)**
+> Mình sẽ hardcode sẵn một vài tuyến đường phổ biến (ví dụ: đi Bắc Cực, đi Tokyo, đi Paris, đi New York) trong code. Nếu nhập đúng tên thì tự hiện, nhập tên lạ thì sẽ dùng một tuyến đường mặc định.
+> 
+> **Lựa chọn 3: Cho phép người dùng tự điền các trạm dừng**
+> Trong Modal "Edit Challenge", ngoài ô nhập Điểm đến, sẽ có thêm chỗ để bạn tự gõ tên 5 thành phố và tự chọn logo cho 5 thành phố đó.
+
+## Proposed Changes
+
+### Frontend (`src/components/ClubGoalProgress.jsx`)
+- **[MODIFY]** Thêm state `destination` (mặc định: Bắc Cực / North Pole).
+- **[MODIFY]** Thêm ô input "Điểm đến (Destination)" vào modal `isEditing`.
+- **[MODIFY]** Thay vì hardcode hằng số `milestones`, sẽ lấy `milestones` từ API (dữ liệu tải về từ backend).
+- **[MODIFY]** Icon đích đến (`map-pin-end`) sẽ cập nhật dựa trên emoji do AI trả về hoặc emoji tự chọn, vẫn giữ nguyên class `destination-badge` và `milestone-badge` để không làm mất hiệu ứng và kích thước CSS ban đầu.
+
+### Backend (`server/index.js`)
+- **[MODIFY]** Cập nhật endpoint `POST /api/challenge/goal` để nhận thêm tham số `destination`.
+- **[MODIFY]** (Nếu chọn Option 1): Tích hợp hàm gọi AI để generate ra `milestones` array dạng JSON, sau đó lưu toàn bộ vào file `Storage/club_goal.json`.
+- **[MODIFY]** Endpoint `GET /api/challenge/goal` sẽ trả về thêm `destination` và mảng `milestones`.
+
+## Verification Plan
+
+### Manual Verification
+1. Mở modal Edit Challenge, nhập thử điểm đến là "Tokyo".
+2. Bấm Save.
+3. Giao diện tiến trình sẽ tự load lại và hiển thị cờ/logo đích là Tokyo (ví dụ 🗼), các trạm dừng (milestones) sẽ tự động thay đổi thành các thành phố như Taipei, Thượng Hải, Osaka... với các emoji tương ứng (giữ nguyên kích thước vòng tròn và hiệu ứng).
