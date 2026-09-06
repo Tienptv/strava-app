@@ -19,7 +19,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
   const { lang, t } = useLang();
   
   const [goalData, setGoalData] = useState(null);
-  const [targetKm, setTargetKm] = useState(8801);
+  const [targetKm, setTargetKm] = useState(600);
   const [customTitle, setCustomTitle] = useState(null);
   const [customSubtitle, setCustomSubtitle] = useState(null);
   const [eventTiers, setEventTiers] = useState({});
@@ -120,33 +120,21 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
   // CALCULATION: DAY OF YEAR & PERCENTAGES
   // -------------------------------------------------------------
   const now = new Date();
-  const isLeapYear = (currentYear % 4 === 0 && currentYear % 100 !== 0) || currentYear % 400 === 0;
+  const realCurrentYear = now.getFullYear();
+  const isLeapYear = (realCurrentYear % 4 === 0 && realCurrentYear % 100 !== 0) || realCurrentYear % 400 === 0;
   const totalDaysInYear = isLeapYear ? 366 : 365;
 
-  const startOfYear = new Date(currentYear, 0, 1);
+  const startOfYear = new Date(realCurrentYear, 0, 1);
   const diffDays = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
-  const dayOfYear = Math.max(1, Math.min(totalDaysInYear, diffDays));
+  const dayOfYear = Math.max(0, Math.min(totalDaysInYear, diffDays));
   const percentTime = Math.min(Math.max(Math.round((dayOfYear / totalDaysInYear) * 1000) / 10, 0), 100);
 
-  const percentDistance = Math.min(Math.round((totalDistance / targetKm) * 100) || 0, 100);
+  const annualTargetKm = targetKm * 12;
+  const percentDistance = Math.min(Math.round((totalDistance / annualTargetKm) * 100) || 0, 100);
 
-  // User rules for progress mode:
-  // "Runner di chuyển theo Cách B nếu cách A bị ẩn, và theo cách A nếu Cách B bị ẩn. Nếu cả 2 cách không bị ẩn thì ưu tiên theo cách B"
-  const isShowDist = goalData?.showDistanceProgress !== false;
-  const isShowTime = goalData?.showTimeProgress !== false;
-  const showTodayMarker = goalData?.showTodayMarker !== false;
-
+  // Just use percentTime for the active runner
   let activeRunnerPercent = percentTime;
-  if (isShowTime && isShowDist) {
-    activeRunnerPercent = percentTime; // Priority to B
-  } else if (!isShowTime && isShowDist) {
-    activeRunnerPercent = percentDistance; // Follows A
-  } else if (isShowTime && !isShowDist) {
-    activeRunnerPercent = percentTime; // Follows B
-  } else {
-    activeRunnerPercent = percentTime;
-  }
-
+  const showTodayMarker = goalData?.showTodayMarker !== false;
   const vehiclePos = Math.min(Math.max(activeRunnerPercent, 2), 96);
 
   // -------------------------------------------------------------
@@ -166,8 +154,9 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
     const rawPercent = (startDays[i] / totalDaysInYear) * 100;
     // Tháng đầu tiên đặt tại 2.2% để trọn vẹn nằm trên thanh track
     const percent = i === 0 ? 2.2 : Math.round(rawPercent * 10) / 10;
-    const isPast = (now.getFullYear() > currentYear) || (now.getFullYear() === currentYear && now.getMonth() > i);
-    const isCurrent = (now.getFullYear() === currentYear && now.getMonth() === i);
+    // Đồng bộ với realCurrentYear của thanh progress xanh lá:
+    const isPast = now.getMonth() > i;
+    const isCurrent = now.getMonth() === i;
     return {
       monthNum,
       label: lang === 'en' ? monthNamesEnShort[i] : `T${monthNum}`,
@@ -390,59 +379,13 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
             </div>
           )}
         </div>
-
-        <div className="club-goal__stats">
-          <div className="timeline-indicators-summary">
-            {isShowDist && (
-              <span className="indicator-pill indicator-pill--km" title={lang === 'en' ? 'Actual distance progress' : 'Tiến độ cự ly km thực tế'}>
-                🏃 {t('distanceIndicator')}: <strong>{percentDistance}%</strong>
-              </span>
-            )}
-            {isShowTime && (
-              <span className="indicator-pill indicator-pill--time" title={lang === 'en' ? 'Time elapsed in year' : 'Tiến độ thời gian trong năm'}>
-                ⏳ {t('timeIndicator')}: <strong>{percentTime}%</strong> ({lang === 'en' ? `Day ${dayOfYear}/${totalDaysInYear}` : `Ngày ${dayOfYear}/${totalDaysInYear}`})
-              </span>
-            )}
-          </div>
-
-          {isGoalVisible ? (
-            <div className="club-goal__km-display">
-              <span className="current-dist">{totalDistance.toFixed(1)}</span>
-              <div className="target-display">
-                <span className="total-goal">/ {targetKm} km</span>
-                {isAdmin && (
-                  <button 
-                    className="btn-icon btn-edit" 
-                    onClick={handleOpenEdit} 
-                    title={t('editGoal')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <Edit2 size={14} />
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            isAdmin && (
-              <button 
-                className="btn-icon btn-edit" 
-                onClick={handleOpenEdit} 
-                title={t('editGoal')}
-                style={{ 
-                  background: 'var(--bg-secondary)', 
-                  padding: '6px', 
-                  borderRadius: '8px',
-                  border: '1px solid var(--border)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}
-              >
-                <Edit2 size={14} />
-              </button>
-            )
-          )}
+        <div className="club-goal__time-status" style={{ display: 'flex', alignItems: 'center' }}>
+          <span className="indicator-pill indicator-pill--time" style={{
+            background: 'rgba(0, 163, 166, 0.1)', color: 'var(--primary-navy)', border: '1px solid rgba(0, 163, 166, 0.3)',
+            padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px'
+          }} title={lang === 'en' ? 'Time elapsed in year' : 'Tiến độ thời gian trong năm'}>
+            ⏳ {t('timeIndicator') || 'Time'}: <strong>{percentTime}%</strong> ({lang === 'en' ? `Day ${dayOfYear}/${totalDaysInYear}` : `Ngày ${dayOfYear}/${totalDaysInYear}`})
+          </span>
         </div>
       </div>
       
@@ -457,31 +400,16 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
           {/* Background road texture */}
           <div className="map-track-bg"></div>
           
-          {/* Time Progress Fill (Cách B) - Dải fill thời gian thực trong năm */}
-          {isShowTime && (
-            <div 
-              className={`map-track-fill timeline-time-fill ${isShowDist ? 'timeline-time-fill--dual' : ''}`}
-              style={{ width: `${percentTime}%` }}
-              title={lang === 'en' 
-                ? `Time progress: ${percentTime}% (Day ${dayOfYear}/${totalDaysInYear})` 
-                : `Tiến độ thời gian: ${percentTime}% (Ngày ${dayOfYear}/${totalDaysInYear})`}
-            >
-              <div className="timeline-shimmer-wave"></div>
-            </div>
-          )}
-
-          {/* Distance Progress Fill (Cách A) - Dải fill cự ly */}
-          {isShowDist && (
-            <div 
-              className={`map-track-fill timeline-distance-fill ${isShowTime ? 'timeline-distance-fill--dual' : ''}`} 
-              style={{ width: `${percentDistance}%` }}
-              title={lang === 'en' 
-                ? `Completed distance: ${totalDistance.toFixed(1)} km (${percentDistance}%)` 
-                : `Cự ly đã hoàn thành: ${totalDistance.toFixed(1)} km (${percentDistance}%)`}
-            >
-              <div className="timeline-shimmer-wave"></div>
-            </div>
-          )}
+          {/* Time Progress Fill - Represents the number of days in the year up to now over 365 days */}
+          <div 
+            className="map-track-fill timeline-time-fill"
+            style={{ width: `${percentTime}%` }}
+            title={lang === 'en' 
+              ? `Time progress: ${percentTime}% (Day ${dayOfYear}/${totalDaysInYear})` 
+              : `Tiến độ thời gian: ${percentTime}% (Ngày ${dayOfYear}/${totalDaysInYear})`}
+          >
+            <div className="timeline-shimmer-wave"></div>
+          </div>
 
           {/* 12 Month Milestones (Thay chấm tròn bằng tên tháng trực tiếp trên thanh ray) */}
           {monthMilestones.map((m) => (

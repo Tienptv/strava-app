@@ -787,6 +787,13 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
         method: 'POST',
         body: JSON.stringify(dataToSave)
       });
+      // Also save config because title is now visually in this section
+      await apiFetch('/challenge/config', {
+        method: 'POST',
+        body: JSON.stringify(config)
+      });
+      window.dispatchEvent(new Event('challengeUpdated'));
+      
       window.dispatchEvent(new Event('goalUpdated'));
       if (showNotification) {
         Swal.fire({
@@ -1711,18 +1718,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
               <p>{t('loadingConfig')}</p>
             ) : config ? (
               <form onSubmit={handleSaveConfig} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                <div>
-                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                    {t('challengeTitleLabel')}
-                  </label>
-                  <input 
-                    type="text"
-                    value={config.title || 'Journey from HCMC to the North Pole'}
-                    onChange={(e) => setConfig({ ...config, title: e.target.value })}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-                    placeholder={t('challengeTitlePlaceholder')}
-                  />
-                </div>
+
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
@@ -1883,6 +1879,19 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '20px' }}>
               <div>
                 <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
+                  {lang === 'en' ? 'Monthly Goal' : 'Mục tiêu của tháng'}
+                </label>
+                <input 
+                  type="text"
+                  value={config?.title || 'Journey from HCMC to the North Pole'}
+                  onChange={(e) => setConfig({ ...(config || {}), title: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                  placeholder={t('challengeTitlePlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
                   {lang === 'en' ? 'Challenge Year' : 'Năm Thử Thách'}
                 </label>
                 <input 
@@ -1895,12 +1904,12 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
 
               <div>
                 <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                  {lang === 'en' ? 'Annual Target (km)' : 'Mục tiêu Cả Năm (km)'}
+                  {lang === 'en' ? 'Monthly Target (km)' : 'Mục tiêu Tháng (km)'}
                 </label>
                 <input 
                   type="number"
-                  value={goalData.targetKm || 8801}
-                  onChange={(e) => setGoalData({ ...goalData, targetKm: parseInt(e.target.value) || 8801 })}
+                  value={goalData.targetKm || 600}
+                  onChange={(e) => setGoalData({ ...goalData, targetKm: parseInt(e.target.value) || 600 })}
                   style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                 />
               </div>

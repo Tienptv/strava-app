@@ -1,32 +1,34 @@
 {
-  "year": 2026,
-  "targetKm": 8801,
+  "year": 2027,
+  "targetKm": 600,
   "customTitle": "Challenge with the Haskoning 200K Club",
   "customSubtitle": "Beyond the finish line!!!",
-  "showAnnualGoal": false,
+  "showAnnualGoal": true,
   "showDistanceProgress": false,
   "showTimeProgress": true,
   "showTodayMarker": false,
   "events": [
     {
       "id": "race_1",
-      "name": "Khai xuân Bính Ngọ 2026",
-      "date": "2026-02-15",
-      "logoUrl": "",
-      "icon": "🏮",
+      "name": "HCMC Marathon 2026",
+      "date": "2026-01-17",
+      "logoUrl": "https://www.carnifest.com/wp-content/uploads/2018/10/HCMC_Run___Ho_Chi_Minh_City_Marathon_0.jpg",
+      "registrationUrl": "",
+      "icon": "🏅",
       "type": "internal",
-      "location": "Toàn quốc",
-      "note": "Khởi động mùa giải mới 2026"
+      "location": "TP HCM",
+      "note": "10km / HM / FM"
     },
     {
       "id": "race_2",
-      "name": "Tiền Phong Marathon 2026",
-      "date": "2026-03-29",
-      "logoUrl": "",
+      "name": "VnExpress Marathon Ho Chi Minh City Midnight",
+      "date": "2026-03-22",
+      "logoUrl": "https://tse4.mm.bing.net/th/id/OIP.XYpLfR_66sFsgsDp4r36AwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+      "registrationUrl": "",
       "icon": "🏅",
       "type": "race",
-      "location": "Phú Yên",
-      "note": "Cự ly: 21km / 42km"
+      "location": "TP HCM",
+      "note": "5km/ 10km / 21km / 42km"
     },
     {
       "id": "race_3",

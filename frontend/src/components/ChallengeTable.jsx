@@ -77,6 +77,15 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
   const myUserKey = myMatchKey ? `${myMatchKey}_${year}_${month}` : null;
 
   const [penaltiesLedger, setPenaltiesLedger] = useState([]);
+  const [goalData, setGoalData] = useState(null);
+
+  const loadGoalData = useCallback(() => {
+    if (apiFetch) {
+      apiFetch('/challenge/goal')
+        .then(data => setGoalData(data))
+        .catch(e => console.error("Error loading goal data", e));
+    }
+  }, [apiFetch]);
 
   const loadTargets = useCallback(() => {
     if (apiFetch) {
@@ -130,8 +139,12 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     return () => window.removeEventListener('penaltiesUpdated', handlePenaltiesUpdated);
   }, [loadPenaltiesLedger]);
 
-
-
+  useEffect(() => {
+    loadGoalData();
+    const handleGoalUpdated = () => loadGoalData();
+    window.addEventListener('challengeGoalUpdated', handleGoalUpdated);
+    return () => window.removeEventListener('challengeGoalUpdated', handleGoalUpdated);
+  }, [loadGoalData]);
   const saveToApi = (updates) => {
     if (apiFetch) {
       apiFetch('/challenge/targets', {
@@ -232,9 +245,18 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     return getAthleteAvatar(member, size);
   };
 
+  const totalMonthlyDistance = challengeData.reduce((sum, row) => sum + (row.totalDistance || 0), 0);
+  const targetKm = goalData?.targetKm || 600;
+  const percentDistance = Math.min(Math.round((totalMonthlyDistance / targetKm) * 100) || 0, 100);
+
+  const now = new Date();
+  const isCurrentMonth = now.getFullYear() === year && now.getMonth() + 1 === month;
+  const dayOfMonth = isCurrentMonth ? now.getDate() : (now.getFullYear() > year || (now.getFullYear() === year && now.getMonth() + 1 > month) ? daysInMonth : 0);
+  const percentTime = Math.min(Math.max(Math.round((dayOfMonth / daysInMonth) * 1000) / 10, 0), 100);
+
   return (
     <div className="challenge-container">
-      <div className="challenge-header">
+      <div className="challenge-header" style={{ position: 'relative' }}>
         <div className="challenge-title-group">
           <h2 className="challenge-title-main">
             <span className="challenge-title-text">{t('challengeMonth')}</span>
@@ -244,6 +266,25 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
             </span>
           </h2>
         </div>
+        
+        {/* Căn lề phải đúng bằng tổng độ rộng các cột sticky bên phải (460px) để mép phải trùng với đường gióng Target */}
+        {goalData?.showDistanceProgress !== false && (
+          <div className="club-goal__stats" style={{ position: 'absolute', right: '460px', display: 'flex', alignItems: 'stretch', gap: '8px', height: '36px' }}>
+            <div className="timeline-indicators-summary" style={{ display: 'flex', marginBottom: 0 }}>
+              <span className="indicator-pill indicator-pill--km" style={{ display: 'flex', alignItems: 'center', height: '100%', padding: '0 16px', borderRadius: '20px', fontSize: '0.85rem', margin: 0, boxSizing: 'border-box' }} title={lang === 'en' ? 'Actual distance progress' : 'Tiến độ cự ly km thực tế'}>
+                🏃‍♂️ {t('distanceIndicator')}: <strong style={{ marginLeft: '4px' }}>{percentDistance}%</strong>
+              </span>
+            </div>
+
+            <div className="club-goal__km-display" style={{ background: '#f8fafc', padding: '0 16px', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: 0, height: '100%', boxSizing: 'border-box' }}>
+              <span className="current-dist" style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '1.1rem' }}>{totalMonthlyDistance.toFixed(1)}</span>
+              <div className="target-display" style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: '4px' }}>
+                <span className="total-goal" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>/ {targetKm} km</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         
         {challengeData.length > 0 && challengeData[0].totalDistance > 0 && (
           <div className="runner-of-the-month" title="Runner of the Month">
