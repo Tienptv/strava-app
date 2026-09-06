@@ -1,0 +1,14 @@
+{
+  "cookies": [
+    {
+      "name": "_strava4_session",
+      "value": "c24017okaaeq0r7e9om8bkrveo4jj8bg",
+      "domain": ".strava.com",
+      "path": "/",
+      "httpOnly": true,
+      "secure": true
+    }
+  ],
+  "savedAt": "2026-09-06T08:50:28.073Z",
+  "source": "manual"
+}

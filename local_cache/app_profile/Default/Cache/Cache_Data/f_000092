@@ -1,0 +1,4155 @@
+var flagToast = 0;
+var csrfName  = $('meta[name="csrf-name"]').attr('content');
+var csrfToken = $('meta[name="_token"]').attr('content');
+
+document.querySelectorAll('.dselect').forEach((item) => {
+    dselect(item, { search: true });
+});
+
+function isValidDateInput(value) {
+    const match = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if ( !match ) return false;
+
+    const day = Number(match[1]);
+    const month = Number(match[2]);
+    const year = Number(match[3]);
+    const date = new Date(year, month - 1, day);
+
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
+
+function initFlatpickrs(root = document) {
+    if ( !root ) return;
+
+    root.querySelectorAll('.flatpickr').forEach(input => {
+        if ( input._flatpickr ) return;
+
+        let minDate = input.getAttribute('data-min-date');
+        const maxDate = input.getAttribute('data-max-date') || null;
+        const dateFormat = input.getAttribute('data-date-format') || 'd/m/Y';
+        const altFormat = input.getAttribute('data-alt-format');
+        const clickOpens = input.getAttribute('data-click-opens') !== 'false';
+
+        if ( !minDate ) minDate = 'today';
+        if ( minDate === 'none' ) minDate = null;
+        if ( minDate === '100-years-ago' ) {
+            minDate = new Date();
+            minDate.setFullYear(minDate.getFullYear() - 100);
+            minDate.setHours(0, 0, 0, 0);
+        }
+
+        flatpickr(input, {
+            dateFormat: dateFormat,
+            altInput: Boolean(altFormat),
+            altFormat: altFormat || 'F j, Y',
+            altInputClass: altFormat ? 'form-control flatpickr-input' : undefined,
+            locale: 'vn',
+            minDate: minDate,
+            maxDate: maxDate,
+            disableMobile: 'true',
+            allowInput: !altFormat,
+            clickOpens: clickOpens,
+            onReady: function(selectedDates, dateStr, instance) {
+                if ( !instance.altInput ) return;
+
+                let typedValue = null;
+                let selectingFromCalendar = false;
+                const fieldWrapper = instance.altInput.closest('.form-floating');
+                const toggle = fieldWrapper ? fieldWrapper.querySelector('.flatpickr-toggle') : null;
+                instance.altInput.removeAttribute('readonly');
+                instance.altInput.setAttribute('inputmode', instance.input.getAttribute('inputmode') || 'numeric');
+                instance.altInput.setAttribute('pattern', instance.input.getAttribute('pattern') || '[0-9]*');
+
+                const removeAgeErrors = function() {
+                    if ( !fieldWrapper ) return;
+                    fieldWrapper.querySelectorAll('.age-error').forEach(error => error.remove());
+
+                    if ( instance.input.classList.contains('dob-main') ) {
+                        const key = instance.input.id.split('-').pop();
+                        const ageGroup = document.getElementById('age_group-' + key);
+                        if ( ageGroup ) {
+                            ageGroup.classList.remove('is-invalid');
+                            ageGroup.parentElement.querySelectorAll('.age-error').forEach(error => error.remove());
+                        }
+                    }
+                };
+                const showDateFormatError = function() {
+                    removeAgeErrors();
+                    instance.altInput.classList.add('is-invalid');
+                    instance.input.classList.add('is-invalid');
+
+                    if ( instance.altInput ) {
+                        instance.altInput.insertAdjacentHTML(
+                            'afterend',
+                            '<em class="mt-1 d-block text-danger line-1-2 age-error date-format-error"><small>Ngày sinh không hợp lệ hoặc không đúng định dạng</small></em>'
+                        );
+                    }
+                };
+
+                instance.altInput.addEventListener('input', function() {
+                    let caretPosition = this.selectionStart;
+
+                    if ( instance.config.altFormat === 'd/m/Y' ) {
+                        const rawValue = this.value;
+                        const rawCaret = caretPosition === null ? rawValue.length : caretPosition;
+                        const digitsBeforeCaret = rawValue.slice(0, rawCaret).replace(/\D/g, '').length;
+                        const caretWasAfterSeparator = rawCaret > 0 && /\D/.test(rawValue.charAt(rawCaret - 1));
+                        const digits = rawValue.replace(/\D/g, '').slice(0, 8);
+                        const formattedValue = [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)]
+                            .filter(Boolean)
+                            .join('/');
+
+                        caretPosition = 0;
+                        let digitCount = 0;
+                        for ( let i = 0; i < formattedValue.length && digitCount < digitsBeforeCaret; i++ ) {
+                            caretPosition = i + 1;
+                            if ( /\d/.test(formattedValue.charAt(i)) ) digitCount++;
+                        }
+                        if ( caretWasAfterSeparator && formattedValue.charAt(caretPosition) === '/' ) {
+                            caretPosition++;
+                        }
+
+                        this.value = formattedValue;
+                    }
+
+                    const restoreCaret = () => {
+                        if ( caretPosition !== null ) this.setSelectionRange(caretPosition, caretPosition);
+                    };
+
+                    typedValue = this.value.trim();
+                    this.classList.remove('is-invalid');
+                    instance.input.classList.remove('is-invalid');
+                    removeAgeErrors();
+
+                    if ( typedValue.length === 10 && isValidDateInput(typedValue) ) {
+                        const parsedDate = instance.parseDate(typedValue, instance.config.altFormat);
+                        if ( parsedDate && instance.isEnabled(parsedDate) ) {
+                            instance.setDate(typedValue, true, instance.config.altFormat);
+                            restoreCaret();
+                            return;
+                        }
+                    }
+
+                    instance.clear(false);
+                    instance.altInput.value = typedValue;
+                    if ( typedValue.length === 10 ) showDateFormatError();
+                    restoreCaret();
+                });
+                instance.altInput.addEventListener('focus', function() {
+                    instance.close();
+                });
+                if ( toggle && toggle.classList.contains('flatpickr-toggle') ) {
+                    const openCalendar = function(event) {
+                        event.preventDefault();
+                        instance.open();
+                    };
+
+                    toggle.addEventListener('click', openCalendar);
+                    toggle.addEventListener('keydown', function(event) {
+                        if ( event.key === 'Enter' || event.key === ' ' ) openCalendar(event);
+                    });
+                }
+                instance.calendarContainer.addEventListener('mousedown', function() {
+                    selectingFromCalendar = true;
+                });
+                instance.config.onChange.push(function() {
+                    selectingFromCalendar = false;
+                    typedValue = null;
+                    instance.altInput.classList.remove('is-invalid');
+                    instance.input.classList.remove('is-invalid');
+                    removeAgeErrors();
+                });
+                instance.altInput.addEventListener('blur', function() {
+                    if ( selectingFromCalendar ) {
+                        selectingFromCalendar = false;
+                        typedValue = null;
+                        return;
+                    }
+                    if ( typedValue === null || typedValue === '' ) return;
+
+                    if ( typedValue.length !== 10 || !isValidDateInput(typedValue) || instance.input.value === '' ) {
+                        showDateFormatError();
+                    }
+                    typedValue = null;
+                });
+            }
+        });
+    });
+}
+
+initFlatpickrs();
+
+$('.flatpickr-range').each(function () {
+    let $this = $(this);
+    let minDate = $this.data('min');
+    let maxDate = $this.data('max');
+
+    $this.flatpickr({
+        minDate: minDate || 'today',
+        maxDate: maxDate || null,
+        dateFormat: 'Y-m-d',
+        locale: 'vn',
+        mode: 'range',
+        disableMobile: 'true',
+        allowInput: true
+    });
+});
+
+$('.spinner-input').spinner();
+
+function getCookie(name) {
+    let cookieValue = null;
+    if ( document.cookie && document.cookie !== '' ) {
+        let cookies = document.cookie.split(';');
+        for ( let i = 0; i < cookies.length; i++ ) {
+            let cookie = cookies[i].trim();
+            if ( cookie.substring(0, name.length + 1) === (name + '=') ) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function handleAjaxError(xhr, status, error) {
+    if ( xhr.status === 500 ) {
+        toastBottom('Đã xảy ra lỗi, vui lòng thử lại', 'danger');
+        return;
+    }
+    if ( xhr.status === 403 ) {
+        toastBottom('Bạn không có quyền thực hiện thao tác này', 'danger');
+        return;
+    }
+    if ( xhr.status === 401 ) {
+        toastBottom('Phiên đăng nhập đã hết hạn', 'danger');
+        return;
+    }
+    toastBottom('Có lỗi xảy ra: ' + ( error || 'Không xác định' ), 'danger');
+}
+
+function validateNumber(el) {
+    el.value = el.value.replace(/[^0-9.]/g, '');
+}
+
+function validateAlphaNumeric(el) {
+    el.value = el.value.replace(/[^a-zA-Z0-9]/g, '');
+}
+
+function sanitizeVnExpressBibName(value) {
+    return String(value || '').replace(/[^\p{L} ]/gu, '').slice(0, 20);
+}
+
+$(document).on('input', 'input[id^="bib_name-"]', function () {
+    if ( typeof isVnExpress !== 'undefined' && isVnExpress == 1 ) {
+        this.value = sanitizeVnExpressBibName(this.value);
+    }
+});
+
+const eventCustomFieldTimeSelector = '#events-custom-field input[data-formatter="hh:mm"][data-distance]';
+const eventCustomFieldDefaultTimeLimit = '06:30';
+const eventCustomFieldTimeLimits = {
+    '42km': '06:30',
+    '21km': '03:30',
+    '10km': '02:00',
+    '5km': '01:15'
+};
+
+function formatEventCustomFieldTime(input) {
+    let digits = input.value.replace(/\D/g, '').slice(0, 4);
+    input.value = digits.length > 2
+        ? digits.slice(0, 2) + ':' + digits.slice(2)
+        : digits;
+}
+
+function parseEventCustomFieldTime(value) {
+    let matches = value.match(/^(\d{2}):(\d{2})$/);
+    if ( !matches ) return null;
+
+    let hours = Number(matches[1]);
+    let minutes = Number(matches[2]);
+
+    return {
+        minutePart: minutes,
+        totalMinutes: (hours * 60) + minutes
+    };
+}
+
+function getEventCustomFieldTimeLimit(distance) {
+    let label = eventCustomFieldTimeLimits[distance] || eventCustomFieldDefaultTimeLimit;
+    let parts = label.split(':').map(Number);
+
+    return {
+        label: label,
+        totalMinutes: (parts[0] * 60) + parts[1]
+    };
+}
+
+function isValidHttpsUrl(value) {
+    try {
+        let url = new URL(value);
+        return url.protocol === 'https:' && !!url.hostname;
+    } catch (error) {
+        return false;
+    }
+}
+
+function initEventCustomFieldFormatters() {
+    document.querySelectorAll(eventCustomFieldTimeSelector).forEach(function (input) {
+        formatEventCustomFieldTime(input);
+    });
+}
+
+if ( document.readyState === 'loading' ) {
+    document.addEventListener('DOMContentLoaded', initEventCustomFieldFormatters);
+} else {
+    initEventCustomFieldFormatters();
+}
+
+document.addEventListener('input', function (e) {
+    if ( !e.target.matches(eventCustomFieldTimeSelector) ) return;
+    formatEventCustomFieldTime(e.target);
+});
+
+document.addEventListener('input', function (e) {
+    if ( !e.target.classList.contains('input-currency') ) return;
+
+    let el = e.target;
+    let cursorPos = el.selectionStart;
+
+    let beforeCursor = el.value.slice(0, cursorPos);
+    let digitsBeforeCursor = beforeCursor.replace(/\D/g, '').length;
+
+    let raw = el.value.replace(/\D/g, '');
+    let formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    el.value = formatted;
+    
+    let newCursor = 0;
+    let digitCount = 0;
+
+    for ( let i = 0; i < formatted.length; i++ ) {
+        if ( /\d/.test(formatted[i]) ) {
+            digitCount++;
+        }
+        if ( digitCount >= digitsBeforeCursor ) {
+            newCursor = i + 1;
+            break;
+        }
+    }
+
+    el.setSelectionRange(newCursor, newCursor);
+});
+
+if ( window.history.replaceState ) {
+    window.history.replaceState( null, null, window.location.href );
+}
+
+function copyText(text) {
+    copyTextToClipboard(text);
+    toastBottom('Đã sao chép thành công', 'success');
+}
+
+function formatMoney(number) {
+    return Number(number || 0).toLocaleString('en-US');
+}
+
+function validateEmailStrict(email) {
+    let regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if ( !regex.test(email) ) return false;
+
+    let parts = email.split('@');
+    if ( parts.length !== 2 ) return false;
+
+    let local = parts[0];
+    let domain = parts[1].toLowerCase();
+
+    if ( local.length < 1 ) return false;
+    if ( domain.indexOf('.') === -1 ) return false;
+    if ( domain.startsWith('.') || domain.endsWith('.') ) return false;
+
+    let invalidChars = /[,\+\`\~\!\#\$\%\^\&\*\(\)\=\{\}\[\]\|\\\:;\"\'\<\>\?\/]/;
+    if ( invalidChars.test(email) ) return false;
+
+    let commonTypos = [
+        /* gmail */
+        'gmail.co', 'gmail.con', 'gmail.coom', 'gmail.comm', 'gmail.cm', 'gmail.vom', 'gmail.om',
+        'gmai.com', 'gmial.com', 'gnail.com', 'gmal.com', 'gmaill.com', 'gma.com', 'gamil.com', 'gmil.com', 'gail.com',
+        'gmal.cmo', 'gmail.cmo', 'gmaill.con', 'gmail.ccom', 'gmmail.com', 'hmail.com', 'gmail.com.vn', 'googlemail.com', 'mail.com',
+        /* hotmail */
+        'hotmal.com', 'hotmial.com', 'hotmai.com', 'hotmil.com', 'hotmaill.com', 'homail.com',
+        'hotmail.co', 'hotmail.con', 'hotmail.coom', 'hotmal.co', 'hotmial.con', 'hotmal.cmo',
+        /* yahoo */
+        'yahho.com', 'yhoo.com', 'yaoo.com', 'yaho.com', 'yaho.co', 'yahoo.co', 'yahoo.con', 'yahoo.coom',
+        'yhoo.co', 'yhoo.con', 'yahho.cmo',
+        /* outlook */
+        'outlok.com', 'outllok.com', 'outluk.com', 'outloook.com',
+        'outlook.co', 'outlook.con', 'outlook.coom',
+        'outlok.co', 'outlok.con', 'outluk.con', 'outllok.cmo',
+        /* iCloud */
+        'iclod.com', 'icluod.com', 'iclaud.com', 'iclud.com', 'icload.com', 'icould.com', 'icoud.com',
+        'icloud.co', 'icloud.con', 'icluod.con', 'icloud.coom', 'icluod.cmo', 'me.com',
+        /* dot com */
+        '.comm', '.ccom', '.coom', '.cmo'
+    ];
+
+    if ( commonTypos.includes(domain) ) { return false; }
+    return true;
+}
+
+function getAge(dateString, age_as_of = 0) {
+    let day, month, year;
+    
+    if ( dateString.includes('/') ) {
+        [day, month, year] = dateString.split('/').map(Number);
+    } else {
+        [year, month, day] = dateString.split('-').map(Number);
+    }
+
+    const birthDate = new Date(year, month - 1, day);
+
+    let today;
+
+    if ( age_as_of && age_as_of !== 0 ) {
+        today = new Date(
+            age_as_of < 10000000000
+                ? age_as_of * 1000
+                : age_as_of
+        );
+    } else {
+        today = new Date();
+    }
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    if ( today.getMonth() < birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+    ) {
+        age--;
+    }
+
+    /*
+     * Keep the completed years, but include the progress toward the next
+     * birthday. Age limits are exact-date limits: max age 6 ends after the
+     * sixth birthday, instead of lasting until the seventh birthday.
+     */
+    const lastBirthday = new Date(
+        birthDate.getFullYear() + age,
+        birthDate.getMonth(),
+        birthDate.getDate()
+    );
+    const nextBirthday = new Date(
+        birthDate.getFullYear() + age + 1,
+        birthDate.getMonth(),
+        birthDate.getDate()
+    );
+
+    if ( today > lastBirthday ) {
+        age += (today - lastBirthday) / (nextBirthday - lastBirthday);
+    }
+
+    return age;
+}
+
+function fallbackCopyTextToClipboard(text) {
+    let textArea = document.createElement('textarea');
+    textArea.value = text;
+
+    textArea.style.top = 0;
+    textArea.style.left = 0;
+    textArea.style.position = 'fixed';
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        let successful = document.execCommand('copy');
+        let msg = successful ? 'successful' : 'unsuccessful';
+        console.log('Fallback: Copying text command was ' + msg);
+    } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+    }
+
+    document.body.removeChild(textArea);
+}
+
+function copyTextToClipboard(text) {
+    if ( !navigator.clipboard ) {
+        fallbackCopyTextToClipboard(text);
+        return;
+    }
+
+    navigator.clipboard.writeText(text).then(function() {
+        console.log('Async: Copying to clipboard was successful!');
+    }, function(err) {
+        console.error('Async: Could not copy text: ', err);
+    });	
+}
+
+$('.facebook-share').click(function() {
+	window.open ( $(this).attr('href'), "_blank", "location=yes,height=470,width=520,scrollbars=yes,status=yes" );
+	return false;
+});
+
+function toastBottom(text, class_ = '') {
+    var x = document.getElementById('toast-bottom');
+
+    if ( flagToast == 0 ) {
+        x.innerHTML += text;
+        x.className = 'show';
+        flagToast = 1;
+
+        if ( !class_ ) {
+            x.classList.add('danger');
+        } else {
+            x.classList.add(class_);
+        }
+        
+        setTimeout(function() {
+            x.innerHTML = '';
+            flagToast = 0; 
+            x.className = x.className.replace('show', '');
+            x.className = x.className.replace(class_, ''); 
+        }, 5000);
+    }
+}
+
+$('.upload-img').change(function(e) {
+    for ( let i = 0; i < e.originalEvent.srcElement.files.length; i++ ) {
+        let file = e.originalEvent.srcElement.files[i];
+        let show_img = $(this).attr('data-img');
+
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function () {
+            $('#' + show_img + ' img').attr('src', reader.result);
+        };
+
+        reader.onerror = function (error) {
+            console.log('Error: ', error);
+        };
+    }
+});
+
+$(document).on('click', '.copy-url', function(e) {
+    if ( $(e.target).closest('a').length ) return;
+
+    const textCopy = $(e.target).attr('data-copy') || $(this).attr('data-copy');
+    if ( textCopy ) { copyText(textCopy); }
+});
+
+$('.social-share-url').on('click', 'a', function() {
+	window.open(href = $(this).attr('href'), "_blank", "location=yes,height=470,width=520,scrollbars=yes,status=yes");
+	return false;
+});
+
+/* step 01 - sum total price */
+$('.ticket-wrapper').on('click', '.spinner button', function() {
+    operatorPrice();
+});
+
+function operatorPrice() {
+    let inputs = document.querySelectorAll('input[class^="spinner-input"]');
+    let totalPrice = 0;
+
+    for ( let i = 0; i < inputs.length; i++ ) {
+        if ( inputs[i].value && inputs[i].value >=0 && inputs[i].getAttribute('data-price') ) {
+            totalPrice = totalPrice + parseInt(inputs[i].value) * parseInt(inputs[i].getAttribute('data-price'));
+        }
+    }
+    
+    $('#ticket-total').html(formatMoney(totalPrice) + 'đ');
+}
+
+$('.change-date-sale ul').on('click', 'li', function() {
+    $('.change-date-sale ul li').removeClass('active');
+    $(this).addClass('active');
+
+    $('.change-date-sale button').html( $(this).html() );
+
+    let col = $(this).attr('data-col');
+    $('.ticket-wrapper .ticket-row .col').removeClass('active');
+    $('.ticket-wrapper .ticket-row .col.' + col).addClass('active');
+});
+
+$('.register-step-01-validate').on('click', function () {
+    const hasTicket = [...document.querySelectorAll('input[class^="spinner-input"]')].some(input => parseInt(input.value, 10) > 0);
+
+    if ( !hasTicket ) {
+        toastBottom('Vui lòng chọn số lượng vé', 'danger');
+        return;
+    }
+
+    $('#form-register-step-01').trigger('submit');
+});
+
+$('.register-step-04-validate').on('click', function () {
+    if ( !$('.users-address-validate').length ) {
+        $(this).addClass('loading');
+    }
+});
+
+function checkRequired(selectors) {
+    for ( let selector of selectors ) {
+        let $input = $(selector);
+        let value = ($input.val() || '').trim();
+        $input.removeClass('is-invalid');
+
+        if ( value === '' ) {
+            $input.addClass('is-invalid');
+            return $input;
+        }
+    }
+    return null;
+}
+
+function checkFormat(selector, rule) {
+    let $input = $(selector);
+    let value = ($input.val() || '').trim();
+
+    let isValid = true;
+
+    if ( value !== '' ) {
+        if ( rule instanceof RegExp ) {
+            isValid = rule.test(value);
+        } else if ( typeof rule === 'function' ) {
+            isValid = rule(value);
+        }
+    }
+
+    if ( !isValid ) {
+        $input.addClass('is-invalid');
+        return $input;
+    }
+
+    return null;
+}
+
+$('.via-group-leader-validate').on('click', function (e) {
+    e.preventDefault();
+
+    const $btn = $(this).addClass('loading');
+
+    const requiredBuyer = ['#buyer-name', '#buyer-phone', '#buyer-email'];
+    const requiredVat = [
+        '#vat_company_name',
+        '#vat_tax_code',
+        '#vat_company_address',
+        '#vat_name_of_recipient',
+        '#vat_phone_of_recipient',
+        '#vat_email_of_recipient'
+    ];
+
+    let firstInvalid =
+        checkRequired(requiredBuyer) ||
+        checkFormat('#buyer-email', validateEmailStrict) ||
+        checkFormat('#buyer-phone', /^\d{10}$/);
+
+    const useVat = $('#buyer-group-vat').is(':checked');
+
+    if ( !firstInvalid && useVat ) {
+        firstInvalid =
+            checkRequired(requiredVat) ||
+            checkFormat('#vat_email_of_recipient', validateEmailStrict) ||
+            checkFormat('#vat_phone_of_recipient', /^\d{10}$/);
+
+        if ( !firstInvalid && !$('#buyer-vat-confirm').is(':checked') ) {
+            firstInvalid = $('#buyer-vat-confirm').addClass('is-invalid');
+            toastBottom('Vui lòng xác nhận thông tin xuất hóa đơn', 'danger');
+        }
+    }
+
+    if ( firstInvalid ) {
+        if ( !firstInvalid.is('#buyer-vat-confirm') ) {
+            toastBottom('Vui lòng nhập vào tất cả các trường bắt buộc', 'danger');
+        }
+
+        firstInvalid.focus();
+        $btn.removeClass('loading');
+        return false;
+    }
+
+    this.form?.submit();
+});
+
+/* begin address validate */
+$(document).on('click', '.users-address-validate', function () {
+    const $btn = $(this);
+
+    const ids = $btn.attr('data-ids');
+    if ( !ids ) {
+        toastBottom('Đã xảy ra lỗi không xác định', 'danger');
+        return;
+    }
+
+    let htmlConfirmList = '';
+    const $ulConfirm = $('#register-step-04-confirm').find('ul');
+    $ulConfirm.empty();
+
+    const arrIds = ids.split(',');
+    const requiredFields = $btn.data('required');
+
+    let flagError = 0;
+
+    for ( let key of arrIds ) {
+        if ( !key ) return;
+
+        let $accordion = $('#accordion' + key);
+        if ( !$accordion.length ) {
+            $accordion = $btn.closest('#users-address-validate');
+        }
+        if ( !$accordion.length ) {
+            $accordion = $btn.closest('.modal').find('#users-address-validate').first();
+        }
+
+        let title_ = $('#title-distance-' + key).text().trim();
+        if ( title_ ) { title_ = 'Thông tin ' + title_; }
+
+        let phoneValidate = '';
+
+        $accordion.removeClass('is-invalid');
+
+        /* default field */
+        let arrField = requiredFields ? requiredFields.split(',').map(f => f.trim()) : [ 'name', 'last_name', 'phone', 'email', 'identification_number', 'nationality', 'nation', 'province', 'gender', 'dob', 't_shirt_size', 'emergency_contact_name', 'emergency_contact_phone' ];
+        
+        for ( let field of arrField ) {
+            const $input = $('#' + field + '-' + key);
+            if ( !$input.length || $input.hasClass('not-required') ) continue;
+
+            const val = $.trim($input.val());
+            $input.removeClass('is-invalid');
+
+            const invalidate = (msg) => {
+                $input.addClass('is-invalid').focus();
+                $accordion.addClass('is-invalid');
+                toastBottom(msg, 'danger');
+                
+                flagError = 1;
+                return false;
+            };
+
+            if ( !val ) return invalidate(`Vui lòng nhập vào các trường bắt buộc ${title_}`);
+
+            if ( field === 'phone' ) {
+                const phoneClean = val.replace(/\s+/g, '');
+                phoneValidate = phoneClean;
+
+                if (!/^\d{10}$/.test(phoneClean)) {
+                    return invalidate(`Số điện thoại không hợp lệ ${title_}`);
+                }
+            }
+
+            if ( field === 'email' && !validateEmailStrict(val) )
+                return invalidate(`Định dạng Email không hợp lệ ${title_}`);
+
+            if ( field === 'email' && typeof isVnExpress !== 'undefined' && isVnExpress == 1 ) {
+                const emailDomain = val.split('@').pop().toLowerCase();
+
+                if ( /(^|\.)icloud\./.test(emailDomain) || /(^|\.)yahoo\./.test(emailDomain) )
+                    return invalidate(`Email iCloud và Yahoo không hợp lệ cho giải VnExpress`);
+            }
+
+            if ( field === 'identification_number' ) {
+                if ( !/^[a-zA-Z0-9]+$/.test(val) )
+                    return invalidate(`CCCD hoặc hộ chiếu chỉ được nhập chữ và số ${title_}`);
+
+                if ( val.length < 5 || val.length > 25 )
+                    return invalidate(`CCCD hoặc hộ chiếu phải có từ 5 đến 25 ký tự ${title_}`);
+            }
+
+            if ( field === 'emergency_contact_phone' ) {
+                if ( !/^\d{10}$/.test(val.replace(/\s+/g, '')) )
+                    return invalidate(`Số điện thoại người liên lạc khẩn cấp không hợp lệ ${title_}`);
+                if ( phoneValidate === val.replace(/\s+/g, '') )
+                    return invalidate('Số điện thoại người liên lạc khẩn cấp không được trùng với SĐT cá nhân');
+            }
+        }
+
+        /* check valid dob */
+        const $dob = $('#dob-' + key);
+        const $dobDisplay = $dob.siblings('input.flatpickr-input[type="text"]').first();
+        const $dobFocus = $dobDisplay.length ? $dobDisplay : $dob;
+        let dob = $dob.val();
+        let age_as_of = parseInt($dob.attr('age-as-of') || 0);
+        let age = dob ? getAge(dob, age_as_of) : 20;
+        
+        if ( arrField.includes('dob') && !dob ) {
+            $dob.add($dobDisplay).addClass('is-invalid');
+            $dobFocus.focus();
+            toastBottom(`Vui lòng nhập vào các trường bắt buộc ${title_}`, 'danger');
+            return false;
+        }
+
+        let minAge = parseInt($dob.attr('date-min-age') || 0);
+        let maxAge = parseInt($dob.attr('date-max-age') || 0);
+
+        if ( minAge && age < minAge ) {
+            $dob.add($dobDisplay).addClass('is-invalid');
+            $dobFocus.focus();
+            $accordion.addClass('is-invalid');
+
+            toastBottom(`${title_} người tham gia đăng ký phải trên ${minAge} tuổi`, 'danger');
+            return false;
+        }
+
+        if ( maxAge && age > maxAge ) {
+            $dob.add($dobDisplay).addClass('is-invalid');
+            $dobFocus.focus();
+            $accordion.addClass('is-invalid');
+
+            toastBottom(`${title_} người tham gia đăng ký phải nhỏ hơn ${maxAge} tuổi`, 'danger');
+            return false;
+        }
+
+        /* check valid guardian */
+        const flagChild = Number($('#title-distance-' + key).data('child')) === 1;
+        if ( age < 18 || flagChild ) {
+            const guardianFields = [ 'guardian_name', 'guardian_identification_number', 'guardian_phone', 'guardian_email', 'guardian_dob', 'guardian_relationship' ];
+
+            for ( let f of guardianFields ) {
+                const $g = $('#' + f + '-' + key);
+                if ( !$g.length ) continue;
+
+                const $gDisplay = $g.siblings('input.flatpickr-input[type="text"]').first();
+                const $gFocus = $gDisplay.length ? $gDisplay : $g;
+                const val = $.trim($g.val());
+                $g.add($gDisplay).removeClass('is-invalid');
+
+                if ( !val ) {
+                    $g.add($gDisplay).addClass('is-invalid');
+                    $gFocus.focus();
+                    $accordion.addClass('is-invalid');
+
+                    toastBottom('Vui lòng nhập đầy đủ thông tin Phụ huynh/ Người giám hộ', 'danger');
+                    return false;
+                }
+
+                if ( f === 'guardian_phone' && !/^\d{10}$/.test(val.replace(/\s+/g, ''))) {
+                    $g.addClass('is-invalid');
+                    $gFocus.focus();
+                    $accordion.addClass('is-invalid');
+
+                    toastBottom(`Số điện thoại Phụ huynh/ Người giám hộ không hợp lệ ${title_}`, 'danger');
+                    return false;
+                }
+
+                if ( f === 'guardian_email' && !validateEmailStrict(val) ) {
+                    $g.addClass('is-invalid');
+                    $gFocus.focus();
+                    $accordion.addClass('is-invalid');
+
+                    toastBottom('Email Phụ huynh/ Người giám hộ không đúng', 'danger');
+                    return false;
+                }
+
+                if ( f === 'guardian_identification_number' && (val.length < 5 || val.length > 20) ) {
+                    $g.addClass('is-invalid');
+                    $gFocus.focus();
+                    $accordion.addClass('is-invalid');
+                    
+                    toastBottom('CCCD Phụ huynh/ Người giám hộ không hợp lệ', 'danger');
+                    return false;
+                }
+
+                if ( f === 'guardian_dob' && getAge(val) < 18 ) {
+                    $g.add($gDisplay).addClass('is-invalid');
+                    $gFocus.focus();
+                    $accordion.addClass('is-invalid');
+
+                    toastBottom('Phụ huynh/ Người giám hộ phải đủ 18 tuổi', 'danger');
+                    return false;
+                }
+            }
+        }
+
+        /* check acf */
+        if ( $accordion.find('#events-custom-field').length ) {
+            $accordion.find('#events-custom-field .form-control').each(function () {
+                let $input = $(this);
+                let value = $.trim($input.val());
+                let formatter = $input.attr('data-formatter') || 'text';
+
+                $input.removeClass('is-invalid');
+
+                const invalidateAcf = (message) => {
+                    $input.addClass('is-invalid').focus();
+                    $accordion.addClass('is-invalid');
+                    toastBottom(message, 'danger');
+
+                    flagError = 1;
+                    return false;
+                };
+
+                if ( !$input.hasClass('not-required') && !value ) {
+                    return invalidateAcf(`Vui lòng nhập vào các trường bắt buộc ${title_}`);
+                }
+
+                if ( !value ) return;
+
+                if ( formatter === 'hh:mm' ) {
+                    let time = parseEventCustomFieldTime(value);
+                    if ( !time ) {
+                        return invalidateAcf(`Thời gian phải đúng định dạng hh:mm ${title_}`);
+                    }
+
+                    let distance = ($input.attr('data-distance') || '').toLowerCase();
+                    let timeLimit = getEventCustomFieldTimeLimit(distance);
+
+                    if ( time.totalMinutes > timeLimit.totalMinutes ) {
+                        let distanceText = distance ? ` cho cự ly ${distance}` : '';
+                        return invalidateAcf(`Thời gian tối đa ${distanceText} là ${timeLimit.label} ${title_}`);
+                    }
+
+                    if ( time.minutePart > 59 ) {
+                        return invalidateAcf(`Thời gian phải đúng định dạng hh:mm ${title_}`);
+                    }
+                }
+
+                if ( formatter === 'url' && !isValidHttpsUrl(value) ) {
+                    return invalidateAcf(`Liên kết không đúng định dạng ${title_}`);
+                }
+            });
+        }
+
+        if ( flagError == 1 ) return false;
+
+        /* check valid pet */
+        const petFields = [
+            { id: 'pet-type-', cls: 'pet-type' },
+            { id: 'pet-name-', cls: 'pet-name', trim: true },
+            { id: 'pet-weight-', cls: 'pet-weight', trim: true },
+            { id: 'pet-vaccin-', cls: 'pet-vaccin', checkbox: true }
+        ];
+
+        for ( let f of petFields ) {
+            const $el = $('#' + f.id + key);
+            if ( !$el.length ) continue;
+
+            const $wrap = $('#pet-field-' + key + ' .' + f.cls);
+            $wrap.removeClass('is-invalid');
+
+            if ( f.checkbox && !$el.is(':checked') ) {
+                $wrap.addClass('is-invalid').focus();
+                $accordion.addClass('is-invalid');
+
+                toastBottom(`Vui lòng xác nhận thú cưng đã tiêm chủng ở khung ${title_}`, 'danger');
+                return false;
+            }
+
+            let val = f.trim ? $.trim($el.val()) : $el.val();
+            if ( !f.checkbox && !val ) {
+                $wrap.addClass('is-invalid').focus();
+                $accordion.addClass('is-invalid');
+
+                toastBottom(`Vui lòng nhập Thông tin thú cưng ở khung ${title_}`, 'danger');
+                return false;
+            }
+        }
+
+        /* check required addons */
+        const $requiredAddonGroups = $('#users-address-validate .addon-items[data-addon-required="1"]');
+        if ( $requiredAddonGroups.find('.addon-item').length && !$requiredAddonGroups.find('.addon-checkbox:checked').length ) {
+            $requiredAddonGroups.addClass('is-invalid');
+            $accordion.addClass('is-invalid');
+
+            const $firstAddon = $requiredAddonGroups.find('.addon-item').first();
+            if ( $firstAddon.length ) {
+                $('html, body').animate({ scrollTop: $firstAddon.offset().top - 140 }, 250);
+            }
+
+            toastBottom(`Vui lòng chọn ít nhất 1 dịch vụ Lưu trú hoặc Di chuyển ${title_}`, 'danger');
+            return false;
+        }
+
+        /* check valid confirm vaccination */
+        if ( $('#agree-confirm_vaccination-' + key).length ) {
+            let $el = $('#agree-confirm_vaccination-' + key);
+            $el.removeClass('is-invalid');
+
+            if ( !$el.is(':checked') ) {
+                $el.addClass('is-invalid').focus();
+                $accordion.addClass('is-invalid');
+
+                toastBottom('Vui lòng xác nhận điều khoản và điều kiện', 'danger');
+                return false;
+            }
+        }
+
+        /* check valid disclaimer */
+        if ( $('#agree-disclaimer-' + key).length ) {
+            let $el = $('#agree-disclaimer-' + key);
+            $el.removeClass('is-invalid');
+
+            if ( !$el.is(':checked') ) {
+                $el.addClass('is-invalid').focus();
+                $accordion.addClass('is-invalid');
+
+                toastBottom('Vui lòng xác nhận điều khoản và điều kiện', 'danger');
+                return false;
+            }
+        }
+
+        /* */
+        const $form = $('#users-address-validate');
+        const $dobInputs = $form.find('input.dob-main[id]');
+        const $ageSelects = $form.find('select.age-group');
+
+        if ( $('#min-children').length ) {
+            const minChildrenRequired = parseInt($('#min-children').val(), 10);
+
+            let under18FromDob = 0;
+            let under18FromSelect = 0;
+            let hasInvalidChildAge = false;
+
+            $dobInputs.each(function () {
+                const $input = $(this);
+                
+                const dob = $input.val();
+                if ( !dob ) return;
+
+                let minRequired = 0;
+                let maxRequired = 18;
+
+                if ( typeof childAgeLimit !== 'undefined' ) {
+                    minRequired = childAgeLimit.min;
+                    maxRequired = childAgeLimit.max;
+                }
+
+                if ( $input.is('[date-min-age]') && $input.is('[date-max-age]') ) {
+                    minRequired = parseInt($input.attr('date-min-age'), 10);
+                    maxRequired = parseInt($input.attr('date-max-age'), 10);
+                }
+
+                $input.removeClass('is-invalid');
+
+                const ageAsOf = parseInt($input.attr('age-as-of') || 0);
+                const age = getAge(dob, ageAsOf);
+                if ( age < maxRequired ) {
+                    under18FromDob++;
+
+                    if ( age < minRequired || age > maxRequired ) {
+                        $input.addClass('is-invalid');
+                        hasInvalidChildAge = true;
+                    }
+                }
+            });
+
+            $ageSelects.each(function () {
+                if ( $(this).val() === '1' ) under18FromSelect++;
+            });
+
+            if ( hasInvalidChildAge ) {
+                toastBottom(`Trẻ em phải trong độ tuổi từ ${childAgeLimit.min} đến ${childAgeLimit.max} tuổi (*)`, 'danger');
+                return false;
+            }
+            
+            if ( under18FromDob < minChildrenRequired ) {
+                toastBottom(`Cần phải có ít nhất ${minChildrenRequired} Kid (trẻ em) để hoàn tất đăng ký (*)`, 'danger');
+                return false;
+            }
+        }
+
+        if ( $('#min-adults').length ) {
+            const minAdultsRequired = parseInt($('#min-adults').val(), 10);
+            let adultsFromDob = 0;
+            let adultsFromSelect = 0;
+
+            $dobInputs.each(function () {
+                const dob = this.value;
+                if ( dob && getAge(dob) >= 18 ) adultsFromDob++;
+            });
+
+            $ageSelects.each(function () {
+                if ($(this).val() === '0') adultsFromSelect++;
+            });
+
+            if ( adultsFromDob < minAdultsRequired ) {
+                toastBottom(`Cần phải có ít nhất ${minAdultsRequired} người trên 18 tuổi để hoàn tất đăng ký (*)`, 'danger');
+                return false;
+            }
+        }
+
+        /* modal confirm */
+        htmlConfirmList += ` <li> <strong>${($('#title-distance-' + key).text().trim()).split('-')[0].trim()}:</strong> ${$.trim($('#name-' + key).val() || '')} - <span class="text-primary"> ${$.trim($('#email-' + key).val() || '')} </span> </li> `;
+    }
+
+    if ( $btn.data('quick-checkout') !== undefined ) {
+        const must = (id, msg, type = null) => {
+            const $el = $(id);
+            let val = ($el.val() || '').trim();
+
+            $el.removeClass('is-invalid');
+
+            if ( !val ) {
+                $el.addClass('is-invalid').focus();
+                toastBottom(msg, 'danger');
+                return false;
+            }
+
+            if ( type === 'email' && !validateEmailStrict(val) ) {
+                $el.addClass('is-invalid').focus();
+                toastBottom('Email không hợp lệ', 'danger');
+                return false;
+            }
+
+            if ( type === 'phone' && !/^\d{10}$/.test(val.replace(/\s+/g, '')) ) {
+                $el.addClass('is-invalid').focus();
+                toastBottom('Số điện thoại không hợp lệ', 'danger');
+                return false;
+            }
+
+            return true;
+        };
+
+        if ( !must('#buyer-name', 'Vui lòng nhập Họ & tên người mua') ) return false;
+        if ( !must('#buyer-email', 'Vui lòng nhập Email người mua', 'email') ) return false;
+        if ( !must('#buyer-phone', 'Vui lòng nhập SĐT người mua', 'phone') ) return false;
+
+        if ( $('#buyer-vat').is(':checked') ) {
+            const vatFields = [
+                {id: '#vat_company_name', msg: 'Vui lòng nhập tên công ty'},
+                {id: '#vat_tax_code', msg: 'Vui lòng nhập mã số thuế'},
+                {id: '#vat_company_address', msg: 'Vui lòng nhập địa chỉ công ty'},
+                {id: '#vat_name_of_recipient', msg: 'Vui lòng nhập họ tên người nhận'},
+                {id: '#vat_phone_of_recipient', msg: 'Vui lòng nhập số điện thoại người nhận', type: 'phone'},
+                {id: '#vat_email_of_recipient', msg: 'Vui lòng nhập email người nhận', type: 'email'}
+            ];
+
+            for ( let f of vatFields ) {
+                if ( !must(f.id, f.msg, f.type) ) return false;
+            }
+
+            if ( !$('#buyer-vat-confirm').is(':checked') ) {
+                $('#buyer-vat-confirm').addClass('is-invalid').focus();
+                toastBottom('Vui lòng xác nhận thông tin xuất hóa đơn', 'danger');
+                return false;
+            }
+        }
+
+        /* ===== payment ===== */
+        if ( !$('input[name="payment"]:checked').length ) {
+            toastBottom('Vui lòng chọn phương thức thanh toán', 'danger');
+            return false;
+        }
+    }
+
+    if ( $('#register-step-04-confirm').length ) {
+        $ulConfirm.html(htmlConfirmList);
+        $('#register-step-04-confirm').modal('show');
+        return;
+    }
+
+    $('#users-address-validate').trigger('submit');
+});
+
+$(document).on('click', '#register-step-04-confirm .btn-primary', function (e) {
+    e.preventDefault();
+
+    const $ul = $('#register-step-04-confirm ul');
+    if ( $ul.find('li').length === 0 ) {
+        toastBottom('Đã xảy ra lỗi', 'danger');
+        return false;
+    }
+
+    $('#users-address-validate').trigger('submit');
+});
+/* end address validate */
+
+/* 
+ * check show guardian field
+ */
+$('#users-address-validate').on('change', 'input.dob-main[id]', function () {
+    if ( $(this).hasClass('not-required') ) { return false; }
+    
+    let $input = $(this);
+    let $displayInput = $input.siblings('input.flatpickr-input[type="text"]').first();
+    if ( !$displayInput.length ) $displayInput = $input;
+    let id = $input.attr('id');
+    let key = id.split('-')[1];
+    let selectedDate = $input.val();
+    let age_as_of = parseInt($input.attr('age-as-of') || 0);
+    
+    let age = getAge(selectedDate, age_as_of);
+    $('.guardian-field-' + key).addClass('d-none');
+
+    let minRequired = 0;
+    let maxRequired = 18;
+    
+    if ( age < maxRequired ) {
+        $('.guardian-field-' + key).removeClass('d-none');
+    }
+
+    /* */
+    let ageGroupVal = $('#age_group-' + key).val();
+    if ( ageGroupVal && ageGroupVal == 1 ) {
+        $('.guardian-field-' + key).removeClass('d-none');
+    }
+
+    $input.siblings('.age-error').remove();
+    $input.removeClass('is-invalid');
+    $('#age_group-' + key).siblings('.age-error').remove();
+    $('#age_group-' + key).removeClass('is-invalid');
+    
+    /* */
+    let $ageGroup = $('#age_group-' + key);
+    if ( $ageGroup.length ) {
+        let selected = $ageGroup.val();
+        let errorMessage = '';
+
+        /* override by line combo */
+        if ( typeof childAgeLimit !== 'undefined' ) {
+            minRequired = childAgeLimit.min;
+            maxRequired = childAgeLimit.max;
+        }
+
+        /* override by ticket */
+        if ( $input.is('[date-min-age]') && 
+            $input.is('[date-max-age]') &&
+            parseInt($input.attr('date-min-age'), 10) > 0 &&
+            parseInt($input.attr('date-max-age'), 10) > 0 ) {
+            minRequired = parseInt($input.attr('date-min-age'), 10);
+            maxRequired = parseInt($input.attr('date-max-age'), 10);
+        }
+        
+        if ( selected === '1' && ( age > maxRequired || age < minRequired ) ) {
+            errorMessage = `Độ tuổi không chính xác, nhóm <strong>Đối tượng</strong> trẻ em dành cho thành viên `;
+
+            if ( minRequired == 0 ) {
+                errorMessage += `nhỏ hơn ${maxRequired} tuổi`;
+            } else {
+                errorMessage += `từ ${minRequired} đến ${maxRequired} tuổi`;
+            }
+        }
+
+        if ( selected === '0' && age < maxRequired ) {
+            errorMessage = `Độ tuổi không chính xác, nhóm <strong>Đối tượng</strong> người lớn dành cho thành viên trên ${maxRequired} tuổi`;
+        }
+
+        if ( errorMessage !== '' ) {
+            $('<em class="mt-1 d-block text-danger line-1-2 age-error"> <small>' + errorMessage + '</small> </em>').insertAfter($displayInput);
+            $input.addClass('is-invalid');
+
+            $('<em class="mt-1 d-block text-danger line-1-2 age-error"><small>' + errorMessage + '</small></em>').insertAfter($('#age_group-' + key));
+            $('#age_group-' + key).addClass('is-invalid');
+            $('#accordion' + key).addClass('is-invalid');
+        }
+    } else {
+        /* override by ticket */
+        let minAge = parseInt($input.attr('date-min-age'), 10);
+        let maxAge = parseInt($input.attr('date-max-age'), 10);
+
+        let hasMin = $input.is('[date-min-age]') && minAge > 0;
+        let hasMax = $input.is('[date-max-age]') && maxAge > 0;
+
+        if ( hasMin || hasMax ) {
+            let isInvalidAge = false;
+            let errorMessage = 'Độ tuổi không chính xác, loại vé này chỉ dành cho thành viên ';
+
+            if ( hasMin && hasMax ) {
+                isInvalidAge = age < minAge || age > maxAge;
+                errorMessage += `từ ${minAge} đến ${maxAge} tuổi`;
+            } else if ( hasMin ) {
+                isInvalidAge = age < minAge;
+                errorMessage += `từ ${minAge} tuổi trở lên`;
+            } else if ( hasMax ) {
+                isInvalidAge = age > maxAge;
+                errorMessage += `tối đa ${maxAge} tuổi`;
+            }
+
+            if ( isInvalidAge ) {
+                $('<em class="mt-1 d-block text-danger line-1-2 age-error"><small>' + errorMessage + '</small></em>').insertAfter($displayInput);
+                $input.addClass('is-invalid');
+
+                $('<em class="mt-1 d-block text-danger line-1-2 age-error"><small>' + errorMessage + '</small></em>').insertAfter($('#age_group-' + key));
+                $('#accordion' + key).addClass('is-invalid');
+            }
+        }
+    }
+    
+    /* */
+    let $select = $('#t_shirt_size-' + key);
+    if ( $select.length ) {
+        let $options = $select.find('option');
+        let $childOptions = $options.filter('.child');
+
+        let maxAge = 18;
+        if ( typeof ageThreshold !== 'undefined' ) {
+            maxAge = ageThreshold;
+        }
+
+        if ( $childOptions.length ) {
+            if ( age < maxAge ) {
+                $options.each(function() {
+                    $(this).toggle($(this).hasClass('child'));
+                });
+            } else {
+                $options.each(function() {
+                    $(this).toggle(!$(this).hasClass('child'));
+                });
+            }
+            if ( !$select.find('option:selected').is(':visible') ) {
+                $select.val('');
+            }
+        }
+    }
+});
+
+$('#users-address-validate').on('change', 'input.guardian_dob[id]', function () {
+    let $input = $(this);
+    let $displayInput = $input.siblings('input.flatpickr-input[type="text"]').first();
+    if ( !$displayInput.length ) $displayInput = $input;
+    let selectedDate = $input.val();
+    let age = getAge(selectedDate);
+
+    $input.removeClass('is-invalid').siblings('.age-error').remove();
+    if ( age < 18 ) {
+        $input.addClass('is-invalid');
+        $('<em class="mt-1 d-block text-danger line-1-2 age-error"><small>Phụ huynh/ Người giám hộ phải trên 18 tuổi</small></em>').insertAfter($displayInput);
+    }
+});
+
+$('#users-address-validate').on('click', '.dropdown-toggle', function () {
+    let classList = $(this).attr('class').split(/\s+/);
+    let key = null;
+
+    classList.forEach((cls, index) => {
+        if ( cls === 'dropdown-toggle' && classList[index + 1] ) {
+            key = classList[index + 1];
+        }
+    });
+
+    if ( key ) { $('#collapse' + key).collapse('show'); }
+});
+
+$('.form-control').on('click', function () {
+    $(this).removeClass('is-invalid');
+    $('.accordion.accordion-wrapper').removeClass('is-invalid');
+});
+
+$('#create-group-bank_transfers_qr_code, .dselect-wrapper').on('click', function() {
+    $(this).removeClass('is-invalid');
+    $(this).siblings('.form-control').removeClass('is-invalid');
+});
+
+$(document).on('click', '.select-profile li', function() {
+    let id = $(this).attr('data-id');
+    let key = $(this).attr('data-key');
+    let preUrl = $(this).closest('.select-profile').attr('data-url');
+    let hideTShirt = $(this).closest('.select-profile').attr('hide-t_shirt');
+
+    if ( !id && !key && preUrl ) return false;
+
+    $('.collapse' + key + ' .card-body').addClass('loading');
+    let text_ = $(this).text();
+    
+    $.ajax({
+        url: preUrl + 'chon-ho-so/' + id,
+        cache: false,
+        success: function (response) {
+            if ( $('#accordion' + key).length ) {
+                $('#accordion' + key).removeClass('is-invalid');
+                $('#accordion' + key + ' .form-control').removeClass('is-invalid');
+            }
+
+            let fields = ['name', 'last_name', 'phone', 'email', 'identification_number', 'nationality', 'nation', 'province', 'gender', 'dob', 'guardian_name', 'guardian_identification_number', 'guardian_phone', 'guardian_email', 'guardian_dob', 'guardian_relationship', 'bib_name', 't_shirt_size', 'emergency_contact_name', 'emergency_contact_phone', 'club', 'blood', 'medical_information', 'current_medications'];
+
+            if ( hideTShirt == 1 ) {
+                fields = fields.filter(f => f !== 't_shirt_size');
+            }
+
+            fields.forEach(field => {
+                const selector = `#${field}-${key}`;
+                let value = response[field] || '';
+
+                if ( field === 'bib_name' && typeof isVnExpress !== 'undefined' && isVnExpress == 1 ) {
+                    value = sanitizeVnExpressBibName(value);
+                }
+
+                if ( field === 't_shirt_size' && typeof tShirtSizeLimit !== 'undefined' && typeof tShirtSizeLimit === 'object' ) {
+                    const limit = tShirtSizeLimit[value];
+                    if ( typeof limit !== 'undefined' ) {
+                        const selectedCount = $('.select-t-shirt-size').filter(function () {
+                            return $(this).val() === value;
+                        }).length;
+
+                        if ( parseInt(limit) <= selectedCount ) {
+                            toastBottom(`Không thể chọn Size áo vì đã đạt giới hạn`, 'danger');
+                            return;
+                        }
+                    }
+                }
+
+                const element = document.querySelector(selector);
+                if ( field === 'blood' && value && element instanceof HTMLSelectElement ) {
+                    const hasBloodOption = Array.from(element.options).some(option => String(option.value) === String(value));
+                    if ( !hasBloodOption ) return;
+                }
+
+                if ( ['dob', 'guardian_dob'].includes(field) && element && element._flatpickr ) {
+                    const dateFormat = String(value).includes('/')
+                        ? element._flatpickr.config.altFormat
+                        : element._flatpickr.config.dateFormat;
+
+                    if ( value ) {
+                        element._flatpickr.setDate(value, true, dateFormat);
+                    } else {
+                        element._flatpickr.clear(true);
+                    }
+                    return;
+                }
+
+                $(selector).val(value);
+                if ( field === 'club' ) {
+                    $(selector).trigger('change');
+                }
+            });
+
+            $('.collapse' + key + ' .card-body').removeClass('loading');
+            $('.dropdown-toggle.' + key).html(text_);
+        },
+        complete: function (xhr, status) { 
+            $('.collapse' + key + ' .card-body').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+    
+    /* hide profile selected */
+    $('.select-profile li').removeClass('disabled');
+    $('.select-profile.' + key).attr('data-selected', id);
+
+    let selectProfile = document.querySelectorAll('#users-address-validate .dropdown.select-profile');
+    
+    let selec_ = 0;
+    for ( let i = 0; i < selectProfile.length; i++ ) {
+        selec_ = selectProfile[i].getAttribute('data-selected');
+        $('.select-profile li.profile-' + selec_).addClass('disabled');
+    }
+});
+
+let cancelRegistrationCheckRequest = null;
+
+function showCancelRegistrationCheckError(message) {
+    $('#modalCancel button[type="submit"]').prop('disabled', true);
+    $('#cancel-registration-payment-summary')
+        .empty()
+        .append($('<div>', {
+            class: 'alert alert-warning mb-0 fs-14',
+            text: message || 'Không thể tính số tiền hoàn dự kiến'
+        }));
+}
+
+function renderCancelRegistrationPaymentSummary(data) {
+    let refundAmount = Math.max(0, parseInt(data.refund_total, 10) || 0);
+    let comboNotice = Number(data.is_combo) === 1
+        ? '<p class="mb-0 mt-2 text-danger fs-14 lh-xs"><strong>Lưu ý:</strong> Đăng ký này thuộc gói Combo. Khi xác nhận hủy và hoàn tiền, tất cả đăng ký trong Combo sẽ bị hủy.</p>'
+        : '';
+
+    $('#modalCancel button[type="submit"]').prop('disabled', false);
+    $('#cancel-registration-payment-summary').html(
+        '<p class="mb-0">Số tiền hoàn lại dự kiến cho đăng ký này là: ' +
+            '<strong class="text-primary">' + formatMoney(refundAmount) + '₫</strong>' +
+        '</p>' +
+        comboNotice
+    );
+}
+
+$(document)
+.off('click.cancelRegistration', '.js-cancel-registration')
+.on('click.cancelRegistration', '.js-cancel-registration', function(e) {
+    e.preventDefault();
+
+    let button = $(this);
+    let modal = $('#modalCancel');
+    let type = button.attr('data-type') || '';
+    let id = button.attr('data-id') || 0;
+    let checkUrl = modal.attr('data-check-url') || '';
+    let fields = {
+        '#cancel-payment-no': '#' + (button.attr('data-payment-no') || '__'),
+        '#cancel-distance': button.attr('data-distance') || '__',
+        '#cancel-fullname': button.attr('data-fullname') || '__',
+        '#cancel-email': button.attr('data-email') || '__',
+        '#cancel-phone': button.attr('data-phone') || '__'
+    };
+
+    modal.data('cancel-registration-button', button);
+
+    Object.keys(fields).forEach(function(selector) {
+        modal.find(selector).text(fields[selector]);
+    });
+
+    modal.find('#type').val(type);
+    modal.find('#type_id').val(id);
+    modal.find('#cancel-reason').val('').removeClass('is-invalid');
+    modal.find('#cancel-image').val('').removeClass('is-invalid').prop('readonly', false);
+    modal.find('button[type="submit"]').prop('disabled', true).removeClass('loading');
+    modal.find('#cancel-registration-payment-summary').html('<p class="mb-0">Đang tải số tiền hoàn dự kiến...</p>');
+    modal.modal('show');
+
+    if ( cancelRegistrationCheckRequest ) {
+        cancelRegistrationCheckRequest.abort();
+    }
+
+    if ( !checkUrl || !type || !id ) {
+        showCancelRegistrationCheckError();
+        return;
+    }
+
+    let request = $.ajax({
+        url: checkUrl,
+        cache: false,
+        type: 'post',
+        dataType: 'json',
+        data: {
+            type: type,
+            type_id: id,
+            [csrfName]: csrfToken
+        },
+        success: function(response) {
+            if ( response.status !== 'success' || !response.data ) {
+                showCancelRegistrationCheckError(response.msg);
+                return;
+            }
+
+            renderCancelRegistrationPaymentSummary(response.data);
+        },
+        error: function(xhr, status) {
+            if ( status !== 'abort' ) {
+                showCancelRegistrationCheckError();
+            }
+        },
+        complete: function() {
+            if ( cancelRegistrationCheckRequest === request ) {
+                cancelRegistrationCheckRequest = null;
+            }
+        }
+    });
+    cancelRegistrationCheckRequest = request;
+});
+
+function validateCancelRegistrationReason(textarea, showToast = true) {
+    let value = $.trim($(textarea).val() || '');
+
+    if ( !value ) {
+        $(textarea).addClass('is-invalid');
+        if ( showToast ) {
+            toastBottom('Vui lòng nhập lý do hủy', 'danger');
+        }
+        return false;
+    }
+
+    $(textarea).removeClass('is-invalid');
+    return true;
+}
+
+function validateCancelRegistrationImage(input, showToast = true) {
+    if ( !input.files || !input.files.length ) {
+        $(input).addClass('is-invalid');
+        if ( showToast ) {
+            toastBottom('Vui lòng tải lên hình ảnh mã QR ngân hàng', 'danger');
+        }
+        return false;
+    }
+
+    let file = input.files[0];
+    let allowedTypes = ['image/jpeg', 'image/png'];
+    let allowedExtensions = /\.(jpe?g|png)$/i;
+
+    if ( file.size > 500 * 1024 ) {
+        $(input).addClass('is-invalid').val('');
+        if ( showToast ) {
+            toastBottom('Hình ảnh QR đang vượt quá dung lượng cho phép', 'danger');
+        }
+        return false;
+    }
+
+    if ( !allowedTypes.includes(file.type) && !allowedExtensions.test(file.name) ) {
+        $(input).addClass('is-invalid').val('');
+        if ( showToast ) {
+            toastBottom('Hình ảnh QR tải lên không đúng định dạng', 'danger');
+        }
+        return false;
+    }
+
+    $(input).removeClass('is-invalid');
+    return true;
+}
+
+$(document)
+.off('input.cancelRegistrationReason', '.js-cancel-registration-reason')
+.on('input.cancelRegistrationReason', '.js-cancel-registration-reason', function() {
+    validateCancelRegistrationReason(this, false);
+})
+.off('change.cancelRegistrationImage', '.js-cancel-registration-image')
+.on('change.cancelRegistrationImage', '.js-cancel-registration-image', function() {
+    validateCancelRegistrationImage(this);
+})
+.off('submit.cancelRegistration', '#cancel-registration-form')
+.on('submit.cancelRegistration', '#cancel-registration-form', function(e) {
+    e.preventDefault();
+
+    let form = this;
+    let modal = $('#modalCancel');
+    let cancelButton = modal.data('cancel-registration-button');
+    let actionButton = cancelButton && cancelButton.length
+        ? cancelButton.closest('.registration-item').find('.actions > .dropdown-toggle')
+        : $();
+    let reason = form.querySelector('.js-cancel-registration-reason');
+    let input = this.querySelector('.js-cancel-registration-image');
+    let isValid = true;
+
+    if ( reason && !validateCancelRegistrationReason(reason) ) {
+        isValid = false;
+    }
+
+    if ( input && !validateCancelRegistrationImage(input, isValid) ) {
+        isValid = false;
+    }
+
+    if ( !isValid ) {
+        return false;
+    }
+
+    $.ajax({
+        url: $(form).attr('action'),
+        cache: false,
+        type: 'post',
+        data: new FormData(form),
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        beforeSend: function() {
+            $('#modalCancel button[type="submit"]').prop('disabled', true).addClass('loading');
+            actionButton.addClass('disabled');
+        },
+        success: function(response) {
+            if ( response.status == 'success' ) {
+                let registrationItem = cancelButton.closest('.registration-item');
+
+                registrationItem
+                    .find('.js-registration-cancel-status')
+                    .html('<em class="text-danger fs-14">Đang xử lý hoàn tiền</em>');
+                cancelButton.closest('li').remove();
+
+                modal.removeData('cancel-registration-button').modal('hide');
+                form.reset();
+                toastBottom('Yêu cầu của bạn đã được ghi nhận', 'success');
+                return;
+            }
+
+            actionButton.removeClass('disabled');
+            toastBottom(response.msg || 'Đã xảy ra lỗi, vui lòng thử lại', 'danger');
+        },
+        complete: function() {
+            $('#modalCancel button[type="submit"]').prop('disabled', false).removeClass('loading');
+        },
+        error: function(xhr, status, error) {
+            actionButton.removeClass('disabled');
+            let msg = xhr.responseJSON && xhr.responseJSON.msg ? xhr.responseJSON.msg : '';
+            if ( msg ) {
+                toastBottom(msg, 'danger');
+                return;
+            }
+
+            handleAjaxError(xhr, status, error);
+        }
+    });
+});
+
+$(document).on('click', '.create-group-new-club', function() {
+    let key = $(this).attr('data-key');
+    if ( !key ) return;
+    
+    if ( $(this).is(':checked') ) {
+        $('#form-new-club-' + key).removeClass('d-none');
+        $('#form-old-club-' + key).addClass('d-none');
+    } else {
+        $('#form-new-club-' + key).addClass('d-none');
+        $('#form-old-club-' + key).removeClass('d-none');
+    }
+});
+
+$(document).on('change', '#use-group-password', function() {
+    const $passwordWrap = $('#create-group-password-wrap');
+    const $passwordInput = $('#create-group-password');
+
+    if ( $(this).is(':checked') ) {
+        $passwordWrap.removeClass('d-none');
+        $passwordInput.prop('disabled', false).trigger('focus');
+    } else {
+        $passwordInput.val('').prop('disabled', true).removeClass('is-invalid');
+        $passwordWrap.addClass('d-none');
+    }
+});
+
+$('#create-group-vat, #buyer-vat, #buyer-group-vat').on('click', function() {
+    let $targetDiv = $('.vat-form');
+    if ( $(this).is(':checked') ) {
+        $targetDiv.stop().animate({ height: $targetDiv.get(0).scrollHeight }, 300);
+    } else {
+        $targetDiv.stop().animate({ height: 0 }, 300);
+    }
+});
+
+$('.btn-create-group').on('click', function () {
+    let flagError = 0;
+
+    const checkRequired = (selector, message) => {
+        const $el = $(selector);
+        if (!$el.val() || !$el.val().toString().trim()) {
+            toastBottom(message, 'danger');
+            $el.addClass('is-invalid');
+            flagError = 1;
+        }
+    };
+
+    const checkRequiredMultiple = (selector, message) => {
+        $(selector).each(function () {
+            const $el = $(this);
+            const val = $el.val();
+            if ( !val || !val.toString().trim() ) {
+                toastBottom(message, 'danger');
+                $el.addClass('is-invalid');
+                flagError = 1;
+            } else {
+                $el.removeClass('is-invalid');
+            }
+        });
+    };
+
+    const checkRequiredFile = (selector, message) => {
+        const $el = $(selector);
+        if ( $el[0].files.length === 0 ) {
+            toastBottom(message, 'danger');
+            $el.addClass('is-invalid');
+            flagError = 1;
+        }
+    };
+
+    const checkEmail = (selector, message) => {
+        const $el = $(selector);
+        if ( $el.val() && !validateEmailStrict($el.val() )) {
+            toastBottom(message, 'danger');
+            $el.addClass('is-invalid');
+            flagError = 1;
+        }
+    };
+
+    const checkUrl = (selector, message) => {
+        const $el = $(selector);
+        const urlRegex = /^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/;
+        if ( $el.val() && !urlRegex.test($el.val()) ) {
+            toastBottom(message, 'danger');
+            $el.addClass('is-invalid');
+            flagError = 1;
+        }
+    };
+
+    checkRequired('#create-group-name', 'Vui lòng nhập vào Họ và tên trưởng nhóm');
+    checkRequired('#create-group-email', 'Vui lòng nhập vào Email');
+    checkEmail('#create-group-email', 'Định dạng Email không chính xác');
+    checkRequired('#create-group-phone', 'Vui lòng nhập vào Số điện thoại');
+    checkRequired('#create-group-dob', 'Vui lòng nhập vào Ngày sinh');
+
+    const dob = $('#create-group-dob').val();
+    if ( dob && getAge(dob) < 18 ) {
+        toastBottom('Trưởng nhóm phải bắt buộc trên 18 tuổi', 'danger');
+        $('#create-group-dob').addClass('is-invalid');
+        flagError = 1;
+    }
+
+    checkRequired('#create-group-identification_number', 'Vui lòng nhập vào CMND hoặc hộ chiếu');
+    /* checkRequired('#create-group-zalo_url', 'Vui lòng nhập vào Liên kết Zalo nhóm'); */
+
+    if ( $('#create-group-new-club-01').is(':checked') ) {
+        checkRequired('#create-group-club_name-01', 'Vui lòng nhập vào Tên nhóm mới');
+    } else {
+        checkRequired('#create-group-club', 'Vui lòng nhập vào Tên nhóm');
+    }
+
+    checkRequired('#create-group-expired_at', 'Vui lòng nhập vào Thời hạn hết hiệu lực đăng ký');
+
+    if ( $('#use-group-password').is(':checked') ) {
+        checkRequired('#create-group-password', $('#create-group-password').data('required-message'));
+    }
+
+    if ( $('#create-group-vat').is(':checked') ) {
+        checkRequired('#vat_company_name', 'Vui lòng nhập vào tên công ty');
+        checkRequired('#vat_tax_code', 'Vui lòng nhập vào mã số thuế');
+        checkRequired('#vat_company_address', 'Vui lòng nhập vào địa chỉ công ty');
+        checkRequired('#vat_name_of_recipient', 'Vui lòng nhập vào họ tên người nhận');
+        checkRequired('#vat_phone_of_recipient', 'Vui lòng nhập vào số điện thoại người nhận');
+
+        const phone = $('#vat_phone_of_recipient').val();
+        if ( phone && phone.length < 10 ) {
+            toastBottom('Định dạng Số điện thoại không chính xác', 'danger');
+            $('#vat_phone_of_recipient').addClass('is-invalid');
+            flagError = 1;
+        }
+
+        checkRequired('#vat_email_of_recipient', 'Vui lòng nhập vào địa chỉ email');
+        checkEmail('#vat_email_of_recipient', 'Định dạng Email không chính xác');
+
+        if ( !$('#create-group-vat-confirm').is(':checked') ) {
+            $('#create-group-vat-confirm').addClass('is-invalid').focus();
+            toastBottom('Vui lòng xác nhận thông tin xuất hóa đơn', 'danger');
+            return false;
+        }
+    }
+
+    checkUrl('#create-group-zalo_url', 'Thông tin nhóm Zalo không đúng định dạng, vui lòng nhập là url');
+    checkUrl('#create-group-facebook_url', 'Thông tin nhóm Facebook không đúng định dạng, vui lòng nhập là url');
+
+    if ( $('#create-group-bank_transfers_status').is(':checked') ) {
+        checkRequired('#create-group-bank_transfers_account_name', 'Vui lòng nhập vào Tên tài khoản');
+        checkRequired('#create-group-bank_transfers_account_branch', 'Vui lòng nhập vào Chi nhánh');
+        checkRequired('#create-group-bank_transfers_account_number', 'Vui lòng nhập vào Số tài khoản');
+        checkRequired('#create-group-bank_transfers_pre_transfer_content', 'Vui lòng nhập vào Tiền tố nội dung chuyển khoản');
+        if ( !$('#old_bank_transfers_qr_code').val()?.trim() ) {
+            checkRequiredFile('#create-group-bank_transfers_qr_code', 'Vui lòng chọn hình ảnh QR nhận tiền');
+        }
+    }
+
+    checkRequiredMultiple('.create-group-tickets_price', 'Vui lòng nhập vào giá vé');
+    if ( $('#create-discount-amount-rule').length ) {
+        checkRequired('#create-discount-amount-rule', $('#create-discount-amount-rule').data('required-message'));
+    }
+    /* checkRequired('#create-percent-discount', 'Vui lòng % giảm giá'); */
+    
+    if ( flagError ) return false;
+    $('#form-tao-nhom-dang-ky').trigger('submit');
+});
+
+let sentTickets = new Map();
+
+function getSelectedTickets() {
+    let ticketIDs = [];
+    let qtys = [];
+    let totalQty = 0;
+    let needSignIn = false;
+
+    $('.groupbuy-ticket-wrapper .spinner input.spinner-input').each(function() {
+        let value = parseInt($(this).val(), 10);
+        let dataId = $(this).data('id');
+
+        if ( !dataId || isNaN(dataId) || dataId <= 0 ) {
+            needSignIn = true;
+            return false;
+        }
+
+        if ( value > 0 ) {
+            ticketIDs.push(dataId);
+            qtys.push(value);
+            totalQty += value;
+        }
+    });
+
+    if ( needSignIn && $('#modal-signin').length ) {
+        if ( !window.__justShowedModal__ ) {
+            window.__justShowedModal__ = true;
+            setTimeout(() => {
+                $('button.decrease').trigger('click');
+                $('#modal-signin').modal('show');
+                window.__justShowedModal__ = false;
+            }, 100);
+        }
+    }
+
+    return { ticketIDs, qtys, totalQty };
+}
+
+$(document).on('click', '.groupbuy-ticket-wrapper .spinner button.decrease', function(event) {
+    let $input = $(this).next('.spinner-input');
+    let ticketID = Number($input.data('id'));
+    let currentValue = Number($input.val());
+
+    if ( sentTickets.has(ticketID) && currentValue < sentTickets.get(ticketID) ) {
+        $input.next('button.increase').trigger('click');
+    }
+
+    let { totalQty } = getSelectedTickets();
+    $('.groupbuy-ticket-total').html(totalQty);
+});
+
+$(document).on('click', '.groupbuy-ticket-wrapper .spinner button.increase', function(event) {
+    let { totalQty } = getSelectedTickets();
+    $('.groupbuy-ticket-total').html(totalQty);
+});
+
+$(document).on('click', '#groupbuy-ticket-confirm', function() {
+    let { ticketIDs, qtys, totalQty } = getSelectedTickets();
+    let id = $(this).attr('data-id');
+    let url = $(this).attr('data-url');
+    
+    if ( !id || isNaN(id) || id <= 0 ) { return false; }
+    
+    if ( ticketIDs.length <= 0 ) {
+        toastBottom('Vui lòng chọn số lượng để tiếp tục');
+        return false;
+    }
+
+    /* filter the difference */
+    let newTicketIDs = [];
+    let newQtys = [];
+
+    ticketIDs.forEach((id, index) => {
+        let currentQty = qtys[index];
+        let previousQty = sentTickets.get(id) || 0;
+        let diffQty = currentQty - previousQty;
+
+        if ( diffQty > 0 ) {
+            newTicketIDs.push(id);
+            newQtys.push(diffQty);
+        }
+    });
+
+    if ( newTicketIDs.length === 0 ) { return false; }
+
+    $.ajax({
+        url: url,
+        cache: false,
+        type: 'post',
+        data: {
+            id: id,
+            ticket: newTicketIDs,
+            qty: newQtys,
+            start_key: sessionStorage.start_key,
+            [csrfName]: csrfToken
+        },
+        beforeSend: function() {
+            $('#groupbuy-ticket-confirm').addClass('loading');
+            
+            if ( sessionStorage.start_key ) {
+                sessionStorage.start_key = parseInt(sessionStorage.start_key) + parseInt(totalQty);
+            }
+
+            /* update sent list */
+            newTicketIDs.forEach((id, index) => {
+                let updatedQty = (sentTickets.get(id) || 0) + newQtys[index];
+                sentTickets.set(id, updatedQty);
+            });
+        },
+        success: function (resp) {
+            $('#form-groupbuy').append(resp);
+            initFlatpickrs(document.getElementById('form-groupbuy'));
+            
+            document.querySelectorAll('#form-groupbuy select.dselect').forEach((item) => {
+                if ( !item.dataset.dselectInit ) {
+                    dselect(item, { search: true });
+                    item.dataset.dselectInit = 'true';
+                }
+            });
+
+            theme.lightbox();
+            updateDataIDsinFormGroupbuy();
+            
+            $('html, body').animate({
+                scrollTop: $('#users-address-validate').offset().top - 150
+            }, 300);
+        },
+        complete: function (xhr, status) {
+            $('#form-groupbuy .event-summary').remove();
+            $('#form-groupbuy .alert.alert-warning.first').remove();
+            $('#form-groupbuy + .form-floating').removeClass('d-none');
+            $('#groupbuy-ticket-confirm').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('.groupbuy-ticket-info .groupbuy-ticket-info-toggle').click(function () {
+    $(this).closest('.groupbuy-ticket-info').toggleClass('show');
+});
+
+function updateDataIDsinFormGroupbuy() {
+    let formGroupbuy = document.getElementById('form-groupbuy');
+    let accordions = formGroupbuy.getElementsByClassName('accordion-wrapper');
+    let modifiedAccordionIds = [];
+
+    for ( let i = 0; i < accordions.length; i++ ) {
+        let id = accordions[i].id;
+        let modifiedId = id.replace('accordion', '');
+        modifiedAccordionIds.push(modifiedId);
+    }
+
+    $('#users-address-validate .users-address-validate').attr('data-ids', modifiedAccordionIds.join(','));
+
+    let dataRequired = $('#data-required').data('required');
+    if ( dataRequired ) {
+        $('#users-address-validate .users-address-validate').attr('data-required', dataRequired);
+    }
+}
+
+function deleteGroupbuyItem(item) {
+    let comboID = item.attr('data-combo');
+    let accordions = $('#form-groupbuy #accordion' + item.attr('data-key'));
+
+    if ( comboID ) {
+        accordions = $('#form-groupbuy .accordion-wrapper').filter(function() {
+            return $(this).hasClass('combo-' + comboID);
+        });
+    }
+
+    let ticketCounts = {};
+    accordions.find('i.delete-item[data-ticket]').each(function() {
+        let ticketID = $(this).attr('data-ticket');
+        ticketCounts[ticketID] = (ticketCounts[ticketID] || 0) + 1;
+    });
+
+    accordions.remove();
+    updateDataIDsinFormGroupbuy();
+
+    let totalRemoved = 0;
+    Object.keys(ticketCounts).forEach(function(ticketID) {
+        let count = ticketCounts[ticketID];
+        let input = $('.spinner-input.' + ticketID);
+        totalRemoved += count;
+
+        input.length && input.val(Math.max((parseInt(input.val(), 10) || 0) - count, 0)).trigger('change');
+
+        let numericTicketID = Number(ticketID);
+        if ( sentTickets.has(numericTicketID) ) {
+            sentTickets.set(numericTicketID, Math.max(sentTickets.get(numericTicketID) - count, 0));
+        }
+    });
+
+    let strong = $('.groupbuy-ticket-total');
+    if ( strong.length && totalRemoved ) {
+        strong.text(Math.max((parseInt(strong.text(), 10) || 0) - totalRemoved, 0));
+    }
+}
+
+$('#form-groupbuy').on('click', 'i.delete-item', function(e) {
+    let item = $(this);
+
+    Swal.fire({
+      title: 'Bạn có chắc chắn muốn xóa không?',
+      showCancelButton: true,
+      confirmButtonText: 'XÁC NHẬN',
+      cancelButtonText: 'ĐÓNG',
+      confirmButtonColor: '#d33',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      reverseButtons: true
+    }).then((result) => {
+        if ( result.value ) {
+            deleteGroupbuyItem(item);
+        }
+    });
+});
+
+$('.groupbuy-payment-status').change(function() {
+    let checkbox = $(this);
+    let isChecked = checkbox.is(':checked');
+    let oldState = !isChecked; 
+
+    checkbox.prop('checked', oldState);
+
+    let textAlert = 'Bạn có chắc chắn gỡ trạng thái đã thanh toán của người này?';
+    if ( !$(this).is(':checked') ) {
+        textAlert = 'Bạn có chắc chắn người này đã thanh toán cho mình?';
+    }
+
+    $('#modalGroupBuyPayment .modal-body').html(textAlert);
+    $('#modalGroupBuyPayment .modal-footer .btn').attr('data-id', $(this).val());
+    $('#modalGroupBuyPayment').modal('show');
+
+    return false;
+});
+
+$('#modalGroupBuyPayment .modal-footer .btn').on('click', function() {
+    let id = $(this).attr('data-id');
+    let url = $(this).attr('data-url');
+    if ( !id || !url ) return;
+
+    $.ajax({
+        url: url,
+        cache: false,
+        type: 'post',
+        data: {
+            line: id,
+            [csrfName]: csrfToken
+        },
+        beforeSend: function() {
+            $('#modalGroupBuyPayment .modal-footer .btn').addClass('loading');
+        },
+        success: function (result) {
+            toastBottom(result.msg, result.type);
+            
+            if ( result.type == 'success' ) {
+                if ( result.status == 1 && result.payment_no ) {
+                    $('.payment-status-text.' + result.payment_no).html('<span class="text-success"> Đã thanh toán </span>');
+                    $('.groupbuy-payment-status.' + result.payment_no).prop('checked', true);
+                }
+                if ( result.status == 0 && result.payment_no && result.line ) {
+                    $('.payment-status-text.' + result.line).html('<span class="text-danger"> Chưa thanh toán </span>');
+                    $('.groupbuy-payment-status.' + result.line).prop('checked', false);
+                }
+                if ( result.amount_total ) {
+                    $('#amount-total').html(result.amount_total + '₫');
+                }
+                if ( result.amount_discount ) {
+                    $('#amount-discount').html(result.amount_discount + '₫');
+                }
+
+                $('#amount-loyalty').parent('li').addClass('d-none');
+                if ( result.amount_loyalty ) {
+                    $('#amount-loyalty').parent('li').removeClass('d-none');
+                    $('#amount-loyalty').html(result.amount_loyalty + '₫');
+                }
+
+                if ( result.total ) {
+                    $('#groupbuy-total').html( result.total + '₫');
+                }
+                if ( result.ticket_prices ) {
+                    $('.group-ticket-price').each(function() {
+                        let distanceID = $(this).attr('data-distance-id');
+                        if ( Object.prototype.hasOwnProperty.call(result.ticket_prices, distanceID) ) {
+                            $(this).html(result.ticket_prices[distanceID] + '₫');
+                        }
+                    });
+                }
+                if ( result.registration_prices ) {
+                    $('.group-registration-price').each(function() {
+                        let paymentNo = $(this).attr('data-payment-no');
+                        if ( Object.prototype.hasOwnProperty.call(result.registration_prices, paymentNo) ) {
+                            $(this).html(result.registration_prices[paymentNo] + '₫');
+                        }
+                    });
+                }
+                if ( result.paid_user_count ) {
+                    $('#total-user-paid').html( result.paid_user_count );
+                }
+            }
+
+            $('#modalGroupBuyPayment').modal('hide');
+        },
+        complete: function (xhr, status) {
+            $('#modalGroupBuyPayment .modal-footer .btn').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$(document).on('click', '.groupbuy-edit-user-info', function(e) {
+    e.preventDefault();
+    
+    let id = $(this).attr('data-id');
+    let url = $(this).attr('data-url');
+    let name = $(this).attr('data-name');
+
+    if ( !id || !url || !name ) return;
+
+    $(this).addClass('disabled');
+    $('button.users-address-validate').prop('disabled', false);
+    
+    $('#modalGroupBuyEdit .modal-title').html('Cập nhật thông tin [' + name + ']')
+    $('#modalGroupBuyEdit .modal-body #form-groupbuy').html('<div class="alert alert-primary mt-3 mb-3 text-center" role="alert">Không có dữ liệu</div>');
+    
+    $.ajax({
+        url: url + '/' + id,
+        cache: false,
+        beforeSend: function() { },
+        success: function (response) {
+            $('#modalGroupBuyEdit .modal-body #form-groupbuy').html(response);
+            initFlatpickrs(document.querySelector('#modalGroupBuyEdit .modal-body #form-groupbuy'));
+            $('#modalGroupBuyEdit .modal-body #line').val(id);
+            $('#modalGroupBuyEdit .modal-footer .btn').attr('data-ids', id);
+            initEventCustomFieldFormatters();
+
+            $('#modalGroupBuyEdit').modal('show');
+            
+            $('.dselect').each((i, el) => dselect(el, { search: true }));
+
+            if ( window.glightboxInstance ) {
+                window.glightboxInstance.destroy();
+            }
+
+            window.glightboxInstance = GLightbox({
+                selector: '[data-glightbox]'
+            });
+
+            disable_field_user_info();
+            
+            let dataRequired = $('#data-required').data('required');
+            if ( dataRequired ) {
+                $('#modalGroupBuyEdit .users-address-validate').attr('data-required', dataRequired);
+            }
+        },
+        complete: function (xhr, status) {
+            $('.groupbuy-edit-user-info').removeClass('disabled');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$(document).on('click', '.datatable-edit-user-info', function(e) {
+    e.preventDefault();
+    
+    let id = $(this).attr('data-id');
+    let url = $(this).attr('data-url');
+    let name = $(this).attr('data-name');
+
+    if ( !id || !url || !name ) return;
+
+    $(this).addClass('disabled');
+    
+    $('#modalGroupBuyEdit .modal-title').html('Cập nhật thông tin [' + name + ']')
+    $('#modalGroupBuyEdit .modal-body #form-groupbuy').html('<div class="alert alert-primary mt-3 mb-3 text-center" role="alert">Không có dữ liệu</div>');
+    
+    $.ajax({
+        url: url + '/' + id,
+        cache: false,
+        beforeSend: function() { },
+        success: function (response) {
+            $('#modalGroupBuyEdit .modal-body #form-groupbuy').html(response);
+            initFlatpickrs(document.querySelector('#modalGroupBuyEdit .modal-body #form-groupbuy'));
+            $('#modalGroupBuyEdit .modal-body #id').val(id);
+            $('#modalGroupBuyEdit .modal-footer .btn').attr('data-ids', id);
+            initEventCustomFieldFormatters();
+
+            $('#modalGroupBuyEdit').modal('show');
+            $('.dselect').each((i, el) => dselect(el, { search: true }));
+
+            disable_field_user_info();
+        },
+        complete: function (xhr, status) {
+            $('.datatable-edit-user-info').removeClass('disabled');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('.btn-groupbuy-submit').on('click', function(e) {
+    e.preventDefault();
+
+    let id = $(this).attr('data-id');
+    let url = $(this).attr('data-url');
+
+    if ( !id || !url ) return;
+
+    $('#modalGroupBuySubmit').modal({
+        show: false,
+        backdrop: 'static'
+    });
+
+    $.ajax({
+        url: url + '/' + id,
+        cache: false,
+        beforeSend: function() {
+            $('.btn-groupbuy-submit').addClass('loading');
+        },
+        success: function (response) {
+            $('#modalGroupBuySubmit .modal-body').html(response);
+            $('#modalGroupBuySubmit').modal('show');
+        },
+        complete: function (xhr, status) {
+            $('.btn-groupbuy-submit').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('.group-register-submit-payment').on('click', function() {
+    $(this).addClass('loading');
+
+    let id = $(this).attr('data-id');
+    let urlPost = $(this).attr('data-url');
+
+    if ( !id || !urlPost ) return;
+    
+    $('#modalPaymentSuccess').modal({
+        show: false,
+        backdrop: 'static'
+    });
+
+    $.ajax({
+        type: 'post',
+        url: urlPost,
+        data: {
+            id: id,
+            [csrfName]: csrfToken
+        },
+        cache: false,
+        async: true,
+        beforeSend: function() {
+            $('#modalPaymentSuccess .modal-body').html('<div class="alert alert-primary mt-3 mb-6 text-center" role="alert">Đã xảy ra lỗi [không xác định]</div>');
+        },
+        success: function (response) {
+            $('#modalGroupBuySubmit').modal('hide');
+            $('#modalPaymentSuccess .modal-body').html(response.data);
+            $('#modalPaymentSuccess').modal('show');
+            
+            $('.btn-groupbuy-submit').prop('disabled', false);
+            $('.btn-groupbuy-submit').html('TIẾP TỤC THANH TOÁN <i class="uil uil-telegram-alt font-1rem lh-1"></i>');
+            $('#table-group-register-line .groupbuy-payment-status').prop('disabled', true);
+            $('#table-group-register-line .groupbuy-edit-user-info').addClass('d-none');
+            $('#table-group-register-line .group-view-audit-log').addClass('d-none');
+            $('#table-group-register-line .groupbuy-delete-user-info').addClass('disabled');
+            
+            if ( response.payment_no && typeof checkLeaderPaymentStatusStart === 'function' ) {
+                checkLeaderPaymentStatusStart(response.payment_no);
+            }
+        },
+        complete: function (xhr, status) {
+            $('.group-register-submit-payment').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('.group-view-audit-log').on('click', function(e) {
+    let id = $(this).attr('data-id');
+    let user = $(this).attr('data-user');
+    let url = $(this).attr('data-url');
+
+    if ( !id || !user || !url ) return;
+    
+    $.ajax({
+        url: url + '/' + id + '/' + user,
+        cache: false,
+        beforeSend: function() { },
+        success: function (response) {
+            $('#modalLogs .modal-body').html(response);
+            $('#modalLogs').modal('show');
+        },
+        complete: function (xhr, status) { },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('#export-portal-personal').siblings('.dropdown-menu').find('.export-portal-personal').on('click', function(e) {
+    e.preventDefault();
+
+    let eventID = $(this).attr('data-id') ?? 0;
+    let typeExport = $(this).attr('data-type');
+    let distance = $('#distance').val() ?? 0;
+    let ticket = $('#ticket').val() ?? 0;
+    let coupon = $('#coupon').val() ?? 0;
+    let keyword = $('#q').val();
+
+    if ( !eventID || typeof typeExport === 'undefined' ) return;
+    
+    $.ajax({
+        url: '../../portal/export/personal',
+        cache: false,
+        type: 'post',
+        data: {
+            event: eventID,
+            type: typeExport,
+            distance: distance,
+            ticket: ticket,
+            coupon: coupon,
+            keyword: keyword,
+            [csrfName]: csrfToken
+        },
+        beforeSend: function() {
+            $('#export-portal-personal').addClass('loading');
+        },
+        success: function (result) {
+            if ( result && result.status == '200' && result.file_url && result.file_name ) {
+                let link = document.createElement('a');
+                link.href = result.file_url;
+                link.setAttribute('download', result.file_name);
+                document.body.appendChild(link);
+                link.click();
+            }
+            if ( result && result.status == '400' && result.msg ) {
+                toastBottom(result.msg);
+            }
+        },
+        complete: function (xhr, status) {
+            $('#export-portal-personal').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+function handlePortalExport(buttonSelector, url) {
+    $(buttonSelector).on('click', function(e) {
+        e.preventDefault();
+
+        let eventID = $(this).attr('data-id');
+        let $btn = $(this);
+
+        $.ajax({
+            url: url,
+            cache: false,
+            type: 'post',
+            data: {
+                event: eventID,
+                [csrfName]: csrfToken
+            },
+            beforeSend: function() {
+                $btn.addClass('loading');
+            },
+            success: function (result) {
+                if ( result && result.status == '200' && result.file_url && result.file_name ) {
+                    let link = document.createElement('a');
+                    link.href = result.file_url;
+                    link.setAttribute('download', result.file_name);
+                    document.body.appendChild(link);
+                    link.click();
+                }
+                if ( result && result.status == '400' && result.msg ) {
+                    toastBottom(result.msg);
+                }
+            },
+            complete: function (xhr, status) {
+                $btn.removeClass('loading')
+            },
+            error: handleAjaxError
+        });
+    });
+}
+
+handlePortalExport('#export-portal-group', '../../portal/export/group');
+handlePortalExport('#export-coupon-used', '../../portal/export/coupons-used');
+handlePortalExport('#export-coupon', '../../portal/export/coupons');
+handlePortalExport('#export-vat', '../../portal/export/vat');
+
+$('.export-portal-group-line').on('click', function(e) {
+    e.preventDefault();
+
+    let eventID = $(this).attr('data-id');
+    let typeExport = $(this).attr('data-type');
+
+    if ( !eventID || ! typeExport ) return;
+
+    $.ajax({
+        url: '../../portal/export/group_line',
+        cache: false,
+        type: 'post',
+        data: {
+            event: eventID,
+            type: typeExport,
+            [csrfName]: csrfToken
+        },
+        beforeSend: function() {
+            $('#export-portal-group-line').addClass('loading');
+        },
+        success: function (result) {
+            if ( result && result.status == '200' && result.file_url && result.file_name ) {
+                let link = document.createElement('a');
+                link.href = result.file_url;
+                link.setAttribute('download', result.file_name);
+                document.body.appendChild(link);
+                link.click();
+            }
+            if ( result && result.status == '400' && result.msg ) {
+                toastBottom(result.msg);
+            }
+        },
+        complete: function (xhr, status) {
+            $('#export-portal-group-line').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('#export-group-register-line').on('click', function(e) {
+    e.preventDefault();
+
+    $.ajax({
+        url: $(this).attr('data-url'),
+        cache: false,
+        type: 'post',
+        beforeSend: function() {
+            $('#export-group-register-line').addClass('loading');
+        },
+        success: function (result) {
+            if ( result && result.status == '200' && result.file_url && result.file_name ) {
+                let link = document.createElement('a');
+                link.href = result.file_url;
+                link.setAttribute('download', result.file_name);
+                document.body.appendChild(link);
+                link.click();
+            }
+            if ( result && result.status == '400' && result.msg ) {
+                toastBottom(result.msg);
+            }
+        },
+        complete: function (xhr, status) {
+            $('#export-group-register-line').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$(window).on('load', function() {
+    if ( $('#portal-group-counter').length ) {
+        let id = $('#portal-group-counter').attr('data-id');
+        let ticket = $('#portal-group-counter').attr('data-ticket');
+        let urlGet = $('#portal-group-counter').attr('data-url');
+
+        if ( !id || !ticket || !urlGet ) return;
+
+        $.ajax({
+            url: urlGet + '?id=' + id + '&ticket=' + ticket,
+            cache: false,
+            beforeSend: function() { },
+            success: function (result) {
+                if ( result.total ) {
+                    $('.group-total-lazy').html(result.total);
+                }
+                if ( result.register ) {
+                    $('#group-total-register').html( formatMoney ( result.register ) );
+                }
+                if ( result.register_success ) {
+                    $('#group-total-register-success').html( formatMoney ( result.register_success ) );
+                }
+                if ( result.register && result.register_success ) {
+                    $('#group-total-register-pending').html( formatMoney ( parseInt(result.register) - parseInt(result.register_success) ) );
+                }
+            },
+            complete: function (xhr, status) {
+                $('#portal-group-counter .card-body').removeClass('loading');
+            },
+            error: handleAjaxError
+        })
+        .done(function( html ) { });
+    }
+
+    if ( $('#portal-group-ticket-counter').length ) {
+        let id = $('#portal-group-ticket-counter').attr('data-id');
+        let ticket = $('#portal-group-ticket-counter-ticket').val();
+        let urlGet = $('#portal-group-ticket-counter').attr('data-url');
+
+        if ( !id || !ticket || !urlGet ) return;
+
+        $.ajax({
+            url: urlGet + '?id=' + id + '&ticket=' + ticket,
+            cache: false,
+            beforeSend: function() { },
+            success: function (resp) {
+                if ( resp.status == 200 ) {
+                    $('#portal-group-ticket-counter').html(resp.data_pers);
+                    $('#portal-group-ticket-counter-group').html(resp.data_grou);
+                }
+            },
+            complete: function (xhr, status) { },
+            error: handleAjaxError
+        })
+        .done(function( html ) { });
+    }
+
+    if ( $('#portal-t-shirt-counter').length ) {
+        let id = $('#portal-t-shirt-counter').attr('data-id');
+        let urlGet = $('#portal-t-shirt-counter').attr('data-url');
+
+        if ( !id || !urlGet ) return;
+
+        $.ajax({
+            url: urlGet + '?id=' + id,
+            cache: false,
+            beforeSend: function() { },
+            success: function (resp) {
+                if ( resp.status == 200 ) {
+                    $('#portal-t-shirt-counter').html(resp.data);
+                }
+            },
+            complete: function (xhr, status) { },
+            error: handleAjaxError
+        })
+        .done(function( html ) { });
+    }
+
+    if ( $('#portal-revenue').length ) {
+        let id = $('#portal-revenue').attr('data-id');
+        let ticket = $('#portal-group-ticket-counter-ticket').val() ?? 0;
+        let urlGet = $('#portal-revenue').attr('data-url');
+
+        if ( !id || !ticket || !urlGet ) return;
+
+        $.ajax({
+            url: urlGet + '?id=' + id + '&ticket=' + ticket,
+            cache: false,
+            beforeSend: function() { },
+            success: function (resp) {
+                if ( resp.status == 200 ) {
+                    $('#revenue-total').html(resp.total);
+                    $('#revenue-total-pers').html(resp.total_pers);
+                    $('#prevenue-total-gruo').html(resp.total_grou);
+                }
+            },
+            complete: function (xhr, status) {
+                $('#portal-revenue .card-body').removeClass('loading');
+            },
+            error: handleAjaxError
+        })
+        .done(function( html ) { });
+    }
+    
+    if ( $('#portal-group-counter-by-distance').length ) {
+        let id = $('#portal-group-counter-by-distance').attr('data-id');
+        let ticket = $('#ticket').val() ?? 0;
+        let urlGet = $('#portal-group-counter-by-distance').attr('data-url');
+
+        if ( !id || !ticket || !urlGet ) return;
+
+        $.ajax({
+            url: urlGet + '?id=' + id + '&ticket=' + ticket,
+            cache: false,
+            beforeSend: function() { },
+            success: function (resp) {
+                if ( resp.status == 200 ) {
+                    $('#portal-group-counter-by-distance table tbody').html(resp.data);
+                }
+            },
+            complete: function (xhr, status) {
+                $('#portal-group-counter-by-distance .card-body').removeClass('loading');
+            },
+            error: handleAjaxError
+        })
+        .done(function( html ) { });
+    }
+
+    if ( $('#data-tables-register').length ) {
+        let isFirstDraw = true;
+        let tableElement = $('#data-tables-register');
+        let isGroup = tableElement.data('type') === 'group';
+        let isUtilitie = tableElement.data('type') === 'utilitie';
+        let isPortalVAT = tableElement.data('type') === 'portal-vat';
+        let ajaxUrl = tableElement.data('url');
+
+        let columnConfig = isGroup
+            ? [
+                { 'width': '40px', className: 'text-center' },
+                null, null, null, null, null, null,
+                { className: 'text-center' }
+            ]
+            : isUtilitie
+            ? [
+                { 'width': '40px', className: 'text-center' },
+                null, null, null, null, null, null, null, null, null,
+                { className: 'text-center' },
+                { className: 'text-center' }
+            ]
+            : isPortalVAT
+            ? [
+                { 'width': '40px', className: 'text-center' },
+                { className: 'text-nowrap' }, { className: 'text-nowrap' }, null, { className: 'text-nowrap' }
+            ]
+            : [
+                { 'width': '40px', className: 'text-center' },
+                null, null, null, null, null, null, null, null
+            ];
+            
+        let dataTable = tableElement.DataTable({
+            language: {
+                'url': 'https://' + window.location.hostname + '/assets/pace8vn/data-tables/vietnamese.json?ver=1.1'
+            },
+            pageLength: 25,
+            bAutoWidth: false,
+            scrollX: true,
+            fixedColumns: {
+                leftColumns: 2
+            },
+            fixedHeader: true,
+            layout: {
+                topEnd: {
+                    search: {  placeholder: 'Nhập mã đăng ký, tên hoặc 4 sdt cuối' }
+                }
+            },
+            'columns': columnConfig,
+            ordering: false,
+            processing: true,
+            'info': false,
+            initComplete: function () {
+                isFirstDraw = false;
+            },
+            drawCallback: function () {
+                $('#data-tables-top-here .loader').remove();
+            },
+            ajax: {
+                url: ajaxUrl,
+                dataSrc: function (json) {
+                    $('#datatable-loader').hide();
+                    $('#example').removeClass('d-none');
+
+                    if ( Array.isArray(json.data) ) {
+                        $('#su-kien-total-line-result').text(json.data.length);
+                    }
+
+                    return json.data;
+                }
+            },
+        });
+
+        dataTable.on('processing.dt', function(e, settings, processing) {
+            if ( !processing ) {
+                $('#data-tables-register').removeClass('loading');
+            }
+        });
+
+        dataTable.on('init', function () {
+            let scrollBody = document.querySelector('.dt-scroll-body');
+    
+            if ( scrollBody ) {
+                let scrollWidth = scrollBody.scrollWidth;
+                
+                $('.external-scrollbar div').css('width', scrollWidth + 'px');
+                $('.external-scrollbar').on('scroll', function () {
+                    $(scrollBody).scrollLeft($(this).scrollLeft());
+                });
+    
+                $(scrollBody).on('scroll', function () {
+                    $('.external-scrollbar').scrollLeft($(this).scrollLeft());
+                });
+            }
+        });
+
+        $('#data-tables-register').on('page.dt search.dt', function () {
+            if ( isFirstDraw == false ) {
+                $('html, body').animate({
+                    scrollTop: $('#data-tables-top-here').offset().top - 100
+                }, 'fast');
+            }
+        });
+    }
+
+    disable_field_user_info();
+});
+
+function disable_field_user_info() {
+    if ( $('#disable-field-user-info').length ) {
+        let id = $('#disable-field-user-info').attr('data-id');
+        let field = $('#disable-field-user-info').attr('data-field');
+
+        if ( !id || !field ) return;
+        
+        if ( field === 'all' ) {
+            $('form#users-address-validate input').prop('readonly', true);
+            $('form#users-address-validate select').prop('disabled', true);
+            $('button.users-address-validate').prop('disabled', true);
+        } else {
+            let arrField = field.split(", ");
+            arrField.forEach(function(element) {
+                $('#' + element + '-' + id).prop('readonly', true);
+            });
+        }
+    }
+}
+
+$(document).ready(function() {
+    $('body').tooltip({ selector: '[data-toggle=tooltip]' });
+
+    let src_elements = [];
+    let lightbox_gallery = [];
+    
+    $('.open-glightbox' ).on('click', 'img', function(e) {
+        e.preventDefault();
+        
+        src_elements = [];
+        src_elements.push({
+            'href': $(this).attr('src'),
+            'type': 'image',
+        });
+
+        lightbox_gallery = GLightbox({
+            elements: src_elements,
+            autoplayVideos: true,
+        });
+
+        lightbox_gallery.open();
+    });
+});
+
+$('.accordion').on('shown.bs.collapse', function() { return true; });
+
+function getDiscountStandardPriceNote(result) {
+    if ( parseInt(result.event_id, 10) !== 217 ) {
+        return '';
+    }
+
+    return `<div class="mt-0 small text-muted">Áp dụng theo giá vé tiêu chuẩn, <a href="https://pace8.vn/uploads/2026/07/1-b-ng-v-c-nh-n.png" class="text-primary text-decoration-underline" data-glightbox="type: image">xem chi tiết <i class="uil uil-external-link-alt"></i></a></div>`;
+}
+
+$('#apply-coupon-code').on('click', function(e) {
+    e.preventDefault();
+    
+    let id = $(this).attr('data-id');
+    let url = $(this).attr('data-url');
+    let code = $('#coupon-code').val();
+
+    if ( !code ) {
+        $('#coupon-code').addClass('is-invalid');
+        return false;
+    }
+
+    $.ajax({
+        url: url,
+        cache: false,
+        type: 'post',
+        data: {
+            id: id,
+            code: code,
+            [csrfName]: csrfToken
+        },
+        beforeSend: function() {
+            $('#apply-coupon-code').addClass('loading');
+            $('.register-step-04-validate').addClass('loading');
+        },
+        success: function (result) {
+            if ( result.status == 'success' ) {
+                let rows = [
+                    { key: 'subtotal', label: 'Tạm tính' },
+                    { key: 'purchase_discount', label: 'Ưu đãi mua nhiều', class: 'text-danger' },
+                    { key: 'discount', label: 'Mã giảm giá: <code class="text-success fs-16 fw-bold">{coupon}</code>', class: 'text-danger' },
+                    { key: 'payment_method_discount', label: 'Ưu đãi thanh toán (-{payment_method_discount_percent}%)', class: 'text-danger' },
+                    { key: 'loyalty', label: 'Sử dụng Xu', class: 'text-danger' },
+                    { key: 'vat_fee', label: 'Xuất hóa đơn (+{fee_vat}% VAT)' },
+                    { key: 'fee', label: 'Phí giao dịch (+{fee_payment}%)' }
+                ];
+
+                let html = '';
+                rows.forEach(row => {
+                    let val = result[row.key];
+                    if ( val ) {
+                        let label = row.label
+                            .replace('{coupon}', result.discount_code ?? '')
+                            .replace('{payment_method_discount_percent}', result.payment_method_discount_percent ?? 0)
+                            .replace('{fee_vat}', result.fee_vat ?? '')
+                            .replace('{fee_payment}', result.fee_payment ?? '');
+                        let cls = row.class ?? '';
+                        html += `<div class="d-flex align-items-center mt-2"> <span>${label}</span> <strong class="ms-auto ${cls}">${val.toLocaleString()}₫</strong> </div>`;
+                        if ( row.key === 'discount' ) {
+                            html += getDiscountStandardPriceNote(result);
+                        }
+                    }
+                });
+
+                if ( result.total !== undefined && result.total !== null ) {
+                    html += `<hr class="double my-2" /> <div class="mt-2 d-flex align-items-center h5 mb-0"> <strong>Tổng thanh toán</strong> <strong class="ms-auto">${result.total.toLocaleString()}₫</strong> </div>`;
+                }
+
+                $('#show-order-price').html(html);
+                $('.form-floating.promo-code').remove();
+
+                if ( result.discount_code ) {
+                    toastBottom(`Áp dụng mã <strong>` + result.discount_code + `</strong> thành công!`, 'success');
+                }
+                
+                $('#ticket-total').text(result.total.toLocaleString() + '₫');
+            }
+            
+            if ( result.status == 'error' ) {
+                toastBottom(result.msg);
+            }
+            
+            if ( window.glightboxInstance ) {
+                window.glightboxInstance.destroy();
+            }
+
+            window.glightboxInstance = GLightbox({
+                selector: '[data-glightbox]'
+            });
+        },
+        complete: function (xhr, status) {
+            $('#apply-coupon-code').removeClass('loading');
+            $('.register-step-04-validate').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('.payment-method input[type="radio"]').change(function() {
+    let payment = $(this).val();
+    let id = $(this).attr('data-id');
+    let urlAjax = $(this).attr('data-url');
+
+    if ( !payment || !id || !urlAjax ) return;
+
+    $.ajax({
+        url: urlAjax,
+        cache: false,
+        type: 'post',
+        data: {
+            id: id,
+            payment: payment,
+            [csrfName]: csrfToken
+        },
+        beforeSend: function() {
+            $('.register-step-04-validate').addClass('loading');
+        },
+        success: function (result) {
+            if ( result.status == 'success' ) {
+                let rows = [
+                    { key: 'subtotal', label: 'Tạm tính' },
+                    { key: 'purchase_discount', label: 'Ưu đãi mua nhiều', class: 'text-danger' },
+                    { key: 'discount', label: 'Mã giảm giá: <code class="text-success fs-16 fw-bold">{coupon}</code>', class: 'text-danger' },
+                    { key: 'payment_method_discount', label: 'Ưu đãi thanh toán (-{payment_method_discount_percent}%)', class: 'text-danger' },
+                    { key: 'loyalty', label: 'Sử dụng Xu', class: 'text-danger' },
+                    { key: 'vat_fee', label: 'Xuất hóa đơn (+{fee_vat}% VAT)' },
+                    { key: 'fee', label: 'Phí giao dịch (+{fee_payment}%)' }
+                ];
+
+                let html = '';
+                rows.forEach(row => {
+                    let val = result[row.key];
+                    if ( val ) {
+                        let label = row.label
+                            .replace('{coupon}', result.discount_code ?? '')
+                            .replace('{payment_method_discount_percent}', result.payment_method_discount_percent ?? 0)
+                            .replace('{fee_vat}', result.fee_vat ?? '')
+                            .replace('{fee_payment}', result.fee_payment ?? '');
+                        let cls = row.class ?? '';
+                        html += `<div class="d-flex align-items-center mt-2"> <span>${label}</span> <strong class="ms-auto ${cls}">${val.toLocaleString()}₫</strong> </div>`;
+                        if ( row.key === 'discount' ) {
+                            html += getDiscountStandardPriceNote(result);
+                        }
+                    }
+                });
+
+                if ( result.total !== undefined && result.total !== null ) {
+                    html += `<hr class="double my-2" /> <div class="mt-2 d-flex align-items-center h4 mb-0"> <strong>Tổng thanh toán</strong> <strong class="ms-auto">${result.total.toLocaleString()}₫</strong> </div>`;
+                }
+
+                $('#show-order-price').html(html);
+                $('#ticket-total').text(result.total.toLocaleString() + '₫');
+            }
+
+            if ( result.status == 'error' ) {
+                toastBottom(result.msg);
+            }
+            
+            if ( window.glightboxInstance ) {
+                window.glightboxInstance.destroy();
+            }
+
+            window.glightboxInstance = GLightbox({
+                selector: '[data-glightbox]'
+            });
+        },
+        complete: function (xhr, status) {
+            $('.register-step-04-validate').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+function showPopup() {
+    let homepage = 'none';
+    if ( window.location.pathname == '/' ) { homepage = 'home'; }
+
+    let count = 0;
+    if ( sessionStorage.countPopup ) {
+        count = 1;
+    } else {
+        sessionStorage.countPopup = 1;
+    }
+
+    let showPopup= $('body').attr('data-popup');
+    let delay = $('body').attr('data-popup-delay');
+
+    if ( showPopup == 0 ) { return; }
+    if ( !delay ) { delay = 5000; }
+    
+    setTimeout(function() {
+        $.ajax({
+            url: 'https://' + window.location.hostname + '/get-popup/' + homepage + '/' + count,
+            cache: false,
+            success: function (response) {
+                if ( response ) {
+                    $('body').append(response);
+                    $('#modalPopup').modal('show');
+                }
+            },
+            complete: function (xhr, status) { },
+            error: handleAjaxError
+        })
+        .done(function( html ) { });
+    }, delay);
+}
+
+function showAlertZaloModal() {
+    var modalHTML = `<div class="modal fade" id="alertZaloModal" tabindex="-1" aria-labelledby="alertZaloModalLabel" aria-hidden="true"> <div class="modal-dialog modal-dialog-centered"> <div class="modal-content"> <div class="modal-body"> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> <p class="mb-4">Để có trải nghiệm tốt hơn, vui lòng mở trang này trong trình duyệt web của bạn!</p> <p class="mb-0 text-center"> <button id="open-browser-chrome" class="btn btn-primary fw-normal gap-8px w-200px"> <i class="icon-chrome"></i> Mở bằng Chrome</button> </p> <!--p class="mb-0 text-center"> <button id="open-browser-safari" class="btn btn-primary fw-normal gap-8px w-200px"> <i class="icon-safari"></i> Mở bằng Safari</button> </p--> </div> </div> </div> </div>`;
+
+    $('body').append(modalHTML);
+    let alertZaloModal = new bootstrap.Modal(document.getElementById('alertZaloModal'), {
+        keyboard: false
+    });
+
+    alertZaloModal.show();
+}
+
+function openInChromeBrowser() {
+    let url = window.location.href.replace(`${window.location.protocol}//`, '');
+
+    if ( /Android/i.test(navigator.userAgent) ) {
+        window.location.href = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=http;package=com.android.chrome;end';;
+    } else if ( /iPhone|iPad|iPod/i.test(navigator.userAgent) ) {
+        alert('Vui lòng mở liên kết này trong trình duyệt Chrome: ' + url);
+        window.location.href = 'googlechrome://' + url;
+    } else {
+        window.open(url, '_blank');
+    }
+}
+
+function openInSafariBrowser() {
+    let url = window.location.href.replace(`${window.location.protocol}//`, '');
+
+    if ( /Android/i.test(navigator.userAgent) ) {
+        window.location.href = 'intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=http;package=com.android.chrome;end';;
+    } else if ( /iPhone|iPad|iPod/i.test(navigator.userAgent) ) {
+        alert('Vui lòng mở liên kết này trong trình duyệt Safari: ' + url);
+        window.location.href = 'x-web-search://' + url;
+    } else {
+        window.open(url, '_blank');
+    }
+}
+
+/* check zalo or facebook browser */
+var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+function isZaloBrowser() {
+    return /Zalo/i.test(userAgent);
+}
+
+function isFacebookBrowser() {
+    return /FBAN/i.test(userAgent) || /FBAV/i.test(userAgent);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if ( isZaloBrowser() || isFacebookBrowser() && !sessionStorage.getItem('zaloModalShown') ) {
+        /* showAlertZaloModal(); */
+        sessionStorage.setItem('zaloModalShown', '1');
+    } else {
+        showPopup();
+    }
+});
+
+$(document).on('click', '#open-browser-chrome', function() {
+    openInChromeBrowser();
+});
+
+$(document).on('click', '#open-browser-safari', function() {
+    openInSafariBrowser();
+});
+
+$('.starrating input[type="radio"]').on('change', function() {
+    let value = $(this).val();
+    let msg = 'Cực kì hài lòng';
+
+    if ( value ) {
+        switch ( value ) {
+            case '1':
+                msg = 'Rất không hài lòng';
+                break;
+            case '2':
+                msg = 'Không hài lòng';
+                break;
+            case '3':
+                msg = 'Bình thường';
+                break;
+            case '4':
+                msg = 'Hài lòng';
+                break;
+        }
+    }
+
+    $('#label-risingstar').text(msg);
+});
+
+$('#send-comment').on('click', function(e) {
+    e.preventDefault();
+
+    let urlPost = $(this).attr('data-url');
+    if ( !urlPost ) { return; }
+
+    let rating = $('input[name="rating"]:checked').val();
+    if ( !rating ) {
+        toastBottom('Vui lòng chọn đánh giá', 'danger');
+        return;
+    }
+
+    let comment = $('#comment').val();
+    if ( !comment ) {
+        toastBottom('Vui lòng nhập bình luận', 'danger');
+        return;
+    }
+
+    $.ajax({
+        type: 'post',
+        url: urlPost,
+        data: {
+            type: $(this).attr('data-type'),
+            type_id: $(this).attr('data-id'),
+            rating: rating,
+            comment: comment,
+            for: $(this).attr('data-for'),
+            [csrfName]: csrfToken
+        },
+        cache: false,
+        async: false,
+        beforeSend: function() {
+            $('#send-comment').addClass('loading');
+        },
+        success: function (response) {
+            if ( response.status == 'success' ) {
+                toastBottom('Gửi đánh giá thành công, chờ phê duyệt từ quản trị viên', 'success');
+
+                $('#comment').val('');
+                $('input[name="rating"]:checked').prop('checked', false);
+            }
+            if ( response.status == 'error' ) {
+                toastBottom(response.data, 'danger');
+            }
+        },
+        complete: function (xhr, status) {
+            $('#send-comment').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('#single-comment').on('click', '.send-replay-comment', function(e) {
+    e.preventDefault();
+
+    let id_ = $(this).attr('data-id');
+    let type = $(this).attr('data-type');
+    let comment = $('#comment-' + id_).val();
+    let urlPost = $(this).attr('data-url');
+
+    if ( !id_ || !type || !urlPost ) { return; }
+
+    if ( !comment ) {
+        toastBottom('Vui lòng nhập trả lời bình luận', 'danger');
+        $('#comment-' + id_).addClass('is-invalid');
+        return;
+    }
+
+    $.ajax({
+        type: 'post',
+        url: urlPost,
+        data: {
+            id: id_,
+            comment: comment,
+            type: type,
+            for: $(this).attr('data-for'),
+            [csrfName]: csrfToken
+        },
+        cache: false,
+        async: false,
+        success: function (response) {
+            if ( response.status == 'success' ) {
+                toastBottom('Trả lời bình luận thành công, chờ phê duyệt từ quản trị viên', 'success');
+                $('#comment-' + id_).val('');
+                $('.replay-comment.' + id_).toggleClass('d-none');
+            }
+            if ( response.status == 'error' ) {
+                toastBottom(response.data, 'danger');
+            }
+        },
+        complete: function (xhr, status) { },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('#single-comment').on('click', '.show-replay-comment', function(e) {
+    e.preventDefault();
+
+    let id_ = $(this).attr('data-id');
+    $('#comment-' + id_).val('');
+    $('.replay-comment.' + id_).toggleClass('d-none');
+});
+
+$('#single-comment').on('click', '.cancel-replay-comment', function(e) {
+    e.preventDefault();
+
+    let id_ = $(this).attr('data-id');
+    $('#comment-' + id_).val('');
+    $('.replay-comment.' + id_).toggleClass('d-none');
+});
+
+$('#load-all-review').on('click', function(e) {
+    e.preventDefault();
+
+    let id = $(this).attr('data-id');
+    let type = $(this).attr('data-type');
+    let urlGet = $(this).attr('data-url');
+
+    if ( !id || !type || !urlGet ) return;
+
+    $.ajax({
+        type: 'get',
+        url: urlGet + '?id=' + id + '&type=' + type,
+        cache: false,
+        async: false,
+        beforeSend: function() {
+            $('#load-all-review').addClass('loading');
+        },
+        success: function (response) {
+            if ( response.status == 'success' ) {
+                $('#load-all-review').remove();
+                $('#single-comment').append(response.data);
+            }
+            if ( response.status == 'error' ) {
+                toastBottom(response.data, 'danger');
+            }
+        },
+        complete: function (xhr, status) {
+            $('#load-all-review').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$(document).on('click', '.view-detail-payment', function(e) {
+    e.preventDefault();
+    window.location.href = $(this).attr('data-href');
+});
+
+$(window).on('scroll', function () {
+    let scroll = $(window).scrollTop();
+    let targetElement = $('.hotel-image-gallery.mb-4');
+
+    if ( targetElement.length ) {
+        let targetOffset = targetElement.offset().top;
+
+        if ( scroll >= targetOffset ) {
+            if ( $('.fixed-button').length ) {
+                $('.fixed-button').addClass('fixed');
+            }
+        } else {
+            if ( $('.fixed-button').length ) {
+                $('.fixed-button').removeClass('fixed');
+            }
+        }
+    }
+});
+
+$(document).on('click', '.show-modal-login-with-alert', function() {
+    $('#modal-signin .modal-body .alert').remove();
+    $('#modal-signin .modal-body h2').after('<div class="alert alert-danger mt-4 px-2" role="alert"> ' + $(this).attr('data-msg') + '</div>');
+    
+    $('#modal-signin').modal('show');
+});
+
+$(window).on('scroll', function() {
+    if ( window.innerWidth <= 768 ) {
+        $('#card-bottom-mobile').css('bottom', $(this).scrollTop() > 400 ? 0 : -160);
+    }
+});
+
+/* scroll top slider */
+$(window).on('load', function () {
+    const $targetDiv = $('.top-slider-');
+    const $closeButton = $('.close-btn');
+    const $body = $('body');
+    
+    let isStopped = false;
+    $( window ).on('scroll', function () {
+        if ( isStopped ) return;
+    
+        let divHeight = $targetDiv.outerHeight();
+        let scrollY = $(this).scrollTop();
+    
+        if ( scrollY > divHeight * 2 ) {
+            if ( !$targetDiv.hasClass('fixed') ) {
+                $targetDiv.removeClass('removing-fixed').addClass('fixed');
+                $body.css('padding-top', `${divHeight}px`);
+            }
+        }
+    });
+    
+    $closeButton.on('click', function () {
+        if ( $targetDiv.hasClass('fixed') ) {
+            $targetDiv.removeClass('fixed').addClass('removing-fixed');
+            $body.css('padding-top', '0');
+    
+            isStopped = true;
+            
+            setTimeout(() => {
+                $targetDiv.removeClass('removing-fixed');
+            }, 300);
+        }
+    });
+});
+  
+$('.events-timeline .events-timeline-month').on('click', function(e) {
+    e.preventDefault();
+
+    let btn = $(this);
+    let ids = $(this).attr('data-ids');
+    let dataUrl = $('.events-timeline').attr('data-url');
+    
+    $.ajax({
+        type: 'post',
+        url: dataUrl,
+        data: { ids: ids },
+        cache: false,
+        async: false,
+        beforeSend: function() {
+            btn.find('a').addClass('loading');
+        },
+        success: function (response) {
+            if ( response.status == 'success' ) {
+                $('#events-timeline-result').html(response.data);
+
+                $('.events-timeline-month a').removeClass('btn-primary').addClass('btn-soft-ash');
+                btn.find('a').removeClass('btn-soft-ash');
+                btn.find('a').addClass('btn-primary');
+            }
+            if ( response.status == 'error' ) {
+                toastBottom(response.data, 'danger');
+            }
+        },
+        complete: function() {
+            btn.find('a').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { });
+});
+
+$('.events-timeline .nav-tabs').on('click', '.nav-link', function(e) {
+    e.preventDefault();
+
+    let targetTabId = $(this).attr('href').substring(1);
+    let targetTab = $('#' + targetTabId);
+    let firstLi = targetTab.find('ul li.events-timeline-month').first();
+
+    if ( firstLi.length > 0 ) {
+        firstLi.trigger('click');
+    }
+});
+
+$('.utilities-select-service').on('click', function(e) {
+    e.preventDefault();
+
+    let checkedBoxes = $('.utilities-open-booking input[type="checkbox"]:checked');
+    if ( checkedBoxes.length <= 0 ) {
+        toastBottom('Vui lòng chọn ít nhất một tiện ích', 'danger');
+        return false;
+    }
+
+    let url = $(this).attr('href');
+    let utilities = [];
+
+    checkedBoxes.each(function() {
+        utilities.push('utilities[]=' + encodeURIComponent($(this).val()));
+    });
+
+    let queryString = utilities.join('&');
+    let fullUrl = url.includes('?') ? url + '&' + queryString : url + '?' + queryString;
+    
+    window.location.href = fullUrl;
+});
+
+$('.tabs-on-mobile button').click(function () {
+    let target = $(this).data('target');
+
+    $('.tabs-on-mobile-content').removeClass('d-block').addClass('d-none d-lg-block');
+    $("#" + target).removeClass('d-none').addClass('d-block');
+
+    $('.tabs-on-mobile button').removeClass('active');
+    $(this).addClass('active');
+});
+
+$(document).ready(function () {
+    const $offcanvasBody = $('.offcanvas-body');
+    const $menu = $offcanvasBody.find('.bg-dark-78');
+    const $navItems = $menu.find('> .nav-item');
+    const $indicator = $('<div>').addClass('nav-indicator').appendTo($menu);
+
+    let $activeItem = $navItems.first();
+    let firstRender = true;
+
+    function moveIndicatorTo($item) {
+        const itemRect = $item[0].getBoundingClientRect();
+        const parentRect = $menu[0].getBoundingClientRect();
+
+        const indicatorWidth = itemRect.width * 0.7;
+        const indicatorLeft = itemRect.left - parentRect.left + (indicatorWidth * 0.2);
+
+        if ( firstRender ) {
+            $indicator.css('transition', 'none');
+        }
+
+        $indicator.css({
+            'width': indicatorWidth + 'px',
+            'left': indicatorLeft + 'px',
+            'opacity': '1',
+            'transform': 'translateX(0)'
+        });
+
+        if ( firstRender ) {
+            requestAnimationFrame(() => {
+                $indicator.css('transition', 'all 0.4s ease');
+                firstRender = false;
+            });
+        }
+    }
+
+    moveIndicatorTo($activeItem);
+
+    $navItems.each(function () {
+        const $item = $(this);
+
+        $item.on('mouseenter', function () {
+            moveIndicatorTo($item);
+        });
+        $item.on('mouseleave', function () {
+            if (!$indicator.data('locked')) {
+                moveIndicatorTo($activeItem);
+            }
+        });
+        $item.find('a').on('click', function () {
+            $activeItem = $item;
+            $indicator.data('locked', true);
+        });
+    });
+
+    $menu.on('mouseleave', function () {
+        if ( !$indicator.data('locked') ) {
+            moveIndicatorTo($activeItem);
+        }
+    });
+
+    $(window).on('resize', function () {
+        moveIndicatorTo($activeItem);
+    });
+
+    /* */
+    let $header = $('.header-sticky');
+    let $wrapper = $('.wrapper');
+    function updateHeaderClass() {
+        let scrollTop = $(window).scrollTop();
+        let windowWidth = $(window).width();
+        $header.removeClass('bg-white bg-soft-backdrop-filter bg-transparent has-shadow');
+        $wrapper.removeClass('has-header-sticky');
+    
+        if ( scrollTop > 750 ) {
+            $header.addClass('bg-white has-shadow');
+            $wrapper.addClass('has-header-sticky');
+        } else if ( scrollTop > 10 ) {
+            if ( windowWidth >= 1024 ) {
+                $header.addClass('bg-soft-backdrop-filter has-shadow');
+                $wrapper.addClass('has-header-sticky');
+            } else {
+                $header.addClass('bg-white has-shadow');
+            }
+        } else {
+            $header.addClass('bg-transparent');
+        }
+    }
+    
+    $(window).on('scroll', updateHeaderClass);
+    updateHeaderClass();
+});
+
+function toggleClearQ() {
+    $('.clear-q').addClass('d-none');
+    if ( $('.input-q').val() !== '' ) {
+        $('.clear-q').removeClass('d-none');
+    }
+
+    $('.search-autocomplete .search-locations').removeClass('d-none');
+    $('.search-autocomplete .search-event').addClass('d-none');
+    $('#text-search').text('');
+    $('#search-event-result').html('');
+}
+
+let currentRequest = null;
+let debounceTimer = null;
+
+$('.input-q').on('input', function () {
+    const $input = $(this);
+    const value = $input.val();
+
+    toggleClearQ();
+    clearTimeout(debounceTimer);
+
+    if ( value ) {
+        debounceTimer = setTimeout(function () {
+            if ( currentRequest && currentRequest.readyState !== 4 ) {
+                currentRequest.abort();
+            }
+
+            currentRequest = $.ajax({
+                type: 'post',
+                url: './ajax-search',
+                data: { q: value },
+                cache: false,
+                beforeSend: function () {
+                    $('#hero-search-form button').addClass('loading');
+                },
+                success: function (response) {
+                    if ( response.status === 'success' ) {
+                        $('.search-autocomplete .search-locations').addClass('d-none');
+                        $('.search-autocomplete .search-event').removeClass('d-none');
+                        $('#text-search').text(value);
+                        $('#search-event-result').html(response.data);
+                    } else if ( response.status === 'error' ) {
+                        toastBottom(response.data, 'danger');
+                    }
+                },
+                complete: function (xhr, status) { 
+                    $('#hero-search-form button').removeClass('loading');
+                },
+                error: handleAjaxError
+            });
+        }, 400);
+    } else {
+        $('.search-autocomplete .search-locations').removeClass('d-none');
+        $('.search-autocomplete .search-event').addClass('d-none');
+        $('#text-search').text('');
+        $('#search-event-result').html('');
+    }
+});
+
+$('.clear-q').on('click', function() {
+    $('.input-q').val('');
+    toggleClearQ();
+});
+
+$(document).on('click', '.search-locations li span', function() {
+    let keyword = $(this).data('keyword');
+    let type = $(this).data('type');
+
+    if ( type ) {
+        $('.input-' + type).val(keyword);
+    } else {
+        $('.input-q').val(keyword);
+    }
+
+    toggleClearQ();
+    $('#hero-search-form').submit();
+});
+
+$('#hero-search-form #search-event-result').on('click', 'li', function() {
+    let url = $(this).data('url');
+    window.location.href = url;
+});
+
+$('.input-q').on('click', function() {
+    $('.search-autocomplete').show();
+});
+
+$(document).on('click', function(event) {
+    if ( !$(event.target).closest('.search-autocomplete, .input-q, .clear-q').length ) {
+        $('.search-autocomplete').hide();
+    }
+});
+
+$('.dropdown-filters input[type="checkbox"]').on('change', function() {
+    $(this).closest('form').submit();
+});
+
+$('#users-address-validate').on('change', '.age-group', function () {
+    let selectedValue = $(this).val();
+    let key = $(this).data('key');
+    let titleTarget = $('#title-distance-' + key);
+
+    if ( selectedValue == 1 ) {
+        titleTarget.attr('data-child', '1');
+        toggleDangerLabels(key, true);
+        $('.guardian-field-' + key).removeClass('d-none');
+    } else {
+        titleTarget.removeAttr('data-child');
+        toggleDangerLabels(key, false);
+        $('.guardian-field-' + key).addClass('d-none');
+    }
+
+    /* */
+    let minRequired = 0;
+    let maxRequired = 18;
+
+    if ( typeof childAgeLimit !== 'undefined' ) {
+        minRequired = childAgeLimit.min;
+        maxRequired = childAgeLimit.max;
+    }
+
+    let $dobInput = $('#dob-' + key);
+    let $dobDisplayInput = $dobInput.siblings('input.flatpickr-input[type="text"]').first();
+    if ( !$dobDisplayInput.length ) $dobDisplayInput = $dobInput;
+    let dobVal = $dobInput.val();
+    let dobDisplayVal = $.trim($dobDisplayInput.val());
+
+    if ( dobDisplayVal && (!dobVal || !isValidDateInput(dobDisplayVal)) ) {
+        $('#age_group-' + key).removeClass('is-invalid').siblings('.age-error').remove();
+        return false;
+    }
+
+    if ( $dobInput.is('[date-min-age]') && 
+        $dobInput.is('[date-max-age]') &&
+        parseInt($dobInput.attr('date-min-age'), 10) > 0 &&
+        parseInt($dobInput.attr('date-max-age'), 10) > 0 ) {
+        minRequired = parseInt($dobInput.attr('date-min-age'), 10);
+        maxRequired = parseInt($dobInput.attr('date-max-age'), 10);
+    }
+
+    $dobInput.siblings('.age-error').remove();
+    $dobInput.removeClass('is-invalid');
+    $('#age_group-' + key).siblings('.age-error').remove();
+    $('#age_group-' + key).removeClass('is-invalid');
+
+    if ( dobVal ) {
+        let ageAsOf = parseInt($dobInput.attr('age-as-of') || 0);
+        let age = getAge(dobVal, ageAsOf);
+        let errorMessage = '';
+        
+        if ( selectedValue == '1' && ( age > maxRequired || age < minRequired ) ) {
+            errorMessage = `Độ tuổi không chính xác, nhóm Đối tượng trẻ em dành cho thành viên `;
+
+            if ( minRequired == 0 ) {
+                errorMessage += `nhỏ hơn ${maxRequired} tuổi`;
+            } else {
+                errorMessage += `từ ${minRequired} đến ${maxRequired} tuổi`;
+            }
+        }
+
+        if ( selectedValue == '0' && age < maxRequired ) {
+            errorMessage = `Độ tuổi không chính xác, nhóm Đối tượng người lớn dành cho thành viên trên ${maxRequired} tuổi`;
+        }
+
+        if ( errorMessage !== '' ) {
+            $('<em class="mt-1 d-block text-danger line-1-2 age-error"> <small>' + errorMessage + '</small> </em>').insertAfter($dobDisplayInput);
+            $dobInput.addClass('is-invalid');
+            $('<em class="mt-1 d-block text-danger line-1-2 age-error"><small>' + errorMessage + '</small></em>').insertAfter($('#age_group-' + key));
+            $('#age_group-' + key).addClass('is-invalid');
+        }
+    }
+
+    /* */
+    let $select = $('#t_shirt_size-' + key);
+    if ( $select.length && selectedValue == 1 ) {
+        let $options = $select.find('option');
+        $options.each(function () {
+            $(this).toggle($(this).hasClass('child'));
+        });
+
+        if ( !$select.find('option:selected').is(':visible') ) {
+            $select.val('');
+        }
+    } else {
+        let $options = $select.find('option');
+        $options.each(function () {
+            $(this).toggle(!$(this).hasClass('child'));
+        });
+
+        if ( !$select.find('option:selected').is(':visible') ) {
+            $select.val('');
+        }
+    }
+});
+
+function toggleDangerLabels(key, hide) {
+    const fields = ['phone', 'identification_number'];
+
+    fields.forEach(function(field) {
+        const inputId = `${field}-${key}`;
+        const input = $(`#${inputId}`);
+        const label = $(`label[for="${inputId}"]`);
+
+        if ( hide ) {
+            label.find('small.text-danger').addClass('d-none');
+            if ( input.hasClass('is-invalid') ) {
+                input.removeClass('is-invalid');
+            }
+        } else {
+            label.find('small.text-danger').removeClass('d-none');
+        }
+    });
+}
+
+$('.videos-card .item').on('click', function (e) {
+    e.preventDefault();
+
+    let key = $(this).data('video-key');
+    let data = videoData[key];
+
+    if ( !data ) return;
+
+    $('.main-video .card .post-title a').attr('href', data.event_url).text(data.event_name);
+    
+    $('.main-video .card .post-content .post-meta .post-date span').text(data.event_time);
+    $('.main-video .card .post-content .post-meta .post-comments span').text(data.event_location);
+
+    $('.main-video .card .post-content a.cta').attr('href', data.event_cta_url).html(data.event_cta_text + ' <i class="uil uil-external-link-alt ms-1"></i>');
+
+    $('.main-video .card .card-body .summary').html(data.summary)
+    $('.main-video .card .tags').html(data.event_tags)
+
+    /* */
+    $('.main-video .plyr').replaceWith(`<div class="player" data-plyr-provider="youtube" data-plyr-embed-id="${data.youtube_url}"></div> `);
+
+    Plyr.setup('.player', {
+        loadSprite: true,
+        fullscreen: { enabled: true, iosNative: true },
+        muted: false,
+        autoplay: true,
+        youtube: {
+            noCookie: true
+        }
+    });
+
+    $('html, body').animate({
+        scrollTop: $('.main-video').offset().top - 100
+    }, 500);
+});
+
+$('#buyer-vat').change(function() {
+    let calculate = $(this).data('calculate') || 0;
+    let id = $(this).data('id') || 0;
+    let urlAjax = $(this).attr('data-url');
+
+    let vat = 0;
+    if ( $(this).is(':checked') ) { vat = 1; }
+
+    if ( calculate && urlAjax ) {
+        $.ajax({
+            url: urlAjax,
+            cache: false,
+            type: 'post',
+            data: {
+                id: id,
+                vat: vat,
+                [csrfName]: csrfToken
+            },
+            beforeSend: function() {
+                $('.register-step-04-validate').addClass('loading');
+            },
+            success: function (result) {
+                if ( result.status == 'success' ) {
+                    let rows = [
+                        { key: 'subtotal', label: 'Tạm tính' },
+                        { key: 'purchase_discount', label: 'Ưu đãi mua nhiều', class: 'text-danger' },
+                        { key: 'discount', label: 'Mã giảm giá: <code class="text-success fs-16 fw-bold">{coupon}</code>', class: 'text-danger' },
+                        { key: 'payment_method_discount', label: 'Ưu đãi thanh toán (-{payment_method_discount_percent}%)', class: 'text-danger' },
+                        { key: 'loyalty', label: 'Sử dụng Xu', class: 'text-danger' },
+                        { key: 'vat_fee', label: 'Xuất hóa đơn (+{fee_vat}% VAT)' },
+                        { key: 'fee', label: 'Phí giao dịch (+{fee_payment}%)' }
+                    ];
+
+                    let html = '';
+                    rows.forEach(row => {
+                        let val = result[row.key];
+                        if ( val ) {
+                            let label = row.label
+                                .replace('{coupon}', result.discount_code ?? '')
+                                .replace('{payment_method_discount_percent}', result.payment_method_discount_percent ?? 0)
+                                .replace('{fee_vat}', result.fee_vat ?? '')
+                                .replace('{fee_payment}', result.fee_payment ?? '');
+                            let cls = row.class ?? '';
+                            html += `<div class="d-flex align-items-center mt-2"> <span>${label}</span> <strong class="ms-auto ${cls}">${val.toLocaleString()}₫</strong> </div>`;
+                            if ( row.key === 'discount' ) {
+                                html += getDiscountStandardPriceNote(result);
+                            }
+                        }
+                    });
+
+                    if ( result.total !== undefined && result.total !== null ) {
+                        html += `<hr class="double my-2" /> <div class="mt-2 d-flex align-items-center h4 mb-0"> <strong>Tổng thanh toán</strong> <strong class="ms-auto">${result.total.toLocaleString()}₫</strong> </div>`;
+                    }
+
+                    $('#show-order-price').html(html);
+                    $('#ticket-total').text(result.total.toLocaleString() + '₫');
+                }
+
+                if ( result.status == 'error' ) {
+                    toastBottom(result.msg);
+                }
+            },
+            complete: function (xhr, status) {
+                $('.register-step-04-validate').removeClass('loading');
+            },
+            error: handleAjaxError
+        })
+        .done(function( html ) { });
+    }
+});
+
+$('#loyalty-using').change(function () {
+    let id = $(this).data('id') || 0;
+    let urlAjax = $(this).attr('data-url');
+    if ( !urlAjax ) return;
+
+    let using = 0;
+    if ( $(this).is(':checked') ) { using = 1; }
+    
+    $.ajax({
+        url: urlAjax,
+        cache: false,
+        type: 'post',
+        data: {
+            id: id,
+            using: using,
+            [csrfName]: csrfToken
+        },
+        beforeSend: function() {
+            $('.register-step-04-validate').addClass('loading');
+        },
+        success: function (result) {
+            if ( result.status == 'success' ) {
+                let rows = [
+                    { key: 'subtotal', label: 'Tạm tính' },
+                    { key: 'purchase_discount', label: 'Ưu đãi mua nhiều', class: 'text-danger' },
+                    { key: 'discount', label: 'Mã giảm giá: <code class="text-success fs-16 fw-bold">{coupon}</code>', class: 'text-danger' },
+                    { key: 'payment_method_discount', label: 'Ưu đãi thanh toán (-{payment_method_discount_percent}%)', class: 'text-danger' },
+                    { key: 'loyalty', label: 'Sử dụng Xu', class: 'text-danger' },
+                    { key: 'vat_fee', label: 'Xuất hóa đơn (+{fee_vat}% VAT)' },
+                    { key: 'fee', label: 'Phí giao dịch (+{fee_payment}%)' }
+                ];
+
+                let html = '';
+                rows.forEach(row => {
+                    let val = result[row.key];
+                    if ( val ) {
+                        let label = row.label
+                            .replace('{coupon}', result.discount_code ?? '')
+                            .replace('{payment_method_discount_percent}', result.payment_method_discount_percent ?? 0)
+                            .replace('{fee_vat}', result.fee_vat ?? '')
+                            .replace('{fee_payment}', result.fee_payment ?? '');
+                        let cls = row.class ?? '';
+                        html += `<div class="d-flex align-items-center mt-2"> <span>${label}</span> <strong class="ms-auto ${cls}">${val.toLocaleString()}₫</strong> </div>`;
+                        if ( row.key === 'discount' ) {
+                            html += getDiscountStandardPriceNote(result);
+                        }
+                    }
+                });
+
+                if ( result.total !== undefined && result.total !== null ) {
+                    html += `<hr class="double my-2" /> <div class="mt-2 d-flex align-items-center h4 mb-0"> <strong>Tổng thanh toán</strong> <strong class="ms-auto">${result.total.toLocaleString()}₫</strong> </div>`;
+                }
+
+                $('#show-order-price').html(html);
+                $('#ticket-total').text(result.total.toLocaleString() + '₫');
+            }
+
+            if ( result.status == 'error' ) {
+                toastBottom(result.msg);
+            }
+        },
+        complete: function (xhr, status) {
+            $('.register-step-04-validate').removeClass('loading');
+        },
+        error: handleAjaxError
+    })
+    .done(function( html ) { })
+});
+
+if ( typeof tShirtSizeLimit !== 'undefined' && typeof tShirtSizeLimit === 'object' ) {
+    function countSelected(id) {
+        let count = 0;
+        $('.select-t-shirt-size').each(function () {
+            if ( $(this).val() === id ) count++;
+        });
+        return count;
+    }
+
+    function updateOptionsVisibility() {
+        $('.select-t-shirt-size').each(function () {
+            const $select = $(this);
+            const currentVal = $select.val();
+
+            $select.find('option').each(function () {
+                const $option = $(this);
+                const optionVal = $option.attr('value');
+
+                if ( !optionVal ) return;
+
+                const limit = tShirtSizeLimit[optionVal];
+                if ( typeof limit !== 'undefined' ) {
+                    const selectedCount = countSelected(optionVal);
+
+                    if ( limit === '0' ) {
+                        $option.hide();
+                        if ( currentVal === optionVal ) {
+                            $select.val('');
+                        }
+                    } else if ( selectedCount >= parseInt(limit) && currentVal !== optionVal ) {
+                        $option.hide();
+                    } else {
+                        $option.show();
+                    }
+                } else {
+                    $option.show();
+                }
+            });
+        });
+    }
+
+    $('.select-t-shirt-size').on('change', function () {
+        updateOptionsVisibility();
+    });
+    updateOptionsVisibility();
+}
+
+$(document).on('show.bs.dropdown', '.dropdown.select-profile', function(){
+    let $dropdown = $(this);
+    let key = $dropdown.attr('class').split(' ').pop();
+
+    if ( $dropdown.find('.search-profile').length === 0 ) {
+        $dropdown.find('ul').prepend(
+            '<li style="padding: 0.25rem;"> <input type="text" class="form-control form-control-sm search-profile" data-key="'+ key +'" placeholder="Tìm kiếm..."> </li>'
+        );
+    }
+});
+
+$(document).on('keyup', '.search-profile', function(){
+    let keyword = $(this).val().toLowerCase();
+    let key = $(this).data('key');
+
+    $(this).closest('ul').find('li').each(function(index){
+        if ( index === 0 ) return;
+        if ( $(this).data('key') == key ) {
+            $(this).toggle($(this).text().toLowerCase().indexOf(keyword) > -1);
+        }
+    });
+});
+
+$(document).on('click', '.js-confirm-action', function (e) {
+    e.preventDefault();
+
+    let $el = $(this);
+    let url = $el.attr('href');
+    let title = $el.attr('title') || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+    let needReload = String($el.data('reload')) === '1';
+
+    Swal.fire({
+      title: title,
+      showCancelButton: true,
+      confirmButtonText: 'XÁC NHẬN',
+      cancelButtonText: 'ĐÓNG',
+      confirmButtonColor: '#d33',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      reverseButtons: true
+    }).then((result) => {
+    if ( result.value ) {
+        if ( needReload ) {
+          window.location.href = url; return;
+        }
+
+        $.ajax({
+          url: url,
+          type: 'GET',
+          dataType: 'json',
+          success: function (res) {
+            Swal.close();
+
+            if ( res.status == 400 ) {
+              toastBottom(res.msg ?? 'Đã xảy ra lỗi', 'danger');
+            }
+
+            if ( res.status == 200 ) {
+                toastBottom(res.msg ?? 'Đã xảy ra lỗi', 'success');
+              window.location.replace(res.redirect);
+            }
+          },
+          complete: function (xhr, status) { },
+          error: handleAjaxError
+        });
+      }
+    });
+});
+
+function renderComputedOrderTotal(result) {
+    let rows = [
+        { key: 'subtotal', label: 'Tạm tính' },
+        { key: 'purchase_discount', label: 'Ưu đãi mua nhiều', class: 'text-danger' },
+        { key: 'discount', label: 'Mã giảm giá: <code class="text-success fs-16 fw-bold">{coupon}</code>', class: 'text-danger' },
+        { key: 'payment_method_discount', label: 'Ưu đãi thanh toán (-{payment_method_discount_percent}%)', class: 'text-danger' },
+        { key: 'loyalty', label: 'Sử dụng Xu', class: 'text-danger' },
+        { key: 'vat_fee', label: 'Xuất hóa đơn (+{fee_vat}% VAT)' },
+        { key: 'fee', label: 'Phí giao dịch (+{fee_payment}%)' }
+    ];
+
+    let html = '';
+    rows.forEach(row => {
+        let val = result[row.key];
+        if ( val ) {
+            let label = row.label
+                .replace('{coupon}', result.discount_code ?? '')
+                .replace('{payment_method_discount_percent}', result.payment_method_discount_percent ?? 0)
+                .replace('{fee_vat}', result.fee_vat ?? '')
+                .replace('{fee_payment}', result.fee_payment ?? '');
+            let cls = row.class ?? '';
+            html += `<div class="d-flex align-items-center mt-2"> <span>${label}</span> <strong class="ms-auto ${cls}">${val.toLocaleString()}₫</strong> </div>`;
+            if ( row.key === 'discount' ) {
+                html += getDiscountStandardPriceNote(result);
+            }
+        }
+    });
+
+    if ( result.total !== undefined && result.total !== null ) {
+        html += `<hr class="double my-2" /> <div class="mt-2 d-flex align-items-center h4 mb-0"> <strong>Tổng thanh toán</strong> <strong class="ms-auto">${result.total.toLocaleString()}₫</strong> </div>`;
+    }
+
+    $('#show-order-price').html(html);
+    $('#ticket-total').text(result.total.toLocaleString() + '₫');
+
+    if ( window.glightboxInstance ) {
+        window.glightboxInstance.destroy();
+    }
+
+    window.glightboxInstance = GLightbox({
+        selector: '[data-glightbox]'
+    });
+}
+
+function parseVndAmount(value) {
+    return parseInt(String(value || '').replace(/[^\d]/g, ''), 10) || 0;
+}
+
+function formatVndAmount(value) {
+    return (parseInt(value, 10) || 0).toLocaleString() + '₫';
+}
+
+function getSummaryLine(addonKey) {
+    let key = String(addonKey || '');
+    return $('#summary-total .cart-list li.line-' + key);
+}
+
+function syncSummaryLineAddons(addonKey) {
+    let summaryLine = getSummaryLine(addonKey);
+    if ( !summaryLine.length ) {
+        return;
+    }
+
+    let price = summaryLine.children('span').first();
+    if ( !price.length ) {
+        return;
+    }
+
+    if ( summaryLine.data('base-price') === undefined ) {
+        summaryLine.data('base-price', parseVndAmount(price.text()));
+    }
+
+    let labels = [];
+    let addonTotal = 0;
+    $('.addon-item[data-key="' + addonKey + '"] .addon-checkbox:checked').each(function () {
+        let addonItem = $(this).closest('.addon-item');
+        let label = addonItem.data('label');
+
+        if ( label && !labels.includes(label) ) {
+            labels.push(label);
+        }
+
+        addonTotal += parseVndAmount(addonItem.data('price'));
+    });
+
+    price.text(formatVndAmount(parseVndAmount(summaryLine.data('base-price')) + addonTotal));
+
+    let addons = summaryLine.children('em').last();
+    if ( labels.length ) {
+        if ( !addons.length ) {
+            addons = $('<em></em>').appendTo(summaryLine);
+        }
+
+        addons.text(labels.join(', '));
+    } else {
+        addons.remove();
+    }
+}
+
+$(document)
+.off('click.addonItem', '.addon-item')
+.on('click.addonItem', '.addon-item', function (e) {
+    if ( $(this).hasClass('disabled') ) {
+        return;
+    }
+
+    if ( $(e.target).is('input[type="checkbox"]') ) {
+        return;
+    }
+
+    let checkbox = $(this).find('.addon-checkbox');
+    if ( checkbox.prop('disabled') ) {
+        return;
+    }
+
+    checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+})
+.off('change.addonItem', '.addon-checkbox')
+.on('change.addonItem', '.addon-checkbox', function () {
+    let checkbox = $(this);
+    let addonItem = checkbox.closest('.addon-item');
+    let checked = this.checked;
+    let addonID = addonItem.data('id');
+    let addonKey = addonItem.data('key');
+
+    addonItem.toggleClass('checked', checked);
+    if ( $('#users-address-validate .addon-items[data-addon-required="1"] .addon-checkbox:checked').length ) {
+        $('#users-address-validate .addon-items[data-addon-required="1"]').removeClass('is-invalid');
+    } else {
+        addonItem.closest('.addon-items').removeClass('is-invalid');
+    }
+    syncSummaryLineAddons(addonKey);
+
+    if ( !addonID || !addonKey ) {
+        return;
+    }
+
+    $.ajax({
+        url: '../../compute-order-total',
+        cache: false,
+        type: 'post',
+        data: {
+            action: checked ? 'add' : 'remove',
+            addon: addonID,
+            key: addonKey,
+            [csrfName]: csrfToken
+        },
+        beforeSend: function() {
+            checkbox.prop('disabled', true);
+            $('.register-step-04-validate').addClass('loading');
+        },
+        success: function (result) {
+            if ( result.status == 'success' && result.total !== undefined && result.total !== null ) {
+                renderComputedOrderTotal(result);
+            }
+
+            if ( result.status == 'error' ) {
+                toastBottom(result.msg);
+            }
+        },
+        complete: function () {
+            checkbox.prop('disabled', addonItem.hasClass('disabled'));
+            $('.register-step-04-validate').removeClass('loading');
+        },
+        error: function (xhr, status, error) {
+            handleAjaxError(xhr, status, error);
+        }
+    });
+});
+
+function autoSelectFreeAddonItems() {
+    $('.addon-item[data-price="0"]').each(function () {
+        let addonItem = $(this);
+        let checkbox = addonItem.find('.addon-checkbox');
+
+        if ( !checkbox.length ) {
+            addonItem.addClass('disabled');
+            return;
+        }
+
+        if ( !checkbox.prop('checked') && !checkbox.prop('disabled') ) {
+            addonItem.trigger('click');
+        }
+
+        addonItem.addClass('disabled');
+        checkbox.prop('disabled', true);
+    });
+}
+
+$(function () {
+    autoSelectFreeAddonItems();
+});

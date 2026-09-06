@@ -1,0 +1,18 @@
+{
+  "adminIds": [
+    "125487039",
+    "120540594",
+    "pham_T.",
+    "pham_tien"
+  ],
+  "defaultPermissions": {
+    "generalSettings": true,
+    "manageRoles": false,
+    "activityLogs": true,
+    "dataManagement": false,
+    "penaltiesTargets": true,
+    "syncStrava": true,
+    "importActivities": true
+  },
+  "customPermissions": {}
+}

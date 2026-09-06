@@ -1,0 +1,120 @@
+{
+  "Tien_P.": {
+    "target": "100",
+    "penalty": true
+  },
+  "Thanh_X.": {
+    "penalty": false
+  },
+  "Sơn_N._2026_7": {
+    "penalty": false
+  },
+  "Sơn_N._2026_8": {
+    "target": "",
+    "penalty": false
+  },
+  "Huy_H._2026_8": {
+    "target": 0,
+    "penalty": false
+  },
+  "Sang_N._2026_8": {
+    "target": 50,
+    "penalty": true
+  },
+  "Tien_P._2026_8": {
+    "target": 50,
+    "penalty": true
+  },
+  "pham_T._2026_8": {
+    "target": "",
+    "penalty": false
+  },
+  "Thinh_V._2026_8": {
+    "target": 46,
+    "penalty": true
+  },
+  "Thanh_X._2026_8": {
+    "penalty": false,
+    "target": 0
+  },
+  "Lieu_V._2026_8": {
+    "target": "",
+    "penalty": false
+  },
+  "Phuong_N._2026_8": {
+    "penalty": false,
+    "target": 0
+  },
+  "Tien_P._2026_6": {
+    "penalty": false,
+    "target": ""
+  },
+  "Thanh_X._2026_6": {
+    "target": ""
+  },
+  "Tien_P._2026_9": {
+    "penalty": true,
+    "target": 100
+  },
+  "Thắm_Đ._2026_9": {
+    "target": ""
+  },
+  "vu_D._2026_9": {
+    "target": 0
+  },
+  "Peter_V._2026_9": {
+    "penalty": false,
+    "target": ""
+  },
+  "Phú_N._2026_9": {
+    "target": ""
+  },
+  "pham_T._2026_9": {
+    "target": "",
+    "penalty": false
+  },
+  "Pha_V._2026_9": {
+    "target": "",
+    "penalty": false
+  },
+  "Nguyen_H._2026_9": {
+    "target": ""
+  },
+  "Nam_N._2026_9": {
+    "target": ""
+  },
+  "Andie_L._2026_9": {
+    "target": 0,
+    "penalty": false
+  },
+  "Huy_H._2026_9": {
+    "target": 0,
+    "penalty": false
+  },
+  "pham_T._2026_10": {
+    "penalty": true,
+    "target": 1
+  },
+  "Sang_N._2026_9": {
+    "penalty": false,
+    "target": 0
+  },
+  "Linh_T._2026_9": {
+    "target": 0,
+    "penalty": false
+  },
+  "Sơn_N._2026_9": {
+    "penalty": false
+  },
+  "Vĩnh_P._2026_9": {
+    "target": 0,
+    "penalty": false
+  },
+  "An_H._2026_9": {
+    "target": ""
+  },
+  "sang_nguyen": {
+    "target": 60,
+    "penalty": 20000
+  }
+}

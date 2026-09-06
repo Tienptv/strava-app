@@ -1,0 +1,29 @@
+======================================================================
+      HƯỚNG DẪN SỬ DỤNG BỘ PHẦN MỀM STRAVA TRACKER PRO (DESKTOP .EXE)
+======================================================================
+
+Đây là bộ phần mềm Windows Desktop ĐỘC LẬP HOÀN TOÀN:
+- TÍCH HỢP ĐẦY ĐỦ TẤT CẢ TÍNH NĂNG (Giao diện React hiện đại, Quản trị Admin, Cào dữ liệu tự động, Chụp ảnh toàn bảng...)
+- TỰ ĐỘNG ĐỒNG BỘ DỮ LIỆU VỚI MÁY CHỦ CLOUD RENDER để cả đội cùng xem trên Web.
+- KHÔNG CẦN CÀI ĐẶT BẤT KỲ THỨ GÌ (Đã tích hợp sẵn Node.js Portable v20).
+- KHÔNG CẦN QUYỀN ADMINISTRATOR của máy tính.
+
+----------------------------------------------------------------------
+CÁCH SỬ DỤNG:
+----------------------------------------------------------------------
+1. Nhấp đúp chuột vào file: "Strava_Tracker.exe" (hoặc "START_APP.bat").
+2. Ứng dụng sẽ tự động khởi động máy chủ dữ liệu ngầm và mở cửa sổ phần mềm độc lập (App Mode).
+3. Thao tác trên giao diện:
+   - Đăng nhập Strava trên Sidebar (lưu phiên làm việc an toàn).
+   - Bấm "Auto sync Strava": Tự động cào dữ liệu qua Chrome thật, cập nhật bảng xếp hạng và đồng bộ Cloud Render!
+   - Sử dụng đầy đủ 5 Tab trong mục Quản trị (Administer): Cấu hình giải chạy, phân quyền admin, nhật ký hoạt động, quản trị dữ liệu, mục tiêu & tiền phạt.
+   - Tải ảnh chụp toàn bảng (Download Screenshot) chất lượng cao cực nhanh.
+4. Khi dùng xong:
+   - Đóng cửa sổ phần mềm, hoặc bấm chuột phải vào biểu tượng Strava dưới Khay hệ thống (góc dưới bên phải Taskbar) và chọn "❌ Thoát Hoàn Toàn".
+
+----------------------------------------------------------------------
+NẾU GẶP SỰ CỐ:
+----------------------------------------------------------------------
+- Chạy file "DEBUG_RUN.bat" để xem trực tiếp các thông báo lỗi nếu có xung đột cổng kết nối.
+- Xem file "server.log" trong thư mục này để kiểm tra nhật ký hoạt động.
+======================================================================

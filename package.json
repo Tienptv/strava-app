@@ -1,0 +1,15 @@
+{
+  "name": "strava-desktop-software",
+  "version": "1.2.1",
+  "description": "Strava Tracker - Standalone Professional Desktop Software Suite",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "archiver": "^8.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "papaparse": "^5.6.0",
+    "puppeteer-core": "^25.8.0"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "year": 2026,
+  "targetKm": 8801,
+  "customTitle": "Challenge with the Haskoning 200K Club",
+  "customSubtitle": "Beyond the finish line!!!",
+  "showAnnualGoal": false,
+  "showDistanceProgress": false,
+  "showTimeProgress": true,
+  "showTodayMarker": false,
+  "events": [
+    {
+      "id": "race_1",
+      "name": "Khai xuân Bính Ngọ 2026",
+      "date": "2026-02-15",
+      "logoUrl": "",
+      "icon": "🏮",
+      "type": "internal",
+      "location": "Toàn quốc",
+      "note": "Khởi động mùa giải mới 2026"
+    },
+    {
+      "id": "race_2",
+      "name": "Tiền Phong Marathon 2026",
+      "date": "2026-03-29",
+      "logoUrl": "",
+      "icon": "🏅",
+      "type": "race",
+      "location": "Phú Yên",
+      "note": "Cự ly: 21km / 42km"
+    },
+    {
+      "id": "race_3",
+      "name": "Vp Bank Music Half Marathon",
+      "date": "2026-08-02",
+      "logoUrl": "https://vpbankhcmcmusichalfmarathon.com.vn/wp-content/uploads/2026/05/Logo-VPHCM.png",
+      "icon": "🏃",
+      "type": "internal",
+      "location": "HCMC",
+      "note": "5km / 10km / HM"
+    },
+    {
+      "id": "race_4",
+      "name": "VnExpress Marathon Nha Trang",
+      "date": "2026-08-16",
+      "logoUrl": "/race_logos/vnexpress_marathon.png",
+      "icon": "🏆",
+      "type": "race",
+      "location": "Nha Trang",
+      "note": "Giải chạy biển miền Trung"
+    },
+    {
+      "id": "race_1788370354607",
+      "name": "Garmin Run 2026",
+      "date": "2026-10-18",
+      "logoUrl": "/race_logos/garmin_run.png",
+      "registrationUrl": "https://pace8.vn/su-kien/garmin-run-vietnam-2026/nhom-dang-ky/758",
+      "icon": "🏅",
+      "type": "race",
+      "location": "TP HCM",
+      "note": "5km / 10km / 21km"
+    },
+    {
+      "id": "race_1788367954480",
+      "name": "Salonpas Run 2026",
+      "date": "2026-11-08",
+      "logoUrl": "/race_logos/salonpas_run.svg",
+      "registrationUrl": "https://pace8.vn/su-kien/salonpas-run-2026/nhom-dang-ky/853",
+      "icon": "🏅",
+      "type": "race",
+      "location": "TP HCM",
+      "note": "5km / 10km / 21km"
+    },
+    {
+      "id": "race_1788368919805",
+      "name": "HCMC Techcombank 2026",
+      "date": "2026-12-06",
+      "logoUrl": "/race_logos/techcombank_hcmc.png",
+      "registrationUrl": "https://pace8.vn/su-kien/techcombank-ho-chi-minh-city-international-marathon-2026/nhom-dang-ky/575",
+      "icon": "🏅",
+      "type": "race",
+      "location": "TP HCM",
+      "note": "5km / 10km / 21km / 42km"
+    }
+  ],
+  "targetDistance": 2026
+}
