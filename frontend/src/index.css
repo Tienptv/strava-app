@@ -4286,8 +4286,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   z-index: 999;
   opacity: 0;
   visibility: hidden;
-  pointer-events: none;
   transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 1.5s;
 }
 
 .race-glass-tooltip.tooltip-top {
@@ -4324,8 +4324,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .race-badge-wrapper:hover .race-glass-tooltip {
   opacity: 1;
   visibility: visible;
-  pointer-events: auto;
   transform: translateX(-50%) scale(1);
+  transition-delay: 0s;
 }
 
 .race-badge-wrapper:hover .race-glass-tooltip.tooltip-align-right {
