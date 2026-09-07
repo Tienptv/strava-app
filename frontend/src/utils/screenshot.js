@@ -160,7 +160,7 @@ export async function captureFullTableChrome(options = {}) {
       body: JSON.stringify({ 
         month, 
         year, 
-        athleteId, 
+        athleteId: options.athleteId, 
         lang: currentLang,
         chartsCollapsed: isChartsCollapsed 
       })
