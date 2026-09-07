@@ -112,8 +112,22 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
   useEffect(() => {
     loadTargets();
 
-    const handleTargetsUpdated = () => {
-      loadTargets();
+    const handleTargetsUpdated = (e) => {
+      if (e && e.detail) {
+        const { matchKey, year: updatedYear, month: updatedMonth, target, penalty } = e.detail;
+        if (updatedYear == year && updatedMonth == month) {
+          setUserData(prev => {
+            const key = `${matchKey}_${year}_${month}`;
+            const next = { ...prev };
+            next[key] = { ...next[key] };
+            if (target !== undefined) next[key].target = target;
+            if (penalty !== undefined) next[key].penalty = penalty;
+            return next;
+          });
+        }
+      } else {
+        loadTargets();
+      }
     };
 
     const handleFocus = () => {
