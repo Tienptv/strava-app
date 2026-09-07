@@ -26,7 +26,7 @@
     "penalty": true
   },
   "pham_T._2026_8": {
-    "target": "",
+    "target": 0,
     "penalty": false
   },
   "Thinh_V._2026_8": {
@@ -124,5 +124,12 @@
   "Thinh_V._2026_9": {
     "target": 26,
     "penalty": true
+  },
+  "Huy_V._2026_8": {
+    "target": 9
+  },
+  "pham_T._2026_6": {
+    "target": "",
+    "penalty": false
   }
 }

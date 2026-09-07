@@ -1,5 +1,19 @@
 [
   {
+    "id": "1788805290092",
+    "timestamp": "2026-09-07T18:21:30.092Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1788805252019",
+    "timestamp": "2026-09-07T18:20:52.019Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
     "id": "1788803880570",
     "timestamp": "2026-09-07T17:58:00.570Z",
     "action": "Đẩy dữ liệu lên Cloud",

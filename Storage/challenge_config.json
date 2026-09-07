@@ -4925,5 +4925,6 @@
   "penaltyRate": 200000,
   "defaultTarget": 50,
   "defaultChart": "leaderboard",
-  "title": "Journey from HCMC to the North Pole"
+  "title": "Journey from HCMC to the North Pole",
+  "lockTargetsAfterDate": 12
 }
