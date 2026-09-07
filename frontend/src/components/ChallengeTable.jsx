@@ -42,7 +42,7 @@ function getDayHeaderStarColor(day, totalDays) {
   }
 }
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, nameMapping = {} }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, lockTargetsAfterDate = 0, nameMapping = {} }) {
   const { lang, t } = useLang();
   
   const [userData, setUserData] = useState({});
@@ -365,8 +365,25 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               // Check if this row is the logged in athlete (Chỉ 1 dòng duy nhất được gán isMe)
               const isMe = Boolean(myRow && myRow.matchKey === row.matchKey);
 
+              // Check lock deadline
+              let isLockedByDate = false;
+              if (!isAdmin && lockTargetsAfterDate > 0) {
+                const currentDate = new Date();
+                const currentMonthIndex = currentDate.getMonth() + 1;
+                const currentYear = currentDate.getFullYear();
+                
+                const isPastMonth = year < currentYear || (year === currentYear && month < currentMonthIndex);
+                const isCurrentMonth = year === currentYear && month === currentMonthIndex;
+                
+                if (isPastMonth) {
+                  isLockedByDate = true;
+                } else if (isCurrentMonth && currentDate.getDate() > lockTargetsAfterDate) {
+                  isLockedByDate = true;
+                }
+              }
+
               // Admin can edit all; normal user can edit their own row, unless allowEditOthers is true
-              const canEdit = Boolean(isAdmin || isMe || allowEditOthers);
+              const canEdit = Boolean(isAdmin || (!isLockedByDate && (isMe || allowEditOthers)));
 
               // Tính tiền phạt phải nộp: Chỉ áp dụng khi có tick checkbox penalty và target > 0
               // max 200k, tỷ lệ theo số km chưa hoàn thành, làm tròn lên mốc 10k (ví dụ: 64k -> 70k, 86k -> 90k, 106k -> 110k)
@@ -444,7 +461,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                           onBlur={(e) => handleTargetBlur(row.matchKey, e.target.value)}
                           onKeyDown={handleTargetKeyDown}
                           disabled={!canEdit}
-                          title={!canEdit ? t('noEditPermission') : t('enterTargetKm')}
+                          title={!canEdit ? (isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('noEditPermission')) : t('enterTargetKm')}
                           className={`target-input ${isZeroVal ? 'is-zero-target' : ''} ${!canEdit ? 'target-input--readonly' : ''} ${isMe ? 'target-input--me' : ''}`}
                         />
                       );
@@ -456,7 +473,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                       checked={hasPenalty}
                       onChange={(e) => handlePenaltyChange(row.matchKey, e.target.checked)}
                       disabled={!canEdit}
-                      title={!canEdit ? t('noEditPermission') : t('checkPenaltyCommitment')}
+                      title={!canEdit ? (isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('noEditPermission')) : t('checkPenaltyCommitment')}
                       style={{ cursor: canEdit ? 'pointer' : 'default', opacity: canEdit ? 1 : 0.8 }} 
                       className={isMe ? 'penalty-checkbox--me' : ''}
                     />

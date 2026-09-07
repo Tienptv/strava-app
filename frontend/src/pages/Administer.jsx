@@ -239,6 +239,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       .then(data => {
         setConfig(data || {
           allowEditOthers: false,
+          lockTargetsAfterDate: 12,
           defaultTarget: 50,
           penaltyRate: 10000,
           title: 'Journey from HCMC to the North Pole'
@@ -1768,6 +1769,32 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                   </label>
                   <p style={{ margin: '6px 0 0 28px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                     {t('allowEditAthletesDesc')}
+                  </p>
+                </div>
+
+                <div style={{ 
+                  background: 'rgba(239, 68, 68, 0.05)', 
+                  padding: '14px', 
+                  borderRadius: '10px', 
+                  border: '1px dashed #ef4444',
+                  marginTop: '10px'
+                }}>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: '#b91c1c' }}>
+                    {lang === 'en' ? 'Lock Target & Penalty edits after day (per month):' : 'Khóa thay đổi Mục tiêu & Phạt sau ngày (mỗi tháng):'}
+                  </label>
+                  <input 
+                    type="number"
+                    min="0"
+                    max="31"
+                    placeholder="VD: 12 (Để trống hoặc 0 nếu không khoá)"
+                    value={config.lockTargetsAfterDate ?? ''}
+                    onChange={(e) => setConfig({ ...config, lockTargetsAfterDate: e.target.value ? Number(e.target.value) : null })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #fca5a5', fontSize: '0.9rem', color: '#7f1d1d' }}
+                  />
+                  <p style={{ margin: '6px 0 0 0', fontSize: '0.8rem', color: '#991b1b' }}>
+                    {lang === 'en' 
+                      ? 'Non-admins will not be able to edit targets after this day of the month. Set to 0 to disable locking.' 
+                      : 'Người dùng thường sẽ không thể sửa mục tiêu/phạt sau ngày này của tháng. Nhập 0 để bỏ khóa.'}
                   </p>
                 </div>
 

@@ -10,7 +10,9 @@ export default function PersonalGoal({
   challengeMonth, 
   challengeYear, 
   challengeParticipants = {},
-  challengeData = []
+  challengeData = [],
+  isAdmin = false,
+  lockTargetsAfterDate = 0
 }) {
   const { t, lang } = useLang();
   
@@ -30,6 +32,23 @@ export default function PersonalGoal({
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [allTimeFinancial, setAllTimeFinancial] = useState(null);
+
+  // Calculate if editing is locked by date
+  let isLockedByDate = false;
+  if (!isAdmin && lockTargetsAfterDate > 0) {
+    const today = new Date();
+    const todayMonth = today.getMonth() + 1;
+    const todayYear = today.getFullYear();
+    
+    const isPastMonth = currentYear < todayYear || (currentYear === todayYear && currentMonth < todayMonth);
+    const isCurrentMonth = currentYear === todayYear && currentMonth === todayMonth;
+    
+    if (isPastMonth) {
+      isLockedByDate = true;
+    } else if (isCurrentMonth && today.getDate() > lockTargetsAfterDate) {
+      isLockedByDate = true;
+    }
+  }
 
   // Fetch all-time financial contribution from penalties ledger
   useEffect(() => {
@@ -217,7 +236,13 @@ export default function PersonalGoal({
           </div>
         </div>
         {!isEditing && (
-          <button className="btn-icon btn-edit-goal" onClick={handleStartEdit} title={t('editGoal')}>
+          <button 
+            className="btn-icon btn-edit-goal" 
+            onClick={isLockedByDate ? undefined : handleStartEdit} 
+            title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('editGoal')}
+            style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+            disabled={isLockedByDate}
+          >
             <Edit2 size={16} />
             <span style={{ fontSize: '0.8rem', marginLeft: '4px', fontWeight: 600 }}>{t('editGoal')}</span>
           </button>
@@ -330,7 +355,10 @@ export default function PersonalGoal({
                 <button 
                   type="button" 
                   className="btn-link-penalty" 
-                  onClick={handleStartEdit}
+                  onClick={isLockedByDate ? undefined : handleStartEdit}
+                  title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : ''}
+                  style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed', textDecoration: 'none' } : {}}
+                  disabled={isLockedByDate}
                 >
                   + {t('joinPenaltyChallenge')}
                 </button>

@@ -448,6 +448,7 @@ export default function Dashboard({
                       athlete={athlete}
                       isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
                       allowEditOthers={challengeConfig?.allowEditOthers}
+                      lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
                       nameMapping={nameMapping}
                     />
                   </>
@@ -467,6 +468,7 @@ export default function Dashboard({
             challengeYear={challengeYear}
             challengeParticipants={challengeParticipants}
             challengeData={challengeData}
+            lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
           />
           <div className="stats-grid">
             <div className="stat-card">

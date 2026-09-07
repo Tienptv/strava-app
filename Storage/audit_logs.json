@@ -1,5 +1,47 @@
 [
   {
+    "id": "1788803880570",
+    "timestamp": "2026-09-07T17:58:00.570Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
+  },
+  {
+    "id": "1788803851598",
+    "timestamp": "2026-09-07T17:57:31.598Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
+  },
+  {
+    "id": "1788803815768",
+    "timestamp": "2026-09-07T17:56:55.768Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
+  },
+  {
+    "id": "1788803815102",
+    "timestamp": "2026-09-07T17:56:55.102Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
+  },
+  {
+    "id": "1788803736832",
+    "timestamp": "2026-09-07T17:55:36.832Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
+  },
+  {
+    "id": "1788803735565",
+    "timestamp": "2026-09-07T17:55:35.565Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
+  },
+  {
     "id": "1788802989597",
     "timestamp": "2026-09-07T17:43:09.597Z",
     "action": "Đẩy dữ liệu lên Cloud",
