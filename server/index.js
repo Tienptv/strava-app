@@ -10,7 +10,7 @@ import { StravaAPI } from './strava.js';
 import { scrapeClubActivities, loginAndGetCookie, getSavedCookie, extractCookiesFromActiveBrowser, clearCookiesFromActiveBrowser, getBrowserExecutable } from './scraper.js';
 import https from 'https';
 import { ZipArchive } from 'archiver';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 
 dotenv.config();
 
@@ -4397,6 +4397,69 @@ app.get('/api/penalties/export-csv', (req, res) => {
     res.send(csv);
   } catch (err) {
     console.error('Lỗi export CSV:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// SYSTEM SCRIPTS (BAT FILES) API
+// ==========================================
+app.get('/api/scripts', async (req, res) => {
+  try {
+    const scripts = [];
+    const scanDir = (dir) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (let entry of entries) {
+        if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === 'desktop_release' || entry.name === '.git') continue;
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          scanDir(fullPath);
+        } else if (entry.name.toLowerCase().endsWith('.bat')) {
+          scripts.push({
+            name: entry.name,
+            path: fullPath,
+            relativePath: path.relative(path.join(__dirname, '..'), fullPath)
+          });
+        }
+      }
+    };
+    scanDir(path.join(__dirname, '..'));
+    res.json(scripts);
+  } catch (err) {
+    console.error('Lỗi khi quét file .bat:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/scripts/execute', async (req, res) => {
+  try {
+    const { scriptPath } = req.body;
+    if (!scriptPath || !fs.existsSync(scriptPath)) {
+      return res.status(400).json({ error: 'Đường dẫn script không hợp lệ hoặc file không tồn tại.' });
+    }
+    
+    // Yêu cầu chỉ chạy file .bat
+    if (!scriptPath.toLowerCase().endsWith('.bat')) {
+      return res.status(400).json({ error: 'Chỉ hỗ trợ chạy file .bat.' });
+    }
+
+    // Spawn script in a new detached cmd window
+    const scriptDir = path.dirname(scriptPath);
+    const scriptFile = path.basename(scriptPath);
+    
+    const child = spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/c', scriptFile], {
+      detached: true,
+      cwd: scriptDir,
+      stdio: 'ignore'
+    });
+    
+    child.unref();
+
+    addAuditLog(`Execute Script`, req.body.adminId || 'System Admin', `Ran ${scriptFile}`);
+
+    res.json({ success: true, message: `Đã kích hoạt script ${scriptFile} thành công.` });
+  } catch (err) {
+    console.error('Lỗi khi chạy script:', err);
     res.status(500).json({ error: err.message });
   }
 });

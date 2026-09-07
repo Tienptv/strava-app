@@ -37,7 +37,10 @@ import {
   AlertTriangle,
   Check,
   Sliders,
-  Lock
+  Lock,
+  Terminal,
+  Play,
+  Loader
 } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { processChallengeData } from '../utils/challengeStats';
@@ -53,7 +56,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // Active Tab: 'settings', 'roles', 'logs', 'data', 'penalties'
   const getInitialTab = () => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts'];
     return (tabParam && validTabs.includes(tabParam)) ? tabParam : 'settings';
   };
   const [activeTab, setActiveTab] = useState(getInitialTab);
@@ -61,7 +64,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // Đồng bộ activeTab khi URL query param hoặc location state thay đổi
   useEffect(() => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts'];
     if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
       setActiveTab(tabParam);
     }
@@ -232,6 +235,13 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   const [allTimeSort, setAllTimeSort] = useState('rank'); // 'rank' | 'km' | 'name'
   const [allTimeSearch, setAllTimeSearch] = useState('');
 
+  // ==========================================
+  // STATE: 6. SYSTEM SCRIPTS
+  // ==========================================
+  const [scriptsList, setScriptsList] = useState([]);
+  const [loadingScripts, setLoadingScripts] = useState(false);
+  const [scriptExecuting, setScriptExecuting] = useState(null);
+
   // Load Settings
   const loadConfig = () => {
     setLoadingConfig(true);
@@ -265,7 +275,6 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       .finally(() => setLoadingLogs(false));
   };
 
-  // Load Storage Stats
   const loadStorageStats = () => {
     setLoadingStorage(true);
     apiFetch('/admin/storage-stats')
@@ -274,6 +283,59 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       })
       .catch(err => console.error('Lỗi tải storage stats:', err))
       .finally(() => setLoadingStorage(false));
+  };
+
+  // Load Scripts
+  const loadScripts = () => {
+    setLoadingScripts(true);
+    apiFetch('/scripts')
+      .then(data => setScriptsList(data || []))
+      .catch(err => console.error('Lỗi tải scripts:', err))
+      .finally(() => setLoadingScripts(false));
+  };
+  useEffect(() => {
+    if (activeTab === 'scripts') {
+      loadScripts();
+    }
+  }, [activeTab]);
+
+  const handleExecuteScript = async (scriptPath, scriptName) => {
+    try {
+      const result = await Swal.fire({
+        title: lang === 'en' ? `Execute ${scriptName}?` : `Chạy ${scriptName}?`,
+        text: lang === 'en' ? 'A new command prompt window will open.' : 'Một cửa sổ dòng lệnh mới sẽ được mở ra để chạy script này.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#00A3A6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: lang === 'en' ? 'Yes, execute it!' : 'Đồng ý chạy!',
+        cancelButtonText: lang === 'en' ? 'Cancel' : 'Hủy'
+      });
+      
+      if (result.isConfirmed) {
+        setScriptExecuting(scriptPath);
+        const res = await apiFetch('/scripts/execute', {
+          method: 'POST',
+          body: JSON.stringify({ scriptPath })
+        });
+        
+        Swal.fire({
+          icon: 'success',
+          title: lang === 'en' ? 'Executed!' : 'Đã kích hoạt!',
+          text: res.message,
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: lang === 'en' ? 'Error' : 'Lỗi',
+        text: err.message
+      });
+    } finally {
+      setScriptExecuting(null);
+    }
   };
 
   // Load Goal & Timeline Races
@@ -1697,6 +1759,40 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ fontSize: '1rem', fontWeight: 700 }}>{t('tab5Title')}</div>
             {!isSuperAdmin && effectivePermissions.penaltiesTargets === false && <Lock size={14} color="#94a3b8" />}
+          </div>
+        </button>
+
+        {/* Tab 6: System Scripts */}
+        <button
+          onClick={() => handleTabClick('scripts')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 18px',
+            borderRadius: '12px',
+            border: activeTab === 'scripts' ? '2px solid #8b5cf6' : '1px solid var(--border)',
+            background: activeTab === 'scripts' ? '#ffffff' : 'var(--bg-glass)',
+            boxShadow: activeTab === 'scripts' ? '0 6px 16px rgba(139, 92, 246, 0.18)' : 'none',
+            color: activeTab === 'scripts' ? '#7c3aed' : 'var(--text-secondary)',
+            cursor: 'pointer',
+            textAlign: 'left',
+            transition: 'all 0.2s ease',
+            fontWeight: activeTab === 'scripts' ? 700 : 500
+          }}
+        >
+          <div style={{ 
+            width: '40px', height: '40px', borderRadius: '10px', 
+            background: activeTab === 'scripts' ? '#8b5cf6' : 'rgba(139, 92, 246, 0.1)', 
+            color: activeTab === 'scripts' ? '#fff' : '#7c3aed',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <Terminal size={22} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontSize: '1rem', fontWeight: 700 }}>
+              {lang === 'en' ? 'System Scripts' : 'Hệ thống Scripts'}
+            </div>
           </div>
         </button>
       </div>
@@ -3569,6 +3665,73 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             </div>
           )}
 
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB CONTENT 6: HỆ THỐNG SCRIPTS (SYSTEM SCRIPTS)                          */}
+      {/* ========================================================================= */}
+      {activeTab === 'scripts' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="card" style={{ padding: '24px', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+              <Terminal size={22} color="var(--accent)" />
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary-navy)', margin: 0 }}>
+                {lang === 'en' ? 'System Scripts (.bat)' : 'Kịch bản Hệ Thống (.bat)'}
+              </h2>
+            </div>
+            
+            {loadingScripts ? (
+              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                {lang === 'en' ? 'Scanning for scripts...' : 'Đang quét tìm scripts...'}
+              </div>
+            ) : scriptsList.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                {scriptsList.map((script, idx) => (
+                  <div key={idx} style={{ padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '12px' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: 'var(--primary-navy)', marginBottom: '4px', fontSize: '1.05rem', wordBreak: 'break-all' }}>
+                        {script.name}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
+                        {script.path}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleExecuteScript(script.path, script.name)}
+                      disabled={scriptExecuting === script.path}
+                      className="btn btn--primary"
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        padding: '10px 14px',
+                        borderRadius: '8px',
+                        fontWeight: 700,
+                        opacity: scriptExecuting === script.path ? 0.7 : 1
+                      }}
+                    >
+                      {scriptExecuting === script.path ? (
+                        <>
+                          <Loader className="spin" size={16} /> {lang === 'en' ? 'Executing...' : 'Đang chạy...'}
+                        </>
+                      ) : (
+                        <>
+                          <Play size={16} /> {lang === 'en' ? 'Run Script' : 'Chạy Script'}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                {lang === 'en' ? 'No .bat files found in project.' : 'Không tìm thấy file .bat nào trong dự án.'}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
