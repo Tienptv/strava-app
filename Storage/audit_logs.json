@@ -1,5 +1,12 @@
 [
   {
+    "id": "1788766467338",
+    "timestamp": "2026-09-07T07:34:27.338Z",
+    "action": "Thu hồi quyền Admin",
+    "user": "Super Admin (133066813)",
+    "details": "Thu hồi quyền admin của: Tien PhamTV (ID: 120540594)"
+  },
+  {
     "id": "1788762953503",
     "timestamp": "2026-09-07T06:35:53.503Z",
     "action": "Thu hồi quyền Admin",

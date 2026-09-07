@@ -1980,15 +1980,15 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   overflow-y: auto;
   max-height: 560px; /* Đủ để hiển thị Header + khoảng 15 runners */
   border-radius: var(--radius-sm);
-  border: 2px solid #9c27b0; /* Khung màu tím theo yêu cầu */
+  border: 1px solid var(--border);
   background: #f4f6f8;
   margin-top: 16px;
   box-shadow: var(--shadow-sm);
-  width: 100%;
 }
 
 .challenge-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.85rem;
   text-align: center;
@@ -1999,7 +1999,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .challenge-table td {
   border: 1px solid var(--border);
   padding: 0 4px;
-  min-width: 32px;
+  min-width: 0;
   vertical-align: middle;
   box-sizing: border-box;
 }
@@ -2017,9 +2017,9 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 .challenge-table th.day-col,
 .challenge-table td.day-cell {
-  width: 28px !important;
-  min-width: 28px !important;
-  max-width: 28px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
   height: 28px !important;
   max-height: 28px !important;
   padding: 0 !important;
