@@ -116,5 +116,13 @@
   "sang_nguyen": {
     "target": 60,
     "penalty": 20000
+  },
+  "Lieu_V._2026_9": {
+    "target": 1,
+    "penalty": true
+  },
+  "Thinh_V._2026_9": {
+    "target": 26,
+    "penalty": true
   }
 }

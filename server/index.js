@@ -489,6 +489,73 @@ app.get('/api/auth/url', (req, res) => {
   res.json({ url: authUrl, redirectUri });
 });
 
+// Hàm tự động đồng bộ hoạt động trong ngày hôm nay của user sau khi Auth
+async function autoFetchAndMergeUserActivities(accessToken, athlete) {
+  try {
+    // Chỉ đồng bộ hoạt động của ngày hôm nay (từ 00:00:00) theo múi giờ Việt Nam
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    });
+    const parts = formatter.formatToParts(new Date());
+    const year = parts.find(p => p.type === 'year').value;
+    const month = parts.find(p => p.type === 'month').value;
+    const day = parts.find(p => p.type === 'day').value;
+    const startOfDayVN = new Date(`${year}-${month}-${day}T00:00:00+07:00`);
+    const after = Math.floor(startOfDayVN.getTime() / 1000);
+
+    const activities = await strava.getActivities(accessToken, { per_page: 50, after });
+    
+    if (!Array.isArray(activities) || activities.length === 0) return;
+
+    // Filter run activities
+    const runActivities = activities.filter(act => {
+      const t = (act.type || '').toLowerCase();
+      return ['run', 'virtualrun', 'trailrun', 'trail run'].includes(t) || t.includes('run') || t.includes('trail');
+    });
+
+    if (runActivities.length === 0) return;
+
+    // Map to standard format
+    const mappedActivities = runActivities.map(act => ({
+      id: act.id.toString(),
+      type: act.type,
+      distance: act.distance,
+      moving_time: act.moving_time,
+      start_date_local: act.start_date_local,
+      athlete: {
+        id: athlete.id,
+        firstname: athlete.firstname || '',
+        lastname: athlete.lastname || ''
+      }
+    }));
+
+    // Merge into imported_activities.json
+    let existing = [];
+    if (fs.existsSync(IMPORTED_FILE)) {
+      try {
+        existing = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
+        if (!Array.isArray(existing)) existing = [];
+      } catch (e) { existing = []; }
+    }
+
+    let addedCount = 0;
+    mappedActivities.forEach(newAct => {
+      if (!existing.some(ext => ext.id === newAct.id)) {
+        existing.push(newAct);
+        addedCount++;
+      }
+    });
+
+    if (addedCount > 0) {
+      fs.writeFileSync(IMPORTED_FILE, JSON.stringify(existing, null, 2), 'utf8');
+      console.log(`[Auto-Sync] Đã đồng bộ ${addedCount} hoạt động mới trong ngày hôm nay cho user ${athlete.firstname} ${athlete.lastname}`);
+    }
+  } catch (error) {
+    console.error(`[Auto-Sync] Lỗi khi tự động lấy hoạt động cho user ${athlete?.id}:`, error.message);
+  }
+}
+
 // Đổi authorization code lấy access token
 app.post('/api/auth/token', async (req, res) => {
   try {
@@ -533,6 +600,11 @@ app.post('/api/auth/token', async (req, res) => {
     try {
       autoCookie = await extractCookiesFromActiveBrowser();
     } catch (_) {}
+
+    // Kích hoạt đồng bộ hoạt động ngầm trong ngày hôm nay (không await để UI login nhanh)
+    if (tokenData.access_token && tokenData.athlete) {
+      autoFetchAndMergeUserActivities(tokenData.access_token, tokenData.athlete);
+    }
 
     res.json({
       athlete: tokenData.athlete,
@@ -1476,6 +1548,68 @@ app.get('/api/activities', getToken, async (req, res) => {
       before: before ? parseInt(before) : undefined,
     });
     res.json(activities);
+
+    // Kích hoạt đồng bộ ngầm vào bảng challenge
+    (async () => {
+      try {
+        if (!Array.isArray(activities) || activities.length === 0) return;
+        
+        // 1. Lọc Run/TrailRun
+        const runActivities = activities.filter(act => {
+          const t = (act.type || '').toLowerCase();
+          return ['run', 'virtualrun', 'trailrun', 'trail run'].includes(t) || t.includes('run') || t.includes('trail');
+        });
+        if (runActivities.length === 0) return;
+
+        // Lấy athleteId từ request
+        let athleteIdStr = req.headers['x-athlete-id'] || req.query.athleteId || null;
+        if (!athleteIdStr && req.accessToken) {
+           const match = Array.from(tokenStore.entries()).find(([k, v]) => v.access_token === req.accessToken);
+           if (match) athleteIdStr = match[0];
+        }
+        
+        // 2. Chuyển đổi sang chuẩn
+        let mappedActivities = runActivities.map(act => ({
+          id: act.id.toString(),
+          type: act.type,
+          distance: act.distance,
+          moving_time: act.moving_time,
+          start_date_local: act.start_date_local,
+          athlete: {
+            id: (act.athlete && act.athlete.id) ? act.athlete.id.toString() : athleteIdStr,
+            firstname: '',
+            lastname: ''
+          }
+        }));
+
+        // 3. Khôi phục tên thật từ AthleteID_Name.csv
+        mappedActivities = mapAthleteNamesUsingCSV(mappedActivities);
+
+        // 4. Merge vào imported_activities.json
+        let existing = [];
+        if (fs.existsSync(IMPORTED_FILE)) {
+          try {
+            existing = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
+            if (!Array.isArray(existing)) existing = [];
+          } catch(e) { existing = []; }
+        }
+
+        let addedCount = 0;
+        mappedActivities.forEach(newAct => {
+          if (!existing.some(ext => ext.id === newAct.id)) {
+            existing.push(newAct);
+            addedCount++;
+          }
+        });
+
+        if (addedCount > 0) {
+          fs.writeFileSync(IMPORTED_FILE, JSON.stringify(existing, null, 2), 'utf8');
+          console.log(`[Auto-Sync] Đã đồng bộ ${addedCount} hoạt động từ tab Activities cho user ID ${athleteIdStr}`);
+        }
+      } catch (err) {
+        console.error('[Auto-Sync] Lỗi khi đồng bộ từ GET /api/activities:', err.message);
+      }
+    })();
   } catch (error) {
     console.error('Lỗi lấy activities:', error.message);
     res.status(500).json({ error: 'Không thể lấy danh sách hoạt động' });
