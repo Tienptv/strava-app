@@ -46,6 +46,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
   const { lang, t } = useLang();
   
   const [userData, setUserData] = useState({});
+  const [editingTargets, setEditingTargets] = useState({});
 
   // Identify the SINGLE best matching row for the logged-in athlete
   const myRow = React.useMemo(() => {
@@ -171,21 +172,30 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
 
 
   const handleTargetChange = (matchKey, val) => {
-    if (val === '') {
-      onUserDataChange(matchKey, 'target', '');
-      return;
-    }
-    const cleanStr = String(val).replace(/^0+(?=\d)/, '');
-    const num = parseInt(cleanStr, 10);
-    onUserDataChange(matchKey, 'target', isNaN(num) ? '' : num);
+    const key = `${matchKey}_${year}_${month}`;
+    setEditingTargets(prev => ({
+      ...prev,
+      [key]: val
+    }));
   };
 
   const handleTargetBlur = (matchKey, val) => {
-    if (val === '' || val === undefined) {
+    const key = `${matchKey}_${year}_${month}`;
+    // Lấy giá trị đang edit (nếu có), fallback về val
+    const currentVal = editingTargets[key] !== undefined ? editingTargets[key] : val;
+    
+    // Clear editing state
+    setEditingTargets(prev => {
+      const next = {...prev};
+      delete next[key];
+      return next;
+    });
+
+    if (currentVal === '' || currentVal === undefined) {
       onUserDataChange(matchKey, 'target', '');
       return;
     }
-    const cleanStr = String(val).replace(/^0+(?=\d)/, '');
+    const cleanStr = String(currentVal).replace(/^0+(?=\d)/, '');
     const num = parseInt(cleanStr, 10);
     onUserDataChange(matchKey, 'target', isNaN(num) ? '' : num);
   };
@@ -402,13 +412,14 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
 
                   <td className="sum-cell sticky-right col-target">
                     {(() => {
-                      const rawTarget = userData[userKey]?.target !== undefined 
-                        ? userData[userKey]?.target 
-                        : userData[row.matchKey]?.target;
-                      const displayTarget = (rawTarget !== undefined && rawTarget !== '') 
-                        ? (isNaN(Number(rawTarget)) ? '' : Number(rawTarget)) 
-                        : '';
-                      const isZeroVal = displayTarget === 0;
+                      const userKey = `${row.matchKey}_${year}_${month}`;
+                      const rawTarget = editingTargets[userKey] !== undefined
+                        ? editingTargets[userKey]
+                        : (userData[userKey]?.target !== undefined 
+                           ? userData[userKey]?.target 
+                           : userData[row.matchKey]?.target);
+                      const displayTarget = rawTarget !== undefined ? rawTarget : '';
+                      const isZeroVal = displayTarget === 0 || displayTarget === '0';
 
                       return (
                         <input 
