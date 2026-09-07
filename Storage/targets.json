@@ -70,8 +70,8 @@
     "target": ""
   },
   "pham_T._2026_9": {
-    "target": 900,
-    "penalty": false
+    "target": 700,
+    "penalty": true
   },
   "Pha_V._2026_9": {
     "target": "",
@@ -100,8 +100,8 @@
     "target": 0
   },
   "Linh_T._2026_9": {
-    "target": 0,
-    "penalty": false
+    "target": 50,
+    "penalty": true
   },
   "Sơn_N._2026_9": {
     "penalty": false

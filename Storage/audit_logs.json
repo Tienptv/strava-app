@@ -1,5 +1,47 @@
 [
   {
+    "id": "1788802989597",
+    "timestamp": "2026-09-07T17:43:09.597Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
+  },
+  {
+    "id": "1788802817607",
+    "timestamp": "2026-09-07T17:40:17.607Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (216 mục), targets.json (34 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
+  },
+  {
+    "id": "1788801352546",
+    "timestamp": "2026-09-07T17:15:52.546Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
+  },
+  {
+    "id": "1788801281093",
+    "timestamp": "2026-09-07T17:14:41.093Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
+  },
+  {
+    "id": "1788801181021",
+    "timestamp": "2026-09-07T17:13:01.021Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (205 mục), targets.json (34 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
+  },
+  {
+    "id": "1788801151762",
+    "timestamp": "2026-09-07T17:12:31.762Z",
+    "action": "Git Push",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
+  },
+  {
     "id": "1788800987669",
     "timestamp": "2026-09-07T17:09:47.670Z",
     "action": "Git Push",

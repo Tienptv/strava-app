@@ -816,8 +816,9 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                       html: `
                         <div style="text-align: left; font-size: 0.88rem; color: #334155; line-height: 1.6;">
                           <p style="margin-bottom: 6px;"><b>1.</b> ${lang === 'en' ? `Scraping activities from Strava (${syncLimit} activities)...` : `Đang cào dữ liệu từ Strava (${syncLimit} hoạt động)...`}</p>
-                          <p style="margin-bottom: 6px;"><b>2.</b> ${lang === 'en' ? 'Automatically pushing data to Render Cloud...' : 'Tự động đẩy dữ liệu lên Render Cloud...'}</p>
-                          <p style="color: #64748b; font-size: 0.8rem; margin: 8px 0 0;">${lang === 'en' ? 'Please wait a moment, window will update when done.' : 'Vui lòng đợi giây lát, cửa sổ sẽ cập nhật khi hoàn tất.'}</p>
+                          <p style="margin-bottom: 6px;"><b>2.</b> ${lang === 'en' ? 'Automatically pulling data from Render Cloud...' : 'Tự động kéo dữ liệu từ Render Cloud...'}</p>
+                          <p style="margin-bottom: 6px;"><b>3.</b> ${lang === 'en' ? 'Automatically pushing data to Render Cloud...' : 'Tự động đẩy toàn bộ dữ liệu lên Render Cloud...'}</p>
+                          <p style="color: #64748b; font-size: 0.8rem; margin: 8px 0 0;">${lang === 'en' ? 'Please wait a moment, window will update when done.' : 'Vui lòng đợi giây lát, quy trình gồm 3 bước sẽ cập nhật khi hoàn tất.'}</p>
                         </div>
                       `,
                       allowOutsideClick: false,
@@ -840,6 +841,33 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                       });
 
                       if (data.success) {
+                        let pullSuccess = false;
+                        let pushSuccess = false;
+                        let pullError = '';
+                        let pushError = '';
+
+                        // Bước 2: Pull từ Render (ko chạy Git Push)
+                        try {
+                          const pullRes = await apiFetch('/storage/pull-from-cloud', { method: 'POST' });
+                          pullSuccess = pullRes.success;
+                          if (!pullSuccess) pullError = pullRes.error || 'Unknown error';
+                        } catch (err) {
+                          console.warn("Pull từ Cloud thất bại:", err);
+                          pullError = err.message;
+                        }
+
+                        // Bước 3: Push lên Render (đẩy toàn bộ bundle)
+                        try {
+                          const pushRes = await apiFetch('/storage/push-to-cloud', { method: 'POST' });
+                          pushSuccess = pushRes.success;
+                          if (!pushSuccess) pushError = pushRes.error || 'Unknown error';
+                        } catch (err) {
+                          console.warn("Push full bundle thất bại:", err);
+                          pushError = err.message;
+                        }
+
+                        const finalCloudSynced = pushSuccess;
+
                         if (data.scraped_count === 0) {
                           await Swal.fire({
                             title: lang === 'en' ? 'No New Activities' : 'Không có hoạt động mới',
@@ -852,7 +880,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                         }
 
                         // Kiểm tra kết quả Cloud Sync để thông báo với độ tin cậy cao
-                        if (data.cloudSynced) {
+                        if (finalCloudSynced && pullSuccess) {
                           await Swal.fire({
                             title: lang === 'en' ? '🎉 Sync Completed!' : '🎉 Đồng bộ hoàn tất!',
                             html: `
@@ -863,10 +891,13 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                                   <p style="margin: 0;">• ${lang === 'en' ? `Total local activities: <b>${data.count}</b> items.` : `Tổng hoạt động trong máy: <b>${data.count}</b> mục.`}</p>
                                   ${data.filename ? `<p style="margin: 0; font-size: 0.78rem; color: #64748b;">• ${lang === 'en' ? 'File saved:' : 'Tệp lưu:'} <code>${data.filename}</code></p>` : ''}
                                 </div>
-                                <div style="padding: 10px 14px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
-                                  <p style="color: #0284c7; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '☁️ 2. Render Cloud (Web Server):' : '☁️ 2. Render Cloud (Web Server):'}</p>
-                                  <p style="margin: 0; color: #0369a1; font-weight: 600;">• ${lang === 'en' ? 'Automatically synced to Render Cloud successfully!' : 'Đã tự động đồng bộ lên Render Cloud thành công!'}</p>
-                                  <p style="margin: 4px 0 0; font-size: 0.8rem; color: #475569;">${lang === 'en' ? 'All club members and Sub-Admins on the web can now view the latest data.' : 'Toàn bộ thành viên CLB và Sub-Admin trên web hiện đã xem được dữ liệu mới nhất.'}</p>
+                                <div style="padding: 10px 14px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; margin-bottom: 10px;">
+                                  <p style="color: #0284c7; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '☁️ 2. Pull from Render Cloud:' : '☁️ 2. Kéo dữ liệu từ Cloud:'}</p>
+                                  <p style="margin: 0; color: #0369a1; font-weight: 600;">• ${lang === 'en' ? 'Successfully pulled latest data (targets, admins) from Cloud!' : 'Đã kéo thành công dữ liệu mới nhất (mục tiêu, admins) từ Cloud!'}</p>
+                                </div>
+                                <div style="padding: 10px 14px; background: #fdf4ff; border: 1px solid #fbcfe8; border-radius: 8px;">
+                                  <p style="color: #c026d3; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '🚀 3. Push to Render Cloud:' : '🚀 3. Đẩy lên Render Cloud:'}</p>
+                                  <p style="margin: 0; color: #a21caf; font-weight: 600;">• ${lang === 'en' ? 'Successfully pushed full bundle to Cloud!' : 'Đã đẩy toàn bộ dữ liệu hoàn chỉnh lên Cloud thành công!'}</p>
                                 </div>
                               </div>
                             `,
@@ -877,18 +908,20 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                           window.location.reload();
                         } else {
                           await Swal.fire({
-                            title: lang === 'en' ? '⚠️ Saved Locally (Cloud Pending)' : '⚠️ Đã lưu vào máy (Chưa lên Cloud)',
+                            title: lang === 'en' ? '⚠️ Sync Partially Completed' : '⚠️ Đồng bộ hoàn thành một phần',
                             html: `
                               <div style="text-align: left; font-size: 0.88rem; color: #334155; line-height: 1.6;">
                                 <div style="padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 10px;">
                                   <p style="color: #16a34a; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '✅ 1. Strava Data (Local Machine):' : '✅ 1. Dữ liệu Strava (Máy tính Local):'}</p>
                                   <p style="margin: 0;">• ${lang === 'en' ? `Scraped and saved <b>${data.scraped_count}</b> activities to local computer.` : `Đã cào và lưu an toàn <b>${data.scraped_count}</b> hoạt động vào máy tính.`}</p>
-                                  <p style="margin: 0;">• ${lang === 'en' ? `Total local activities: <b>${data.count}</b> items.` : `Tổng hoạt động trong máy: <b>${data.count}</b> mục.`}</p>
                                 </div>
-                                <div style="padding: 10px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
-                                  <p style="color: #d97706; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '⚠️ 2. Render Cloud (Connection Failed):' : '⚠️ 2. Render Cloud (Chưa kết nối được):'}</p>
-                                  <p style="margin: 0; color: #b45309;">• ${lang === 'en' ? 'Error details:' : 'Chi tiết lỗi:'} <i>${data.cloudError || (lang === 'en' ? 'Could not connect to Cloud server (timeout or starting up)' : 'Không thể kết nối đến máy chủ Cloud (timeout hoặc đang khởi động)')}</i></p>
-                                  <p style="margin: 6px 0 0; font-size: 0.8rem; color: #78350f;">💡 <b>${lang === 'en' ? 'Tip:' : 'Gợi ý:'}</b> ${lang === 'en' ? 'Data on your machine is 100% safe. You can go to <b>Administer ➡️ Tab 4</b> and click <b>Push to Render Cloud</b> to push again later.' : 'Dữ liệu trên máy của bạn đã được bảo toàn 100%. Bạn có thể vào <b>Quản trị ➡️ Tab 4</b> bấm <b>Push to Render Cloud</b> để đẩy lại sau.'}</p>
+                                <div style="padding: 10px 14px; background: ${pullSuccess ? '#f0f9ff' : '#fffbeb'}; border: 1px solid ${pullSuccess ? '#bae6fd' : '#fde68a'}; border-radius: 8px; margin-bottom: 10px;">
+                                  <p style="color: ${pullSuccess ? '#0284c7' : '#d97706'}; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '☁️ 2. Pull from Render Cloud:' : '☁️ 2. Kéo dữ liệu từ Cloud:'}</p>
+                                  <p style="margin: 0; color: ${pullSuccess ? '#0369a1' : '#b45309'};">• ${pullSuccess ? (lang === 'en' ? 'Success' : 'Thành công') : (lang === 'en' ? 'Failed: ' + pullError : 'Thất bại: ' + pullError)}</p>
+                                </div>
+                                <div style="padding: 10px 14px; background: ${finalCloudSynced ? '#fdf4ff' : '#fffbeb'}; border: 1px solid ${finalCloudSynced ? '#fbcfe8' : '#fde68a'}; border-radius: 8px;">
+                                  <p style="color: ${finalCloudSynced ? '#c026d3' : '#d97706'}; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '🚀 3. Push to Render Cloud:' : '🚀 3. Đẩy lên Render Cloud:'}</p>
+                                  <p style="margin: 0; color: ${finalCloudSynced ? '#a21caf' : '#b45309'};">• ${finalCloudSynced ? (lang === 'en' ? 'Success' : 'Thành công') : (lang === 'en' ? 'Failed: ' + pushError : 'Thất bại: ' + pushError)}</p>
                                 </div>
                               </div>
                             `,

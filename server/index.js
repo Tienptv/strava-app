@@ -489,22 +489,11 @@ app.get('/api/auth/url', (req, res) => {
   res.json({ url: authUrl, redirectUri });
 });
 
-// Hàm tự động đồng bộ hoạt động trong ngày hôm nay của user sau khi Auth
+// Hàm tự động đồng bộ hoạt động gần nhất của user sau khi Auth
 async function autoFetchAndMergeUserActivities(accessToken, athlete) {
   try {
-    // Chỉ đồng bộ hoạt động của ngày hôm nay (từ 00:00:00) theo múi giờ Việt Nam
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    });
-    const parts = formatter.formatToParts(new Date());
-    const year = parts.find(p => p.type === 'year').value;
-    const month = parts.find(p => p.type === 'month').value;
-    const day = parts.find(p => p.type === 'day').value;
-    const startOfDayVN = new Date(`${year}-${month}-${day}T00:00:00+07:00`);
-    const after = Math.floor(startOfDayVN.getTime() / 1000);
-
-    const activities = await strava.getActivities(accessToken, { per_page: 50, after });
+    // Chỉ đồng bộ 5 hoạt động gần nhất của user này
+    const activities = await strava.getActivities(accessToken, { per_page: 5 });
     
     if (!Array.isArray(activities) || activities.length === 0) return;
 
@@ -538,18 +527,26 @@ async function autoFetchAndMergeUserActivities(accessToken, athlete) {
         if (!Array.isArray(existing)) existing = [];
       } catch (e) { existing = []; }
     }
+    const preCount = existing.length;
 
-    let addedCount = 0;
-    mappedActivities.forEach(newAct => {
-      if (!existing.some(ext => ext.id === newAct.id)) {
-        existing.push(newAct);
-        addedCount++;
+    // 1. Áp dụng chuẩn hoá tên (phòng trường hợp tên Strava bị thay đổi)
+    const normalizedNewActivities = mapAthleteNamesUsingCSV(mappedActivities);
+
+    // 2. Lọc trùng lặp nghiêm ngặt như khi Admin bấm Sync
+    const mergedData = mergeActivitiesList(existing, normalizedNewActivities);
+
+    if (mergedData.length > preCount || JSON.stringify(mergedData) !== JSON.stringify(existing)) {
+      fs.writeFileSync(IMPORTED_FILE, JSON.stringify(mergedData, null, 2), 'utf8');
+      console.log(`[Auto-Sync] Đã đồng bộ hoạt động mới từ 5 hoạt động gần nhất cho user ${athlete.firstname} ${athlete.lastname}. Tổng: ${mergedData.length}`);
+      
+      // Tự động đẩy lên Render Cloud nếu đang chạy ở máy local/desktop
+      if (!process.env.RENDER) {
+        try {
+          await pushActivitiesToCloud(normalizedNewActivities, 'Auto Sync (Login)');
+        } catch (e) {
+          console.warn('Lỗi push cloud ngầm sau khi auth:', e.message);
+        }
       }
-    });
-
-    if (addedCount > 0) {
-      fs.writeFileSync(IMPORTED_FILE, JSON.stringify(existing, null, 2), 'utf8');
-      console.log(`[Auto-Sync] Đã đồng bộ ${addedCount} hoạt động mới trong ngày hôm nay cho user ${athlete.firstname} ${athlete.lastname}`);
     }
   } catch (error) {
     console.error(`[Auto-Sync] Lỗi khi tự động lấy hoạt động cho user ${athlete?.id}:`, error.message);
@@ -1146,6 +1143,20 @@ app.get('/api/storage/export-zip', (req, res) => {
   }
 });
 
+// Endpoint trả về bản gốc của file penalties để Cloud có thể pull
+app.get('/api/challenge/penalties-raw', (req, res) => {
+  try {
+    if (fs.existsSync(PENALTIES_FILE)) {
+      const data = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8'));
+      res.json(data);
+    } else {
+      res.json(null);
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // [GIẢI PHÁP 2] Kéo dữ liệu mới nhất từ Cloud Render về lưu vào máy local
 app.post('/api/storage/pull-from-cloud', async (req, res) => {
   const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
@@ -1206,6 +1217,17 @@ app.post('/api/storage/pull-from-cloud', async (req, res) => {
       console.warn('Lỗi kéo admins:', e.message);
     }
 
+    // 5. Tải penalties
+    try {
+      const penalties = await fetchJson('/api/challenge/penalties-raw');
+      if (penalties && typeof penalties === 'object') {
+        fs.writeFileSync(PENALTIES_FILE, JSON.stringify(penalties, null, 2), 'utf8');
+        results.push(`member_penalties_mapping.json`);
+      }
+    } catch (e) {
+      console.warn('Lỗi kéo penalties:', e.message);
+    }
+
     addAuditLog('Kéo dữ liệu Cloud', currentAthleteId || 'Super Admin', `Đã kéo từ ${cloudUrl}: ${results.join(', ')}`);
 
     res.json({
@@ -1223,7 +1245,7 @@ app.post('/api/storage/pull-from-cloud', async (req, res) => {
 // Endpoint nhận gói dữ liệu bundle đồng bộ (chạy trên Cloud hoặc khi nhận push)
 app.post('/api/storage/sync-bundle', (req, res) => {
   try {
-    const { imported, targets, config, admins, nameMapping, clubGoal } = req.body;
+    const { imported, targets, config, admins, nameMapping, clubGoal, penalties } = req.body;
     const updated = [];
 
     if (Array.isArray(imported)) {
@@ -1255,6 +1277,11 @@ app.post('/api/storage/sync-bundle', (req, res) => {
     if (clubGoal && typeof clubGoal === 'object') {
       writeStorageJson(GOAL_FILE, clubGoal);
       updated.push(`club_goal.json`);
+    }
+
+    if (penalties && typeof penalties === 'object') {
+      writeStorageJson(PENALTIES_FILE, penalties);
+      updated.push(`member_penalties_mapping.json`);
     }
 
     addAuditLog('Nhận dữ liệu đồng bộ', 'Hệ thống', `Cập nhật bundle: ${updated.join(', ')}`);
@@ -1290,6 +1317,9 @@ app.post('/api/storage/push-to-cloud', async (req, res) => {
     }
     if (fs.existsSync(GOAL_FILE)) {
       try { bundle.clubGoal = JSON.parse(fs.readFileSync(GOAL_FILE, 'utf8')); } catch(e){}
+    }
+    if (fs.existsSync(PENALTIES_FILE)) {
+      try { bundle.penalties = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8')); } catch(e){}
     }
 
     const targetEndpoint = `${cloudUrl}/api/storage/sync-bundle`;

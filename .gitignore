@@ -32,3 +32,7 @@ bin/
 scraper-error.html
 scratch/
 download/
+ 
+# backup files
+backup/
+*.zip
