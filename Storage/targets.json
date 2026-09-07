@@ -70,8 +70,8 @@
     "target": ""
   },
   "pham_T._2026_9": {
-    "target": "",
-    "penalty": false
+    "target": 100,
+    "penalty": true
   },
   "Pha_V._2026_9": {
     "target": "",

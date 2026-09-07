@@ -1,5 +1,19 @@
 [
   {
+    "id": "1788800658135",
+    "timestamp": "2026-09-07T17:04:18.135Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (216 mục), targets.json (34 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
+  },
+  {
+    "id": "1788798018134",
+    "timestamp": "2026-09-07T16:20:18.134Z",
+    "action": "Git Push",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
+  },
+  {
     "id": "1788798006853",
     "timestamp": "2026-09-07T16:20:06.853Z",
     "action": "Kéo dữ liệu Cloud",
