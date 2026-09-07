@@ -857,12 +857,12 @@ app.delete('/api/admins/:id', (req, res) => {
     const sLower = s.toLowerCase();
     if (s === targetId || sLower === targetLower) return false;
     if (sLower === targetNoUnder || sLower === targetSlug) return false;
-    if (info.id && (s === info.id || sLower === info.id.toLowerCase())) return false;
-    if (info.matchKey && (sLower === info.matchKey.toLowerCase() || sLower.replace('.', '') === info.matchKey.toLowerCase().replace('.', ''))) return false;
-    if (info.name && (sLower === info.name.toLowerCase() || sLower === info.name.replace(/\s+/g, '_').toLowerCase())) return false;
+    if (targetInfo.id && (s === targetInfo.id || sLower === targetInfo.id.toLowerCase())) return false;
+    if (targetInfo.matchKey && (sLower === targetInfo.matchKey.toLowerCase() || sLower.replace('.', '') === targetInfo.matchKey.toLowerCase().replace('.', ''))) return false;
+    if (targetInfo.name && (sLower === targetInfo.name.toLowerCase() || sLower === targetInfo.name.replace(/\s+/g, '_').toLowerCase())) return false;
     
     const itemInfo = getAthleteMatchKeyAndId(s);
-    if (itemInfo.id && info.id && itemInfo.id.toString() === info.id.toString()) return false;
+    if (itemInfo.id && targetInfo.id && itemInfo.id.toString() === targetInfo.id.toString()) return false;
     return true;
   });
 

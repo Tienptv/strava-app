@@ -1980,14 +1980,15 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   overflow-y: auto;
   max-height: 560px; /* Đủ để hiển thị Header + khoảng 15 runners */
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid #9c27b0; /* Khung màu tím theo yêu cầu */
   background: #f4f6f8;
   margin-top: 16px;
   box-shadow: var(--shadow-sm);
+  width: 100%;
 }
 
 .challenge-table {
-  width: max-content;
+  width: 100%;
   border-collapse: collapse;
   font-size: 0.85rem;
   text-align: center;
