@@ -1,5 +1,12 @@
 [
   {
+    "id": "1788769866535",
+    "timestamp": "2026-09-07T08:31:06.535Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
     "id": "1788766467338",
     "timestamp": "2026-09-07T07:34:27.338Z",
     "action": "Thu hồi quyền Admin",
