@@ -3786,7 +3786,7 @@ app.post('/api/screenshot/full-table', async (req, res) => {
       }
 
       // Đặt lại position static cho các ô để hàng TOTAL không bị nhảy lên giữa hoặc đầu bảng do sticky bottom
-      const stickyElements = document.querySelectorAll('.challenge-table th, .challenge-table td, .totals-row, .totals-row td, .totals-row th, tfoot, thead');
+      const stickyElements = document.querySelectorAll('.totals-row, .totals-row td, .totals-row th, tfoot, thead, thead th, tfoot th, tfoot td');
       stickyElements.forEach(el => {
         el.style.setProperty('position', 'static', 'important');
         el.style.setProperty('bottom', 'auto', 'important');

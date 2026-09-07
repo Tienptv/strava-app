@@ -55,18 +55,6 @@
       "athleteId": "72851794",
       "id": "72851794"
     },
-    "Phuong_N.": {
-      "resource_state": 2,
-      "firstname": "Phuong",
-      "lastname": "Ngo",
-      "membership": "member",
-      "admin": false,
-      "owner": false,
-      "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/126486870/28996370/4/medium.jpg",
-      "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/126486870/28996370/4/large.jpg",
-      "name": "Phuong Ngo",
-      "avatar": ""
-    },
     "Quy_T.": {
       "resource_state": 2,
       "firstname": "Quy",
@@ -137,20 +125,6 @@
       "athleteId": "77523597",
       "id": "77523597"
     },
-    "pham_T.": {
-      "resource_state": 2,
-      "firstname": "pham",
-      "lastname": "tien",
-      "membership": "member",
-      "admin": false,
-      "owner": false,
-      "profile_medium": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c",
-      "profile": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c",
-      "name": "pham tien",
-      "avatar": "",
-      "athleteId": "120540594",
-      "id": "120540594"
-    },
     "Tien_P.": {
       "resource_state": 2,
       "firstname": "Tien",
@@ -188,21 +162,6 @@
       "name": "Huy Vu",
       "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/51364143/13720166/9/medium.jpg",
       "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/51364143/13720166/9/large.jpg",
-      "membership": "member",
-      "admin": false,
-      "owner": false,
-      "resource_state": 2,
-      "_fromConfig": true
-    },
-    "Phuong_T.": {
-      "matchKey": "Phuong_T.",
-      "id": "48977253",
-      "athleteId": "48977253",
-      "firstname": "Phuong",
-      "lastname": "Tran",
-      "name": "Phuong Tran",
-      "profile_medium": "https://d3nn82uaxijpm6.cloudfront.net/assets/avatar/athlete/full-ce13d984537a7f51cd27a09f00a1fac018db4abfc5b6082cf2db04be58a756b3.png",
-      "profile": "https://d3nn82uaxijpm6.cloudfront.net/assets/avatar/athlete/full-ce13d984537a7f51cd27a09f00a1fac018db4abfc5b6082cf2db04be58a756b3.png",
       "membership": "member",
       "admin": false,
       "owner": false,
@@ -4816,18 +4775,6 @@
         "athleteId": "72851794",
         "id": "72851794"
       },
-      "Phuong_N.": {
-        "resource_state": 2,
-        "firstname": "Phuong",
-        "lastname": "Ngo",
-        "membership": "member",
-        "admin": false,
-        "owner": false,
-        "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/126486870/28996370/4/medium.jpg",
-        "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/126486870/28996370/4/large.jpg",
-        "name": "Phuong Ngo",
-        "avatar": ""
-      },
       "Quy_T.": {
         "resource_state": 2,
         "firstname": "Quy",
@@ -4898,20 +4845,6 @@
         "athleteId": "77523597",
         "id": "77523597"
       },
-      "pham_T.": {
-        "resource_state": 2,
-        "firstname": "pham",
-        "lastname": "tien",
-        "membership": "member",
-        "admin": false,
-        "owner": false,
-        "profile_medium": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c",
-        "profile": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c",
-        "name": "pham tien",
-        "avatar": "",
-        "athleteId": "120540594",
-        "id": "120540594"
-      },
       "Tien_P.": {
         "resource_state": 2,
         "firstname": "Tien",
@@ -4949,21 +4882,6 @@
         "name": "Huy Vu",
         "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/51364143/13720166/9/medium.jpg",
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/51364143/13720166/9/large.jpg",
-        "membership": "member",
-        "admin": false,
-        "owner": false,
-        "resource_state": 2,
-        "_fromConfig": true
-      },
-      "Phuong_T.": {
-        "matchKey": "Phuong_T.",
-        "id": "48977253",
-        "athleteId": "48977253",
-        "firstname": "Phuong",
-        "lastname": "Tran",
-        "name": "Phuong Tran",
-        "profile_medium": "https://d3nn82uaxijpm6.cloudfront.net/assets/avatar/athlete/full-ce13d984537a7f51cd27a09f00a1fac018db4abfc5b6082cf2db04be58a756b3.png",
-        "profile": "https://d3nn82uaxijpm6.cloudfront.net/assets/avatar/athlete/full-ce13d984537a7f51cd27a09f00a1fac018db4abfc5b6082cf2db04be58a756b3.png",
         "membership": "member",
         "admin": false,
         "owner": false,

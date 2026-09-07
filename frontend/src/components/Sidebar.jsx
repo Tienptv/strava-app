@@ -966,7 +966,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                   month: activeMonth,
                   year: activeYear,
                   lang: lang,
-                  fileName: `Strava_Challenge_T${activeMonth}_${activeYear}.png`
+                  fileName: `Strava_Challenge_T${activeMonth}_${activeYear}.png`,
+                  athleteId: localStorage.getItem('athleteId')
                 });
               }}
               style={{ 
