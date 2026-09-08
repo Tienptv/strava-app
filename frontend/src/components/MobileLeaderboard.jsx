@@ -222,20 +222,11 @@ export default function MobileLeaderboard({
 
       {/* View Toggle Bar (Cards vs Full Table) */}
       <div className="mobile-view-toggle-bar">
-        <div className="mobile-toggle-group">
+        <div className="mobile-toggle-group" style={{ justifyContent: 'center' }}>
           <button className="mobile-toggle-btn active">
             📱 {lang === 'en' ? 'Card View' : 'Dạng Thẻ'}
           </button>
-          {onToggleFullTable && (
-            <button className="mobile-toggle-btn" onClick={onToggleFullTable}>
-              <Table size={14} style={{ marginRight: 4 }} />
-              {lang === 'en' ? 'Full Grid' : 'Bảng 31 Ngày'}
-            </button>
-          )}
         </div>
-        <span className="mobile-toggle-hint">
-          {lang === 'en' ? 'Rotate phone for full table' : 'Xoay ngang đt để xem bảng'}
-        </span>
       </div>
 
       {/* Top 3 Podium Cards (Only if no search active) */}

@@ -2816,7 +2816,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.5rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--primary-navy);
 }
@@ -3969,7 +3969,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .month-node-label {
-  font-size: 0.55rem;
+  font-size: 0.48rem;
   font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -4093,8 +4093,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .race-badge-node {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: #ffffff;
   border: 2.5px solid var(--accent);
@@ -4139,7 +4139,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .race-badge-icon {
-  font-size: 20px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5974,7 +5974,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
   /* Adjust font sizes for mobile view */
   .club-goal__title {
-    font-size: 1.1rem !important;
+    font-size: 0.9rem !important;
   }
 
   .upcoming-race-badge {
@@ -5993,7 +5993,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   }
 
   .month-node-label {
-    font-size: 0.5rem !important;
+    font-size: 0.4rem !important;
     padding: 2px 3px !important;
   }
 }

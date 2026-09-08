@@ -290,7 +290,54 @@ export default function Dashboard({
         <div className="challenge-view">
           {/* Trên Mobile: Chỉ hiển thị Hành trình năm khi chọn tab 'journey' */}
           {(!isMobile || mobileActiveNavTab === 'journey') && (
-            <ClubGoalProgress totalDistance={combinedTotalDistance} apiFetch={apiFetch} isAdmin={isAdmin} />
+            <>
+              <ClubGoalProgress totalDistance={combinedTotalDistance} apiFetch={apiFetch} isAdmin={isAdmin} />
+              
+              {isMobile && (
+                <div style={{ marginTop: '20px' }}>
+                  {/* Thanh chọn tháng dành riêng cho mobile tab Journey */}
+                  <div className="challenge-tabs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', overflowX: 'auto', gap: '6px', maxWidth: '100%', paddingBottom: '4px' }}>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => {
+                        const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const monthLabel = lang === 'en' 
+                          ? `${monthNamesEn[m - 1]}/${new Date().getFullYear()}`
+                          : `${t('month')} ${m}/${new Date().getFullYear()}`;
+                        return (
+                          <button
+                            key={m}
+                            className={`tab month-pill ${challengeMonth === m ? 'tab--active' : ''}`}
+                            data-month={m}
+                            onClick={() => { setChallengeMonth(m); setChallengeYear(new Date().getFullYear()); }}
+                          >
+                            {monthLabel}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {loadingChallenge ? (
+                    <div className="loading">
+                      <div className="loading__spinner"></div>
+                      <div className="loading__text">{t('loadingChallengeData')}</div>
+                    </div>
+                  ) : (
+                    <ChallengeTable 
+                      challengeData={challengeData} 
+                      year={challengeYear} 
+                      month={challengeMonth} 
+                      apiFetch={apiFetch}
+                      athlete={athlete}
+                      isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
+                      allowEditOthers={challengeConfig?.allowEditOthers}
+                      lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                      nameMapping={nameMapping}
+                    />
+                  )}
+                </div>
+              )}
+            </>
           )}
           
           {(!isMobile || mobileActiveNavTab === 'leaderboard') && (
@@ -369,8 +416,8 @@ export default function Dashboard({
                   </button>
                 </div>
               </div>
-            {/* Nếu trên điện thoại và đang xem Card View thì render MobileLeaderboard */}
-            {isMobile && mobileViewType === 'card' ? (
+            {/* Trên điện thoại luôn hiển thị MobileLeaderboard trong tab Rankings */}
+            {isMobile ? (
               loadingChallenge ? (
                 <div className="loading">
                   <div className="loading__spinner"></div>
@@ -385,7 +432,7 @@ export default function Dashboard({
                   apiFetch={apiFetch}
                   athlete={athlete}
                   nameMapping={nameMapping}
-                  onToggleFullTable={() => setMobileViewType('table')}
+                  nameMapping={nameMapping}
                 />
               )
             ) : (
@@ -410,16 +457,6 @@ export default function Dashboard({
                       );
                     })}
                   </div>
-
-                  {isMobile && (
-                    <button 
-                      className="btn btn--secondary" 
-                      style={{ fontSize: '0.8rem', padding: '5px 12px', background: '#ffffff', border: '1px solid var(--border)' }}
-                      onClick={() => setMobileViewType('card')}
-                    >
-                      📱 Xem Dạng Thẻ
-                    </button>
-                  )}
                 </div>
 
                 {loadingChallenge ? (
@@ -456,6 +493,85 @@ export default function Dashboard({
               </>
             )}
           </div>
+          )}
+        </div>
+          {(!isMobile || mobileActiveNavTab === 'journey') && (
+            <div className="dashboard-content" style={{ marginTop: '24px' }}>
+              {isMobile && (
+                <div className="mobile-view-toggle-bar" style={{ marginBottom: '16px' }}>
+                  <div className="mobile-toggle-group">
+                    <button 
+                      className={`mobile-toggle-btn ${mobileViewType === 'card' ? 'active' : ''}`}
+                      onClick={() => setMobileViewType('card')}
+                    >
+                      📱 {lang === 'en' ? 'Journey' : 'Hành Trình'}
+                    </button>
+                    <button 
+                      className={`mobile-toggle-btn ${mobileViewType === 'table' ? 'active' : ''}`}
+                      onClick={() => setMobileViewType('table')}
+                    >
+                      <Table size={14} style={{ marginRight: 4 }} />
+                      {lang === 'en' ? 'Full Grid' : 'Bảng 31 Ngày'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {(!isMobile || mobileViewType === 'card') ? (
+                <>
+                  <PersonalGoal 
+                    activities={activities} 
+                    athlete={athlete}
+                    apiFetch={apiFetch}
+                    challengeMonth={challengeMonth}
+                    challengeYear={challengeYear}
+                    challengeParticipants={challengeParticipants}
+                    challengeData={challengeData}
+                    lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                  />
+                  <ClubGoalProgress 
+                    challengeData={challengeData}
+                    challengeYear={challengeYear}
+                    challengeMonth={challengeMonth}
+                    lang={lang}
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="challenge-tabs" style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', overflowX: 'auto', gap: '6px', maxWidth: '100%', paddingBottom: '4px' }}>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => {
+                        const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const monthLabel = lang === 'en' 
+                          ? `${monthNamesEn[m - 1]}/${new Date().getFullYear()}`
+                          : `${t('month')} ${m}/${new Date().getFullYear()}`;
+                        return (
+                          <button
+                            key={m}
+                            className={`tab month-pill ${challengeMonth === m ? 'tab--active' : ''}`}
+                            data-month={m}
+                            onClick={() => { setChallengeMonth(m); setChallengeYear(new Date().getFullYear()); }}
+                          >
+                            {monthLabel}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <ChallengeTable 
+                    challengeData={challengeData} 
+                    year={challengeYear} 
+                    month={challengeMonth} 
+                    apiFetch={apiFetch}
+                    athlete={athlete}
+                    isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
+                    allowEditOthers={challengeConfig?.allowEditOthers}
+                    lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                    nameMapping={nameMapping}
+                  />
+                </>
+              )}
+            </div>
           )}
         </div>
       ) : (
