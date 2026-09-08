@@ -6097,8 +6097,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 .admin-content {
   flex: 1;
-  padding: 32px 40px;
-  max-width: 1000px;
+  padding: 32px 24px;
 }
 
 .fluent-card {

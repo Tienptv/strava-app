@@ -1542,15 +1542,8 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
     <div className="dashboard" style={{ padding: '20px 24px 8px 24px', maxWidth: '1280px', margin: '0 auto' }}>
       
       {/* Header Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '16px', padding: '0 24px 0 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button 
-            className="btn btn--secondary" 
-            onClick={() => navigate('/')}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', borderRadius: '8px', fontWeight: 600 }}
-          >
-            <ArrowLeft size={16} /> {lang === 'en' ? 'Back to Dashboard' : 'Trở về Dashboard'}
-          </button>
           <div>
             <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary-navy)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Shield size={28} color="var(--accent)" /> {t('adminTitle')}
@@ -2088,7 +2081,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       {/* TAB CONTENT 2: QUẢN LÝ PHÂN QUYỀN (ROLES & PERMISSIONS)                    */}
       {/* ========================================================================= */}
       {activeTab === 'roles' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
           
           {/* Cột 1: Danh sách Admin */}
           <div className="card" style={{ padding: '24px', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)' }}>
@@ -2653,7 +2646,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '16px', marginTop: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '24px', marginTop: '20px' }}>
               {/* Giải Pháp 1: Tải Toàn Bộ Storage (ZIP) */}
               <div style={{ padding: '18px', borderRadius: '12px', border: '1px solid #bfdbfe', background: '#f8fafc', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
