@@ -5395,12 +5395,12 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .runner-card-target-text {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   color: #64748b;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 4px;
-  white-space: nowrap;
   line-height: 1.4;
 }
 
@@ -5426,7 +5426,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .runner-km-val {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 900;
   color: var(--primary-navy, #002D54);
 }
@@ -5442,21 +5442,21 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .badge-penalty-free {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   background: #ecfdf5;
   color: #059669;
-  padding: 3px 7px;
+  padding: 2px 5px;
   border-radius: 6px;
   border: 1px solid #a7f3d0;
 }
 
 .badge-penalty-owing {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   background: #fff1f2;
   color: #e11d48;
-  padding: 3px 7px;
+  padding: 2px 5px;
   border-radius: 6px;
   border: 1px solid #fecdd3;
 }

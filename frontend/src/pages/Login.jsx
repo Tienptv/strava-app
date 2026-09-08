@@ -136,6 +136,24 @@ export default function Login({ onLogin, onGuestAccess }) {
             <RefreshCw size={15} />
             {t('switchAccount')}
           </button>
+          
+          <a 
+            href="https://www.strava.com/account/recover" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              fontSize: '0.8rem',
+              color: 'var(--accent)',
+              textAlign: 'center',
+              textDecoration: 'none',
+              marginTop: '4px',
+              fontWeight: 500
+            }}
+            onMouseOver={(e) => e.currentTarget.style.textDecoration = 'underline'}
+            onMouseOut={(e) => e.currentTarget.style.textDecoration = 'none'}
+          >
+            {lang === 'en' ? 'Forgot Strava Password?' : 'Quên mật khẩu Strava?'}
+          </a>
         </div>
 
         <p style={{ marginTop: 18, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
