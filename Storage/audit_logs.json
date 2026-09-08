@@ -1,5 +1,19 @@
 [
   {
+    "id": "1788843724966",
+    "timestamp": "2026-09-08T05:02:04.966Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (216 mục), targets.json (37 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788843724301",
+    "timestamp": "2026-09-08T05:02:04.301Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (216 mục), targets.json (37 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1788834540945",
     "timestamp": "2026-09-08T02:29:00.945Z",
     "action": "Đẩy dữ liệu lên Cloud",

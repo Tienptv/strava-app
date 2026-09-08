@@ -22,6 +22,14 @@ function App() {
 
   // Kiểm tra đã đăng nhập chưa hoặc có cờ Guest Mode
   useEffect(() => {
+    const storedAppVersion = localStorage.getItem('appVersion');
+    if (storedAppVersion !== APP_VERSION) {
+      localStorage.clear();
+      localStorage.setItem('appVersion', APP_VERSION);
+      window.location.reload();
+      return;
+    }
+
     const isGuestQuery = window.location.search.includes('guest=') || window.location.pathname === '/leaderboard';
     const isGuestStored = localStorage.getItem('isGuest') === 'true';
 

@@ -5240,7 +5240,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
   scrollbar-width: none;
 }
 .mobile-filter-chips::-webkit-scrollbar {
@@ -5251,9 +5251,10 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   border: 1px solid #e2e8f0;
   background: #ffffff;
   color: #475569;
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.74rem;
+  line-height: normal;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -5400,6 +5401,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   align-items: center;
   gap: 4px;
   white-space: nowrap;
+  line-height: 1.4;
 }
 
 .dot-sep {
@@ -5943,4 +5945,44 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   gap: 12px;
   color: #64748b;
   font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS OVERRIDES
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Scale down the runner avatar and adjust position */
+  .timeline-runner-avatar {
+    width: 96px !important;
+    height: 96px !important;
+    top: -70px !important;
+  }
+  
+  /* Hide text labels on mobile to avoid overlapping */
+  .race-label-text {
+    display: none !important;
+  }
+}
+
+/* Responsive adjustments for Challenge Table on tablets and landscape phones */
+@media (max-width: 1024px) {
+  /* Gỡ bỏ sticky của các cột bên phải để cho phép cuộn ngang toàn bộ bảng */
+  .challenge-table th.sticky-right,
+  .challenge-table td.sticky-right,
+  .totals-row td.sticky-right,
+  .challenge-table tfoot tr.totals-row td.sticky-right,
+  .runner-row--me td.sticky-right {
+    position: static !important;
+  }
+  
+  /* Sửa lại Header để phần Stats tự động đẩy xuống hoặc căn lề đúng thay vì ghim cứng 460px */
+  .challenge-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .club-goal__stats {
+    position: static !important;
+    margin-left: auto;
+  }
 }
