@@ -5974,6 +5974,13 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   .runner-row--me td.sticky-right {
     position: static !important;
   }
+
+  /* Bắt buộc các cột ngày phải có độ rộng tối thiểu để không bị bóp méo (squished) thành 0px */
+  .challenge-table th.day-col,
+  .challenge-table td.day-cell {
+    min-width: 28px !important;
+    width: 28px !important;
+  }
   
   /* Sửa lại Header để phần Stats tự động đẩy xuống hoặc căn lề đúng thay vì ghim cứng 460px */
   .challenge-header {
