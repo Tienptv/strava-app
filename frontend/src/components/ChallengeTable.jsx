@@ -145,7 +145,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
       window.removeEventListener('focus', handleFocus);
       clearInterval(interval);
     };
-  }, [loadTargets]);
+  }, [loadTargets, year, month]);
 
   useEffect(() => {
     loadPenaltiesLedger();

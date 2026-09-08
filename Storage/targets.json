@@ -131,5 +131,9 @@
   "pham_T._2026_6": {
     "target": "",
     "penalty": false
+  },
+  "Hà Xuân_A._2026_9": {
+    "target": 50,
+    "penalty": true
   }
 }

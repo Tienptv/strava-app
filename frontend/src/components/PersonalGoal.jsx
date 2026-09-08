@@ -113,12 +113,27 @@ export default function PersonalGoal({
     loadUserTarget();
 
     const handleTargetsUpdated = (e) => {
-      loadUserTarget();
+      if (e && e.detail) {
+        const { matchKey, year: updatedYear, month: updatedMonth, target, penalty } = e.detail;
+        if (matchKey === userMatchKey && updatedYear == currentYear && updatedMonth == currentMonth) {
+          if (target !== undefined) {
+            const num = Number(target);
+            const validTarget = !isNaN(num) && num > 0 ? num : 0;
+            setGoal(validTarget);
+            setTempGoal(validTarget > 0 ? String(validTarget) : '100');
+          }
+          if (penalty !== undefined) {
+            setHasPenalty(Boolean(penalty));
+            setTempPenalty(Boolean(penalty));
+          }
+        }
+      }
+      setTimeout(loadUserTarget, 300);
     };
 
     window.addEventListener('challengeTargetsUpdated', handleTargetsUpdated);
     return () => window.removeEventListener('challengeTargetsUpdated', handleTargetsUpdated);
-  }, [loadUserTarget]);
+  }, [loadUserTarget, userMatchKey, currentYear, currentMonth]);
 
   // Calculate distance for the current month
   useEffect(() => {
