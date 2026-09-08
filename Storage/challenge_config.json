@@ -212,6 +212,21 @@
       "owner": false,
       "resource_state": 2,
       "_fromConfig": true
+    },
+    "Benjamin_D.": {
+      "matchKey": "Benjamin_D.",
+      "id": "83759389",
+      "athleteId": "83759389",
+      "firstname": "Benjamin",
+      "lastname": "Dang",
+      "name": "Benjamin Dang",
+      "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/83759389/20099140/3/medium.jpg",
+      "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/83759389/20099140/3/large.jpg",
+      "membership": "member",
+      "admin": false,
+      "owner": false,
+      "resource_state": 2,
+      "_fromConfig": true
     }
   },
   "monthlyParticipants": {
@@ -4990,6 +5005,21 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/53686864/19413008/3/large.jpg",
         "membership": "member",
         "admin": true,
+        "owner": false,
+        "resource_state": 2,
+        "_fromConfig": true
+      },
+      "Benjamin_D.": {
+        "matchKey": "Benjamin_D.",
+        "id": "83759389",
+        "athleteId": "83759389",
+        "firstname": "Benjamin",
+        "lastname": "Dang",
+        "name": "Benjamin Dang",
+        "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/83759389/20099140/3/medium.jpg",
+        "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/83759389/20099140/3/large.jpg",
+        "membership": "member",
+        "admin": false,
         "owner": false,
         "resource_state": 2,
         "_fromConfig": true

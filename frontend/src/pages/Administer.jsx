@@ -1585,231 +1585,88 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
         </div>
       </div>
 
-      {/* 4 Main Module Buttons / Tabs */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-        gap: '12px', 
-        marginBottom: '16px' 
-      }}>
-        {/* Tab 1 */}
-        <button
-          onClick={() => handleTabClick('settings')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: activeTab === 'settings' ? '2px solid var(--accent)' : '1px solid var(--border)',
-            background: activeTab === 'settings' ? '#ffffff' : 'var(--bg-glass)',
-            boxShadow: activeTab === 'settings' ? '0 6px 16px rgba(0, 163, 166, 0.15)' : 'none',
-            color: activeTab === 'settings' ? 'var(--primary-navy)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.2s ease',
-            fontWeight: activeTab === 'settings' ? 700 : 500,
-            opacity: !isSuperAdmin && effectivePermissions.generalSettings === false ? 0.6 : 1
-          }}
-        >
-          <div style={{ 
-            width: '40px', height: '40px', borderRadius: '10px', 
-            background: activeTab === 'settings' ? 'var(--accent)' : 'rgba(0, 45, 84, 0.06)', 
-            color: activeTab === 'settings' ? '#fff' : 'var(--primary-navy)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Settings size={22} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{t('tab1Title')}</div>
+      {/* ==========================================
+         NEW ADMIN LAYOUT (FLUENT UI)
+         ========================================== */}
+      <div className="admin-layout">
+        
+        {/* SIDEBAR TABS */}
+        <div className="admin-sidebar">
+          <h3>{lang === 'en' ? 'Menu' : 'Danh mục'}</h3>
+          
+          <button
+            onClick={() => handleTabClick('settings')}
+            className={`tab ${activeTab === 'settings' ? 'tab--active' : ''}`}
+            style={{ opacity: !isSuperAdmin && effectivePermissions.generalSettings === false ? 0.6 : 1 }}
+          >
+            <Settings size={20} />
+            <span style={{ flex: 1 }}>{t('tab1Title')}</span>
             {!isSuperAdmin && effectivePermissions.generalSettings === false && <Lock size={14} color="#94a3b8" />}
-          </div>
-        </button>
+          </button>
 
-        {/* Tab 2 */}
-        <button
-          onClick={() => handleTabClick('roles')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: activeTab === 'roles' ? '2px solid var(--accent)' : '1px solid var(--border)',
-            background: activeTab === 'roles' ? '#ffffff' : 'var(--bg-glass)',
-            boxShadow: activeTab === 'roles' ? '0 6px 16px rgba(0, 163, 166, 0.15)' : 'none',
-            color: activeTab === 'roles' ? 'var(--primary-navy)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.2s ease',
-            fontWeight: activeTab === 'roles' ? 700 : 500,
-            opacity: !isSuperAdmin && effectivePermissions.manageRoles === false ? 0.6 : 1
-          }}
-        >
-          <div style={{ 
-            width: '40px', height: '40px', borderRadius: '10px', 
-            background: activeTab === 'roles' ? 'var(--accent)' : 'rgba(0, 45, 84, 0.06)', 
-            color: activeTab === 'roles' ? '#fff' : 'var(--primary-navy)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Users size={22} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{t('tab2Title')}</div>
+          <button
+            onClick={() => handleTabClick('roles')}
+            className={`tab ${activeTab === 'roles' ? 'tab--active' : ''}`}
+            style={{ opacity: !isSuperAdmin && effectivePermissions.manageRoles === false ? 0.6 : 1 }}
+          >
+            <Users size={20} />
+            <span style={{ flex: 1 }}>{t('tab2Title')}</span>
             {!isSuperAdmin && effectivePermissions.manageRoles === false && <Lock size={14} color="#94a3b8" />}
-          </div>
-        </button>
+          </button>
 
-        {/* Tab 3 */}
-        <button
-          onClick={() => handleTabClick('logs')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: activeTab === 'logs' ? '2px solid var(--accent)' : '1px solid var(--border)',
-            background: activeTab === 'logs' ? '#ffffff' : 'var(--bg-glass)',
-            boxShadow: activeTab === 'logs' ? '0 6px 16px rgba(0, 163, 166, 0.15)' : 'none',
-            color: activeTab === 'logs' ? 'var(--primary-navy)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.2s ease',
-            fontWeight: activeTab === 'logs' ? 700 : 500,
-            opacity: !isSuperAdmin && effectivePermissions.activityLogs === false ? 0.6 : 1
-          }}
-        >
-          <div style={{ 
-            width: '40px', height: '40px', borderRadius: '10px', 
-            background: activeTab === 'logs' ? 'var(--accent)' : 'rgba(0, 45, 84, 0.06)', 
-            color: activeTab === 'logs' ? '#fff' : 'var(--primary-navy)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <FileText size={22} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{t('tab3Title')}</div>
+          <button
+            onClick={() => handleTabClick('logs')}
+            className={`tab ${activeTab === 'logs' ? 'tab--active' : ''}`}
+            style={{ opacity: !isSuperAdmin && effectivePermissions.activityLogs === false ? 0.6 : 1 }}
+          >
+            <FileText size={20} />
+            <span style={{ flex: 1 }}>{t('tab3Title')}</span>
             {!isSuperAdmin && effectivePermissions.activityLogs === false && <Lock size={14} color="#94a3b8" />}
-          </div>
-        </button>
+          </button>
 
-        {/* Tab 4 */}
-        <button
-          onClick={() => handleTabClick('data')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: activeTab === 'data' ? '2px solid var(--accent)' : '1px solid var(--border)',
-            background: activeTab === 'data' ? '#ffffff' : 'var(--bg-glass)',
-            boxShadow: activeTab === 'data' ? '0 6px 16px rgba(0, 163, 166, 0.15)' : 'none',
-            color: activeTab === 'data' ? 'var(--primary-navy)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.2s ease',
-            fontWeight: activeTab === 'data' ? 700 : 500,
-            opacity: !isSuperAdmin && effectivePermissions.dataManagement === false ? 0.6 : 1
-          }}
-        >
-          <div style={{ 
-            width: '40px', height: '40px', borderRadius: '10px', 
-            background: activeTab === 'data' ? 'var(--accent)' : 'rgba(0, 45, 84, 0.06)', 
-            color: activeTab === 'data' ? '#fff' : 'var(--primary-navy)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Database size={22} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{t('tab4Title')}</div>
+          <button
+            onClick={() => handleTabClick('data')}
+            className={`tab ${activeTab === 'data' ? 'tab--active' : ''}`}
+            style={{ opacity: !isSuperAdmin && effectivePermissions.dataManagement === false ? 0.6 : 1 }}
+          >
+            <Database size={20} />
+            <span style={{ flex: 1 }}>{t('tab4Title')}</span>
             {!isSuperAdmin && effectivePermissions.dataManagement === false && <Lock size={14} color="#94a3b8" />}
-          </div>
-        </button>
+          </button>
 
-        {/* Tab 5: Báo cáo & Cam kết Phạt */}
-        <button
-          onClick={() => handleTabClick('penalties')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: activeTab === 'penalties' ? '2px solid #ea580c' : '1px solid var(--border)',
-            background: activeTab === 'penalties' ? '#ffffff' : 'var(--bg-glass)',
-            boxShadow: activeTab === 'penalties' ? '0 6px 16px rgba(234, 88, 12, 0.18)' : 'none',
-            color: activeTab === 'penalties' ? '#c2410c' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.2s ease',
-            fontWeight: activeTab === 'penalties' ? 700 : 500,
-            opacity: !isSuperAdmin && effectivePermissions.penaltiesTargets === false ? 0.6 : 1
-          }}
-        >
-          <div style={{ 
-            width: '40px', height: '40px', borderRadius: '10px', 
-            background: activeTab === 'penalties' ? '#ea580c' : 'rgba(234, 88, 12, 0.1)', 
-            color: activeTab === 'penalties' ? '#fff' : '#c2410c',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <DollarSign size={22} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ fontSize: '1rem', fontWeight: 700 }}>{t('tab5Title')}</div>
+          <button
+            onClick={() => handleTabClick('penalties')}
+            className={`tab ${activeTab === 'penalties' ? 'tab--active' : ''}`}
+            style={{ opacity: !isSuperAdmin && effectivePermissions.penaltiesTargets === false ? 0.6 : 1 }}
+          >
+            <DollarSign size={20} />
+            <span style={{ flex: 1 }}>{t('tab5Title')}</span>
             {!isSuperAdmin && effectivePermissions.penaltiesTargets === false && <Lock size={14} color="#94a3b8" />}
-          </div>
-        </button>
+          </button>
 
-        {/* Tab 6: System Scripts */}
-        <button
-          onClick={() => handleTabClick('scripts')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: activeTab === 'scripts' ? '2px solid #8b5cf6' : '1px solid var(--border)',
-            background: activeTab === 'scripts' ? '#ffffff' : 'var(--bg-glass)',
-            boxShadow: activeTab === 'scripts' ? '0 6px 16px rgba(139, 92, 246, 0.18)' : 'none',
-            color: activeTab === 'scripts' ? '#7c3aed' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.2s ease',
-            fontWeight: activeTab === 'scripts' ? 700 : 500
-          }}
-        >
-          <div style={{ 
-            width: '40px', height: '40px', borderRadius: '10px', 
-            background: activeTab === 'scripts' ? '#8b5cf6' : 'rgba(139, 92, 246, 0.1)', 
-            color: activeTab === 'scripts' ? '#fff' : '#7c3aed',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Terminal size={22} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ fontSize: '1rem', fontWeight: 700 }}>
-              {lang === 'en' ? 'System Scripts' : 'Hệ thống Scripts'}
-            </div>
-          </div>
-        </button>
-      </div>
+          <button
+            onClick={() => handleTabClick('scripts')}
+            className={`tab ${activeTab === 'scripts' ? 'tab--active' : ''}`}
+          >
+            <Terminal size={20} />
+            <span style={{ flex: 1 }}>{lang === 'en' ? 'System Scripts' : 'Hệ thống Scripts'}</span>
+          </button>
+        </div>
+
+        {/* CONTENT AREA */}
+        <div className="admin-content">
 
       {/* ========================================================================= */}
       {/* TAB CONTENT 1: CẤU HÌNH CHUNG (CHALLENGE SETTINGS)                        */}
       {/* ========================================================================= */}
       {activeTab === 'settings' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          <div className="card" style={{ padding: '24px', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+          <div className="fluent-card">
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Settings size={22} color="var(--accent)" />
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary-navy)', margin: 0 }}>
-                {t('rulesAndGoals')}
-              </h2>
-            </div>
+              {t('rulesAndGoals')}
+            </h2>
 
             {loadingConfig ? (
               <p>{t('loadingConfig')}</p>
@@ -1817,27 +1674,21 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
               <form onSubmit={handleSaveConfig} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                      {t('defaultTargetLabel')}
-                    </label>
+                <div className="fluent-form-grid">
+                  <div className="fluent-form-group">
+                    <label>{t('defaultTargetLabel')}</label>
                     <input 
                       type="number"
                       value={config.defaultTarget || 50}
                       onChange={(e) => setConfig({ ...config, defaultTarget: Number(e.target.value) })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>
-                  <div>
-                    <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                      {t('penaltyRateLabel')}
-                    </label>
+                  <div className="fluent-form-group">
+                    <label>{t('penaltyRateLabel')}</label>
                     <input 
                       type="number"
                       value={config.penaltyRate || 10000}
                       onChange={(e) => setConfig({ ...config, penaltyRate: Number(e.target.value) })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                     />
                   </div>
                 </div>
@@ -1912,13 +1763,11 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           </div>
 
           {/* Quick Help & Status */}
-          <div className="card" style={{ padding: '24px', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+          <div className="fluent-card">
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Activity size={22} color="var(--accent)" />
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary-navy)', margin: 0 }}>
-                {lang === 'en' ? 'System Operations' : 'Thông tin Vận hành'}
-              </h2>
-            </div>
+              {lang === 'en' ? 'System Operations' : 'Thông tin Vận hành'}
+            </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ padding: '12px 16px', background: 'var(--bg-glass)', borderRadius: '10px', borderLeft: '4px solid #00A3A6' }}>
@@ -1959,7 +1808,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           {/* ========================================================================= */}
           {/* CARD 3: QUẢN LÝ TIMELINE NĂM & CÁC GIẢI CHẠY (ANNUAL TIMELINE & RACES)    */}
           {/* ========================================================================= */}
-          <div className="card" style={{ gridColumn: '1 / -1', padding: '24px', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)', marginTop: '8px' }}>
+          <div className="fluent-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(0, 163, 166, 0.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1999,67 +1848,52 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             </div>
 
             {/* Form Cấu hình cơ bản Timeline */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                  {lang === 'en' ? 'Monthly Goal' : 'Mục tiêu của tháng'}
-                </label>
+            <div className="fluent-form-grid" style={{ marginBottom: '20px' }}>
+              <div className="fluent-form-group full-width">
+                <label>{lang === 'en' ? 'Monthly Goal' : 'Mục tiêu của tháng'}</label>
                 <input 
                   type="text"
                   value={config?.title || 'Journey from HCMC to the North Pole'}
                   onChange={(e) => setConfig({ ...(config || {}), title: e.target.value })}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                   placeholder={t('challengeTitlePlaceholder')}
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                  {lang === 'en' ? 'Challenge Year' : 'Năm Thử Thách'}
-                </label>
+              <div className="fluent-form-group">
+                <label>{lang === 'en' ? 'Challenge Year' : 'Năm Thử Thách'}</label>
                 <input 
                   type="number"
                   value={goalData.year || 2026}
                   onChange={(e) => setGoalData({ ...goalData, year: parseInt(e.target.value) || 2026 })}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                  {lang === 'en' ? 'Monthly Target (km)' : 'Mục tiêu Tháng (km)'}
-                </label>
+              <div className="fluent-form-group">
+                <label>{lang === 'en' ? 'Monthly Target (km)' : 'Mục tiêu Tháng (km)'}</label>
                 <input 
                   type="number"
                   value={goalData.targetKm || 600}
                   onChange={(e) => setGoalData({ ...goalData, targetKm: parseInt(e.target.value) || 600 })}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                  {lang === 'en' ? 'Timeline Title (Custom)' : 'Tiêu đề Timeline (Custom Title)'}
-                </label>
+              <div className="fluent-form-group">
+                <label>{lang === 'en' ? 'Timeline Title (Custom)' : 'Tiêu đề Timeline (Custom Title)'}</label>
                 <input 
                   type="text"
                   value={goalData.customTitle || ''}
                   placeholder={`Haskoning Vietnam Running Journey ${goalData.year || 2026}`}
                   onChange={(e) => setGoalData({ ...goalData, customTitle: e.target.value })}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', marginBottom: '6px', color: 'var(--primary-navy)' }}>
-                  {lang === 'en' ? 'Subtitle (Custom)' : 'Thông điệp / Phụ đề (Custom Subtitle)'}
-                </label>
+              <div className="fluent-form-group">
+                <label>{lang === 'en' ? 'Subtitle (Custom)' : 'Thông điệp / Phụ đề (Custom Subtitle)'}</label>
                 <input 
                   type="text"
                   value={goalData.customSubtitle || ''}
                   placeholder={lang === 'en' ? 'Journey to conquer annual goals & major races' : 'Hành trình chinh phục mục tiêu năm & các giải chạy lớn'}
                   onChange={(e) => setGoalData({ ...goalData, customSubtitle: e.target.value })}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
                 />
               </div>
             </div>
@@ -4119,6 +3953,9 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           </div>
         </div>
       )}
+
+        </div> {/* End admin-content */}
+      </div> {/* End admin-layout */}
 
       {/* Version Tag */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', paddingBottom: '4px' }}>
