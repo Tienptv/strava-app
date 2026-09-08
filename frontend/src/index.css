@@ -5999,6 +5999,19 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 /* Responsive adjustments for Challenge Table on tablets and landscape phones */
+@media (min-width: 1024px) {
+  .club-goal__title-group {
+    flex: 1;
+  }
+  .upcoming-race-badge {
+    order: 2;
+  }
+  .club-goal__time-status {
+    order: 3;
+    margin-left: auto;
+  }
+}
+
 @media (max-width: 1024px) {
   /* Gỡ bỏ sticky của các cột bên phải để cho phép cuộn ngang toàn bộ bảng */
   .challenge-table th.sticky-right,

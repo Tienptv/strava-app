@@ -29,7 +29,7 @@
         "allTimeKmMoneyFile": 1895.05,
         "kmRankMoneyFile": 14,
         "targetCompletedMonths": 0,
-        "paymentStatus": "paid",
+        "paymentStatus": "unpaid",
         "allTimeKmChallenge": 1922.3,
         "allTimeKm": 1922.3,
         "kmRankChallenge": 14,
@@ -131,6 +131,160 @@
           "note": "",
           "updatedBy": "Phạm Tiên (Sub-Admin)",
           "updatedAt": "2026-09-05T07:17:11.450Z"
+        },
+        "2024-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-06": {
+          "status": "unpaid",
+          "paidAt": null,
+          "note": "Chưa đóng theo file theo dõi quỹ",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
         }
       },
       "allTimeKmChallenge": 0
@@ -148,7 +302,7 @@
         "allTimeKmMoneyFile": 3552.19,
         "kmRankMoneyFile": 7,
         "targetCompletedMonths": 11,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 3810.9,
         "allTimeKm": 3810.9,
         "kmRankChallenge": 8,
@@ -238,7 +392,170 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 3810.9
+      "allTimeKmChallenge": 3810.9,
+      "monthlyPaymentStatus": {
+        "2022-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 3,
@@ -345,7 +662,163 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 3.8
+      "allTimeKmChallenge": 3.8,
+      "monthlyPaymentStatus": {
+        "2022-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-02": {
+          "status": "unpaid",
+          "paidAt": null,
+          "note": "Chưa đóng theo file theo dõi quỹ",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 23,
@@ -360,7 +833,7 @@
         "allTimeKmMoneyFile": 1600.43,
         "kmRankMoneyFile": 16,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 1617.4,
         "allTimeKm": 1617.4,
         "kmRankChallenge": 16,
@@ -445,7 +918,142 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 0
+      "allTimeKmChallenge": 0,
+      "monthlyPaymentStatus": {
+        "2022-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 20,
@@ -460,7 +1068,7 @@
         "allTimeKmMoneyFile": 3738.95,
         "kmRankMoneyFile": 6,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 4809.2,
         "allTimeKm": 4809.2,
         "kmRankChallenge": 6,
@@ -567,7 +1175,177 @@
         "2026-05": 24.3,
         "2026-06": 26.3
       },
-      "allTimeKmChallenge": 4809.2
+      "allTimeKmChallenge": 4809.2,
+      "monthlyPaymentStatus": {
+        "2022-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 12,
@@ -582,7 +1360,7 @@
         "allTimeKmMoneyFile": 2966.21,
         "kmRankMoneyFile": 11,
         "targetCompletedMonths": 10,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 3652.4,
         "allTimeKm": 3652.4,
         "kmRankChallenge": 10,
@@ -670,7 +1448,100 @@
         "2026-05": 10,
         "2026-06": 3
       },
-      "allTimeKmChallenge": 149
+      "allTimeKmChallenge": 149,
+      "monthlyPaymentStatus": {
+        "2022-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 21,
@@ -775,6 +1646,104 @@
           "note": "",
           "updatedBy": "Tien PhamTV",
           "updatedAt": "2026-09-05T04:38:24.564Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-06": {
+          "status": "unpaid",
+          "paidAt": null,
+          "note": "Chưa đóng theo file theo dõi quỹ",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
         }
       },
       "allTimeKmChallenge": 2610.6
@@ -878,7 +1847,135 @@
         "2026-05": 3.4,
         "2026-06": 4.7
       },
-      "allTimeKmChallenge": 3221.2
+      "allTimeKmChallenge": 3221.2,
+      "monthlyPaymentStatus": {
+        "2022-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-02": {
+          "status": "unpaid",
+          "paidAt": null,
+          "note": "Chưa đóng theo file theo dõi quỹ",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 2,
@@ -893,7 +1990,7 @@
         "allTimeKmMoneyFile": 441.71,
         "kmRankMoneyFile": 25,
         "targetCompletedMonths": 7,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 671.7,
         "allTimeKm": 671.7,
         "kmRankChallenge": 20,
@@ -964,7 +2061,79 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 0
+      "allTimeKmChallenge": 0,
+      "monthlyPaymentStatus": {
+        "2022-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 24,
@@ -979,7 +2148,7 @@
         "allTimeKmMoneyFile": 1359.34,
         "kmRankMoneyFile": 17,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 0,
         "allTimeKm": 0,
         "kmRankChallenge": 26,
@@ -1047,7 +2216,44 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 0
+      "allTimeKmChallenge": 0,
+      "monthlyPaymentStatus": {
+        "2023-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 4,
@@ -1062,7 +2268,7 @@
         "allTimeKmMoneyFile": 522.46,
         "kmRankMoneyFile": 24,
         "targetCompletedMonths": 6,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 0,
         "allTimeKm": 0,
         "kmRankChallenge": 27,
@@ -1108,7 +2314,44 @@
         "2024-10": 0,
         "2024-11": 0
       },
-      "allTimeKmChallenge": 0
+      "allTimeKmChallenge": 0,
+      "monthlyPaymentStatus": {
+        "2022-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 10,
@@ -1123,7 +2366,7 @@
         "allTimeKmMoneyFile": 212.96,
         "kmRankMoneyFile": 26,
         "targetCompletedMonths": 3,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 233.9,
         "allTimeKm": 233.9,
         "kmRankChallenge": 24,
@@ -1186,7 +2429,37 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 60.8
+      "allTimeKmChallenge": 60.8,
+      "monthlyPaymentStatus": {
+        "2022-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 26,
@@ -1201,7 +2474,7 @@
         "allTimeKmMoneyFile": 3486.2,
         "kmRankMoneyFile": 8,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 3679.3,
         "allTimeKm": 3679.3,
         "kmRankChallenge": 9,
@@ -1300,7 +2573,100 @@
         "2026-05": 90.7,
         "2026-06": 84.6
       },
-      "allTimeKmChallenge": 3679.3
+      "allTimeKmChallenge": 3679.3,
+      "monthlyPaymentStatus": {
+        "2022-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-10": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 8,
@@ -1421,7 +2787,86 @@
         "2026-05": 150.5,
         "2026-06": 135.5
       },
-      "allTimeKmChallenge": 9827.9
+      "allTimeKmChallenge": 9827.9,
+      "monthlyPaymentStatus": {
+        "2023-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-06": {
+          "status": "unpaid",
+          "paidAt": null,
+          "note": "Chưa đóng theo file theo dõi quỹ",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 1,
@@ -1436,7 +2881,7 @@
         "allTimeKmMoneyFile": 617.02,
         "kmRankMoneyFile": 22,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 804.9,
         "allTimeKm": 804.9,
         "kmRankChallenge": 19,
@@ -1498,7 +2943,23 @@
         "2026-05": 0,
         "2026-06": 3.8
       },
-      "allTimeKmChallenge": 55.2
+      "allTimeKmChallenge": 55.2,
+      "monthlyPaymentStatus": {
+        "2025-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 13,
@@ -1513,7 +2974,7 @@
         "allTimeKmMoneyFile": 188.1,
         "kmRankMoneyFile": 27,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 274.4,
         "allTimeKm": 274.4,
         "kmRankChallenge": 23,
@@ -1552,7 +3013,30 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 0
+      "allTimeKmChallenge": 0,
+      "monthlyPaymentStatus": {
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-07": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 15,
@@ -1567,7 +3051,7 @@
         "allTimeKmMoneyFile": 6229.55,
         "kmRankMoneyFile": 2,
         "targetCompletedMonths": 9,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 8300.7,
         "allTimeKm": 8300.7,
         "kmRankChallenge": 2,
@@ -1642,7 +3126,30 @@
         "2026-05": 75.4,
         "2026-06": 59.3
       },
-      "allTimeKmChallenge": 8300.7
+      "allTimeKmChallenge": 8300.7,
+      "monthlyPaymentStatus": {
+        "2022-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 6,
@@ -1657,7 +3164,7 @@
         "allTimeKmMoneyFile": 1030.91,
         "kmRankMoneyFile": 19,
         "targetCompletedMonths": 7,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 1030.91,
         "allTimeKm": 1030.91,
         "kmRankChallenge": 18,
@@ -1730,7 +3237,51 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 1030.91
+      "allTimeKmChallenge": 1030.91,
+      "monthlyPaymentStatus": {
+        "2023-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2024-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 25,
@@ -1745,7 +3296,7 @@
         "allTimeKmMoneyFile": 827.1,
         "kmRankMoneyFile": 21,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 4996,
         "allTimeKm": 4996,
         "kmRankChallenge": 5,
@@ -1806,7 +3357,16 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 98.1
+      "allTimeKmChallenge": 98.1,
+      "monthlyPaymentStatus": {
+        "2023-03": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 9,
@@ -1821,7 +3381,7 @@
         "allTimeKmMoneyFile": 1872.43,
         "kmRankMoneyFile": 15,
         "targetCompletedMonths": 10,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 637,
         "allTimeKm": 637,
         "kmRankChallenge": 21,
@@ -1894,7 +3454,23 @@
         "2026-05": 31.5,
         "2026-06": 21.7
       },
-      "allTimeKmChallenge": 0
+      "allTimeKmChallenge": 0,
+      "monthlyPaymentStatus": {
+        "2023-01": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 14,
@@ -1909,7 +3485,7 @@
         "allTimeKmMoneyFile": 1051.68,
         "kmRankMoneyFile": 18,
         "targetCompletedMonths": 4,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 1677.1,
         "allTimeKm": 1677.1,
         "kmRankChallenge": 15,
@@ -1973,7 +3549,23 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 52.9
+      "allTimeKmChallenge": 52.9,
+      "monthlyPaymentStatus": {
+        "2022-06": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 11,
@@ -1988,7 +3580,7 @@
         "allTimeKmMoneyFile": 1968.3,
         "kmRankMoneyFile": 13,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 2103.4,
         "allTimeKm": 2103.4,
         "kmRankChallenge": 13,
@@ -2056,7 +3648,30 @@
         "2026-05": 17.5,
         "2026-06": 25.5
       },
-      "allTimeKmChallenge": 2103.4
+      "allTimeKmChallenge": 2103.4,
+      "monthlyPaymentStatus": {
+        "2024-12": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2025-05": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-04": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 7,
@@ -2071,7 +3686,7 @@
         "allTimeKmMoneyFile": 953,
         "kmRankMoneyFile": 20,
         "targetCompletedMonths": 6,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 1059.9,
         "allTimeKm": 1059.9,
         "kmRankChallenge": 17,
@@ -2136,7 +3751,37 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 201.4
+      "allTimeKmChallenge": 201.4,
+      "monthlyPaymentStatus": {
+        "2022-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-09": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2022-11": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2023-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 28,
@@ -2151,7 +3796,7 @@
         "allTimeKmMoneyFile": 7.4,
         "kmRankMoneyFile": 28,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 48.8,
         "allTimeKm": 48.8,
         "kmRankChallenge": 25,
@@ -2173,7 +3818,16 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 0
+      "allTimeKmChallenge": 0,
+      "monthlyPaymentStatus": {
+        "2025-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 5,
@@ -2188,7 +3842,7 @@
         "allTimeKmMoneyFile": 3791.73,
         "kmRankMoneyFile": 4,
         "targetCompletedMonths": 4,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 0,
         "allTimeKm": 0,
         "kmRankChallenge": 28,
@@ -2252,7 +3906,23 @@
         "2026-05": 26.5,
         "2026-06": 55.8
       },
-      "allTimeKmChallenge": 0
+      "allTimeKmChallenge": 0,
+      "monthlyPaymentStatus": {
+        "2022-08": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-02": {
+          "status": "paid",
+          "paidAt": "2026-09-08T16:52:45.786Z",
+          "note": "Tự động cập nhật theo file theo dõi quỹ (Paid)",
+          "updatedBy": "System Update",
+          "updatedAt": "2026-09-08T16:52:45.786Z"
+        }
+      }
     },
     {
       "stt": 17,
@@ -2267,7 +3937,7 @@
         "allTimeKmMoneyFile": 3325.85,
         "kmRankMoneyFile": 9,
         "targetCompletedMonths": 0,
-        "paymentStatus": "cleared",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 6842.5,
         "allTimeKm": 6842.5,
         "kmRankChallenge": 3,
@@ -2325,7 +3995,8 @@
         "2026-05": 0,
         "2026-06": 0
       },
-      "allTimeKmChallenge": 6842.5
+      "allTimeKmChallenge": 6842.5,
+      "monthlyPaymentStatus": {}
     },
     {
       "stt": 22,
@@ -2340,7 +4011,7 @@
         "allTimeKmMoneyFile": 5384.33,
         "kmRankMoneyFile": 3,
         "targetCompletedMonths": 4,
-        "paymentStatus": "cleared",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 5384.33,
         "allTimeKm": 5384.33,
         "kmRankChallenge": 4,
@@ -2379,7 +4050,8 @@
         "2024-05": 0,
         "2024-06": 0
       },
-      "allTimeKmChallenge": 5384.33
+      "allTimeKmChallenge": 5384.33,
+      "monthlyPaymentStatus": {}
     },
     {
       "stt": 27,
@@ -2394,7 +4066,7 @@
         "allTimeKmMoneyFile": 578.8,
         "kmRankMoneyFile": 23,
         "targetCompletedMonths": 0,
-        "paymentStatus": "cleared",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 578.8,
         "allTimeKm": 578.8,
         "kmRankChallenge": 22,
@@ -2422,7 +4094,8 @@
         "2026-05": 0,
         "2026-06": 60.1
       },
-      "allTimeKmChallenge": 578.8
+      "allTimeKmChallenge": 578.8,
+      "monthlyPaymentStatus": {}
     }
   ],
   "cashFlowLedger": [

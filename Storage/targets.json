@@ -46,11 +46,12 @@
     "target": 0
   },
   "Tien_P._2026_6": {
-    "penalty": false,
-    "target": ""
+    "penalty": true,
+    "target": 150
   },
   "Thanh_X._2026_6": {
-    "target": ""
+    "target": 68,
+    "penalty": true
   },
   "Tien_P._2026_9": {
     "penalty": true,
@@ -126,7 +127,7 @@
     "penalty": true
   },
   "Huy_V._2026_8": {
-    "target": 9
+    "target": 0
   },
   "pham_T._2026_6": {
     "target": "",
@@ -139,5 +140,40 @@
   "Chi_N._2026_9": {
     "penalty": true,
     "target": 20
+  },
+  "Tien_P._2026_5": {
+    "penalty": false,
+    "target": 0
+  },
+  "Thinh_V._2026_2": {
+    "target": 0,
+    "penalty": false
+  },
+  "Cuong_N._2026_2": {
+    "penalty": true,
+    "target": 70
+  },
+  "Tam_N._2026_2": {
+    "penalty": true,
+    "target": 75
+  },
+  "Huy_H._2026_6": {
+    "target": 150,
+    "penalty": true
+  },
+  "Phuong_N._2026_6": {
+    "target": ""
+  },
+  "Katy_N._2026_6": {
+    "target": 60,
+    "penalty": true
+  },
+  "Sang_N._2026_6": {
+    "target": 50,
+    "penalty": true
+  },
+  "Thinh_V._2026_6": {
+    "target": 26,
+    "penalty": true
   }
 }

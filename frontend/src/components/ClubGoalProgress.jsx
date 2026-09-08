@@ -531,7 +531,6 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
               ev === nextEvent ||
               (nextEvent.id && ev.id ? String(nextEvent.id) === String(ev.id) : (nextEvent.name === ev.name && nextEvent.date === ev.date))
             );
-            if (!isNext) return null;
             return (
               <div 
                 key={`upcoming-date-${ev.id || i}`}
