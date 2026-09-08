@@ -3969,7 +3969,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .month-node-label {
-  font-size: 0.68rem;
+  font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -5970,6 +5970,31 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   /* Hide text labels on mobile to avoid overlapping */
   .race-label-text {
     display: none !important;
+  }
+
+  /* Adjust font sizes for mobile view */
+  .club-goal__title {
+    font-size: 1.1rem !important;
+  }
+
+  .upcoming-race-badge {
+    font-size: 0.75rem !important;
+    padding: 2px 8px !important;
+    white-space: nowrap;
+  }
+
+  .upcoming-race-badge__label {
+    font-size: 0.65rem !important;
+  }
+
+  .indicator-pill--time {
+    font-size: 0.75rem !important;
+    white-space: nowrap;
+  }
+
+  .month-node-label {
+    font-size: 0.5rem !important;
+    padding: 2px 3px !important;
   }
 }
 

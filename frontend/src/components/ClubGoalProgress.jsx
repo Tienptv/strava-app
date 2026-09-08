@@ -382,7 +382,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
         <div className="club-goal__time-status" style={{ display: 'flex', alignItems: 'center' }}>
           <span className="indicator-pill indicator-pill--time" style={{
             background: 'rgba(0, 163, 166, 0.1)', color: 'var(--primary-navy)', border: '1px solid rgba(0, 163, 166, 0.3)',
-            padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px'
+            padding: '4px 10px', borderRadius: '20px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px'
           }} title={lang === 'en' ? 'Time elapsed in year' : 'Tiến độ thời gian trong năm'}>
             ⏳ {t('timeIndicator') || 'Time'}: <strong>{percentTime}%</strong> ({lang === 'en' ? `Day ${dayOfYear}/${totalDaysInYear}` : `Ngày ${dayOfYear}/${totalDaysInYear}`})
           </span>
@@ -531,6 +531,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
               ev === nextEvent ||
               (nextEvent.id && ev.id ? String(nextEvent.id) === String(ev.id) : (nextEvent.name === ev.name && nextEvent.date === ev.date))
             );
+            if (!isNext) return null;
             return (
               <div 
                 key={`upcoming-date-${ev.id || i}`}
