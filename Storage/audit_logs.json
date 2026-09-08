@@ -1,5 +1,54 @@
 [
   {
+    "id": "1788864321132",
+    "timestamp": "2026-09-08T10:45:21.132Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (226 mục), targets.json (38 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
+    "id": "1788864306566",
+    "timestamp": "2026-09-08T10:45:06.566Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (226 mục), targets.json (38 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788863798320",
+    "timestamp": "2026-09-08T10:36:38.320Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (215 mục), targets.json (38 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788863796820",
+    "timestamp": "2026-09-08T10:36:36.820Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (215 mục), targets.json (38 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
+    "id": "1788863786605",
+    "timestamp": "2026-09-08T10:36:26.605Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1788863759907",
+    "timestamp": "2026-09-08T10:35:59.907Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (229 mục), targets.json (38 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788863742979",
+    "timestamp": "2026-09-08T10:35:42.979Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
     "id": "1788843724966",
     "timestamp": "2026-09-08T05:02:04.966Z",
     "action": "Đẩy dữ liệu lên Cloud",

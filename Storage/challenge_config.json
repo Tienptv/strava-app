@@ -197,6 +197,21 @@
       "owner": false,
       "resource_state": 2,
       "_fromConfig": true
+    },
+    "Chi_N.": {
+      "matchKey": "Chi_N.",
+      "id": "53686864",
+      "athleteId": "53686864",
+      "firstname": "Chi",
+      "lastname": "Nguyen-Thanh",
+      "name": "Chi Nguyen-Thanh",
+      "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/53686864/19413008/3/medium.jpg",
+      "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/53686864/19413008/3/large.jpg",
+      "membership": "member",
+      "admin": true,
+      "owner": false,
+      "resource_state": 2,
+      "_fromConfig": true
     }
   },
   "monthlyParticipants": {
@@ -4960,6 +4975,21 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/129623990/30312489/1/large.jpg",
         "membership": "member",
         "admin": false,
+        "owner": false,
+        "resource_state": 2,
+        "_fromConfig": true
+      },
+      "Chi_N.": {
+        "matchKey": "Chi_N.",
+        "id": "53686864",
+        "athleteId": "53686864",
+        "firstname": "Chi",
+        "lastname": "Nguyen-Thanh",
+        "name": "Chi Nguyen-Thanh",
+        "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/53686864/19413008/3/medium.jpg",
+        "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/53686864/19413008/3/large.jpg",
+        "membership": "member",
+        "admin": true,
         "owner": false,
         "resource_state": 2,
         "_fromConfig": true

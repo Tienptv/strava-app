@@ -135,5 +135,9 @@
   "Hà Xuân_A._2026_9": {
     "target": 40,
     "penalty": true
+  },
+  "Chi_N._2026_9": {
+    "penalty": true,
+    "target": 20
   }
 }
