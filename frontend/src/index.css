@@ -4990,7 +4990,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .mobile-kpi-card {
   background: #ffffff;
   border-radius: 12px;
-  padding: 10px 8px;
+  padding: 8px 6px;
   border: 1px solid #e2e8f0;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
@@ -5000,14 +5000,14 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .mobile-kpi-label {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: #64748b;
   white-space: nowrap;
 }
 
 .mobile-kpi-value {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 900;
   color: var(--primary-navy, #002D54);
   margin-top: 2px;
@@ -5027,7 +5027,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   justify-content: space-between;
   align-items: center;
   background: #f1f5f9;
-  padding: 4px;
+  padding: 2px;
   border-radius: 10px;
 }
 
@@ -5039,9 +5039,9 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .mobile-toggle-btn {
   border: none;
   background: transparent;
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 8px;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
@@ -5480,29 +5480,38 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 .runner-card-progress-bar-wrap {
   width: 100%;
-  height: 5px;
+  height: 14px;
   background: #f1f5f9;
-  border-radius: 3px;
+  border-radius: 7px;
   overflow: hidden;
-  margin-top: 8px;
+  margin-top: 6px;
+  position: relative;
 }
 
 .runner-card-progress-bar {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 7px;
+  background: #F39200; /* Haskoning star color */
   transition: width 0.4s ease;
 }
 
-.runner-card-progress-bar.completed {
-  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+.runner-card-progress-text {
+  position: absolute;
+  top: 50%;
+  font-size: 0.65rem;
+  font-weight: 700;
+  pointer-events: none;
 }
 
-.runner-card-progress-bar.halfway {
-  background: linear-gradient(90deg, #00A3A6 0%, #0d9488 100%);
+.runner-card-progress-text.inside {
+  color: #ffffff;
+  transform: translate(-100%, -50%);
 }
 
-.runner-card-progress-bar.starting {
-  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+.runner-card-progress-text.outside {
+  color: #475569;
+  left: 6px;
+  transform: translate(0, -50%);
 }
 
 .runner-card-expand-indicator {

@@ -293,82 +293,82 @@ export default function Dashboard({
             <ClubGoalProgress totalDistance={combinedTotalDistance} apiFetch={apiFetch} isAdmin={isAdmin} />
           )}
           
-          {/* Mini-Widget: Quỹ Hoạt Động & Phát Triển CLB */}
-          <div className="card club-treasury-banner" style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '16px',
-            padding: '14px 20px',
-            borderRadius: '14px',
-            background: 'linear-gradient(135deg, rgba(0, 45, 84, 0.96) 0%, rgba(0, 75, 135, 0.94) 50%, rgba(0, 163, 166, 0.92) 100%)',
-            color: '#ffffff',
-            boxShadow: '0 4px 16px rgba(0, 45, 84, 0.15)',
-            marginBottom: '16px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: 'rgba(255, 255, 255, 0.18)',
-                backdropFilter: 'blur(4px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '22px'
-              }}>
-                💰
-              </div>
-              <div>
-                <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.6px', opacity: 0.85, fontWeight: 700 }}>
-                  {lang === 'en' ? 'Club Treasury & Activities Fund' : 'Quỹ Hoạt Động & Phát Triển CLB'}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginTop: '2px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '1.45rem', fontWeight: 900, color: '#fef08a' }}>
-                    {(treasurySummary?.currentClubFundBalance || 11097000).toLocaleString('vi-VN')} VNĐ
-                  </span>
-                  <span style={{ fontSize: '0.82rem', opacity: 0.9 }}>
-                    ({lang === 'en' ? 'All-Time Collected' : 'Tổng phạt đã thu'}: {(treasurySummary?.totalPenaltyFundCollected || 16900000).toLocaleString('vi-VN')} VNĐ)
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '0.78rem', background: 'rgba(255, 255, 255, 0.15)', padding: '5px 12px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.25)', fontWeight: 600 }}>
-                {lang === 'en' ? '🛡 100% Financial Transparency' : '🛡 Minh bạch tài chính 100%'}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  if (isAdmin && !isMobile) {
-                    navigate('/administer?tab=penalties', { state: { tab: 'penalties' } });
-                  } else {
-                    setShowTreasuryModal(true);
-                  }
-                }}
-                className="btn"
-                style={{
-                  background: '#ffffff',
-                  color: 'var(--primary-navy)',
-                  padding: '7px 16px',
-                  borderRadius: '10px',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}
-              >
-                {lang === 'en' ? 'View Treasury →' : 'Chi Tiết Quỹ →'}
-              </button>
-            </div>
-          </div>
-          
           {(!isMobile || mobileActiveNavTab === 'leaderboard') && (
             <div className="challenge-section-wrapper">
+              
+              {/* Mini-Widget: Quỹ Hoạt Động & Phát Triển CLB */}
+              <div className="card club-treasury-banner" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                padding: '12px 16px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, rgba(0, 45, 84, 0.96) 0%, rgba(0, 75, 135, 0.94) 50%, rgba(0, 163, 166, 0.92) 100%)',
+                color: '#ffffff',
+                boxShadow: '0 4px 16px rgba(0, 45, 84, 0.15)',
+                marginBottom: '16px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    background: 'rgba(255, 255, 255, 0.18)',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px'
+                  }}>
+                    💰
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.6px', opacity: 0.85, fontWeight: 700 }}>
+                      {lang === 'en' ? 'Club Treasury & Activities Fund' : 'Quỹ Hoạt Động & Phát Triển CLB'}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '2px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#fef08a' }}>
+                        {(treasurySummary?.currentClubFundBalance || 11097000).toLocaleString('vi-VN')} VNĐ
+                      </span>
+                      <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                        ({lang === 'en' ? 'All-Time Collected' : 'Tổng phạt đã thu'}: {(treasurySummary?.totalPenaltyFundCollected || 16900000).toLocaleString('vi-VN')} VNĐ)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.7rem', background: 'rgba(255, 255, 255, 0.15)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.25)', fontWeight: 600 }}>
+                    {lang === 'en' ? '🛡 100% Financial Transparency' : '🛡 Minh bạch tài chính 100%'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isAdmin && !isMobile) {
+                        navigate('/administer?tab=penalties', { state: { tab: 'penalties' } });
+                      } else {
+                        setShowTreasuryModal(true);
+                      }
+                    }}
+                    className="btn"
+                    style={{
+                      background: '#ffffff',
+                      color: 'var(--primary-navy)',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      border: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    {lang === 'en' ? 'View Treasury →' : 'Chi Tiết Quỹ →'}
+                  </button>
+                </div>
+              </div>
             {/* Nếu trên điện thoại và đang xem Card View thì render MobileLeaderboard */}
             {isMobile && mobileViewType === 'card' ? (
               loadingChallenge ? (

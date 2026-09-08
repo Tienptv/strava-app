@@ -405,13 +405,7 @@ export default function MobileLeaderboard({
 
                       <div className="runner-card-target-text">
                         {runner.target > 0 ? (
-                          <>
-                            <span>Mục tiêu: <strong>{runner.target} km</strong></span>
-                            <span className="dot-sep">•</span>
-                            <span className={runner.isCompleted ? 'text-success' : 'text-muted'}>
-                              {runner.progressPct}%
-                            </span>
-                          </>
+                          <span><strong>{runner.totalDistance.toFixed(1)} / {runner.target}</strong> km</span>
                         ) : (
                           <span className="text-muted">{lang === 'en' ? 'Free running' : 'Chạy tự do'}</span>
                         )}
@@ -422,8 +416,12 @@ export default function MobileLeaderboard({
                   {/* Right: Distance & Status */}
                   <div className="runner-card-right">
                     <div className="runner-dist-block">
-                      <span className="runner-km-val">{runner.totalDistance.toFixed(1)}</span>
-                      <span className="runner-km-unit">km</span>
+                      {runner.target > 0 ? null : (
+                        <>
+                          <span className="runner-km-val">{runner.totalDistance.toFixed(1)}</span>
+                          <span className="runner-km-unit">km</span>
+                        </>
+                      )}
                     </div>
 
                     {/* Penalty or Paid badge */}
@@ -454,9 +452,15 @@ export default function MobileLeaderboard({
                 {runner.target > 0 && (
                   <div className="runner-card-progress-bar-wrap">
                     <div 
-                      className={`runner-card-progress-bar ${runner.isCompleted ? 'completed' : runner.progressPct >= 50 ? 'halfway' : 'starting'}`}
+                      className="runner-card-progress-bar"
                       style={{ width: `${Math.min(runner.progressPct, 100)}%` }}
                     />
+                    <span 
+                      className={`runner-card-progress-text ${runner.progressPct > 12 ? 'inside' : 'outside'}`}
+                      style={runner.progressPct > 12 ? { left: `calc(${Math.min(runner.progressPct, 100)}% - 6px)` } : {}}
+                    >
+                      {runner.progressPct}%
+                    </span>
                   </div>
                 )}
 
