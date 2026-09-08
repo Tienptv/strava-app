@@ -1,5 +1,33 @@
 [
   {
+    "id": "1788890269574",
+    "timestamp": "2026-09-08T17:57:49.574Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (237 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788890042937",
+    "timestamp": "2026-09-08T17:54:02.937Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (238 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788890019266",
+    "timestamp": "2026-09-08T17:53:39.266Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (238 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788890018452",
+    "timestamp": "2026-09-08T17:53:38.452Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (238 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1788886817228",
     "timestamp": "2026-09-08T17:00:17.228Z",
     "action": "Cập nhật Cấu hình thử thách",
@@ -1370,12 +1398,5 @@
     "action": "Cấp quyền Admin",
     "user": "Super Admin (133066813)",
     "details": "Cấp quyền admin cho ID: Sang_N. (Sang N.)"
-  },
-  {
-    "id": "1787936405402",
-    "timestamp": "2026-08-28T17:00:05.402Z",
-    "action": "Thu hồi quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Thu hồi quyền admin của ID: Sang_N."
   }
 ]

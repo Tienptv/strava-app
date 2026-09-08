@@ -572,7 +572,10 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
               style={{ 
                 width: '192px', 
                 height: '192px', 
-                objectFit: 'contain'
+                objectFit: 'contain',
+                clipPath: 'inset(0 0 12px 0)',
+                border: 'none',
+                outline: 'none'
               }} 
             />
           </div>

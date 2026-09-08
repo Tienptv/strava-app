@@ -78,7 +78,10 @@ export default function TreasuryTransparencyModal({ isOpen, onClose, apiFetch, c
           </button>
           <button 
             className={`treasury-tab-btn ${activeTab === 'members' ? 'active' : ''}`}
-            onClick={() => setActiveTab('members')}
+            onClick={() => {}}
+            disabled
+            title={lang === 'en' ? 'Under development' : 'Đang phát triển'}
+            style={{ cursor: 'not-allowed', opacity: 0.6 }}
           >
             👥 {lang === 'en' ? 'Penalty Status' : 'Trạng Thái Đóng Phạt'} ({ledger.length})
           </button>
