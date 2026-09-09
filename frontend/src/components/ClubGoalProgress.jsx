@@ -427,12 +427,21 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
           {events.map((ev, i) => {
             const hasLogo = !!ev.logoUrl && ev.logoUrl.trim().length > 0;
             const alignClass = ev.percent > 78 ? 'tooltip-align-right' : (ev.percent < 22 ? 'tooltip-align-left' : 'tooltip-align-center');
+            
+            // CALCULATE Z-INDEX
+            let zIndex = 10;
+            if (ev.isPastEvent) {
+               zIndex = 5;
+            } else if (ev.daysDiff !== null && ev.daysDiff !== undefined) {
+               // closest has lowest daysDiff. So higher zIndex.
+               zIndex = 1000 - ev.daysDiff;
+            }
 
             return (
               <div 
                 key={ev.id || i} 
                 className={`timeline-race-milestone race-pos-${ev.pos} ${ev.isPastEvent ? 'race-passed' : 'race-upcoming'}`}
-                style={{ left: `${ev.percent}%` }}
+                style={{ left: `${ev.percent}%`, zIndex: zIndex }}
               >
                 <div className="race-badge-wrapper">
                   <div 
@@ -562,7 +571,8 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
           <div 
             className="timeline-runner-avatar"
             style={{ 
-              left: `calc(${vehiclePos}% - 96px)`
+              left: `${vehiclePos}%`,
+              transform: 'translateX(-50%)'
             }}
             title={lang === 'en' ? `Runner progress: ${activeRunnerPercent}%` : `Tiến độ Runner: ${activeRunnerPercent}%`}
           >
@@ -573,7 +583,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
                 width: '192px', 
                 height: '192px', 
                 objectFit: 'contain',
-                clipPath: 'inset(0 0 12px 0)',
+                clipPath: 'inset(0 0 32px 0)',
                 border: 'none',
                 outline: 'none'
               }} 

@@ -1,5 +1,33 @@
 [
   {
+    "id": "1788964750863",
+    "timestamp": "2026-09-09T14:39:10.863Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (242 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788964745824",
+    "timestamp": "2026-09-09T14:39:05.824Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (242 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
+    "id": "1788953275636",
+    "timestamp": "2026-09-09T11:27:55.636Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (242 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788953274868",
+    "timestamp": "2026-09-09T11:27:54.868Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (242 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1788920533901",
     "timestamp": "2026-09-09T02:22:13.901Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1370,33 +1398,5 @@
     "action": "Kéo dữ liệu Cloud",
     "user": "133066813",
     "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (185 mục), targets.json (25 mục tiêu/phạt), challenge_config.json, admins.json (0 sub-admins)"
-  },
-  {
-    "id": "1787939647986",
-    "timestamp": "2026-08-28T17:54:07.986Z",
-    "action": "Đồng bộ Thành viên",
-    "user": "133066813",
-    "details": "Đã cập nhật Tên/Avatar cho 45 thành viên"
-  },
-  {
-    "id": "1787939558462",
-    "timestamp": "2026-08-28T17:52:38.462Z",
-    "action": "Đồng bộ Thành viên",
-    "user": "133066813",
-    "details": "Đã cập nhật Tên/Avatar cho 45 thành viên"
-  },
-  {
-    "id": "1787939231062",
-    "timestamp": "2026-08-28T17:47:11.062Z",
-    "action": "Đồng bộ Thành viên",
-    "user": "133066813",
-    "details": "Đã cập nhật Tên/Avatar cho 45 thành viên"
-  },
-  {
-    "id": "1787939229460",
-    "timestamp": "2026-08-28T17:47:09.460Z",
-    "action": "Đồng bộ Thành viên",
-    "user": "133066813",
-    "details": "Đã cập nhật Tên/Avatar cho 45 thành viên"
   }
 ]

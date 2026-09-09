@@ -3019,66 +3019,66 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
               </div>
 
               {/* 2. KPI Summary Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '14px', alignItems: 'stretch' }}>
                 {/* KPI 1 */}
-                <div className="card" style={{ padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: 'rgba(0, 45, 84, 0.08)', color: 'var(--primary-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Users size={22} />
+                <div className="card" style={{ padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0', background: '#fff', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(0, 45, 84, 0.08)', color: 'var(--primary-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Users size={18} />
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{t('totalRunnersKpi')}</div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary-navy)' }}>{totalRunners} <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>{t('runnerUnit')}</span></div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t('totalRunnersKpi')}</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-navy)' }}>{totalRunners} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{t('runnerUnit')}</span></div>
                   </div>
                 </div>
 
                 {/* KPI 2 */}
-                <div className="card" style={{ padding: '16px', borderRadius: '12px', border: '1px solid #fed7aa', background: '#fffaf0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: '#ffedd5', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Scale size={22} />
+                <div className="card" style={{ padding: '12px', borderRadius: '12px', border: '1px solid #fed7aa', background: '#fffaf0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#ffedd5', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Scale size={18} />
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: '#9a3412', fontWeight: 600 }}>{t('penaltyCommittedKpi')}</div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#c2410c' }}>
-                      {committedCount} <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>({committedRate}%)</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.75rem', color: '#9a3412', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t('penaltyCommittedKpi')}</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#c2410c' }}>
+                      {committedCount} <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>({committedRate}%)</span>
                     </div>
                   </div>
                 </div>
 
                 {/* KPI 3 */}
-                <div className="card" style={{ padding: '16px', borderRadius: '12px', border: '1px solid #bbf7d0', background: '#f0fdf4', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CheckCircle2 size={22} />
+                <div className="card" style={{ padding: '12px', borderRadius: '12px', border: '1px solid #bbf7d0', background: '#f0fdf4', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CheckCircle2 size={18} />
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: '#166534', fontWeight: 600 }}>{t('goalReachedKpi')}</div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803d' }}>{safeCount} <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>{t('runnerUnit')}</span></div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t('goalReachedKpi')}</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#15803d' }}>{safeCount} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{t('runnerUnit')}</span></div>
                   </div>
                 </div>
 
                 {/* KPI 4 */}
-                <div className="card" style={{ padding: '16px', borderRadius: '12px', border: '1px solid #fecaca', background: '#fef2f2', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <AlertTriangle size={22} />
+                <div className="card" style={{ padding: '12px', borderRadius: '12px', border: '1px solid #fecaca', background: '#fef2f2', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <AlertTriangle size={18} />
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.8rem', color: '#991b1b', fontWeight: 600 }}>{t('owingPenaltyKpi')}</div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#b91c1c' }}>{owingCount} <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>{t('runnerUnit')}</span></div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.75rem', color: '#991b1b', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t('owingPenaltyKpi')}</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#b91c1c' }}>{owingCount} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{t('runnerUnit')}</span></div>
                   </div>
                 </div>
 
                 {/* KPI 5: Phạt tháng & Tình trạng nộp */}
-                <div className="card" style={{ padding: '16px 20px', borderRadius: '12px', border: '1.5px solid #f97316', background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '50px', height: '50px', borderRadius: '14px', background: '#ea580c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)' }}>
-                    <DollarSign size={26} />
+                <div className="card" style={{ padding: '12px', borderRadius: '12px', border: '1px solid #f97316', background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#ea580c', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.35)', flexShrink: 0 }}>
+                    <DollarSign size={18} />
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.78rem', color: '#9a3412', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div style={{ fontSize: '0.7rem', color: '#9a3412', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {t('monthDueKpi')}: {totalFundVnd.toLocaleString('vi-VN')} đ
                     </div>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#15803d', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#15803d', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {t('monthPaidKpi')}: {totalPaidFundVnd.toLocaleString('vi-VN')} đ
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: '#b91c1c', fontWeight: 700 }}>
+                    <div style={{ fontSize: '0.7rem', color: '#b91c1c', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {t('totalPenaltyOwedKpi')}: {totalUnpaidFundVnd.toLocaleString('vi-VN')} đ
                     </div>
                   </div>
