@@ -533,13 +533,14 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
             );
           })}
 
-          {/* Upcoming Race Date Badges (Hiển thị ngày & tháng ở vị trí dưới thanh ray cho các giải sắp diễn ra) */}
+          {/* Upcoming Race Date Badges (Hiển thị ngày & tháng ở vị trí dưới thanh ray cho giải sắp diễn ra gần nhất) */}
           {events.map((ev, i) => {
             if (ev.isPastEvent || !ev.date) return null;
             const isNext = nextEvent && (
               ev === nextEvent ||
               (nextEvent.id && ev.id ? String(nextEvent.id) === String(ev.id) : (nextEvent.name === ev.name && nextEvent.date === ev.date))
             );
+            if (!isNext) return null;
             return (
               <div 
                 key={`upcoming-date-${ev.id || i}`}

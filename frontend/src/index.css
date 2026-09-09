@@ -5960,6 +5960,14 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
    MOBILE RESPONSIVENESS OVERRIDES
    ========================================================================== */
 @media (max-width: 768px) {
+  /* Expand cards to edges */
+  .club-goal-card,
+  .challenge-section-wrapper {
+    margin-left: -16px;
+    margin-right: -16px;
+    border-radius: 0;
+  }
+
   /* Scale down the runner avatar and adjust position */
   .timeline-runner-avatar {
     width: 96px !important;
@@ -5983,8 +5991,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   .upcoming-race-badge {
     font-size: 0.65rem !important;
     padding: 4px 8px !important;
-    white-space: normal !important;
-    word-break: break-word;
+    white-space: nowrap !important;
     line-height: 1.2;
     text-align: center;
   }
@@ -6005,6 +6012,11 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   .month-node-label {
     font-size: 0.4rem !important;
     padding: 2px 3px !important;
+  }
+
+  /* Reduce Monthly Challenge title size */
+  .challenge-title-text {
+    font-size: 1.2rem !important;
   }
 }
 
