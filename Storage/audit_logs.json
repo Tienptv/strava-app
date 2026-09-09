@@ -1,5 +1,19 @@
 [
   {
+    "id": "1788920533901",
+    "timestamp": "2026-09-09T02:22:13.901Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (241 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1788920532657",
+    "timestamp": "2026-09-09T02:22:12.657Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (241 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1788890269574",
     "timestamp": "2026-09-08T17:57:49.574Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1384,19 +1398,5 @@
     "action": "Đồng bộ Thành viên",
     "user": "133066813",
     "details": "Đã cập nhật Tên/Avatar cho 45 thành viên"
-  },
-  {
-    "id": "1787936433740",
-    "timestamp": "2026-08-28T17:00:33.740Z",
-    "action": "Cấp quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Cấp quyền admin cho ID: pham_T. (pham T.)"
-  },
-  {
-    "id": "1787936408089",
-    "timestamp": "2026-08-28T17:00:08.089Z",
-    "action": "Cấp quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Cấp quyền admin cho ID: Sang_N. (Sang N.)"
   }
 ]
