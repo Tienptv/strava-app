@@ -1,5 +1,26 @@
 [
   {
+    "id": "1789032076832",
+    "timestamp": "2026-09-10T09:21:16.832Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789032066073",
+    "timestamp": "2026-09-10T09:21:06.073Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789032030879",
+    "timestamp": "2026-09-10T09:20:30.879Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
     "id": "1789008774847",
     "timestamp": "2026-09-10T02:52:54.847Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1377,26 +1398,5 @@
     "action": "Cấp quyền Admin",
     "user": "Super Admin (133066813)",
     "details": "Cấp quyền admin cho: pham_tien (ID: pham_tien, Key: pham_tien)"
-  },
-  {
-    "id": "1788448222381",
-    "timestamp": "2026-09-03T15:10:22.381Z",
-    "action": "Cấp quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Cấp quyền admin cho: Sang_Nguyen (ID: Sang_Nguyen, Key: Sang_Nguyen)"
-  },
-  {
-    "id": "1788447915470",
-    "timestamp": "2026-09-03T15:05:15.470Z",
-    "action": "Cấp quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Cấp quyền admin cho: Abba_Vũ (ID: Abba_Vũ, Key: Abba_Vũ)"
-  },
-  {
-    "id": "1788446709707",
-    "timestamp": "2026-09-03T14:45:09.707Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
   }
 ]

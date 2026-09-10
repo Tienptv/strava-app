@@ -3943,19 +3943,23 @@ app.post('/api/screenshot/full-table', async (req, res) => {
         view.style.width = '1900px';
       }
 
-      const wrapper = document.querySelector('.challenge-table-wrapper');
-      if (wrapper) {
-        wrapper.style.maxHeight = 'none';
-        wrapper.style.overflow = 'visible';
-      }
-
-      // Đặt lại position static cho các ô để hàng TOTAL không bị nhảy lên giữa hoặc đầu bảng do sticky bottom
-      const stickyElements = document.querySelectorAll('.totals-row, .totals-row td, .totals-row th, tfoot, thead, thead th, tfoot th, tfoot td');
-      stickyElements.forEach(el => {
-        el.style.setProperty('position', 'static', 'important');
-        el.style.setProperty('bottom', 'auto', 'important');
-        el.style.setProperty('top', 'auto', 'important');
-      });
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .challenge-table-wrapper {
+          max-height: none !important;
+          overflow: visible !important;
+        }
+        .totals-row, .totals-row td, .totals-row th, tfoot, thead, thead th, tfoot th, tfoot td {
+          position: static !important;
+          bottom: auto !important;
+          top: auto !important;
+        }
+        .challenge-view, .app-main {
+          height: auto !important;
+          min-height: auto !important;
+        }
+      `;
+      document.head.appendChild(style);
     }, month, Boolean(chartsCollapsed));
 
     await new Promise(r => setTimeout(r, 600));
