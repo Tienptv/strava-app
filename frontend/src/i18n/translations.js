@@ -5,7 +5,7 @@ const translations = {
     logout: 'Đăng xuất',
 
     // Login
-    appTitle: 'Strava Tracker',
+    appTitle: '200K Running Club',
     appSubtitle: 'Theo dõi dữ liệu thể thao cá nhân và nhóm từ Strava. Xem thống kê, biểu đồ và hoạt động chi tiết.',
     featureActivities: 'Xem tất cả hoạt động thể thao cá nhân',
     featureClubs: 'Theo dõi hoạt động của nhóm / câu lạc bộ',
@@ -221,7 +221,7 @@ const translations = {
     
     // Administer Page
     adminTitle: 'Bảng Quản Trị Hệ Thống',
-    adminSubtitle: 'Trung tâm điều hành và quản lý hệ thống thử thách Strava Tracker',
+    adminSubtitle: 'Trung tâm điều hành và quản lý hệ thống thử thách 200K Running Club',
     superAdminFull: '⭐ Super Admin (Toàn quyền)',
     subAdminBadge: '🛡️ Sub-Admin',
     tab1Title: '1. Cấu hình chung',
@@ -388,7 +388,7 @@ const translations = {
     logout: 'Logout',
 
     // Login
-    appTitle: 'Strava Tracker',
+    appTitle: '200K Running Club',
     appSubtitle: 'Track your personal and group sports data from Strava. View statistics, charts, and detailed activities.',
     featureActivities: 'View all personal sports activities',
     featureClubs: 'Track group / club activities',
@@ -624,7 +624,7 @@ const translations = {
 
     // Administer Page
     adminTitle: 'System Administration',
-    adminSubtitle: 'Management and control center for Strava Tracker challenge system',
+    adminSubtitle: 'Management and control center for 200K Running Club challenge system',
     superAdminFull: '⭐ Super Admin (Full Access)',
     subAdminBadge: '🛡️ Sub-Admin',
     tab1Title: '1. General Settings',

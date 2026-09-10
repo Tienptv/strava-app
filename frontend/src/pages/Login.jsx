@@ -89,7 +89,7 @@ export default function Login({ onLogin, onGuestAccess }) {
             onClick={() => onGuestAccess && onGuestAccess()}
           >
             <span style={{ fontSize: '1.25rem' }}>🏆</span>
-            <span>{lang === 'en' ? 'View Club Leaderboard (Public)' : 'Xem Bảng Xếp Hạng CLB (Khách)'}</span>
+            <span>{lang === 'en' ? 'View Club Leaderboard (Guest)' : 'Xem Bảng Xếp Hạng CLB (Khách)'}</span>
             <ChevronRight size={18} />
           </button>
 

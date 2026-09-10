@@ -17,7 +17,7 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
         onClick={() => navigate('/')}
       >
         <div className="navbar__brand-icon">🏃</div>
-        Strava Tracker
+        200K Running Club
       </div>
 
       <div className="navbar__nav">
