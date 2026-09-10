@@ -1199,7 +1199,7 @@ img {
   border: 1px solid rgba(0, 45, 84, 0.1);
   border-radius: var(--radius-lg);
   padding: 1rem 1.4rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 24px;
   box-shadow: 0 4px 16px -2px rgba(0, 45, 84, 0.06), 0 2px 6px -1px rgba(0, 45, 84, 0.03);
   transition: border-color var(--transition-base), box-shadow var(--transition-base), padding 0.2s ease;
 }
@@ -1950,9 +1950,9 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .challenge-tabs {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   box-sizing: border-box;
 }
 
@@ -1982,7 +1982,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .challenge-tabs .month-pill.tab--active {
-  background: rgba(0, 163, 166, 0.1);
+  background: rgba(0, 163, 166, 0.15);
   color: var(--accent);
   border-color: var(--accent);
   font-weight: 700;
@@ -2824,7 +2824,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   gap: 8px;
   background: var(--bg-card);
   padding: 6px 14px;
-  border-radius: var(--radius-lg);
+  border-radius: 50px;
   border: 1px solid rgba(0, 163, 166, 0.5);
   box-shadow: 0 4px 12px rgba(0, 163, 166, 0.15);
   animation: glow-pulse 3s infinite alternate;
@@ -2882,7 +2882,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 .club-goal-card {
   padding: 1rem 1.5rem 0.85rem 1.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 24px;
 }
 
 .club-goal-card .club-goal__header {

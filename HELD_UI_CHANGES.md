@@ -11,3 +11,8 @@ Dưới đây là danh sách những tính năng/thay đổi về giao diện đ
 - **Kế hoạch:** Tăng `min-width` của các cột ngày (từ 1-30) lên **34px** thay vì thả nổi auto.
 - **Mục đích:** Đảm bảo đủ không gian để số thập phân nằm trên 1 hàng, khi kết hợp với căn phải (right-align) thì các số sẽ không chạm vào viền.
 - **Trạng thái:** Tạm hoãn (Hold).
+
+## 3. Bố cục So le (Zig-zag) cho Timeline Sự kiện
+- **Kế hoạch:** Áp dụng bố cục so le (Zig-zag) cho đường băng Timeline sự kiện: một sự kiện text nằm trên trục, sự kiện tiếp theo text nằm dưới trục để có không gian thở. Giữ nguyên tên sự kiện thay vì ẩn đi.
+- **Mục đích:** Khắc phục tình trạng các tên sự kiện (VD: VnExpress Marathon...) bị cắt xén bằng dấu `...` và nằm đè lên nhau gây rối mắt.
+- **Trạng thái:** Tạm hoãn (Hold).

@@ -355,7 +355,7 @@ export default function Dashboard({
                 background: 'linear-gradient(135deg, rgba(0, 45, 84, 0.96) 0%, rgba(0, 75, 135, 0.94) 50%, rgba(0, 163, 166, 0.92) 100%)',
                 color: '#ffffff',
                 boxShadow: '0 4px 16px rgba(0, 45, 84, 0.15)',
-                marginBottom: '16px'
+                marginBottom: '24px'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
@@ -379,7 +379,7 @@ export default function Dashboard({
                       <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#fef08a' }}>
                         {(treasurySummary?.currentClubFundBalance || 11097000).toLocaleString('vi-VN')} VNĐ
                       </span>
-                      <span style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                      <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.85)' }}>
                         ({lang === 'en' ? 'All-Time Collected' : 'Tổng phạt đã thu'}: {(treasurySummary?.totalPenaltyFundCollected || 16900000).toLocaleString('vi-VN')} VNĐ)
                       </span>
                     </div>
