@@ -62,6 +62,17 @@
       "note": "5km / 10km / 21km"
     },
     {
+      "id": "race_1789035253980",
+      "name": "Gemadept Run HCMC 2026",
+      "date": "2026-10-25",
+      "logoUrl": "https://pace8.vn/uploads/2026/05/1-11.-logo-gia-i-500x500.jpg",
+      "registrationUrl": "https://pace8.vn/su-kien/gemadept-run-hcmc-2026",
+      "icon": "🔥",
+      "type": "race",
+      "location": "TP HCM",
+      "note": "5km / 10km / HM"
+    },
+    {
       "id": "race_1788367954480",
       "name": "Salonpas Run 2026",
       "date": "2026-11-08",
