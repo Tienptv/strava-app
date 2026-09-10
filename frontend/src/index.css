@@ -2035,10 +2035,10 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   max-width: none !important;
   height: 28px !important;
   max-height: 28px !important;
-  padding: 0 4px !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
   font-size: 10.5px !important;
-  text-align: right !important;
+  text-align: center !important;
   vertical-align: middle !important;
   line-height: 28px !important;
 }
