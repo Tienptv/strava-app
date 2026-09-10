@@ -1380,15 +1380,21 @@ app.post('/api/admin/git-push', async (req, res) => {
       }
     }
 
+    const execOptions = { 
+      cwd: gitRoot,
+      timeout: 30000,
+      env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } 
+    };
+
     // 1. Tự động kiểm tra và commit các file trong Storage nếu có thay đổi mới
     let commitMessage = '';
     try {
-      await execAsync('git add Storage/', { cwd: gitRoot });
-      const statusRes = await execAsync('git status --porcelain Storage/', { cwd: gitRoot });
+      await execAsync('git add Storage/', execOptions);
+      const statusRes = await execAsync('git status --porcelain Storage/', execOptions);
       if (statusRes.stdout && statusRes.stdout.trim()) {
         const now = new Date();
         const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-        await execAsync(`git commit -m "chore: Sync and backup Strava Storage data [${timeStr}]"`, { cwd: gitRoot });
+        await execAsync(`git commit -m "chore: Sync and backup Strava Storage data [${timeStr}]"`, execOptions);
         commitMessage = `Đã tự động commit các tệp thay đổi trong Storage/ (${timeStr})`;
       }
     } catch (cErr) {
@@ -1396,7 +1402,7 @@ app.post('/api/admin/git-push', async (req, res) => {
     }
 
     // 2. Thực thi lệnh git push
-    const pushRes = await execAsync('git push origin main', { cwd: gitRoot });
+    const pushRes = await execAsync('git push origin main', execOptions);
     const output = ((pushRes.stdout || '') + (pushRes.stderr || '')).trim();
 
     addAuditLog('Git Push', currentAthleteId || 'Super Admin', `Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)`);

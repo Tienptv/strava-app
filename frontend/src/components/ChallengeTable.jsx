@@ -42,6 +42,11 @@ function getDayHeaderStarColor(day, totalDays) {
   }
 }
 
+function isWeekendDay(year, month, day) {
+  const d = new Date(year, month - 1, day).getDay();
+  return d === 0 || d === 6;
+}
+
 export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, lockTargetsAfterDate = 0, nameMapping = {} }) {
   const { lang, t } = useLang();
   
@@ -336,7 +341,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               {daysArray.map(day => (
                 <th 
                   key={day} 
-                  className="day-col" 
+                  className={`day-col ${isWeekendDay(year, month, day) ? 'weekend-col' : ''}`} 
                   style={{ background: getDayHeaderStarColor(day, daysArray.length) }}
                 >
                   {day}
@@ -432,7 +437,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     return (
                       <td 
                         key={day} 
-                        className={`day-cell ${hasRun ? 'has-run' : ''}`}
+                        className={`day-cell ${hasRun ? 'has-run' : ''} ${isWeekendDay(year, month, day) ? 'weekend-col' : ''}`}
                         title={hasRun ? `${displayDist} km` : ''}
                         style={{ backgroundColor: bgColor }}
                       >
@@ -549,7 +554,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               {daysArray.map(day => {
                 const dayTotal = challengeData.reduce((sum, row) => sum + row.dailyDistances[day], 0);
                 return (
-                  <td key={day} className="day-cell">
+                  <td key={day} className={`day-cell ${isWeekendDay(year, month, day) ? 'weekend-col' : ''}`}>
                     {dayTotal > 0 ? (Math.round(dayTotal * 10) / 10).toFixed(1) : ''}
                   </td>
                 );
