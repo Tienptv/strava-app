@@ -573,7 +573,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
             className="timeline-runner-avatar"
             style={{ 
               left: `${vehiclePos}%`,
-              transform: 'translateX(-80%)'
+              transform: 'translateX(-58%)'
             }}
             title={lang === 'en' ? `Runner progress: ${activeRunnerPercent}%` : `Tiến độ Runner: ${activeRunnerPercent}%`}
           >

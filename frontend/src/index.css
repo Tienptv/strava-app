@@ -4410,7 +4410,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateX(-75%) !important;
+  transform: translateX(-58%) !important;
   transition: left 1.5s ease-in-out;
   z-index: 10;
   pointer-events: none;
