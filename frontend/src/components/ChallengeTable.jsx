@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { normalize } from '../utils/challengeStats';
-import { Save, CheckCircle2, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Save, CheckCircle2, ShieldAlert, ShieldCheck, ChevronDown } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 import { getAthleteAvatar } from '../utils/avatar';
 
@@ -47,8 +47,31 @@ function isWeekendDay(year, month, day) {
   return d === 0 || d === 6;
 }
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, lockTargetsAfterDate = 0, nameMapping = {} }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, lockTargetsAfterDate = 0, nameMapping = {}, onMonthChange, onYearChange }) {
   const { lang, t } = useLang();
+  
+  const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsMonthDropdownOpen(false);
+      }
+    }
+    if (isMonthDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMonthDropdownOpen]);
+
+  const handleMonthSelect = (m) => {
+    if (onMonthChange) onMonthChange(m);
+    if (onYearChange) onYearChange(new Date().getFullYear());
+    setIsMonthDropdownOpen(false);
+  };
   
   const [userData, setUserData] = useState({});
   const [editingTargets, setEditingTargets] = useState({});
@@ -290,9 +313,37 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
           <h2 className="challenge-title-main">
             <span className="challenge-title-text">{t('challengeMonth')}</span>
             <span className="challenge-title-dot">•</span>
-            <span className="challenge-title-date">
-              {lang === 'en' ? `${MONTH_NAMES_EN[month - 1]} ${year}` : `Tháng ${month}, ${year}`}
-            </span>
+            <div className="month-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
+              <button 
+                className="challenge-title-date month-dropdown-trigger"
+                onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
+              >
+                {lang === 'en' ? `${MONTH_NAMES_EN[month - 1]} ${year}` : `Tháng ${month}, ${year}`}
+                <ChevronDown size={18} strokeWidth={2.5} />
+              </button>
+              
+              {isMonthDropdownOpen && (
+                <div className="month-dropdown-menu">
+                  <div className="month-dropdown-grid">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => {
+                      const monthLabel = lang === 'en' 
+                        ? `${MONTH_NAMES_EN[m - 1].slice(0,3)}`
+                        : `T${m}`;
+                      const isActive = month === m;
+                      return (
+                        <button
+                          key={m}
+                          className={`month-dropdown-item ${isActive ? 'is-active' : ''}`}
+                          onClick={() => handleMonthSelect(m)}
+                        >
+                          {monthLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </h2>
         </div>
         
@@ -347,14 +398,14 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                   {day}
                 </th>
               ))}
-              <th className="sum-col sticky-right col-target">{t('target')}</th>
-              <th className="sum-col sticky-right col-penalty">{t('penalty')}</th>
-              <th className="sum-col sticky-right col-due">{t('penaltyDue')}</th>
-              <th className="sum-col sticky-right col-progress">{t('progress')}</th>
-              <th className="sum-col sticky-right col-km">{t('sumKm')}</th>
-              <th className="sum-col sticky-right col-days">Σ Days</th>
-              <th className="sum-col sticky-right col-time">Σ Time</th>
-              <th className="sum-col sticky-right col-all-time">Σ All-km</th>
+              <th className="sum-col sticky-right col-target" style={{ textAlign: 'center' }}>{t('target')}</th>
+              <th className="sum-col sticky-right col-penalty" style={{ textAlign: 'center' }}>{t('penalty')}</th>
+              <th className="sum-col sticky-right col-due" style={{ textAlign: 'center' }}>{t('penaltyDue')}</th>
+              <th className="sum-col sticky-right col-progress" style={{ textAlign: 'center' }}>{t('progress')}</th>
+              <th className="sum-col sticky-right col-km" style={{ textAlign: 'center' }}>{t('sumKm')}</th>
+              <th className="sum-col sticky-right col-days" style={{ textAlign: 'center' }}>Σ Days</th>
+              <th className="sum-col sticky-right col-time" style={{ textAlign: 'center' }}>Σ Time</th>
+              <th className="sum-col sticky-right col-all-time" style={{ textAlign: 'center' }}>Σ All-km</th>
             </tr>
           </thead>
           <tbody>

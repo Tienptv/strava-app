@@ -6398,3 +6398,89 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================
+   MONTH DROPDOWN MENU
+   ========================================== */
+.month-dropdown-container {
+  display: inline-block;
+  position: relative;
+}
+
+.month-dropdown-trigger {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.month-dropdown-trigger:hover {
+  background: rgba(0, 163, 166, 0.08);
+  color: #00A3A6;
+}
+
+.month-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  z-index: 50;
+  min-width: 280px;
+  animation: dropdownFadeIn 0.2s ease-out forwards;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.month-dropdown-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.month-dropdown-item {
+  background: var(--bg-glass, #f8fafc);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.month-dropdown-item:hover {
+  background: rgba(0, 163, 166, 0.08);
+  color: #00A3A6;
+  border-color: rgba(0, 163, 166, 0.2);
+}
+
+.month-dropdown-item.is-active {
+  background: #00A3A6;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 163, 166, 0.3);
+}
