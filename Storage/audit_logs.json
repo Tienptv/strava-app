@@ -1,5 +1,33 @@
 [
   {
+    "id": "1789072195687",
+    "timestamp": "2026-09-10T20:29:55.687Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (264 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789072194514",
+    "timestamp": "2026-09-10T20:29:54.514Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (264 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
+    "id": "1789072154997",
+    "timestamp": "2026-09-10T20:29:14.997Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (266 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789072153861",
+    "timestamp": "2026-09-10T20:29:13.861Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (266 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1789071186564",
     "timestamp": "2026-09-10T20:13:06.564Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1370,33 +1398,5 @@
     "action": "Cập nhật trạng thái nộp phạt",
     "user": "Admin Test",
     "details": "Sang Nguyen - Tháng 2026-09: Đã nộp (Chuyển khoản Techcombank 200k)"
-  },
-  {
-    "id": "1788581106560",
-    "timestamp": "2026-09-05T04:05:06.560Z",
-    "action": "Cập nhật trạng thái nộp phạt",
-    "user": "System Reset",
-    "details": "Sang Nguyen - Tháng 2026-09: Chưa nộp"
-  },
-  {
-    "id": "1788581101603",
-    "timestamp": "2026-09-05T04:05:01.603Z",
-    "action": "Cập nhật trạng thái nộp phạt",
-    "user": "Super Admin",
-    "details": "Sang Nguyen - Tháng 2026-09: Đã nộp (Nộp phạt chuyển khoản test)"
-  },
-  {
-    "id": "1788546428964",
-    "timestamp": "2026-09-04T18:27:08.964Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788535048625",
-    "timestamp": "2026-09-04T15:17:28.625Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (187 mục), targets.json (29 mục), challenge_config.json, admins.json (1 sub-admins)"
   }
 ]
