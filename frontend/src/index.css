@@ -2035,10 +2035,10 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   max-width: none !important;
   height: 28px !important;
   max-height: 28px !important;
-  padding: 0 !important;
+  padding: 0 4px !important;
   box-sizing: border-box !important;
   font-size: 10.5px !important;
-  text-align: center !important;
+  text-align: right !important;
   vertical-align: middle !important;
   line-height: 28px !important;
 }
@@ -2059,9 +2059,10 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   font-size: 10px;
   white-space: nowrap;
   padding-left: 2px;
-  padding-right: 2px;
+  padding-right: 6px;
   height: 28px !important;
   vertical-align: middle !important;
+  text-align: right !important;
 }
 
 .challenge-table th.col-target,
@@ -2109,6 +2110,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 .challenge-table tfoot tr.totals-row td {
   padding: 0 4px !important;
+  border-bottom: none !important;
 }
 
 /* Mặc định cho tất cả runner (nhạt nhất) */
@@ -2138,7 +2140,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .runner-info {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   padding-left: 8px;
   padding-right: 4px;
   height: 100%;
@@ -2359,8 +2361,22 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 /* ==========================================
-   RESPONSIVE
+   RESPONSIVE DESIGN
    ========================================== */
+.challenge-title-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.challenge-title-dot {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  transform: translateY(-1px); /* micro-adjustment for optical alignment */
+}
+
 @media (max-width: 768px) {
   .app-layout {
     flex-direction: column;
@@ -2807,11 +2823,11 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   align-items: center;
   gap: 8px;
   background: var(--bg-card);
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--accent);
-  box-shadow: 0 0 15px var(--accent-glow);
-  animation: glow-pulse 2s infinite alternate;
+  border: 1px solid rgba(0, 163, 166, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 163, 166, 0.15);
+  animation: glow-pulse 3s infinite alternate;
 }
 
 @keyframes glow-pulse {
