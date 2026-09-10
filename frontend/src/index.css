@@ -2037,7 +2037,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   max-height: 28px !important;
   padding: 0 !important;
   box-sizing: border-box !important;
-  font-size: 8.5px !important;
+  font-size: 10.5px !important;
   text-align: center !important;
   vertical-align: middle !important;
   line-height: 28px !important;
@@ -2062,6 +2062,16 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   padding-right: 2px;
   height: 28px !important;
   vertical-align: middle !important;
+}
+
+.challenge-table th.col-target,
+.challenge-table td.col-target,
+.challenge-table th.col-penalty,
+.challenge-table td.col-penalty {
+  width: 50px !important;
+  min-width: 50px !important;
+  max-width: 50px !important;
+  box-sizing: border-box !important;
 }
 
 .sticky-col.first-col {
@@ -2624,7 +2634,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .penalty-due-badge.is-free {
-  color: #059669;
+  color: #065f46;
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
@@ -2729,7 +2739,64 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .table-progress-label.completed-label {
-  color: #065f46;
+  color: #ffffff;
+}
+
+.table-progress-label.text-white {
+  color: #ffffff;
+}
+
+/* Custom Switch for Checkboxes */
+.custom-switch {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+.custom-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.custom-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 16px;
+}
+
+.custom-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.custom-switch input:checked + .custom-switch-slider {
+  background-color: var(--accent);
+}
+
+.custom-switch input:checked + .custom-switch-slider:before {
+  transform: translateX(12px);
+}
+
+.custom-switch.disabled .custom-switch-slider {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* ==========================================

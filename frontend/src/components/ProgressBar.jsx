@@ -1,7 +1,8 @@
 import React from 'react';
 
 export default function ProgressBar({ current, target, isCompleted, percent }) {
-  const displayPercent = Math.max(percent, 2); // Minimum 2% to show a sliver of color
+  const displayPercent = percent === 0 ? 0 : Math.max(percent, 2);
+  const isHighPercent = percent > 50;
 
   return (
     <div 
@@ -14,7 +15,7 @@ export default function ProgressBar({ current, target, isCompleted, percent }) {
           style={{ width: `${displayPercent}%` }}
         />
       </div>
-      <span className={`table-progress-label ${isCompleted ? 'completed-label' : ''}`}>
+      <span className={`table-progress-label ${isCompleted ? 'completed-label' : ''} ${isHighPercent ? 'text-white' : ''}`}>
         {percent}% {isCompleted ? '🎯' : ''}
       </span>
     </div>

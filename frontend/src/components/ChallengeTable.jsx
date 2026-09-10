@@ -454,8 +454,8 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                         : (userData[userKey]?.target !== undefined 
                            ? userData[userKey]?.target 
                            : userData[row.matchKey]?.target);
-                      const displayTarget = rawTarget !== undefined ? rawTarget : '';
-                      const isZeroVal = displayTarget === 0 || displayTarget === '0';
+                      const displayTarget = rawTarget !== undefined && rawTarget !== 0 && rawTarget !== '0' ? rawTarget : '';
+                      const isZeroVal = rawTarget === 0 || rawTarget === '0' || rawTarget === undefined || rawTarget === '';
 
                       return (
                         <input 
@@ -473,15 +473,20 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     })()}
                   </td>
                   <td className="sum-cell sticky-right col-penalty">
-                    <input 
-                      type="checkbox" 
-                      checked={hasPenalty}
-                      onChange={(e) => handlePenaltyChange(row.matchKey, e.target.checked)}
-                      disabled={!canEdit}
+                    <label 
+                      className={`custom-switch ${!canEdit ? 'disabled' : ''}`}
                       title={!canEdit ? (isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('noEditPermission')) : t('checkPenaltyCommitment')}
-                      style={{ cursor: canEdit ? 'pointer' : 'default', opacity: canEdit ? 1 : 0.8 }} 
-                      className={isMe ? 'penalty-checkbox--me' : ''}
-                    />
+                      style={{ cursor: canEdit ? 'pointer' : 'default' }}
+                    >
+                      <input 
+                        type="checkbox" 
+                        checked={hasPenalty}
+                        onChange={(e) => handlePenaltyChange(row.matchKey, e.target.checked)}
+                        disabled={!canEdit}
+                        className={isMe ? 'penalty-checkbox--me' : ''}
+                      />
+                      <span className="custom-switch-slider"></span>
+                    </label>
                   </td>
                   <td className="sum-cell sticky-right col-due" style={{ textAlign: 'center' }}>
                     {penaltyAmount !== null ? (
