@@ -85,12 +85,6 @@ export default function ActivityCard({ activity, showAthlete = false }) {
         </div>
       )}
 
-      {activity.map_url && (
-        <div className="activity-card__map-container">
-          <img src={activity.map_url} alt="Activity Map" className="activity-map-img" loading="lazy" />
-        </div>
-      )}
-
       <div className="activity-card__metrics">
         <div className="activity-card__metric">
           <div className="activity-card__metric-value">

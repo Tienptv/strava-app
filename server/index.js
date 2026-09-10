@@ -311,7 +311,6 @@ function parseStorageCSV(content) {
         distance: dist,
         moving_time: movingTimeSec,
         start_date_local: localIsoStr,
-        map_url: row['Map URL'] || '',
         athlete: {
           id: athleteId,
           firstname: firstname,
@@ -349,11 +348,6 @@ function isBetterRecord(a, b) {
   const aLastname = a.athlete?.lastname || '';
   const bLastname = b.athlete?.lastname || '';
   if (aLastname.length > 2 && bLastname.length <= 2) return true;
-  
-  // Ưu tiên bản có map_url
-  if (a.map_url && !b.map_url) return true;
-  // Hoặc ghép map_url vào bản cũ (mutating b) để không mất map
-  if (a.map_url && b && !b.map_url) b.map_url = a.map_url;
   
   return false;
 }
@@ -3158,8 +3152,8 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
     }).slice(0, limit);
     
     // 3. Format as CSV
-    // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type,Map URL
-    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type,Map URL\n";
+    // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
+    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
     runActivities.forEach(act => {
       const name = `"${(act.athleteName || 'Unknown Athlete').replace(/"/g, '""')}"`;
       const id = act.id || '';
@@ -3186,9 +3180,7 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
       else if (lowerType.includes('virtual')) type = 'VirtualRun';
       else if (lowerType.includes('run')) type = 'Run';
       
-      const mapUrl = `"${(act.mapUrl || '').replace(/"/g, '""')}"`;
-
-      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type},${mapUrl}\n`;
+      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
     });
     
     // 4. Save to Storage
