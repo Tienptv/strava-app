@@ -497,7 +497,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     );
                   })}
 
-                  <td className="sum-cell sticky-right col-target">
+                  <td className="sum-cell sticky-right col-target" style={{ textAlign: 'center' }}>
                     {(() => {
                       const userKey = `${row.matchKey}_${year}_${month}`;
                       const rawTarget = editingTargets[userKey] !== undefined
@@ -523,7 +523,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                       );
                     })()}
                   </td>
-                  <td className="sum-cell sticky-right col-penalty">
+                  <td className="sum-cell sticky-right col-penalty" style={{ textAlign: 'center' }}>
                     <label 
                       className={`custom-switch ${!canEdit ? 'disabled' : ''}`}
                       title={!canEdit ? (isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('noEditPermission')) : t('checkPenaltyCommitment')}
@@ -578,7 +578,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                       <span className="text-muted" style={{ opacity: 0.4 }}>-</span>
                     )}
                   </td>
-                  <td className="sum-cell sticky-right col-progress">
+                  <td className="sum-cell sticky-right col-progress" style={{ textAlign: 'center' }}>
                     {showTrackBar ? (
                       <ProgressBar 
                         current={row.totalDistance}
@@ -590,10 +590,10 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                       <span className="text-muted" style={{ opacity: 0.4 }}>-</span>
                     )}
                   </td>
-                  <td className="sum-cell sticky-right col-km highlight-total">{row.totalDistance.toFixed(1)}</td>
-                  <td className="sum-cell sticky-right col-days">{row.totalDays}</td>
-                  <td className="sum-cell sticky-right col-time">{formatTime(row.totalMovingTime)}</td>
-                  <td className="sum-cell sticky-right col-all-time">
+                  <td className="sum-cell sticky-right col-km highlight-total" style={{ textAlign: 'center' }}>{row.totalDistance.toFixed(1)}</td>
+                  <td className="sum-cell sticky-right col-days" style={{ textAlign: 'center' }}>{row.totalDays}</td>
+                  <td className="sum-cell sticky-right col-time" style={{ textAlign: 'center' }}>{formatTime(row.totalMovingTime)}</td>
+                  <td className="sum-cell sticky-right col-all-time" style={{ textAlign: 'center' }}>
                     {row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0 
                       ? row.allTimeDistance.toFixed(1) 
                       : (row.allTimeDistance === 0 ? '0.0' : '-')}
@@ -615,8 +615,8 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                   </td>
                 );
               })}
-              <td className="sum-cell sticky-right col-target">-</td>
-              <td className="sum-cell sticky-right col-penalty">-</td>
+              <td className="sum-cell sticky-right col-target" style={{ textAlign: 'center' }}>-</td>
+              <td className="sum-cell sticky-right col-penalty" style={{ textAlign: 'center' }}>-</td>
               {(() => {
                 let totalPenaltyDue = 0;
                 let hasAnyPenaltyRunner = false;
@@ -634,24 +634,24 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                   }
                 });
                 return (
-                  <td className="sum-cell sticky-right col-due">
+                  <td className="sum-cell sticky-right col-due" style={{ textAlign: 'center' }}>
                     <strong>
                       {hasAnyPenaltyRunner ? `${totalPenaltyDue}k` : '-'}
                     </strong>
                   </td>
                 );
               })()}
-              <td className="sum-cell sticky-right col-progress">-</td>
-              <td className="sum-cell sticky-right col-km">
+              <td className="sum-cell sticky-right col-progress" style={{ textAlign: 'center' }}>-</td>
+              <td className="sum-cell sticky-right col-km" style={{ textAlign: 'center' }}>
                 <strong>
                   {challengeData.reduce((sum, row) => sum + row.totalDistance, 0).toFixed(1)}
                 </strong>
               </td>
-              <td className="sum-cell sticky-right col-days">
+              <td className="sum-cell sticky-right col-days" style={{ textAlign: 'center' }}>
                 {challengeData.reduce((sum, row) => sum + row.totalDays, 0)}
               </td>
-              <td className="sum-cell sticky-right col-time">-</td>
-              <td className="sum-cell sticky-right col-all-time">
+              <td className="sum-cell sticky-right col-time" style={{ textAlign: 'center' }}>-</td>
+              <td className="sum-cell sticky-right col-all-time" style={{ textAlign: 'center' }}>
                 <strong>
                   {challengeData.some(row => row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0) 
                     ? challengeData.reduce((sum, row) => sum + (row.allTimeDistance || 0), 0).toFixed(1)

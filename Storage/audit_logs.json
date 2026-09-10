@@ -1,5 +1,26 @@
 [
   {
+    "id": "1789065866922",
+    "timestamp": "2026-09-10T18:44:26.922Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (245 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789065843630",
+    "timestamp": "2026-09-10T18:44:03.630Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (246 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789065842933",
+    "timestamp": "2026-09-10T18:44:02.933Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (246 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1789063716638",
     "timestamp": "2026-09-10T18:08:36.638Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1377,26 +1398,5 @@
     "action": "Git Push",
     "user": "133066813",
     "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788453239640",
-    "timestamp": "2026-09-03T16:33:59.640Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (184 mục), targets.json (26 mục), challenge_config.json"
-  },
-  {
-    "id": "1788453225296",
-    "timestamp": "2026-09-03T16:33:45.296Z",
-    "action": "Cấp quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Cấp quyền admin cho: pham tien (ID: 120540594, Key: pham_T.)"
-  },
-  {
-    "id": "1788453216249",
-    "timestamp": "2026-09-03T16:33:36.249Z",
-    "action": "Thu hồi quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Thu hồi quyền admin của: pham tien (ID: 120540594)"
   }
 ]
