@@ -1,5 +1,12 @@
 [
   {
+    "id": "1789063716638",
+    "timestamp": "2026-09-10T18:08:36.638Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (248 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
     "id": "1789035376838",
     "timestamp": "2026-09-10T10:16:16.838Z",
     "action": "Kéo dữ liệu Cloud",
@@ -1391,12 +1398,5 @@
     "action": "Thu hồi quyền Admin",
     "user": "Super Admin (133066813)",
     "details": "Thu hồi quyền admin của: pham tien (ID: 120540594)"
-  },
-  {
-    "id": "1788452186325",
-    "timestamp": "2026-09-03T16:16:26.325Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (184 mục), targets.json (26 mục tiêu/phạt), challenge_config.json, admins.json (2 sub-admins)"
   }
 ]

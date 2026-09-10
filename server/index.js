@@ -1577,12 +1577,25 @@ app.get('/api/athlete/stats', getToken, async (req, res) => {
 app.get('/api/activities', getToken, async (req, res) => {
   try {
     const { page = 1, per_page = 30, after, before } = req.query;
-    const activities = await strava.getActivities(req.accessToken, {
+    let activities = await strava.getActivities(req.accessToken, {
       page: parseInt(page),
       per_page: parseInt(per_page),
       after: after ? parseInt(after) : undefined,
       before: before ? parseInt(before) : undefined,
     });
+
+    if (Array.isArray(activities)) {
+      activities = activities.filter(act => {
+        const isPrivate = String(act.private || 'false').toLowerCase() === 'true';
+        const hideFromHome = String(act.hide_from_home || 'false').toLowerCase() === 'true';
+        const visibility = act.visibility;
+        if (isPrivate || hideFromHome || (visibility && String(visibility).toLowerCase() !== 'everyone')) {
+          return false;
+        }
+        return true;
+      });
+    }
+
     res.json(activities);
 
     // Kích hoạt đồng bộ ngầm vào bảng challenge
