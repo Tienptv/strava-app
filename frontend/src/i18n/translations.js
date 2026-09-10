@@ -17,11 +17,11 @@ const translations = {
     loginNote: 'Ứng dụng sẽ yêu cầu quyền đọc dữ liệu hoạt động từ Strava.',
 
     // Dashboard
-    greeting: 'Xin chào, runner',
-    greetingMorning: 'Chào buổi sáng, runner',
-    greetingNoon: 'Chào buổi trưa, runner',
-    greetingAfternoon: 'Chào buổi chiều, runner',
-    greetingEvening: 'Chào buổi tối, runner',
+    greeting: 'Sẵn sàng chinh phục mục tiêu cùng CLB,',
+    greetingMorning: 'Chào buổi sáng! Lên giày và đón bình minh nào,',
+    greetingNoon: 'Giờ nghỉ trưa là thời điểm vàng để tích lũy km,',
+    greetingAfternoon: 'Nắng chiều đã tắt, xỏ giày ra đường chạy thôi,',
+    greetingEvening: 'Tận hưởng những bước chạy thư giãn cuối ngày nhé,',
     totalDistance: 'Tổng quãng đường',
     allActivities: 'Tất cả hoạt động',
     totalTime: 'Tổng thời gian',
@@ -400,11 +400,11 @@ const translations = {
     loginNote: 'The app will request read access to your Strava activity data.',
 
     // Dashboard
-    greeting: 'Hello, runner',
-    greetingMorning: 'Good morning, runner',
-    greetingNoon: 'Good noon, runner',
-    greetingAfternoon: 'Good afternoon, runner',
-    greetingEvening: 'Good evening, runner',
+    greeting: 'Ready to crush some goals,',
+    greetingMorning: 'Morning! Time to lace up and chase the sunrise,',
+    greetingNoon: 'Lunch break? Perfect time to log some miles,',
+    greetingAfternoon: 'Afternoon vibes! Get out there and run,',
+    greetingEvening: 'Wind down your day with a relaxing run,',
     totalDistance: 'Total Distance',
     allActivities: 'All activities',
     totalTime: 'Total Time',

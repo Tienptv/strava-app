@@ -518,6 +518,11 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
         return;
       }
       
+      let mapUrl = '';
+      if (act.mapAndPhotos && act.mapAndPhotos.activityMap && act.mapAndPhotos.activityMap.url) {
+        mapUrl = act.mapAndPhotos.activityMap.url;
+      }
+
       if (activityId) {
         allActivities.set(activityId, {
           id: activityId,
@@ -527,7 +532,8 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
           distance: distance,
           time: time,
           elevation: elev,
-          type: activityType
+          type: activityType,
+          mapUrl: mapUrl
         });
       }
     });

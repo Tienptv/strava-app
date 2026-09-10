@@ -16,7 +16,9 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
         style={{ cursor: 'pointer' }}
         onClick={() => navigate('/')}
       >
-        <div className="navbar__brand-icon">🏃</div>
+        <div className="navbar__brand-icon" style={{ background: 'transparent' }}>
+          <img src="/logo.webp" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        </div>
         200K Running Club
       </div>
 

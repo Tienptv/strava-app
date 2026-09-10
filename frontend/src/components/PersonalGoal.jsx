@@ -57,11 +57,11 @@ export default function PersonalGoal({
         .then(res => {
           if (res && Array.isArray(res.members)) {
             const athId = athlete?.id ? String(athlete.id) : null;
-            const normFname = athlete?.firstname ? athlete.firstname.trim().toLowerCase() : '';
+            const normFullName = `${athlete?.firstname || ''} ${athlete?.lastname || ''}`.trim().toLowerCase();
             const match = res.members.find(m => 
               (athId && m.athleteId && String(m.athleteId) === athId) ||
               (m.rawName && userMatchKey && m.rawName.toLowerCase() === userMatchKey.toLowerCase()) ||
-              (normFname && m.fullName && m.fullName.toLowerCase().includes(normFname))
+              (normFullName && m.fullName && m.fullName.toLowerCase() === normFullName)
             );
             if (match && match.financialSummary) {
               setAllTimeFinancial(match.financialSummary);
@@ -240,99 +240,108 @@ export default function PersonalGoal({
 
   return (
     <div className="personal-goal-card">
-      <div className="personal-goal__header">
-        <div className="personal-goal__title">
-          <div className="personal-goal__icon-badge">
-            <Target size={20} color="#00A3A6" />
+      <div className="personal-goal__main">
+        <div className="personal-goal__header">
+          <div className="personal-goal__title">
+            <div className="personal-goal__icon-badge">
+              <Target size={20} color="#00A3A6" />
+            </div>
+            <div>
+              <span className="personal-goal__main-title">{t('personalGoalTitle')}</span>
+              <span className="personal-goal__month-subtitle"> ({monthName})</span>
+            </div>
           </div>
-          <div>
-            <span className="personal-goal__main-title">{t('personalGoalTitle')}</span>
-            <span className="personal-goal__month-subtitle"> ({monthName})</span>
-          </div>
+          {!isEditing && (
+            <button 
+              className="btn-icon btn-edit-goal" 
+              onClick={isLockedByDate ? undefined : handleStartEdit} 
+              title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('editGoal')}
+              style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+              disabled={isLockedByDate}
+            >
+              <Edit2 size={16} />
+              <span style={{ fontSize: '0.8rem', marginLeft: '4px', fontWeight: 600 }}>{t('editGoal')}</span>
+            </button>
+          )}
         </div>
-        {!isEditing && (
-          <button 
-            className="btn-icon btn-edit-goal" 
-            onClick={isLockedByDate ? undefined : handleStartEdit} 
-            title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('editGoal')}
-            style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-            disabled={isLockedByDate}
-          >
-            <Edit2 size={16} />
-            <span style={{ fontSize: '0.8rem', marginLeft: '4px', fontWeight: 600 }}>{t('editGoal')}</span>
-          </button>
-        )}
-      </div>
 
-      {isEditing ? (
-        <form className="personal-goal__edit-form" onSubmit={handleSave}>
-          <div className="personal-goal__edit-fields">
-            <div className="form-group-compact">
-              <label className="compact-label">{t('targetKm')}:</label>
-              <div className="input-with-unit">
-                <input 
-                  type="number" 
-                  value={tempGoal} 
-                  onChange={(e) => setTempGoal(e.target.value)}
-                  className="goal-input-premium"
-                  placeholder="0"
-                  min="0"
-                  autoFocus
-                />
-                <span className="goal-unit-badge">km</span>
+        {isEditing ? (
+          <form className="personal-goal__edit-form" onSubmit={handleSave}>
+            <div className="personal-goal__edit-fields">
+              <div className="form-group-compact">
+                <label className="compact-label">{t('targetKm')}:</label>
+                <div className="input-with-unit">
+                  <input 
+                    type="number" 
+                    value={tempGoal} 
+                    onChange={(e) => setTempGoal(e.target.value)}
+                    className="goal-input-premium"
+                    placeholder="0"
+                    min="0"
+                    autoFocus
+                  />
+                  <span className="goal-unit-badge">km</span>
+                </div>
+              </div>
+
+              <div className="form-group-compact penalty-toggle-group">
+                <label className="penalty-checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={tempPenalty} 
+                    onChange={(e) => setTempPenalty(e.target.checked)}
+                    className="custom-penalty-checkbox"
+                  />
+                  <span className="penalty-label-text">
+                    <strong>{t('joinPenaltyChallenge')}</strong>
+                    <small>{t('penaltyChallengeHint')}</small>
+                  </span>
+                </label>
               </div>
             </div>
 
-            <div className="form-group-compact penalty-toggle-group">
-              <label className="penalty-checkbox-label">
-                <input 
-                  type="checkbox" 
-                  checked={tempPenalty} 
-                  onChange={(e) => setTempPenalty(e.target.checked)}
-                  className="custom-penalty-checkbox"
-                />
-                <span className="penalty-label-text">
-                  <strong>{t('joinPenaltyChallenge')}</strong>
-                  <small>{t('penaltyChallengeHint')}</small>
-                </span>
-              </label>
+            <div className="personal-goal__edit-actions">
+              <button type="button" className="btn-secondary-sm" onClick={handleCancel}>
+                <X size={15} style={{ marginRight: 4 }} /> {t('cancel')}
+              </button>
+              <button type="submit" className="btn-primary-sm" disabled={saving}>
+                <Check size={15} style={{ marginRight: 4 }} /> {saving ? t('saving') : t('save')}
+              </button>
             </div>
-          </div>
-
-          <div className="personal-goal__edit-actions">
-            <button type="button" className="btn-secondary-sm" onClick={handleCancel}>
-              <X size={15} style={{ marginRight: 4 }} /> {t('cancel')}
-            </button>
-            <button type="submit" className="btn-primary-sm" disabled={saving}>
-              <Check size={15} style={{ marginRight: 4 }} /> {saving ? t('saving') : t('save')}
-            </button>
-          </div>
-        </form>
-      ) : (
-        <>
-          <div className="personal-goal__stats">
-            <div className="goal-numbers">
-              <span className="current-dist">{currentDist.toFixed(1)}</span>
-              <span className="total-goal">/ {goal > 0 ? `${goal} km` : `${t('target')}: 0 km`}</span>
+          </form>
+        ) : (
+          <>
+            <div className="personal-goal__stats">
+              <div className="goal-numbers">
+                <span className="current-dist">{currentDist.toFixed(1)}</span>
+                <span className="total-goal">/ {goal > 0 ? `${goal} km` : `${t('target')}: 0 km`}</span>
+              </div>
+              <div className={`goal-percent-badge ${isGoalReached ? 'is-complete' : ''}`}>
+                {percent}% {isGoalReached ? '🎯' : ''}
+              </div>
             </div>
-            <div className={`goal-percent-badge ${isGoalReached ? 'is-complete' : ''}`}>
-              {percent}% {isGoalReached ? '🎯' : ''}
+
+            <div className="progress-bar-container">
+              <div 
+                className="progress-bar-fill" 
+                style={{ 
+                  width: `${Math.max(percent, goal > 0 ? 3 : 0)}%`,
+                  background: isGoalReached 
+                    ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' 
+                    : 'linear-gradient(90deg, #00A3A6 0%, #B5D334 100%)'
+                }}
+              ></div>
             </div>
-          </div>
 
-          <div className="progress-bar-container">
-            <div 
-              className="progress-bar-fill" 
-              style={{ 
-                width: `${Math.max(percent, goal > 0 ? 3 : 0)}%`,
-                background: isGoalReached 
-                  ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' 
-                  : 'linear-gradient(90deg, #00A3A6 0%, #B5D334 100%)'
-              }}
-            ></div>
-          </div>
+            {isGoalReached && (
+              <p className="goal-congrats">🎉 {t('goalReached')}</p>
+            )}
+          </>
+        )}
+      </div>
 
-          {/* Penalty Status Card */}
+      {!isEditing && (
+        <div className="personal-goal__side-panel">
           <div className="personal-goal__penalty-footer">
             {hasPenalty ? (
               <div className={`penalty-status-box ${isGoalReached ? 'penalty-status-safe' : 'penalty-status-active'}`}>
@@ -369,13 +378,14 @@ export default function PersonalGoal({
                 </span>
                 <button 
                   type="button" 
-                  className="btn-link-penalty" 
+                  className="btn-premium-action" 
                   onClick={isLockedByDate ? undefined : handleStartEdit}
                   title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : ''}
                   style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed', textDecoration: 'none' } : {}}
                   disabled={isLockedByDate}
                 >
-                  + {t('joinPenaltyChallenge')}
+                  <Sparkles size={14} style={{ marginRight: 6 }} />
+                  {lang === 'vi' ? 'Tham gia Đóng góp' : 'Join Challenge'}
                 </button>
               </div>
             )}
@@ -388,29 +398,17 @@ export default function PersonalGoal({
             )}
 
             {allTimeFinancial && (allTimeFinancial.totalPenaltyVND > 0 || allTimeFinancial.allTimeKmMoneyFile > 0) && (
-              <div style={{
-                marginTop: '10px',
-                padding: '8px 12px',
-                borderRadius: '10px',
-                background: 'rgba(0, 45, 84, 0.04)',
-                border: '1px solid rgba(0, 45, 84, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '8px',
-                fontSize: '0.8rem'
-              }}>
-                <span style={{ color: 'var(--primary-navy)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div className="club-contribution-box">
+                <span className="club-contribution-label">
                   <Sparkles size={14} color="#ea580c" />
                   {lang === 'vi' ? 'Đóng góp Quỹ CLB All-Time:' : 'Club All-Time Contribution:'}
                 </span>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 800, color: '#c2410c' }}>
+                <div className="club-contribution-value">
+                  <span className="amount">
                     {(allTimeFinancial.totalPenaltyVND || 0).toLocaleString('vi-VN')} VNĐ
                   </span>
                   {allTimeFinancial.penaltyRank && (
-                    <span style={{ background: '#ffedd5', color: '#9a3412', padding: '1px 6px', borderRadius: '6px', fontWeight: 700, fontSize: '0.75rem' }}>
+                    <span className="rank-badge">
                       #{allTimeFinancial.penaltyRank}
                     </span>
                   )}
@@ -418,11 +416,7 @@ export default function PersonalGoal({
               </div>
             )}
           </div>
-
-          {isGoalReached && (
-            <p className="goal-congrats">🎉 {t('goalReached')}</p>
-          )}
-        </>
+        </div>
       )}
     </div>
   );

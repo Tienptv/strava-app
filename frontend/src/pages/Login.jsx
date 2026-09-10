@@ -39,7 +39,9 @@ export default function Login({ onLogin, onGuestAccess }) {
       </div>
 
       <div className="login-card">
-        <div className="login-card__icon">🏃</div>
+        <div className="login-card__icon" style={{ background: 'transparent', boxShadow: 'none' }}>
+          <img src="/logo.webp" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        </div>
         <h1 className="login-card__title">{t('appTitle')}</h1>
         <p className="login-card__subtitle">
           {t('appSubtitle')}

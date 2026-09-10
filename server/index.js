@@ -311,6 +311,7 @@ function parseStorageCSV(content) {
         distance: dist,
         moving_time: movingTimeSec,
         start_date_local: localIsoStr,
+        map_url: row['Map URL'] || '',
         athlete: {
           id: athleteId,
           firstname: firstname,
@@ -3152,8 +3153,8 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
     }).slice(0, limit);
     
     // 3. Format as CSV
-    // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
-    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
+    // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type,Map URL
+    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type,Map URL\n";
     runActivities.forEach(act => {
       const name = `"${(act.athleteName || 'Unknown Athlete').replace(/"/g, '""')}"`;
       const id = act.id || '';
@@ -3180,7 +3181,9 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
       else if (lowerType.includes('virtual')) type = 'VirtualRun';
       else if (lowerType.includes('run')) type = 'Run';
       
-      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
+      const mapUrl = `"${(act.mapUrl || '').replace(/"/g, '""')}"`;
+
+      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type},${mapUrl}\n`;
     });
     
     // 4. Save to Storage

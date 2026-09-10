@@ -259,9 +259,9 @@ export default function Dashboard({
         <div>
           <h1 className="dashboard__greeting">
             {athlete?.isGuest ? (
-              <span>{lang === 'en' ? 'Welcome Club Runners 👋' : 'Chào mừng VĐV CLB 👋'}</span>
+              <span>{lang === 'en' ? 'Welcome Club Runners' : 'Chào mừng VĐV CLB'}</span>
             ) : (
-              <>{t(greetingKey)} <span>{athlete.firstname || 'Athlete'}</span> 👋</>
+              <>{t(greetingKey)} <span>{athlete.firstname || 'Athlete'}</span></>
             )}
           </h1>
           <p className="dashboard__date">{today}</p>
@@ -488,34 +488,34 @@ export default function Dashboard({
             lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
           />
           <div className="stats-grid">
-            <div className="stat-card">
+            <div className="stat-card stat-card--distance">
               <div className="stat-card__header">
                 <span className="stat-card__label">{t('totalDistance')}</span>
-                <div className="stat-card__icon"><MapPin size={18} /></div>
+                <div className="stat-card__icon"><MapPin size={20} /></div>
               </div>
               <div className="stat-card__value">{totalDistance} km</div>
               <div className="stat-card__sub">{t('allActivities')}</div>
             </div>
-            <div className="stat-card">
+            <div className="stat-card stat-card--time">
               <div className="stat-card__header">
                 <span className="stat-card__label">{t('totalTime')}</span>
-                <div className="stat-card__icon"><Clock size={18} /></div>
+                <div className="stat-card__icon"><Clock size={20} /></div>
               </div>
               <div className="stat-card__value">{totalTime}</div>
               <div className="stat-card__sub">{t('movingTime')}</div>
             </div>
-            <div className="stat-card">
+            <div className="stat-card stat-card--elevation">
               <div className="stat-card__header">
                 <span className="stat-card__label">{t('totalElevation')}</span>
-                <div className="stat-card__icon"><TrendingUp size={18} /></div>
+                <div className="stat-card__icon"><TrendingUp size={20} /></div>
               </div>
               <div className="stat-card__value">{totalElevation} m</div>
               <div className="stat-card__sub">{t('elevationGain')}</div>
             </div>
-            <div className="stat-card">
+            <div className="stat-card stat-card--recent">
               <div className="stat-card__header">
                 <span className="stat-card__label">{t('recentActivities')}</span>
-                <div className="stat-card__icon"><Flame size={18} /></div>
+                <div className="stat-card__icon"><Flame size={20} /></div>
               </div>
               <div className="stat-card__value">{recentCount}</div>
               <div className="stat-card__sub">{t('last4Weeks')}</div>
