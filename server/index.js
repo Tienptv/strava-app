@@ -350,6 +350,11 @@ function isBetterRecord(a, b) {
   const bLastname = b.athlete?.lastname || '';
   if (aLastname.length > 2 && bLastname.length <= 2) return true;
   
+  // Ưu tiên bản có map_url
+  if (a.map_url && !b.map_url) return true;
+  // Hoặc ghép map_url vào bản cũ (mutating b) để không mất map
+  if (a.map_url && b && !b.map_url) b.map_url = a.map_url;
+  
   return false;
 }
 
