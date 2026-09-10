@@ -1,5 +1,26 @@
 [
   {
+    "id": "1789008774847",
+    "timestamp": "2026-09-10T02:52:54.847Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (259 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789008748944",
+    "timestamp": "2026-09-10T02:52:28.944Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (248 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789008747766",
+    "timestamp": "2026-09-10T02:52:27.767Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (248 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1788964750863",
     "timestamp": "2026-09-09T14:39:10.863Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1377,26 +1398,5 @@
     "action": "Git Push",
     "user": "133066813",
     "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788446703809",
-    "timestamp": "2026-09-03T14:45:03.809Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (185 mục), targets.json (25 mục tiêu/phạt), challenge_config.json, admins.json (0 sub-admins)"
-  },
-  {
-    "id": "1788446558165",
-    "timestamp": "2026-09-03T14:42:38.165Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788445969657",
-    "timestamp": "2026-09-03T14:32:49.657Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (185 mục), targets.json (25 mục tiêu/phạt), challenge_config.json, admins.json (0 sub-admins)"
   }
 ]
