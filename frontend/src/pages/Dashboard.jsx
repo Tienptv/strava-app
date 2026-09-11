@@ -295,27 +295,7 @@ export default function Dashboard({
               
               {isMobile && (
                 <div style={{ marginTop: '20px' }}>
-                  {/* Thanh chọn tháng dành riêng cho mobile tab Journey */}
-                  <div className="challenge-tabs" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', overflowX: 'auto', gap: '6px', maxWidth: '100%', paddingBottom: '4px' }}>
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => {
-                        const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        const monthLabel = lang === 'en' 
-                          ? `${monthNamesEn[m - 1]}/${new Date().getFullYear()}`
-                          : `${t('month')} ${m}/${new Date().getFullYear()}`;
-                        return (
-                          <button
-                            key={m}
-                            className={`tab month-pill ${challengeMonth === m ? 'tab--active' : ''}`}
-                            data-month={m}
-                            onClick={() => { setChallengeMonth(m); setChallengeYear(new Date().getFullYear()); }}
-                          >
-                            {monthLabel}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  {/* Removed redundant challenge-tabs for mobile tab Journey */}
                   
                   {loadingChallenge ? (
                     <div className="loading">

@@ -1,5 +1,19 @@
 [
   {
+    "id": "1789097621287",
+    "timestamp": "2026-09-11T03:33:41.287Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (264 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789097620432",
+    "timestamp": "2026-09-11T03:33:40.432Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (264 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1789072195687",
     "timestamp": "2026-09-10T20:29:55.687Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1381,20 +1395,6 @@
   {
     "id": "1788581449137",
     "timestamp": "2026-09-05T04:10:49.137Z",
-    "action": "Cập nhật trạng thái nộp phạt",
-    "user": "Admin Test",
-    "details": "Sang Nguyen - Tháng 2026-09: Đã nộp (Chuyển khoản Techcombank 200k)"
-  },
-  {
-    "id": "1788581443534",
-    "timestamp": "2026-09-05T04:10:43.534Z",
-    "action": "Giao dịch Quỹ CLB",
-    "user": "Admin",
-    "details": "Chi 150.000 VNĐ: Chi liên hoan sinh tố giao lưu test"
-  },
-  {
-    "id": "1788581443518",
-    "timestamp": "2026-09-05T04:10:43.518Z",
     "action": "Cập nhật trạng thái nộp phạt",
     "user": "Admin Test",
     "details": "Sang Nguyen - Tháng 2026-09: Đã nộp (Chuyển khoản Techcombank 200k)"
