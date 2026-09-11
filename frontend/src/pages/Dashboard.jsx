@@ -313,6 +313,8 @@ export default function Dashboard({
                       allowEditOthers={challengeConfig?.allowEditOthers}
                       lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
                       nameMapping={nameMapping}
+                      onMonthChange={setChallengeMonth}
+                      onYearChange={setChallengeYear}
                     />
                   )}
                 </div>
