@@ -1,5 +1,152 @@
 [
   {
+    "id": "1789147543727",
+    "timestamp": "2026-09-11T17:25:43.727Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789147543702",
+    "timestamp": "2026-09-11T17:25:43.702Z",
+    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
+    "user": "Tien PhamTV",
+    "details": "Đã cập nhật cấu hình Club Goal (2027)"
+  },
+  {
+    "id": "1789146563442",
+    "timestamp": "2026-09-11T17:09:23.442Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789146563422",
+    "timestamp": "2026-09-11T17:09:23.422Z",
+    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
+    "user": "Tien PhamTV",
+    "details": "Đã cập nhật cấu hình Club Goal (2027)"
+  },
+  {
+    "id": "1789146543317",
+    "timestamp": "2026-09-11T17:09:03.317Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789146543292",
+    "timestamp": "2026-09-11T17:09:03.292Z",
+    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
+    "user": "Tien PhamTV",
+    "details": "Đã cập nhật cấu hình Club Goal (2027)"
+  },
+  {
+    "id": "1789144493907",
+    "timestamp": "2026-09-11T16:34:53.907Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789144493879",
+    "timestamp": "2026-09-11T16:34:53.879Z",
+    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
+    "user": "Tien PhamTV",
+    "details": "Đã cập nhật cấu hình Club Goal (2027)"
+  },
+  {
+    "id": "1789142945504",
+    "timestamp": "2026-09-11T16:09:05.504Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789142945480",
+    "timestamp": "2026-09-11T16:09:05.480Z",
+    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
+    "user": "Tien PhamTV",
+    "details": "Đã cập nhật cấu hình Club Goal (2027)"
+  },
+  {
+    "id": "1789142927847",
+    "timestamp": "2026-09-11T16:08:47.847Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789142927824",
+    "timestamp": "2026-09-11T16:08:47.824Z",
+    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
+    "user": "Tien PhamTV",
+    "details": "Đã cập nhật cấu hình Club Goal (2027)"
+  },
+  {
+    "id": "1789142433393",
+    "timestamp": "2026-09-11T16:00:33.393Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789142063237",
+    "timestamp": "2026-09-11T15:54:23.237Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789141784310",
+    "timestamp": "2026-09-11T15:49:44.310Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789141784290",
+    "timestamp": "2026-09-11T15:49:44.290Z",
+    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
+    "user": "Tien PhamTV",
+    "details": "Đã cập nhật cấu hình Club Goal (2027)"
+  },
+  {
+    "id": "1789140193204",
+    "timestamp": "2026-09-11T15:23:13.204Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (277 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789140156160",
+    "timestamp": "2026-09-11T15:22:36.160Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (266 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789140152839",
+    "timestamp": "2026-09-11T15:22:32.839Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (266 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
+    "id": "1789106454033",
+    "timestamp": "2026-09-11T06:00:54.033Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (265 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789106453247",
+    "timestamp": "2026-09-11T06:00:53.247Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (265 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1789097621287",
     "timestamp": "2026-09-11T03:33:41.287Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1251,152 +1398,5 @@
     "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
     "user": "pham tien",
     "details": "Đã cập nhật cấu hình Club Goal (2026)"
-  },
-  {
-    "id": "1788592631425",
-    "timestamp": "2026-09-05T07:17:11.425Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "pham tien",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788592602839",
-    "timestamp": "2026-09-05T07:16:42.839Z",
-    "action": "Giao dịch Quỹ CLB",
-    "user": "Phạm Tiên",
-    "details": "Thu 10.000 VNĐ: Test quỹ sub_admin"
-  },
-  {
-    "id": "1788592602807",
-    "timestamp": "2026-09-05T07:16:42.807Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "pham tien",
-    "details": "Lưu cấu hình thử thách (Mặc định)"
-  },
-  {
-    "id": "1788592602799",
-    "timestamp": "2026-09-05T07:16:42.799Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "pham tien",
-    "details": "Đã cập nhật cấu hình Club Goal (2026)"
-  },
-  {
-    "id": "1788592518132",
-    "timestamp": "2026-09-05T07:15:18.132Z",
-    "action": "Giao dịch Quỹ CLB",
-    "user": "Phạm Tiên",
-    "details": "Thu 10.000 VNĐ: Test quỹ sub_admin"
-  },
-  {
-    "id": "1788591359452",
-    "timestamp": "2026-09-05T06:55:59.452Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788591337873",
-    "timestamp": "2026-09-05T06:55:37.873Z",
-    "action": "Cập nhật phân quyền Sub-Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Đã cập nhật bảng giới hạn tính năng cho Sub-Admin"
-  },
-  {
-    "id": "1788591313872",
-    "timestamp": "2026-09-05T06:55:13.872Z",
-    "action": "Cấp quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Cấp quyền admin cho: pham tien (ID: 120540594, Key: pham_T.)"
-  },
-  {
-    "id": "1788591280594",
-    "timestamp": "2026-09-05T06:54:40.594Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (188 mục), targets.json (31 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
-  },
-  {
-    "id": "1788591276607",
-    "timestamp": "2026-09-05T06:54:36.607Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788591271657",
-    "timestamp": "2026-09-05T06:54:31.657Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (188 mục), targets.json (31 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
-  },
-  {
-    "id": "1788590795949",
-    "timestamp": "2026-09-05T06:46:35.949Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788590790798",
-    "timestamp": "2026-09-05T06:46:30.798Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (188 mục), targets.json (31 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
-  },
-  {
-    "id": "1788589578001",
-    "timestamp": "2026-09-05T06:26:18.001Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (188 mục), targets.json (29 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
-  },
-  {
-    "id": "1788588977090",
-    "timestamp": "2026-09-05T06:16:17.090Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788586553616",
-    "timestamp": "2026-09-05T05:35:53.616Z",
-    "action": "Giao dịch Quỹ CLB",
-    "user": "Admin",
-    "details": "Chi 150.000 VNĐ: Chi liên hoan sinh tố giao lưu test"
-  },
-  {
-    "id": "1788586553592",
-    "timestamp": "2026-09-05T05:35:53.592Z",
-    "action": "Cập nhật trạng thái nộp phạt",
-    "user": "Admin Test",
-    "details": "Sang Nguyen - Tháng 2026-09: Đã nộp (Chuyển khoản Techcombank 200k)"
-  },
-  {
-    "id": "1788583104567",
-    "timestamp": "2026-09-05T04:38:24.567Z",
-    "action": "Cập nhật trạng thái nộp phạt",
-    "user": "Tien PhamTV",
-    "details": "Tien PhamTV - Tháng 2026-08: Chưa nộp"
-  },
-  {
-    "id": "1788583100661",
-    "timestamp": "2026-09-05T04:38:20.661Z",
-    "action": "Cập nhật trạng thái nộp phạt",
-    "user": "Tien PhamTV",
-    "details": "Tien PhamTV - Tháng 2026-08: Đã nộp"
-  },
-  {
-    "id": "1788581449142",
-    "timestamp": "2026-09-05T04:10:49.142Z",
-    "action": "Giao dịch Quỹ CLB",
-    "user": "Admin",
-    "details": "Chi 150.000 VNĐ: Chi liên hoan sinh tố giao lưu test"
-  },
-  {
-    "id": "1788581449137",
-    "timestamp": "2026-09-05T04:10:49.137Z",
-    "action": "Cập nhật trạng thái nộp phạt",
-    "user": "Admin Test",
-    "details": "Sang Nguyen - Tháng 2026-09: Đã nộp (Chuyển khoản Techcombank 200k)"
   }
 ]

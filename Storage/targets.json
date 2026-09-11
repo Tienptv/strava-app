@@ -71,7 +71,7 @@
     "target": ""
   },
   "pham_T._2026_9": {
-    "target": 0,
+    "target": "",
     "penalty": false
   },
   "Pha_V._2026_9": {
@@ -98,7 +98,7 @@
   },
   "Sang_N._2026_9": {
     "penalty": false,
-    "target": 0
+    "target": 10
   },
   "Linh_T._2026_9": {
     "target": 50,
@@ -112,7 +112,7 @@
     "penalty": false
   },
   "An_H._2026_9": {
-    "target": 50,
+    "target": 20,
     "penalty": true
   },
   "sang_nguyen": {
@@ -176,5 +176,8 @@
   "Thinh_V._2026_6": {
     "target": 26,
     "penalty": true
+  },
+  "Khương_P._2026_9": {
+    "target": ""
   }
 }
