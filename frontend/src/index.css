@@ -326,17 +326,17 @@ img {
   -webkit-backdrop-filter: blur(40px);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  padding: 48px;
-  max-width: 460px;
-  width: 90%;
+  padding: 40px 32px;
+  max-width: 500px;
+  width: 92%;
   text-align: center;
   box-shadow: var(--shadow-lg);
 }
 
 .login-card__icon {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 24px;
+  width: 144px;
+  height: 144px;
+  margin: 0 auto 16px;
   background: var(--gradient-accent);
   border-radius: var(--radius-lg);
   display: flex;
@@ -527,9 +527,11 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: clamp(0.74rem, 1.8vw, 0.82rem);
   font-weight: 600;
-  padding: 11px 16px;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  padding: 10px 14px;
   background: #ffffff;
   border: 1.5px solid rgba(0, 45, 84, 0.18);
   border-radius: var(--radius-sm);
@@ -540,9 +542,16 @@ button:disabled {
   outline: none;
 }
 
+.btn-switch-account span {
+  white-space: nowrap;
+  display: inline;
+}
+
 .btn-switch-account svg {
   color: var(--accent);
   transition: all 0.25s ease;
+  flex-shrink: 0;
+  margin: 0;
 }
 
 .btn-switch-account:hover:not(:disabled) {
@@ -576,6 +585,72 @@ button:disabled {
 .login-forgot-link:hover {
   color: var(--accent);
   text-decoration: underline;
+}
+
+/* Custom SweetAlert for Switch Account Modal */
+.swal-custom-switch-account {
+  border-radius: 16px !important;
+  padding: 24px 20px !important;
+  font-family: inherit !important;
+  border: 1px solid rgba(0, 163, 166, 0.25) !important;
+  box-shadow: 0 20px 45px rgba(0, 45, 84, 0.2) !important;
+}
+
+.swal-custom-switch-account .swal2-title {
+  color: var(--primary-navy) !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  padding-bottom: 4px !important;
+}
+
+.swal-custom-switch-account .swal2-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-top: 18px !important;
+  justify-content: center !important;
+}
+
+.swal-custom-switch-account .swal2-actions button {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.88rem !important;
+  padding: 10px 16px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.swal-custom-switch-account .swal2-confirm {
+  background: linear-gradient(135deg, #00A3A6 0%, #002D54 100%) !important;
+  box-shadow: 0 4px 12px rgba(0, 163, 166, 0.35) !important;
+}
+
+.swal-custom-switch-account .swal2-confirm:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 163, 166, 0.45) !important;
+}
+
+.swal-custom-switch-account .swal2-deny {
+  background: var(--primary-navy) !important;
+  box-shadow: 0 4px 12px rgba(0, 45, 84, 0.25) !important;
+}
+
+.swal-custom-switch-account .swal2-deny:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 45, 84, 0.35) !important;
+}
+
+.swal-custom-switch-account .swal2-cancel {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.swal-custom-switch-account .swal2-cancel:hover {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Energy / Accent Button (Lime Green -> Teal) */

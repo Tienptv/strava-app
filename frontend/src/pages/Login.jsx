@@ -9,37 +9,37 @@ export default function Login({ onLogin, onGuestAccess }) {
   return (
     <div className="login-page">
       {/* Language switcher on login page */}
-      <div className="lang-switcher" style={{ position: 'absolute', top: 20, right: 24, zIndex: 10 }}>
+      <div className="lang-switcher" style={{ position: 'absolute', top: 16, right: 20, zIndex: 10 }}>
         <button
           className="lang-switcher__text-toggle"
           onClick={() => switchLang(lang === 'en' ? 'vi' : 'en')}
           title={lang === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}
           style={{
-            background: 'rgba(255, 255, 255, 0.8)',
-            border: '1px solid rgba(0, 163, 166, 0.2)',
-            borderRadius: '20px',
-            padding: '6px 14px',
+            background: 'rgba(255, 255, 255, 0.85)',
+            border: '1px solid rgba(0, 163, 166, 0.22)',
+            borderRadius: '16px',
+            padding: '3px 10px',
             cursor: 'pointer',
             fontWeight: 800,
             color: 'var(--primary-navy)',
             display: 'flex',
             alignItems: 'baseline',
-            gap: '6px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            gap: '4px',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
             backdropFilter: 'blur(8px)'
           }}
-          onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,163,166,0.15)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
-          onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = 'rgba(0, 163, 166, 0.2)'; }}
+          onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 3px 10px rgba(0,163,166,0.15)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.04)'; e.currentTarget.style.borderColor = 'rgba(0, 163, 166, 0.22)'; }}
         >
-          <span style={{ fontSize: lang === 'en' ? '1.15rem' : '0.75rem', opacity: lang === 'en' ? 1 : 0.4, transition: 'all 0.3s ease' }}>EN</span>
-          <span style={{ fontSize: '0.9rem', opacity: 0.3, fontWeight: 400 }}>/</span>
-          <span style={{ fontSize: lang === 'vi' ? '1.15rem' : '0.75rem', opacity: lang === 'vi' ? 1 : 0.4, transition: 'all 0.3s ease' }}>VI</span>
+          <span style={{ fontSize: lang === 'en' ? '0.82rem' : '0.68rem', opacity: lang === 'en' ? 1 : 0.45, transition: 'all 0.25s ease' }}>EN</span>
+          <span style={{ fontSize: '0.72rem', opacity: 0.3, fontWeight: 400 }}>/</span>
+          <span style={{ fontSize: lang === 'vi' ? '0.82rem' : '0.68rem', opacity: lang === 'vi' ? 1 : 0.45, transition: 'all 0.25s ease' }}>VI</span>
         </button>
       </div>
 
       <div className="login-card">
-        <div className="login-card__icon" style={{ background: 'transparent', boxShadow: 'none' }}>
+        <div className="login-card__icon" style={{ width: '144px', height: '144px', margin: '0 auto 16px', background: 'transparent', boxShadow: 'none' }}>
           <img src="/logo.webp" alt="Haskoning Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
         <h1 className="login-card__title">{t('appTitle')}</h1>
@@ -117,11 +117,11 @@ export default function Login({ onLogin, onGuestAccess }) {
 
           <button 
             type="button" 
-            className="btn-switch-account" 
+            className="btn btn-switch-account" 
             onClick={() => onLogin(true)}
             title={t('switchAccountHint')}
           >
-            <RefreshCw size={15} />
+            <RefreshCw size={15} style={{ flexShrink: 0 }} />
             <span>{t('switchAccount')}</span>
           </button>
           

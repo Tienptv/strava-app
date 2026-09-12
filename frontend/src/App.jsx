@@ -9,6 +9,7 @@ import Sidebar from './components/Sidebar';
 import { useLang } from './i18n/LangContext';
 import { APP_VERSION } from './config/version';
 import { useAutoUpdate, AutoUpdateToast } from './utils/useAutoUpdate';
+import Swal from 'sweetalert2';
 
 const API_BASE = '/api';
 
@@ -19,7 +20,7 @@ function App() {
   const [challengeMonth, setChallengeMonth] = useState(new Date().getMonth() + 1);
   const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
   const [userRoles, setUserRoles] = useState({ isSuperAdmin: false, isSubAdmin: false, isAdmin: false });
-  const { t } = useLang();
+  const { t, lang } = useLang();
 
   // Tự động kiểm tra phiên bản mới từ Render Cloud và reload mượt mà
   const { updateAvailable, newVersionInfo, countdown, reloadNow } = useAutoUpdate();
@@ -83,11 +84,33 @@ function App() {
     return res.json();
   }, [athleteId]);
 
-  // Đăng nhập: lấy URL OAuth
+  // Đăng nhập: lấy URL OAuth (hỗ trợ đổi tài khoản Strava thật sự)
   const handleLogin = async (forceSwitch = false) => {
     try {
+      const clientOrigin = window.location.origin.includes('127.0.0.1')
+        ? window.location.origin.replace('127.0.0.1', 'localhost')
+        : window.location.origin;
+
       if (forceSwitch) {
-        // Gọi backend xóa cookie/session trình duyệt trước khi mở trang đăng nhập
+        // 1. Hiển thị loading nhẹ nhàng (chạy ngầm hoàn toàn, không cần hộp thoại xác nhận)
+        Swal.fire({
+          title: t('switchAccountLoggingOut'),
+          html: `
+            <div style="font-size: 0.9rem; color: #475569; margin-top: 8px;">
+              ${t('switchAccountRedirecting')}
+            </div>
+          `,
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // 2. Mở popup logout Strava ngay lập tức trong luồng click để xóa sạch cookie phiên cũ
+        const logoutWin = window.open('https://www.strava.com/logout', 'strava_logout_popup', 'width=100,height=100,top=0,left=0');
+
+        // 3. Xóa sạch trạng thái local của app & gọi server logout
         try {
           await fetch(`${API_BASE}/auth/logout`, {
             method: 'POST',
@@ -95,12 +118,32 @@ function App() {
             body: JSON.stringify({ athleteId }),
           });
         } catch (_) {}
+
+        localStorage.removeItem('athleteId');
+        localStorage.removeItem('athlete');
+        localStorage.removeItem('isGuest');
+        sessionStorage.removeItem('stravaCookie');
+
+        // 4. Lấy URL OAuth từ backend
+        const res = await fetch(`${API_BASE}/auth/url?origin=${encodeURIComponent(clientOrigin)}&prompt=force`);
+        const data = await res.json();
+        if (!data.url) {
+          Swal.close();
+          return;
+        }
+
+        // 5. Sau 1.4s (khi Strava đã hủy session cũ), đóng popup và chuyển hướng thẳng sang trang Strava Login
+        setTimeout(() => {
+          if (logoutWin && !logoutWin.closed) {
+            try { logoutWin.close(); } catch (_) {}
+          }
+          window.location.href = data.url;
+        }, 1400);
+        return;
       }
 
-      const clientOrigin = window.location.origin.includes('127.0.0.1')
-        ? window.location.origin.replace('127.0.0.1', 'localhost')
-        : window.location.origin;
-      const res = await fetch(`${API_BASE}/auth/url?origin=${encodeURIComponent(clientOrigin)}&prompt=${forceSwitch ? 'force' : 'force'}`);
+      // Đăng nhập thông thường (không ép đổi tài khoản)
+      const res = await fetch(`${API_BASE}/auth/url?origin=${encodeURIComponent(clientOrigin)}&prompt=auto`);
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;

@@ -14,6 +14,15 @@ const translations = {
     loginButton: 'Đăng nhập với Strava',
     switchAccount: 'Đăng nhập tài khoản khác (Đổi tài khoản)',
     switchAccountHint: 'Xóa phiên cũ để đăng nhập bằng tài khoản Strava khác',
+    switchAccountModalTitle: 'Đổi Tài Khoản Strava',
+    switchAccountModalDesc: 'Trình duyệt đang lưu phiên đăng nhập của tài khoản Strava trước đó. Để đăng nhập tài khoản khác, bạn có 2 cách:',
+    switchAccountStep1: 'Hệ thống mở nhanh trang Strava để xóa phiên cũ.',
+    switchAccountStep2: 'Trang đăng nhập Strava sẽ hiện ra để bạn nhập Email & Mật khẩu mới.',
+    switchAccountBtnConfirm: 'Đăng xuất Strava & Đổi tài khoản',
+    switchAccountBtnDirect: 'Tiếp tục sang Strava',
+    switchAccountLoggingOut: 'Đang chuyển sang tài khoản Strava mới...',
+    switchAccountRedirecting: 'Đang làm mới phiên và mở trang đăng nhập Strava...',
+    switchAccountFallbackNote: 'Mẹo: Trên trang Strava, bạn cũng có thể bấm "Log in as someone else" để đổi tài khoản.',
     loginNote: 'Ứng dụng sẽ yêu cầu quyền đọc dữ liệu hoạt động từ Strava.',
 
     // Dashboard
@@ -402,6 +411,15 @@ const translations = {
     loginButton: 'Login with Strava',
     switchAccount: 'Login with another account (Switch account)',
     switchAccountHint: 'Clear current session to sign in with a different Strava account',
+    switchAccountModalTitle: 'Switch Strava Account',
+    switchAccountModalDesc: 'Your browser is currently holding the previous Strava session. To sign in with a different account:',
+    switchAccountStep1: 'The system will briefly open Strava to clear the old session.',
+    switchAccountStep2: 'Strava login page will appear with blank fields for your new Email & Password.',
+    switchAccountBtnConfirm: 'Sign Out Strava & Switch',
+    switchAccountBtnDirect: 'Continue to Strava',
+    switchAccountLoggingOut: 'Switching Strava Account...',
+    switchAccountRedirecting: 'Refreshing Strava session & opening login page...',
+    switchAccountFallbackNote: 'Tip: On the Strava page, you can also click "Log in as someone else" to switch accounts.',
     loginNote: 'The app will request read access to your Strava activity data.',
 
     // Dashboard
