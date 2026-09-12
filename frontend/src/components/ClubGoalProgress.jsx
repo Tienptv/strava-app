@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLang } from '../i18n/LangContext';
-import { Edit2, X, Trophy, MapPin, Flag, Sparkles, Eye, EyeOff } from 'lucide-react';
+import { Edit2, X, Trophy, MapPin, Flag, Sparkles } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 const formatDayMonth = (dateStr) => {
@@ -193,37 +193,59 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
       ...ev,
       percent: evPercent,
       daysDiff,
-      isPastEvent,
-      pos: 'top' // Luôn đặt trên đỉnh track để không chắn hàng ngang các mốc tháng
+      isPastEvent
     };
-  }).sort((a, b) => a.percent - b.percent);
+  }).sort((a, b) => a.percent - b.percent).map((ev, i) => ({
+    ...ev,
+    pos: i % 2 === 0 ? 'top' : 'bottom',
+    originalIndex: i
+  }));
 
   // Phát hiện va chạm (collision detection) thực tế giữa các nhãn tên giải:
-  // Nếu không bị đè lên nhau thì tất cả hiển thị cùng trên 1 hàng ngang (Tier 1).
-  // Chỉ khi 2 nhãn thực sự chạm/chồng lấn nhau trên màn hình thì nhãn sau mới nhảy lên Tier 2.
+  // Tách nhóm trên và dưới để check va chạm riêng biệt, tránh tier-2 ảo.
   useEffect(() => {
     const checkCollisions = () => {
       if (!events || events.length === 0) return;
       const sorted = [...events].sort((a, b) => a.percent - b.percent);
       const newTiers = {};
-      sorted.forEach((ev, i) => {
-        newTiers[ev.id || i] = 1;
+      sorted.forEach((ev) => {
+        newTiers[ev.id || ev.originalIndex] = 1;
       });
 
-      for (let i = 1; i < sorted.length; i++) {
-        const prevEv = sorted[i - 1];
-        const currEv = sorted[i];
-        const prevEl = labelRefs.current[prevEv.id || (i - 1)];
-        const currEl = labelRefs.current[currEv.id || i];
+      // Kiểm tra nhóm giải nằm trên (top)
+      const topEvents = sorted.filter(ev => ev.pos === 'top');
+      for (let i = 1; i < topEvents.length; i++) {
+        const prevEv = topEvents[i - 1];
+        const currEv = topEvents[i];
+        const prevEl = labelRefs.current[prevEv.id || prevEv.originalIndex];
+        const currEl = labelRefs.current[currEv.id || currEv.originalIndex];
 
         if (prevEl && currEl) {
           const prevRect = prevEl.getBoundingClientRect();
           const currRect = currEl.getBoundingClientRect();
 
-          // Kiểm tra xem nhãn hiện tại có bị lấn vào vùng nhãn trước không
           if (currRect.left < prevRect.right + 4) {
-            const prevTier = newTiers[prevEv.id || (i - 1)] || 1;
-            newTiers[currEv.id || i] = prevTier === 1 ? 2 : 1;
+            const prevTier = newTiers[prevEv.id || prevEv.originalIndex] || 1;
+            newTiers[currEv.id || currEv.originalIndex] = prevTier === 1 ? 2 : 1;
+          }
+        }
+      }
+
+      // Kiểm tra nhóm giải nằm dưới (bottom)
+      const bottomEvents = sorted.filter(ev => ev.pos === 'bottom');
+      for (let i = 1; i < bottomEvents.length; i++) {
+        const prevEv = bottomEvents[i - 1];
+        const currEv = bottomEvents[i];
+        const prevEl = labelRefs.current[prevEv.id || prevEv.originalIndex];
+        const currEl = labelRefs.current[currEv.id || currEv.originalIndex];
+
+        if (prevEl && currEl) {
+          const prevRect = prevEl.getBoundingClientRect();
+          const currRect = currEl.getBoundingClientRect();
+
+          if (currRect.left < prevRect.right + 4) {
+            const prevTier = newTiers[prevEv.id || prevEv.originalIndex] || 1;
+            newTiers[currEv.id || currEv.originalIndex] = prevTier === 1 ? 2 : 1;
           }
         }
       }
@@ -439,7 +461,7 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
 
             return (
               <div 
-                key={ev.id || i} 
+                key={ev.id || ev.originalIndex} 
                 className={`timeline-race-milestone race-pos-${ev.pos} ${ev.isPastEvent ? 'race-passed' : 'race-upcoming'}`}
                 style={{ left: `${ev.percent}%`, zIndex: zIndex }}
               >
@@ -523,10 +545,11 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
                     </div>
                   </div>
                 </div>
-                <span 
-                  ref={(el) => { if (el) labelRefs.current[ev.id || i] = el; }}
-                  className={`race-label-text label-${ev.pos} tier-${eventTiers[ev.id || i] || 1}`}
-                >
+                  <span 
+                    ref={(el) => { if (el) labelRefs.current[ev.id || ev.originalIndex] = el; }}
+                    className={`race-label-text label-${ev.pos} tier-${eventTiers[ev.id || ev.originalIndex] || 1}`}
+                    style={{ display: goalData?.showEventNames === false ? 'none' : '' }}
+                  >
                   {ev.name}
                 </span>
               </div>

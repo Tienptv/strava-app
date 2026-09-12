@@ -2,8 +2,17 @@ import puppeteer from 'puppeteer-core';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
+
+function killDanglingChromeProfiles() {
+  try {
+    if (process.platform === 'win32') {
+      execSync(`powershell -NoProfile -Command "Get-WmiObject Win32_Process -Filter \\"Name='chrome.exe'\\" | Where-Object { $_.CommandLine -match 'chrome_profile' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"`, { stdio: 'ignore' });
+    }
+  } catch (e) {}
+}
 const __dirname = path.dirname(__filename);
 
 // Find Google Chrome or Microsoft Edge on Windows
@@ -154,9 +163,15 @@ export async function loginAndGetCookie() {
   }
 
   console.log('🚀 Đang khởi động trình duyệt Chrome...');
+  const userDataDir = path.join(__dirname, '../local_cache/chrome_profile');
+  if (!fs.existsSync(userDataDir)) fs.mkdirSync(userDataDir, { recursive: true });
+  
+  killDanglingChromeProfiles();
+
   const browser = await puppeteer.launch({
     executablePath: browserPath,
     headless: false,
+    userDataDir: userDataDir,
     ignoreDefaultArgs: ['--enable-automation'],
     args: [
       '--no-sandbox', 
@@ -189,29 +204,7 @@ export async function loginAndGetCookie() {
 
     console.log('🔑 Vui lòng đăng nhập Strava trên cửa sổ Chrome vừa mở...');
 
-    function isSuccessUrl(rawUrl) {
-      if (!rawUrl) return false;
-      const url = rawUrl.toLowerCase();
-      if (!url.includes('strava.com')) return false;
-
-      // Còn ở các trang đăng nhập, xác thực, 2FA, checkpoint
-      if (
-        url.includes('/login') ||
-        url.includes('/session') ||
-        url.includes('/two_factor') ||
-        url.includes('/challenge') ||
-        url.includes('/checkpoint') ||
-        url.includes('/register') ||
-        url.includes('/oauth')
-      ) {
-        return false;
-      }
-
-      // Đã vào bất kỳ trang nào khác của Strava (dashboard, feed, onboarding, athletes, v.v.)
-      return true;
-    }
-
-    // Chờ phát hiện đăng nhập thành công
+    // Chờ phát hiện đăng nhập thành công qua sự xuất hiện của cookie _strava4_session
     await new Promise((resolve, reject) => {
       let isResolved = false;
 
@@ -237,36 +230,7 @@ export async function loginAndGetCookie() {
         fail(new Error('Timeout: Đăng nhập quá 5 phút. Vui lòng thử lại.'));
       }, 300000);
 
-      // 1. Lắng nghe event điều hướng trên trang chính
-      page.on('framenavigated', (frame) => {
-        try {
-          if (frame === page.mainFrame()) {
-            const u = frame.url();
-            if (isSuccessUrl(u)) finish(`Điều hướng trang chính: ${u}`);
-          }
-        } catch (_) {}
-      });
-
-      // 2. Lắng nghe mọi tab/cửa sổ mới mở ra (Google/Facebook OAuth)
-      browser.on('targetcreated', async (target) => {
-        try {
-          if (target.type() === 'page') {
-            const newP = await target.page();
-            if (newP) {
-              newP.on('framenavigated', (frame) => {
-                try {
-                  if (frame === newP.mainFrame()) {
-                    const u = frame.url();
-                    if (isSuccessUrl(u)) finish(`Điều hướng tab phụ: ${u}`);
-                  }
-                } catch (_) {}
-              });
-            }
-          }
-        } catch (_) {}
-      });
-
-      // 3. Polling dự phòng mỗi 500ms CHỈ ĐỌC page.url() (đồng bộ, tuyệt đối không await p.title() để không bị treo)
+      // Polling kiểm tra cookies mỗi 1000ms
       let checkCount = 0;
       const interval = setInterval(async () => {
         if (isResolved) return;
@@ -285,18 +249,21 @@ export async function loginAndGetCookie() {
 
           const pages = await browser.pages();
           for (const p of pages) {
-            const u = p.url(); // Thuộc tính đồng bộ, chạy tức thì
-            if (isSuccessUrl(u)) {
-              finish(`Phát hiện URL thành công: ${u}`);
-              return;
-            }
+            try {
+              const cookies = await p.cookies();
+              const session = cookies.find(c => c.name === '_strava4_session');
+              if (session && session.value) {
+                finish(`Phát hiện cookie _strava4_session!`);
+                return;
+              }
+            } catch (_) {}
           }
 
-          if (checkCount % 6 === 0) {
-            console.log(`[CHECK_LOGIN] Đang chờ đăng nhập... URLs: ${pages.map(p => p.url()).join(' | ')}`);
+          if (checkCount % 5 === 0) {
+            console.log(`[CHECK_LOGIN] Đang chờ đăng nhập hoặc cookie (chờ vượt Cloudflare)... URLs: ${pages.map(p => p.url()).join(' | ')}`);
           }
         } catch (_) {}
-      }, 500);
+      }, 1000);
     });
 
     console.log(`✅ Đăng nhập Strava thành công! Đang lưu cookie và đóng Chrome...`);
@@ -391,9 +358,15 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
     throw new Error('Không tìm thấy trình duyệt Google Chrome hoặc Microsoft Edge trên máy tính của bạn.');
   }
 
+  const userDataDir = path.join(__dirname, '../local_cache/chrome_profile');
+  if (!fs.existsSync(userDataDir)) fs.mkdirSync(userDataDir, { recursive: true });
+  
+  killDanglingChromeProfiles();
+
   const browser = await puppeteer.launch({
     executablePath: browserPath,
     headless: false,
+    userDataDir: userDataDir,
     ignoreDefaultArgs: ['--enable-automation'],
     args: [
       '--no-sandbox',
@@ -652,6 +625,10 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
     // Convert to array and return all. The caller will filter and slice.
     return Array.from(allActivities.values());
   } catch (error) {
+    try { 
+      const proc = browser.process();
+      if (proc && !proc.killed) proc.kill('SIGKILL');
+    } catch(e) {}
     try { await browser.close(); } catch(e) {}
     throw error;
   }

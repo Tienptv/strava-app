@@ -1,6 +1,6 @@
 {
   "name": "strava-desktop-software",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Strava Tracker - Standalone Professional Desktop Software Suite",
   "private": true,
   "type": "module",

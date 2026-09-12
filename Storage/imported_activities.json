@@ -3047,30 +3047,6 @@
     }
   },
   {
-    "id": "20128796096",
-    "type": "Run",
-    "distance": 2000,
-    "moving_time": 882,
-    "start_date_local": "2026-09-10T23:13:41Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Huy",
-      "lastname": "Vu"
-    }
-  },
-  {
-    "id": "20097019118",
-    "type": "Run",
-    "distance": 168.2,
-    "moving_time": 470,
-    "start_date_local": "2026-09-09T09:03:28Z",
-    "athlete": {
-      "id": 133066813,
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
     "id": "20074657805",
     "type": "Run",
     "distance": 7999.6,
@@ -3095,135 +3071,63 @@
     }
   },
   {
-    "id": "19500733483",
+    "id": "20142281380",
     "type": "Run",
-    "distance": 3021.2,
-    "moving_time": 2108,
-    "start_date_local": "2026-07-28T20:35:08Z",
+    "distance": 4510,
+    "moving_time": 1896,
+    "start_date_local": "2026-09-12T17:58:30Z",
     "athlete": {
-      "id": "133066813",
+      "id": null,
+      "firstname": "pham",
+      "lastname": "tien"
+    }
+  },
+  {
+    "id": "20142328798",
+    "type": "Run",
+    "distance": 10050,
+    "moving_time": 4140,
+    "start_date_local": "2026-09-12T17:16:28Z",
+    "athlete": {
+      "id": null,
       "firstname": "Tien",
       "lastname": "PhamTV"
     }
   },
   {
-    "id": "19500217148",
+    "id": "20136287637",
     "type": "Run",
-    "distance": 10115.4,
-    "moving_time": 3840,
-    "start_date_local": "2026-07-28T19:23:43Z",
+    "distance": 5640,
+    "moving_time": 2483,
+    "start_date_local": "2026-09-12T05:51:33Z",
     "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
+      "id": null,
+      "firstname": "Abba",
+      "lastname": "Vũ"
     }
   },
   {
-    "id": "19466507456",
+    "id": "20137799569",
     "type": "Run",
-    "distance": 5014.4,
-    "moving_time": 3493,
-    "start_date_local": "2026-07-26T07:29:18Z",
+    "distance": 3820,
+    "moving_time": 2031,
+    "start_date_local": "2026-09-11T18:38:00Z",
     "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
+      "id": null,
+      "firstname": "Phuong",
+      "lastname": "Ngo"
     }
   },
   {
-    "id": "19515843021",
+    "id": "20128796096",
     "type": "Run",
-    "distance": 11311.3,
-    "moving_time": 5429,
-    "start_date_local": "2026-07-26T05:40:30Z",
+    "distance": 2000,
+    "moving_time": 882,
+    "start_date_local": "2026-09-10T23:13:41Z",
     "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "19432997574",
-    "type": "Run",
-    "distance": 3131.9,
-    "moving_time": 2145,
-    "start_date_local": "2026-07-23T20:05:31Z",
-    "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "19431907629",
-    "type": "Run",
-    "distance": 10106.2,
-    "moving_time": 3863,
-    "start_date_local": "2026-07-23T18:56:33Z",
-    "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "19446959465",
-    "type": "Run",
-    "distance": 6856.9,
-    "moving_time": 2780,
-    "start_date_local": "2026-07-23T05:14:28Z",
-    "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "19515874391",
-    "type": "Run",
-    "distance": 6142.9,
-    "moving_time": 2908,
-    "start_date_local": "2026-07-21T05:08:29Z",
-    "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "19390073520",
-    "type": "Run",
-    "distance": 3099.4,
-    "moving_time": 2094,
-    "start_date_local": "2026-07-20T21:00:59Z",
-    "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "19389185974",
-    "type": "Run",
-    "distance": 10057.1,
-    "moving_time": 3703,
-    "start_date_local": "2026-07-20T19:55:45Z",
-    "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "19370526998",
-    "type": "Run",
-    "distance": 5291.3,
-    "moving_time": 2771,
-    "start_date_local": "2026-07-19T08:55:05Z",
-    "athlete": {
-      "id": "133066813",
-      "firstname": "Tien",
-      "lastname": "PhamTV"
+      "id": null,
+      "firstname": "Huy",
+      "lastname": "Vu"
     }
   }
 ]

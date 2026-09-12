@@ -460,19 +460,44 @@ img {
   font-weight: 500;
 }
 
+/* Dashboard Section Header */
+.dashboard-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.dashboard-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.dashboard-section-icon {
+  color: var(--accent);
+}
+
 /* Stats Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
+  border-radius: 16px;
+  padding: 20px;
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
               box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
               border-color 0.28s ease;
@@ -2357,7 +2382,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   transition: all 0.2s;
-  font-size: 7.5px;
+  font-size: 6.5px;
   padding: 0 !important;
   text-align: center;
   vertical-align: middle;
@@ -2989,6 +3014,102 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   color: var(--text-muted);
 }
 
+/* Tab Switcher */
+.personal-goal__tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-secondary);
+  padding: 4px;
+  border-radius: 8px;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+.goal-tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.goal-tab-btn:hover {
+  color: var(--primary-navy);
+}
+
+.goal-tab-btn.active {
+  background: #fff;
+  color: var(--primary-navy);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Monthly Stats Grid */
+.monthly-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+  animation: modal-fade-in 0.3s ease-out;
+}
+
+.stat-widget {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-color: rgba(0, 163, 166, 0.3);
+}
+
+.stat-widget-icon {
+  background: rgba(0, 163, 166, 0.08);
+  color: var(--accent-dark);
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-widget-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-widget-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.stat-widget-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+}
+
+.stat-widget-value small {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
 .btn-edit-goal {
   display: flex;
   align-items: center;
@@ -3403,13 +3524,47 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   transition: width 1s ease-out, background-color 0.3s;
 }
 
+@keyframes congratsPop {
+  0% { transform: scale(0.9) translateY(10px); opacity: 0; }
+  60% { transform: scale(1.05) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes shimmerShine {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  100% { transform: translateX(300%) skewX(-20deg); }
+}
+
 .goal-congrats {
-  margin-top: 0.75rem;
-  color: var(--success);
-  font-weight: 600;
+  width: fit-content;
+  margin: 1.25rem auto 0 auto;
+  padding: 0.6rem 1.5rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.15) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 2rem;
+  color: #059669;
+  font-weight: 700;
   font-size: 0.95rem;
   text-align: center;
-  animation: pulse 2s infinite;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+  animation: congratsPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.goal-congrats::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  background: linear-gradient(
+    90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.6) 50%, 
+    transparent 100%
+  );
+  width: 50%;
+  animation: shimmerShine 3s infinite linear;
+  pointer-events: none;
 }
 
 /* Club Goal specific */
@@ -4037,7 +4192,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .annual-timeline-track {
   padding: 0 !important;
   margin-top: 68px;
-  margin-bottom: 30px;
+  margin-bottom: 68px;
   overflow: visible !important;
 }
 
@@ -4332,6 +4487,29 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   position: absolute;
   left: 50%;
   top: 100%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 12px;
+  background: rgba(0, 45, 84, 0.25);
+}
+
+.race-label-text.label-bottom {
+  top: calc(100% + 4px);
+}
+
+.race-label-text.label-bottom.tier-1 {
+  top: calc(100% + 4px);
+}
+
+.race-label-text.label-bottom.tier-2 {
+  top: calc(100% + 18px);
+}
+
+.race-label-text.label-bottom.tier-2::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
   transform: translateX(-50%);
   width: 1px;
   height: 12px;
@@ -4844,7 +5022,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   gap: 12px;
   padding: 16px;
   border-radius: 12px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .penalty-status-active {
@@ -4858,16 +5036,18 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .penalty-status-none {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  flex-direction: row;
-  align-items: center;
+  background: rgba(160, 174, 192, 0.05);
+  border: 1px solid rgba(160, 174, 192, 0.15);
 }
 
 .penalty-status-header {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.penalty-icon.neutral {
+  color: #a0aec0;
 }
 
 .penalty-amount-badge {
@@ -4886,6 +5066,48 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .penalty-amount-badge.safe {
   background: rgba(16, 185, 129, 0.2);
   color: #10b981;
+}
+
+/* Club Contribution Styling */
+.personal-goal__club-contribution {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(255, 152, 0, 0.05);
+  border: 1px solid rgba(255, 152, 0, 0.15);
+  border-radius: 12px;
+  margin-top: 16px;
+}
+
+.personal-goal__club-contribution .contribution-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.personal-goal__club-contribution .contribution-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.personal-goal__club-contribution .contribution-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FF9800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.personal-goal__club-contribution .contribution-rank {
+  background: rgba(255, 152, 0, 0.15);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #FF9800;
 }
 
 .btn-edit-goal, .btn-primary-sm, .btn-secondary-sm, .btn-quick-save {
@@ -6639,4 +6861,376 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 163, 166, 0.3);
+}
+
+/* ==========================================
+   PERSONAL GOAL DASHBOARD (2-COLUMN HERO & ASIDE LAYOUT)
+   ========================================== */
+.personal-goal-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1.15fr);
+  gap: 16px;
+  margin-bottom: 20px;
+  align-items: stretch;
+}
+
+.pg-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 16px rgba(0, 45, 84, 0.04), 0 2px 6px rgba(0, 45, 84, 0.02);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 0.28s ease;
+}
+
+.pg-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 163, 166, 0.35);
+  box-shadow: 0 16px 32px -4px rgba(0, 45, 84, 0.1), 0 6px 12px -2px rgba(0, 45, 84, 0.05);
+}
+
+.pg-hero-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pg-aside-penalty-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.pg-aside-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  justify-content: space-between;
+}
+
+/* Header styles for the cards */
+.personal-goal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.personal-goal__title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.personal-goal__icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 163, 166, 0.1);
+  flex-shrink: 0;
+}
+
+.personal-goal__main-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: block;
+}
+
+.personal-goal__month-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Smart Target & Pacing Metrics */
+.pg-goal-smart-metrics {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 163, 166, 0.04);
+  border: 1px solid rgba(0, 163, 166, 0.14);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 14px 0 16px 0;
+  gap: 8px;
+}
+
+.smart-metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.smart-metric-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.smart-metric-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.smart-metric-val.highlight {
+  color: var(--primary-navy);
+}
+
+.smart-metric-val.accent {
+  color: #00A3A6;
+  font-weight: 800;
+}
+
+.smart-metric-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(0, 163, 166, 0.15);
+  flex-shrink: 0;
+}
+
+/* 3x2 Monthly Stats Grid in Hero */
+.monthly-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.stat-widget {
+  background: var(--bg-secondary, rgba(248, 250, 252, 0.7));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.stat-widget:hover {
+  background: var(--bg-card);
+  border-color: rgba(0, 163, 166, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.stat-widget-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 163, 166, 0.08);
+  color: #00A3A6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-widget-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stat-widget-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-widget-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  line-height: 1.2;
+}
+
+.stat-widget-value small {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* AI Coach / Recommendations */
+.ai-coach-box {
+  margin-top: auto;
+  padding: 12px 14px;
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  animation: modal-fade-in 0.4s ease-out;
+  border-left: 4px solid transparent;
+}
+
+.ai-coach-icon {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-coach-title {
+  margin: 0 0 2px 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ai-coach-message {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.ai-coach-success {
+  background: rgba(16, 185, 129, 0.08);
+  border-left-color: #10b981;
+}
+.ai-coach-success .ai-coach-icon { color: #10b981; }
+
+.ai-coach-warning {
+  background: rgba(245, 158, 11, 0.08);
+  border-left-color: #f59e0b;
+}
+.ai-coach-warning .ai-coach-icon { color: #f59e0b; }
+
+.ai-coach-info {
+  background: rgba(59, 130, 246, 0.08);
+  border-left-color: #3b82f6;
+}
+.ai-coach-info .ai-coach-icon { color: #3b82f6; }
+
+/* Aside Card - Penalty & Club Contribution */
+.personal-goal__penalty-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.personal-goal__club-contribution {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.06) 0%, rgba(255, 183, 77, 0.08) 100%);
+  border: 1px solid rgba(255, 152, 0, 0.22);
+  border-radius: 14px;
+  margin-top: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.personal-goal__club-contribution::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(255, 152, 0, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.personal-goal__club-contribution .contribution-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.contribution-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.personal-goal__club-contribution .contribution-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.contribution-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.personal-goal__club-contribution .contribution-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #d97706;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  letter-spacing: -0.5px;
+}
+
+.personal-goal__club-contribution .contribution-value small {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.personal-goal__club-contribution .contribution-rank {
+  background: rgba(217, 119, 6, 0.15);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #b45309;
+}
+
+/* Ensure mobile stacking */
+@media (max-width: 1024px) {
+  .personal-goal-dashboard {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+@media (max-width: 768px) {
+  .personal-goal-dashboard {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .monthly-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .pg-goal-smart-metrics {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .smart-metric-divider {
+    display: none;
+  }
 }

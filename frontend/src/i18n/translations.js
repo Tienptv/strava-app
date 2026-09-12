@@ -91,6 +91,11 @@ const translations = {
     you: 'Bạn',
     targetKm: 'Mục tiêu (km)',
     syncedWithAdmin: 'Đã đồng bộ với Admin & Bảng Challenge',
+    clubAllTimeContribution: 'Đóng góp quỹ CLB',
+    dailyPaceTarget: 'Cần chạy mỗi ngày',
+    daysRemaining: 'Thời gian còn lại',
+    disciplineAndFund: 'Kỷ luật & Quỹ CLB',
+    careerOverview: 'Tổng tích lũy hoạt động (Toàn thời gian)',
 
 
     // ChallengeTable
@@ -474,6 +479,11 @@ const translations = {
     you: 'You',
     targetKm: 'Target Distance (km)',
     syncedWithAdmin: 'Synced with Admin & Challenge Table',
+    clubAllTimeContribution: 'Club Fund Contribution',
+    dailyPaceTarget: 'Daily Target',
+    daysRemaining: 'Remaining Days',
+    disciplineAndFund: 'Discipline & Club Fund',
+    careerOverview: 'All-Time Career Overview',
 
 
     // ChallengeTable

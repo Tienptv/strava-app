@@ -18,6 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const RENDER_CLOUD_URL = process.env.RENDER_CLOUD_URL || 'https://strava-app-86t5.onrender.com';
 const SYNC_SECRET_TOKEN = process.env.SYNC_SECRET_TOKEN || 'STRAVA_SUBADMIN_SYNC_2026';
+const STRAVA_VERIFY_TOKEN = process.env.STRAVA_VERIFY_TOKEN || 'STRAVA_RENDER_WEBHOOK_2026';
 const TARGETS_FILE = path.join(__dirname, '../Storage/targets.json');
 const CONFIG_FILE = path.join(__dirname, '../Storage/challenge_config.json');
 const IMPORTED_FILE = path.join(__dirname, '../Storage/imported_activities.json');
@@ -213,12 +214,12 @@ function parseCSVLine(text) {
   for (let i = 0; i < text.length; i++) {
     let c = text[i];
     if (c === '"') {
-      if (inQuotes && text[i+1] === '"') { row[row.length-1] += '"'; i++; }
+      if (inQuotes && text[i + 1] === '"') { row[row.length - 1] += '"'; i++; }
       else { inQuotes = !inQuotes; }
     } else if (c === ',' && !inQuotes) {
       row.push('');
     } else {
-      row[row.length-1] += c;
+      row[row.length - 1] += c;
     }
   }
   return row.map(s => s.trim().replace(/^["']|["']$/g, ''));
@@ -236,7 +237,7 @@ function parseStorageCSV(content) {
     headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
     rows.push(obj);
   }
-  
+
   const activities = [];
   rows.forEach(row => {
     // Bỏ qua các hoạt động ẩn
@@ -254,7 +255,7 @@ function parseStorageCSV(content) {
       distNum = distNum * 1.609344;
     }
     let dist = isNaN(distNum) ? 0 : Math.round(distNum * 1000);
-    
+
     let movingTimeStr = row['Duration'] || row['Moving Time'] || row['Time'] || '00:00:00';
     let timeParts = movingTimeStr.split(':').map(Number);
     let movingTimeSec = 0;
@@ -335,7 +336,7 @@ function isBetterRecord(a, b) {
   if (!b) return true;
   if (a.start_date_local && !b.start_date_local) return true;
   if (!a.start_date_local && b.start_date_local) return false;
-  
+
   if (a.start_date_local && b.start_date_local) {
     const dateA = new Date(a.start_date_local);
     const dateB = new Date(b.start_date_local);
@@ -343,12 +344,12 @@ function isBetterRecord(a, b) {
     if (dateA.getTime() > dateB.getTime()) return true;
     // Don't return false here yet, let it check lastname below if dates are exactly equal
   }
-  
+
   // Giữ lại bản có tên họ đầy đủ hơn
   const aLastname = a.athlete?.lastname || '';
   const bLastname = b.athlete?.lastname || '';
   if (aLastname.length > 2 && bLastname.length <= 2) return true;
-  
+
   return false;
 }
 
@@ -366,7 +367,7 @@ function mergeActivitiesList(existingList, newList) {
         uniqueMap.set(idKey, act);
       }
     }
-    
+
     const existingComp = uniqueMap.get(cKey);
     if (!existingComp || isBetterRecord(act, existingComp)) {
       uniqueMap.set(cKey, act);
@@ -397,17 +398,17 @@ function syncAllStorageCsv() {
 
     let csvFiles = fs.readdirSync(storageDir).filter(f => f.startsWith('data-') && f.endsWith('.csv'));
     csvFiles.sort(); // Sắp xếp theo tên (tên chứa thời gian nên sẽ tăng dần)
-    
+
     let isUpdated = false;
 
     for (const f of csvFiles) {
       try {
         const content = fs.readFileSync(path.join(storageDir, f), 'utf8');
         let fileActivities = parseStorageCSV(content);
-        
+
         if (fileActivities.length > 0) {
           fileActivities = mapAthleteNamesUsingCSV(fileActivities);
-          
+
           existingActivities = mergeActivitiesList(existingActivities, fileActivities);
           isUpdated = true;
         }
@@ -442,7 +443,7 @@ function getRedirectUri(req) {
     if (ref) {
       try {
         origin = new URL(ref).origin;
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 
@@ -494,7 +495,7 @@ async function autoFetchAndMergeUserActivities(accessToken, athlete) {
   try {
     // Chỉ đồng bộ 5 hoạt động gần nhất của user này
     const activities = await strava.getActivities(accessToken, { per_page: 5 });
-    
+
     if (!Array.isArray(activities) || activities.length === 0) return;
 
     // Filter run activities
@@ -538,7 +539,7 @@ async function autoFetchAndMergeUserActivities(accessToken, athlete) {
     if (mergedData.length > preCount || JSON.stringify(mergedData) !== JSON.stringify(existing)) {
       fs.writeFileSync(IMPORTED_FILE, JSON.stringify(mergedData, null, 2), 'utf8');
       console.log(`[Auto-Sync] Đã đồng bộ hoạt động mới từ 5 hoạt động gần nhất cho user ${athlete.firstname} ${athlete.lastname}. Tổng: ${mergedData.length}`);
-      
+
       // Tự động đẩy lên Render Cloud nếu đang chạy ở máy local/desktop
       if (!process.env.RENDER) {
         try {
@@ -596,7 +597,7 @@ app.post('/api/auth/token', async (req, res) => {
     let autoCookie = null;
     try {
       autoCookie = await extractCookiesFromActiveBrowser();
-    } catch (_) {}
+    } catch (_) { }
 
     // Kích hoạt đồng bộ hoạt động ngầm trong ngày hôm nay (không await để UI login nhanh)
     if (tokenData.access_token && tokenData.athlete) {
@@ -671,7 +672,7 @@ function getAthleteMatchKeyAndId(identifier) {
             fullSlugClean === idStrClean ||
             fullSlugClean === idStrCleanSlug
           );
-          
+
           if (isMatch) {
             return { id, matchKey, name };
           }
@@ -716,7 +717,7 @@ function getAthleteMatchKeyAndId(identifier) {
           }
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   return { id: rawStr, matchKey: rawStr, name: null };
@@ -799,11 +800,11 @@ app.get('/api/auth/roles', (req, res) => {
   const rawAthleteId = (req.headers['x-athlete-id'] || req.query.athleteId || '').toString();
   const subAdmins = loadAdminsList();
   const info = getAthleteMatchKeyAndId(rawAthleteId);
-  
+
   const isSuperAdmin = !!rawAthleteId && (rawAthleteId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID);
   const isSubAdmin = !isSuperAdmin && !!rawAthleteId && isAthleteInSubAdmins(rawAthleteId, subAdmins);
   const isAdmin = isSuperAdmin || isSubAdmin;
-  
+
   const permissions = isSuperAdmin ? {
     generalSettings: true,
     manageRoles: true,
@@ -929,7 +930,7 @@ app.delete('/api/admins/:id', (req, res) => {
     if (targetInfo.id && (s === targetInfo.id || sLower === targetInfo.id.toLowerCase())) return false;
     if (targetInfo.matchKey && (sLower === targetInfo.matchKey.toLowerCase() || sLower.replace('.', '') === targetInfo.matchKey.toLowerCase().replace('.', ''))) return false;
     if (targetInfo.name && (sLower === targetInfo.name.toLowerCase() || sLower === targetInfo.name.replace(/\s+/g, '_').toLowerCase())) return false;
-    
+
     const itemInfo = getAthleteMatchKeyAndId(s);
     if (itemInfo.id && targetInfo.id && itemInfo.id.toString() === targetInfo.id.toString()) return false;
     return true;
@@ -995,10 +996,10 @@ app.delete('/api/admin/audit-logs', (req, res) => {
   if (currentAthleteId !== SUPER_ADMIN_ID && !isAthleteInSubAdmins(currentAthleteId, subAdmins)) {
     return res.status(403).json({ error: 'Không có quyền thực hiện thao tác này' });
   }
-  
+
   try {
     fs.writeFileSync(AUDIT_LOGS_FILE, JSON.stringify([], null, 2), 'utf8');
-  } catch (e) {}
+  } catch (e) { }
   addAuditLog('Dọn dẹp nhật ký', currentAthleteId || 'Admin', 'Đã xóa toàn bộ bản ghi audit log cũ');
   res.json({ success: true, logs: [] });
 });
@@ -1065,7 +1066,7 @@ app.get('/api/admin/storage-stats', (req, res) => {
           const lines = fs.readFileSync(f.file, 'utf8').split('\n').filter(l => l.trim().length > 0);
           count = Math.max(0, lines.length - 1); // Trừ dòng header
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     return {
@@ -1102,7 +1103,7 @@ app.get('/api/storage/export-zip', (req, res) => {
   try {
     const storageDir = path.join(__dirname, '../Storage');
     const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
     const zipName = `strava-app-storage-${timestamp}.zip`;
 
     res.attachment(zipName);
@@ -1130,7 +1131,7 @@ app.get('/api/storage/export-zip', (req, res) => {
           if (stat.isFile()) {
             archive.file(fullPath, { name: f });
           }
-        } catch (e) {}
+        } catch (e) { }
       }
     }
 
@@ -1301,25 +1302,25 @@ app.post('/api/storage/push-to-cloud', async (req, res) => {
 
     const bundle = {};
     if (fs.existsSync(IMPORTED_FILE)) {
-      try { bundle.imported = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8')); } catch(e){}
+      try { bundle.imported = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8')); } catch (e) { }
     }
     if (fs.existsSync(TARGETS_FILE)) {
-      try { bundle.targets = JSON.parse(fs.readFileSync(TARGETS_FILE, 'utf8')); } catch(e){}
+      try { bundle.targets = JSON.parse(fs.readFileSync(TARGETS_FILE, 'utf8')); } catch (e) { }
     }
     if (fs.existsSync(CONFIG_FILE)) {
-      try { bundle.config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); } catch(e){}
+      try { bundle.config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')); } catch (e) { }
     }
     if (fs.existsSync(ADMINS_FILE)) {
-      try { bundle.admins = JSON.parse(fs.readFileSync(ADMINS_FILE, 'utf8')); } catch(e){}
+      try { bundle.admins = JSON.parse(fs.readFileSync(ADMINS_FILE, 'utf8')); } catch (e) { }
     }
     if (fs.existsSync(NAME_MAPPING_FILE)) {
-      try { bundle.nameMapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8')); } catch(e){}
+      try { bundle.nameMapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8')); } catch (e) { }
     }
     if (fs.existsSync(GOAL_FILE)) {
-      try { bundle.clubGoal = JSON.parse(fs.readFileSync(GOAL_FILE, 'utf8')); } catch(e){}
+      try { bundle.clubGoal = JSON.parse(fs.readFileSync(GOAL_FILE, 'utf8')); } catch (e) { }
     }
     if (fs.existsSync(PENALTIES_FILE)) {
-      try { bundle.penalties = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8')); } catch(e){}
+      try { bundle.penalties = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8')); } catch (e) { }
     }
 
     const targetEndpoint = `${cloudUrl}/api/storage/sync-bundle`;
@@ -1380,10 +1381,10 @@ app.post('/api/admin/git-push', async (req, res) => {
       }
     }
 
-    const execOptions = { 
+    const execOptions = {
       cwd: gitRoot,
       timeout: 30000,
-      env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } 
+      env: { ...process.env, GIT_TERMINAL_PROMPT: '0' }
     };
 
     // 1. Tự động kiểm tra và commit các file trong Storage nếu có thay đổi mới
@@ -1393,7 +1394,7 @@ app.post('/api/admin/git-push', async (req, res) => {
       const statusRes = await execAsync('git status --porcelain Storage/', execOptions);
       if (statusRes.stdout && statusRes.stdout.trim()) {
         const now = new Date();
-        const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         await execAsync(`git commit -m "chore: Sync and backup Strava Storage data [${timeStr}]"`, execOptions);
         commitMessage = `Đã tự động commit các tệp thay đổi trong Storage/ (${timeStr})`;
       }
@@ -1428,13 +1429,13 @@ app.post('/api/admin/backup', (req, res) => {
   const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
   try {
     const now = new Date();
-    const timestamp = now.getFullYear().toString() + 
-      (now.getMonth() + 1).toString().padStart(2, '0') + 
-      now.getDate().toString().padStart(2, '0') + '_' + 
-      now.getHours().toString().padStart(2, '0') + 
-      now.getMinutes().toString().padStart(2, '0') + 
+    const timestamp = now.getFullYear().toString() +
+      (now.getMonth() + 1).toString().padStart(2, '0') +
+      now.getDate().toString().padStart(2, '0') + '_' +
+      now.getHours().toString().padStart(2, '0') +
+      now.getMinutes().toString().padStart(2, '0') +
       now.getSeconds().toString().padStart(2, '0');
-    
+
     const backupFileName = `strava-app-backup-${timestamp}.zip`;
     const backupFilePath = path.join(__dirname, '..', backupFileName);
     const output = fs.createWriteStream(backupFilePath);
@@ -1602,7 +1603,7 @@ app.get('/api/activities', getToken, async (req, res) => {
     (async () => {
       try {
         if (!Array.isArray(activities) || activities.length === 0) return;
-        
+
         // 1. Lọc Run/TrailRun
         const runActivities = activities.filter(act => {
           const t = (act.type || '').toLowerCase();
@@ -1613,10 +1614,10 @@ app.get('/api/activities', getToken, async (req, res) => {
         // Lấy athleteId từ request
         let athleteIdStr = req.headers['x-athlete-id'] || req.query.athleteId || null;
         if (!athleteIdStr && req.accessToken) {
-           const match = Array.from(tokenStore.entries()).find(([k, v]) => v.access_token === req.accessToken);
-           if (match) athleteIdStr = match[0];
+          const match = Array.from(tokenStore.entries()).find(([k, v]) => v.access_token === req.accessToken);
+          if (match) athleteIdStr = match[0];
         }
-        
+
         // 2. Chuyển đổi sang chuẩn
         let mappedActivities = runActivities.map(act => ({
           id: act.id.toString(),
@@ -1640,7 +1641,7 @@ app.get('/api/activities', getToken, async (req, res) => {
           try {
             existing = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
             if (!Array.isArray(existing)) existing = [];
-          } catch(e) { existing = []; }
+          } catch (e) { existing = []; }
         }
 
         let addedCount = 0;
@@ -1900,7 +1901,7 @@ function getFullNameMapping() {
           const nameParts = fullName.split(' ');
           const fn = nameParts[0];
           const ln = nameParts.slice(1).join(' ');
-          
+
           if (ln) {
             const initial = ln.charAt(0).toUpperCase() + '.';
             const matchKey = `${fn}_${initial}`.toLowerCase();
@@ -2039,7 +2040,7 @@ function getAllClubMembersRoster() {
           }
         });
       }
-    } catch(e){}
+    } catch (e) { }
   }
 
   // 2. Nạp từ Storage/AthleteID_Name.csv
@@ -2066,10 +2067,10 @@ function getAllClubMembersRoster() {
             else if (map.has(matchKeyNoDot)) existingKey = matchKeyNoDot;
             else {
               for (const [k, v] of map.entries()) {
-                if ((v.id && String(v.id) === String(id)) || 
-                    (v.athleteId && String(v.athleteId) === String(id)) ||
-                    (v.name && v.name.toLowerCase() === name.toLowerCase()) ||
-                    (`${v.firstname} ${v.lastname}`.trim().toLowerCase() === name.toLowerCase())) {
+                if ((v.id && String(v.id) === String(id)) ||
+                  (v.athleteId && String(v.athleteId) === String(id)) ||
+                  (v.name && v.name.toLowerCase() === name.toLowerCase()) ||
+                  (`${v.firstname} ${v.lastname}`.trim().toLowerCase() === name.toLowerCase())) {
                   existingKey = k;
                   break;
                 }
@@ -2101,7 +2102,7 @@ function getAllClubMembersRoster() {
           }
         }
       }
-    } catch(e){}
+    } catch (e) { }
   }
 
   // 3. Nạp avatar từ Storage/avatars.json
@@ -2115,7 +2116,7 @@ function getAllClubMembersRoster() {
           val.profile = avatars[key];
         }
       });
-    } catch(e){}
+    } catch (e) { }
   }
 
   return deduplicateMembers(Array.from(map.values()));
@@ -2160,7 +2161,7 @@ app.get('/api/clubs/:id/members', optionalGetToken, async (req, res) => {
         const initial = ln ? ln.charAt(0).toUpperCase() + '.' : '';
         const matchKey = `${fn}_${initial}`;
         const key = matchKey.toLowerCase();
-        
+
         if (memberMap.has(key)) {
           const rosterItem = memberMap.get(key);
           memberMap.set(key, {
@@ -2210,10 +2211,10 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
     if (!fs.existsSync(configPath)) {
       return res.status(404).json({ error: 'Config not found' });
     }
-    
+
     let configStr = fs.readFileSync(configPath, 'utf8');
     let config = JSON.parse(configStr);
-    
+
     if (!config.clubId) {
       return res.status(400).json({ error: 'Chưa cấu hình Club ID' });
     }
@@ -2221,13 +2222,13 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
     let members = [];
     let page = 1;
     let hasMore = true;
-    
+
     while (hasMore) {
       const pageMembers = await strava.getClubMembers(req.accessToken, config.clubId, {
         page: page,
         per_page: 200,
       });
-      
+
       if (Array.isArray(pageMembers) && pageMembers.length > 0) {
         members = members.concat(pageMembers);
         if (pageMembers.length < 200) {
@@ -2245,7 +2246,7 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
     }
 
     const mapping = getFullNameMapping(); // keys are lowercase e.g. "abba_v."
-    
+
     // Load existing name_mapping.json to update athlete IDs for the scraper
     let nameMappingJson = {};
     try {
@@ -2256,18 +2257,18 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
 
     let mappingUpdated = false;
     const stravaMembersMap = {}; // keyed by matchKey e.g. "Abba_V."
-    
+
     members.forEach(m => {
       let firstname = m.firstname || '';
       let lastname = m.lastname || '';
-      
+
       const initial = lastname ? lastname.charAt(0).toUpperCase() + '.' : '';
       const matchKey = `${firstname}_${initial}`;
       const matchKeyLower = matchKey.toLowerCase();
-      
+
       // FIX: Strava club members API returns athlete id as m.id (not m.athlete.id)
       const athleteId = m.id ? m.id.toString() : null;
-      
+
       // Update name_mapping.json for the fetch_avatars script
       if (athleteId) {
         if (!nameMappingJson[matchKey]) {
@@ -2282,14 +2283,14 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
           mappingUpdated = true;
         }
       }
-      
+
       // FIX: getFullNameMapping() returns lowercase keys - use matchKeyLower to lookup
       const fullNameEntry = mapping[matchKeyLower];
       if (fullNameEntry) {
         firstname = fullNameEntry.firstname || firstname;
         lastname = fullNameEntry.lastname || lastname;
       }
-      
+
       stravaMembersMap[matchKey] = {
         resource_state: m.resource_state || 2,
         name: `${firstname} ${lastname}`.trim(),
@@ -2340,8 +2341,8 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
 
           // Chỉ lưu nếu chưa có hoặc profile mới có URL đầy đủ hơn
           const existing = activitiesAthleteMap[matchKey];
-          const hasGoodProfile = ath.profile_medium && 
-            !ath.profile_medium.includes('avatar/athlete') && 
+          const hasGoodProfile = ath.profile_medium &&
+            !ath.profile_medium.includes('avatar/athlete') &&
             !ath.profile_medium.includes('logo-strava');
 
           if (!existing || (hasGoodProfile && !existing.hasGoodProfile)) {
@@ -2492,7 +2493,7 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
 
     // Update existing participants AND add new members
     if (!config.participants) config.participants = {};
-    
+
     Object.entries(stravaMembersMap).forEach(([matchKey, memberData]) => {
       if (config.participants[matchKey]) {
         // Update existing participant
@@ -2565,20 +2566,20 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
         }
       });
     }
-    
+
     updatedCount = trackedIds.size;
 
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
-    
+
     // Tích hợp chạy 2 lệnh lấy avatar nâng cao
     try {
       const { exec } = await import('child_process');
       const util = await import('util');
       const execPromise = util.promisify(exec);
-      
+
       console.log('Đang chạy fetch_avatars.cjs...');
       await execPromise('node server/fetch_avatars.cjs', { env: process.env, cwd: path.join(__dirname, '..') });
-      
+
       console.log('Đang chạy update_config_avatars.cjs...');
       await execPromise('node server/update_config_avatars.cjs', { env: process.env, cwd: path.join(__dirname, '..') });
       console.log('Đã cập nhật avatar nâng cao thành công!');
@@ -2586,9 +2587,9 @@ app.post('/api/admin/sync-members', getToken, async (req, res) => {
       console.error('Lỗi khi chạy script cập nhật avatar:', scriptErr.message);
       // Không ném lỗi ra ngoài để luồng chính vẫn thành công
     }
-    
+
     const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
-    addAuditLog('Đồng bộ Thành viên', currentAthleteId || 'Admin', 
+    addAuditLog('Đồng bộ Thành viên', currentAthleteId || 'Admin',
       `Đã cập nhật Tên/Avatar cho ${updatedCount} thành viên (${newMemberCount} thành viên mới)`);
 
     res.json({ success: true, updatedCount, newMemberCount });
@@ -2644,7 +2645,7 @@ app.post('/api/challenge/targets', (req, res) => {
         data = {};
       }
     }
-    
+
     if (Array.isArray(payload)) {
       payload.forEach(item => {
         if (item && item.matchKey) {
@@ -2706,10 +2707,10 @@ app.get('/api/challenge/config', (req, res) => {
     if (fs.existsSync(CONFIG_FILE)) {
       const data = fs.readFileSync(CONFIG_FILE, 'utf8');
       const config = JSON.parse(data);
-      
+
       // Gắn Full Name tự động cho config để UI luôn hiển thị đúng
       const mapping = getFullNameMapping();
-      
+
       if (config.participants) {
         Object.keys(config.participants).forEach(key => {
           const mappingEntry = mapping[key.toLowerCase()];
@@ -2720,7 +2721,7 @@ app.get('/api/challenge/config', (req, res) => {
           }
         });
       }
-      
+
       if (config.monthlyParticipants) {
         Object.keys(config.monthlyParticipants).forEach(month => {
           const monthData = config.monthlyParticipants[month];
@@ -2734,7 +2735,7 @@ app.get('/api/challenge/config', (req, res) => {
           });
         });
       }
-      
+
       res.json(config);
     } else {
       res.json({ participants: {}, clubId: '' });
@@ -2764,7 +2765,7 @@ app.post('/api/challenge/config', (req, res) => {
     if (fs.existsSync(CONFIG_FILE)) {
       try {
         existingConfig = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const payload = req.body;
@@ -2930,13 +2931,13 @@ app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
     const clubId = req.params.id;
     // 1. Get up to 50 activities from Strava
     const stravaActivities = await strava.getClubActivities(req.accessToken, clubId, { page: 1, per_page: 50 });
-    
+
     // 2. Filter for 'Run', 'VirtualRun', 'TrailRun' activities
     const runActivities = stravaActivities.filter(act => {
       const t = (act.sport_type || act.type || '').toLowerCase();
       return ['run', 'virtualrun', 'trailrun', 'trail run'].includes(t) || t.includes('run') || t.includes('trail');
     });
-    
+
     // 3. Format as CSV
     // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
     let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
@@ -2947,40 +2948,40 @@ app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
       const title = `"${(act.name || '').replace(/"/g, '""')}"`;
       const distance = ((act.distance || 0) / 1000).toFixed(2);
       const calories = 0;
-      
+
       const totalSeconds = act.moving_time || 0;
       const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
       const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
       const s = (totalSeconds % 60).toString().padStart(2, '0');
       const time = `${h}:${m}:${s}`;
-      
+
       let type = act.sport_type || act.type || 'Run';
       const lowerType = type.toLowerCase().replace(/[\s_-]/g, '');
       if (lowerType.includes('trail')) type = 'TrailRun';
       else if (lowerType.includes('virtual')) type = 'VirtualRun';
       else if (lowerType.includes('run')) type = 'Run';
-      
+
       csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
     });
-    
+
     // 4. Save to Storage
     const storageDir = path.join(__dirname, '../Storage');
     if (!fs.existsSync(storageDir)) {
       fs.mkdirSync(storageDir, { recursive: true });
     }
-    
+
     const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
     const filename = `data-autosync-${timestamp}.csv`;
     const filepath = path.join(storageDir, filename);
-    
+
     fs.writeFileSync(filepath, csvContent, 'utf8');
-    
+
     // 5. Update imported_activities.json directly with smart wipe logic
     let fileActivities = parseStorageCSV(csvContent);
     if (fileActivities.length > 0) {
       fileActivities = mapAthleteNamesUsingCSV(fileActivities);
-      
+
       let existing = [];
       if (fs.existsSync(IMPORTED_FILE)) {
         try {
@@ -2988,7 +2989,7 @@ app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
           if (!Array.isArray(existing)) existing = [];
         } catch (e) { existing = []; }
       }
-      
+
       let minDate = null;
       let maxDate = null;
       fileActivities.forEach(act => {
@@ -2998,7 +2999,7 @@ app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
           if (!maxDate || dateStr > maxDate) maxDate = dateStr;
         }
       });
-      
+
       if (minDate && maxDate) {
         existing = existing.filter(act => {
           if (!act.start_date_local) return true;
@@ -3006,10 +3007,10 @@ app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
           return dateStr < minDate || dateStr > maxDate;
         });
       }
-      
+
       const mergedData = mergeActivitiesList(existing, fileActivities);
       fs.writeFileSync(IMPORTED_FILE, JSON.stringify(mergedData, null, 2), 'utf8');
-      
+
       res.json({ success: true, count: mergedData.length, activities: mergedData, synced_from_strava: runActivities.length, filename });
     } else {
       res.json({ success: true, count: 0, activities: [], synced_from_strava: 0, filename });
@@ -3045,7 +3046,7 @@ app.get('/api/strava/cookie', async (req, res) => {
   if (!cookie) {
     try {
       cookie = await extractCookiesFromActiveBrowser();
-    } catch (_) {}
+    } catch (_) { }
   }
   res.json({ hasCookie: !!cookie, cookie: cookie || '' });
 });
@@ -3092,13 +3093,13 @@ app.post('/api/strava/cookie', (req, res) => {
 // ==========================================
 async function pushActivitiesToCloud(activities, subAdminName = 'Sub-Admin (Desktop App)') {
   if (!Array.isArray(activities) || activities.length === 0) return { success: true, count: 0 };
-  
+
   // Không gửi nếu chính server này đang chạy trên Render (tránh tự gửi cho chính mình)
   if (process.env.RENDER) return { success: true, count: 0, isRender: true };
 
   const targetUrl = `${RENDER_CLOUD_URL.replace(/\/+$/, '')}/api/challenge/sync-client-activities`;
   console.log(`☁️ [HYBRID CLOUD SYNC] Đang tự động gửi ${activities.length} hoạt động lên Cloud Render (${RENDER_CLOUD_URL})...`);
-  
+
   try {
     const res = await fetch(targetUrl, {
       method: 'POST',
@@ -3110,7 +3111,7 @@ async function pushActivitiesToCloud(activities, subAdminName = 'Sub-Admin (Desk
       }),
       signal: AbortSignal.timeout(30000)
     });
-    
+
     if (res.ok) {
       const result = await res.json();
       console.log(`✅ [HYBRID CLOUD SYNC] Đã đồng bộ lên Render thành công! File: ${result.filename || 'OK'}`);
@@ -3132,25 +3133,25 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
     const clubId = req.params.id;
     let cookie = req.body.cookie;
     let limit = req.body.limit || 50;
-    
+
     // Auto-use saved cookie if none provided
     if (!cookie) {
       cookie = getSavedCookie();
     }
-    
+
     if (!cookie) {
       return res.status(400).json({ success: false, error: 'Thiếu Strava Session Cookie. Vui lòng đăng nhập trước.' });
     }
 
     // 1. Scrape activities using Puppeteer
     const scrapedActivities = await scrapeClubActivities(clubId, cookie, limit);
-    
+
     // 2. Filter for 'Run', 'VirtualRun', 'TrailRun' activities and limit to the requested amount
     const runActivities = scrapedActivities.filter(act => {
       const t = (act.type || '').toLowerCase();
       return ['run', 'virtualrun', 'trailrun', 'trail run'].includes(t) || t.includes('run') || t.includes('trail');
     }).slice(0, limit);
-    
+
     // 3. Format as CSV
     // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
     let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
@@ -3159,10 +3160,10 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
       const id = act.id || '';
       const date = act.date || '';
       const title = `"${(act.title || '').replace(/"/g, '""')}"`;
-      
+
       const distance = `"${act.distance}"`;
       const calories = 0;
-      
+
       // Parse time like "1h 45m" or "45m 30s" to HH:mm:ss
       let rawTime = act.time.toLowerCase();
       let h = 0, m = 0, s = 0;
@@ -3173,34 +3174,34 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
       if (mMatch) m = parseInt(mMatch[1]);
       if (sMatch) s = parseInt(sMatch[1]);
       const time = `"${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}"`;
-      
+
       let type = act.type || 'Run';
       const lowerType = type.toLowerCase().replace(/[\s_-]/g, '');
       if (lowerType.includes('trail')) type = 'TrailRun';
       else if (lowerType.includes('virtual')) type = 'VirtualRun';
       else if (lowerType.includes('run')) type = 'Run';
-      
+
       csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
     });
-    
+
     // 4. Save to Storage
     const storageDir = path.join(__dirname, '../Storage');
     if (!fs.existsSync(storageDir)) {
       fs.mkdirSync(storageDir, { recursive: true });
     }
-    
+
     const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
     const filename = `data-autosync-scrape-${timestamp}.csv`;
     const filepath = path.join(storageDir, filename);
-    
+
     fs.writeFileSync(filepath, csvContent, 'utf8');
-    
+
     // 5. Update imported_activities.json directly with smart wipe logic
     let fileActivities = parseStorageCSV(csvContent);
     if (fileActivities.length > 0) {
       fileActivities = mapAthleteNamesUsingCSV(fileActivities);
-      
+
       let existing = [];
       if (fs.existsSync(IMPORTED_FILE)) {
         try {
@@ -3208,7 +3209,7 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
           if (!Array.isArray(existing)) existing = [];
         } catch (e) { existing = []; }
       }
-      
+
       const dailyRanges = {};
       fileActivities.forEach(act => {
         if (act.start_date_local) {
@@ -3222,12 +3223,12 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
           }
         }
       });
-      
+
       const intervals = Object.values(dailyRanges).map(range => ({
         min: range.min - 4000,
         max: range.max + 4000
       }));
-      
+
       if (intervals.length > 0) {
         existing = existing.filter(act => {
           if (!act.start_date_local) return true;
@@ -3236,10 +3237,10 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
           return !isWithinAnyInterval;
         });
       }
-      
+
       const mergedData = mergeActivitiesList(existing, fileActivities);
       fs.writeFileSync(IMPORTED_FILE, JSON.stringify(mergedData, null, 2), 'utf8');
-      
+
       // Tự động đẩy lên Render Cloud nếu đang chạy ở máy local/desktop
       let cloudSyncInfo = null;
       if (!process.env.RENDER) {
@@ -3252,11 +3253,11 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
         }
       }
 
-      res.json({ 
-        success: true, 
-        count: mergedData.length, 
-        activities: mergedData, 
-        scraped_count: runActivities.length, 
+      res.json({
+        success: true,
+        count: mergedData.length,
+        activities: mergedData,
+        scraped_count: runActivities.length,
         filename,
         cloudSynced: cloudSyncInfo ? cloudSyncInfo.success : true,
         cloudError: cloudSyncInfo?.error || null,
@@ -3281,7 +3282,7 @@ app.post('/api/cloud-sync/push-all', async (req, res) => {
         activities = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
       } catch (e) { activities = []; }
     }
-    
+
     if (activities.length === 0) {
       return res.json({ success: true, message: 'Không có hoạt động nào trong bộ nhớ để đồng bộ.', syncedCount: 0 });
     }
@@ -3315,26 +3316,26 @@ app.post('/api/cloud-sync/push-all', async (req, res) => {
 app.post('/api/challenge/sync-client-activities', (req, res) => {
   try {
     const { token, athleteId, activities, subAdminName } = req.body || {};
-    
+
     // 1. Kiểm tra xác thực (Sync Token hoặc Athlete ID của Sub-Admin)
     const configuredToken = process.env.SYNC_SECRET_TOKEN || 'STRAVA_SUBADMIN_SYNC_2026';
     const subAdmins = loadAdminsList();
     const isValidToken = token && (token === configuredToken || token === 'STRAVA_SUBADMIN_SYNC_2026');
     const isValidAdmin = athleteId && (athleteId === SUPER_ADMIN_ID || isAthleteInSubAdmins(athleteId, subAdmins));
-    
+
     if (!isValidToken && !isValidAdmin) {
-      return res.status(401).json({ 
-        success: false, 
-        error: 'Mã xác thực (Sync Token) không hợp lệ. Vui lòng kiểm tra lại config.json.' 
+      return res.status(401).json({
+        success: false,
+        error: 'Mã xác thực (Sync Token) không hợp lệ. Vui lòng kiểm tra lại config.json.'
       });
     }
 
     if (!Array.isArray(activities) || activities.length === 0) {
-      return res.json({ 
-        success: true, 
-        count: 0, 
-        syncedCount: 0, 
-        message: 'Không có hoạt động nào được gửi lên.' 
+      return res.json({
+        success: true,
+        count: 0,
+        syncedCount: 0,
+        message: 'Không có hoạt động nào được gửi lên.'
       });
     }
 
@@ -3345,11 +3346,11 @@ app.post('/api/challenge/sync-client-activities', (req, res) => {
     });
 
     if (runActivities.length === 0) {
-      return res.json({ 
-        success: true, 
-        count: 0, 
-        syncedCount: 0, 
-        message: 'Không tìm thấy hoạt động chạy bộ nào để đồng bộ.' 
+      return res.json({
+        success: true,
+        count: 0,
+        syncedCount: 0,
+        message: 'Không tìm thấy hoạt động chạy bộ nào để đồng bộ.'
       });
     }
 
@@ -3362,7 +3363,7 @@ app.post('/api/challenge/sync-client-activities', (req, res) => {
       const title = `"${(act.title || '').replace(/"/g, '""')}"`;
       const distance = `"${act.distance}"`;
       const calories = act.calories || 0;
-      
+
       let rawTime = (act.time || '').toString().toLowerCase();
       let h = 0, m = 0, s = 0;
       if (rawTime.includes(':')) {
@@ -3378,13 +3379,13 @@ app.post('/api/challenge/sync-client-activities', (req, res) => {
         if (sMatch) s = parseInt(sMatch[1]);
       }
       const time = `"${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}"`;
-      
+
       let type = act.type || 'Run';
       const lowerType = type.toLowerCase().replace(/[\s_-]/g, '');
       if (lowerType.includes('trail')) type = 'TrailRun';
       else if (lowerType.includes('virtual')) type = 'VirtualRun';
       else if (lowerType.includes('run')) type = 'Run';
-      
+
       csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
     });
 
@@ -3392,7 +3393,7 @@ app.post('/api/challenge/sync-client-activities', (req, res) => {
     if (!fs.existsSync(storageDir)) fs.mkdirSync(storageDir, { recursive: true });
 
     const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
     const filename = `data-autosync-scrape-${timestamp}.csv`;
     const filepath = path.join(storageDir, filename);
     fs.writeFileSync(filepath, csvContent, 'utf8');
@@ -3466,66 +3467,246 @@ function mapAthleteNamesUsingCSV(activities) {
   const mappingFile = path.join(__dirname, '../Storage/AthleteID_Name.csv');
   const mappingById = {};
   const mappingByName = {};
-  
+
   if (fs.existsSync(mappingFile)) {
-      const lines = fs.readFileSync(mappingFile, 'utf8').split('\n');
-      lines.forEach(line => {
-          const parts = line.trim().split(',');
-          if (parts.length >= 2) {
-              const id = parts[0].trim();
-              const fullName = parts.slice(1).join(',').trim();
-              
-              if (fullName && fullName !== 'Name') {
-                  const nameParts = fullName.split(' ');
-                  const fn = nameParts[0];
-                  const ln = nameParts.slice(1).join(' ');
-                  const mappedName = { firstname: fn, lastname: ln };
-                  
-                  if (id && id !== 'Athlete ID') {
-                      mappingById[id] = mappedName;
-                  }
-                  
-                  if (ln) {
-                      const initial = ln.charAt(0).toUpperCase() + '.';
-                      const matchKey = `${fn}_${initial}`.toLowerCase();
-                      mappingByName[matchKey] = mappedName;
-                  }
-              }
+    const lines = fs.readFileSync(mappingFile, 'utf8').split('\n');
+    lines.forEach(line => {
+      const parts = line.trim().split(',');
+      if (parts.length >= 2) {
+        const id = parts[0].trim();
+        const fullName = parts.slice(1).join(',').trim();
+
+        if (fullName && fullName !== 'Name') {
+          const nameParts = fullName.split(' ');
+          const fn = nameParts[0];
+          const ln = nameParts.slice(1).join(' ');
+          const mappedName = { firstname: fn, lastname: ln };
+
+          if (id && id !== 'Athlete ID') {
+            mappingById[id] = mappedName;
           }
-      });
+
+          if (ln) {
+            const initial = ln.charAt(0).toUpperCase() + '.';
+            const matchKey = `${fn}_${initial}`.toLowerCase();
+            mappingByName[matchKey] = mappedName;
+          }
+        }
+      }
+    });
   }
 
   return activities.map(act => {
-      if (act.athlete) {
-          let newName = null;
-          // 1. Try mapping by ID
-          if (act.athlete.id && mappingById[act.athlete.id]) {
-              newName = mappingById[act.athlete.id];
-          } 
-          // 2. Try mapping by Match Key
-          else if (act.athlete.firstname) {
-              const fn = act.athlete.firstname;
-              const ln = act.athlete.lastname || '';
-              const initial = ln ? ln.charAt(0).toUpperCase() + '.' : '';
-              const matchKey = `${fn}_${initial}`.toLowerCase();
-              if (mappingByName[matchKey]) {
-                  newName = mappingByName[matchKey];
-              }
-          }
-
-          if (newName) {
-              return {
-                  ...act,
-                  athlete: {
-                      ...act.athlete,
-                      firstname: newName.firstname,
-                      lastname: newName.lastname
-                  }
-              };
-          }
+    if (act.athlete) {
+      let newName = null;
+      // 1. Try mapping by ID
+      if (act.athlete.id && mappingById[act.athlete.id]) {
+        newName = mappingById[act.athlete.id];
       }
-      return act;
+      // 2. Try mapping by Match Key
+      else if (act.athlete.firstname) {
+        const fn = act.athlete.firstname;
+        const ln = act.athlete.lastname || '';
+        const initial = ln ? ln.charAt(0).toUpperCase() + '.' : '';
+        const matchKey = `${fn}_${initial}`.toLowerCase();
+        if (mappingByName[matchKey]) {
+          newName = mappingByName[matchKey];
+        }
+      }
+
+      if (newName) {
+        return {
+          ...act,
+          athlete: {
+            ...act.athlete,
+            firstname: newName.firstname,
+            lastname: newName.lastname
+          }
+        };
+      }
+    }
+    return act;
   });
+}
+
+// ==========================================
+// STRAVA REAL-TIME WEBHOOK PUSH SUBSCRIPTIONS
+// ==========================================
+
+// Helper: Lấy access_token hợp lệ cho một athlete (tự động refresh nếu sắp hết hạn)
+async function getValidAccessToken(athleteId) {
+  if (!athleteId) return null;
+  const idStr = athleteId.toString();
+  let tokenData = tokenStore.get(idStr);
+  if (!tokenData) {
+    loadTokens();
+    tokenData = tokenStore.get(idStr);
+  }
+  if (!tokenData) return null;
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (tokenData.expires_at && tokenData.expires_at - nowSec < 300 && tokenData.refresh_token) {
+    try {
+      const refreshed = await strava.refreshToken(tokenData.refresh_token);
+      tokenData = {
+        access_token: refreshed.access_token,
+        refresh_token: refreshed.refresh_token || tokenData.refresh_token,
+        expires_at: refreshed.expires_at,
+      };
+      tokenStore.set(idStr, tokenData);
+      saveTokens();
+    } catch (err) {
+      console.error(`Lỗi refresh token cho athlete ${idStr}:`, err.message);
+    }
+  }
+  return tokenData.access_token;
+}
+
+// 1. Xác thực Handshake khi đăng ký Webhook với Strava
+app.get('/api/webhook', (req, res) => {
+  try {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode === 'subscribe' && token === STRAVA_VERIFY_TOKEN) {
+      console.log(`✅ [STRAVA_WEBHOOK_HANDSHAKE] Xác thực Webhook thành công từ Strava! Challenge: ${challenge}`);
+      return res.status(200).json({ 'hub.challenge': challenge });
+    } else {
+      console.warn(`⚠️ [STRAVA_WEBHOOK_HANDSHAKE] Từ chối: verify_token không khớp ('${token}' vs '${STRAVA_VERIFY_TOKEN}')`);
+      return res.status(403).json({ error: 'Verify token mismatch' });
+    }
+  } catch (err) {
+    console.error('Lỗi GET /api/webhook:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Tiếp nhận sự kiện bài chạy Realtime từ Strava
+app.post('/api/webhook', (req, res) => {
+  // QUY TẮC BẮT BUỘC CỦA STRAVA: Phải phản hồi HTTP 200 OK ngay lập tức (dưới 2 giây)
+  res.status(200).json({ received: true });
+
+  // Xử lý logic ngầm bất đồng bộ
+  (async () => {
+    try {
+      const event = req.body;
+      if (!event || typeof event !== 'object') return;
+      await handleStravaWebhookEvent(event);
+    } catch (err) {
+      console.error('❌ [WEBHOOK_UNHANDLED_ERROR] Lỗi xử lý ngầm Strava webhook event:', err.message);
+    }
+  })();
+});
+
+// Hàm xử lý sự kiện Webhook ngầm
+async function handleStravaWebhookEvent(event) {
+  console.log(`📡 [STRAVA_WEBHOOK] Nhận sự kiện:`, JSON.stringify(event));
+
+  // Chỉ xử lý các sự kiện đối tượng là bài tập (activity)
+  if (event.object_type !== 'activity') {
+    return { success: false, reason: 'not_activity' };
+  }
+
+  const { aspect_type, object_id, owner_id } = event;
+  const athleteIdStr = (owner_id || '').toString();
+  const activityIdStr = (object_id || '').toString();
+
+  // A. Trường hợp bài chạy bị XOÁ trên Strava
+  if (aspect_type === 'delete') {
+    if (fs.existsSync(IMPORTED_FILE)) {
+      let existing = readStorageJson(IMPORTED_FILE, []);
+      const preLen = existing.length;
+      existing = existing.filter(act => String(act.id) !== activityIdStr);
+      if (existing.length < preLen) {
+        writeStorageJson(IMPORTED_FILE, existing);
+        console.log(`🗑️ [WEBHOOK_DELETE] Đã xoá bài chạy ${activityIdStr} khỏi imported_activities.json`);
+        addAuditLog('Webhook Xoá Bài Chạy', `Strava ID: ${athleteIdStr}`, `Đã xoá hoạt động ${activityIdStr}`);
+        return { success: true, action: 'deleted', id: activityIdStr };
+      }
+    }
+    return { success: true, action: 'delete_not_found', id: activityIdStr };
+  }
+
+  // B. Trường hợp bài chạy được TẠO MỚI (create) hoặc CẬP NHẬT (update)
+  if (aspect_type === 'create' || aspect_type === 'update') {
+    const accessToken = await getValidAccessToken(athleteIdStr);
+    if (!accessToken) {
+      console.warn(`⚠️ [WEBHOOK] Không tìm thấy access_token cho VĐV ${athleteIdStr}. Thành viên này chưa đăng nhập ứng dụng web.`);
+      return { success: false, reason: 'no_access_token', athleteId: athleteIdStr };
+    }
+
+    // Gọi Strava API lấy chi tiết bài tập
+    let activity = null;
+    try {
+      activity = await strava.getActivity(accessToken, activityIdStr);
+    } catch (err) {
+      console.warn(`⚠️ [WEBHOOK] Không thể gọi API lấy chi tiết bài chạy ID ${activityIdStr}:`, err.message);
+      return { success: false, reason: 'api_fetch_failed', error: err.message };
+    }
+
+    if (!activity || !activity.id) {
+      return { success: false, reason: 'empty_activity_data' };
+    }
+
+    // Kiểm tra môn thể thao (chỉ chấp nhận chạy bộ: Run, TrailRun, VirtualRun)
+    const t = (activity.type || '').toLowerCase();
+    const isRun = ['run', 'virtualrun', 'trailrun', 'trail run'].includes(t) || t.includes('run') || t.includes('trail');
+    if (!isRun) {
+      console.log(`ℹ️ [WEBHOOK] Bài tập ID ${activityIdStr} là môn ${activity.type} (không phải chạy bộ), bỏ qua.`);
+      return { success: false, reason: 'not_running_activity', type: activity.type };
+    }
+
+    // Bỏ qua nếu bài tập bị cài đặt ẩn / riêng tư
+    const isPrivate = String(activity.private || 'false').toLowerCase() === 'true';
+    const hideFromHome = String(activity.hide_from_home || 'false').toLowerCase() === 'true';
+    const visibility = activity.visibility;
+    if (isPrivate || hideFromHome || (visibility && String(visibility).toLowerCase() !== 'everyone')) {
+      console.log(`ℹ️ [WEBHOOK] Bài tập ID ${activityIdStr} được cài đặt riêng tư (private/hide_from_home), bỏ qua.`);
+      return { success: false, reason: 'private_activity' };
+    }
+
+    // Định dạng hoạt động chuẩn
+    const newAct = {
+      id: activity.id.toString(),
+      type: activity.type,
+      distance: activity.distance,
+      moving_time: activity.moving_time,
+      start_date_local: activity.start_date_local,
+      athlete: {
+        id: (activity.athlete && activity.athlete.id) ? activity.athlete.id.toString() : athleteIdStr,
+        firstname: (activity.athlete && activity.athlete.firstname) || '',
+        lastname: (activity.athlete && activity.athlete.lastname) || ''
+      }
+    };
+
+    // Chuẩn hoá tên VĐV theo AthleteID_Name.csv
+    const normalizedList = mapAthleteNamesUsingCSV([newAct]);
+
+    // Hợp nhất vào imported_activities.json
+    let existing = readStorageJson(IMPORTED_FILE, []);
+    if (!Array.isArray(existing)) existing = [];
+
+    const mergedData = mergeActivitiesList(existing, normalizedList);
+    writeStorageJson(IMPORTED_FILE, mergedData);
+
+    const runnerName = normalizedList[0]?.athlete?.name || `${normalizedList[0]?.athlete?.firstname || ''} ${normalizedList[0]?.athlete?.lastname || ''}`.trim() || athleteIdStr;
+    const distKm = (activity.distance ? (activity.distance / 1000).toFixed(1) : '0');
+    console.log(`⚡ [WEBHOOK_SUCCESS] Tự động cập nhật thành công bài chạy ${distKm}km của VĐV ${runnerName} (ID: ${activityIdStr})!`);
+
+    addAuditLog('Strava Webhook Realtime', runnerName, `Tự động cập nhật bài chạy ${distKm}km (ID: ${activityIdStr})`);
+
+    // Nếu đang chạy ở bản desktop thì tự động đẩy lên Render Cloud
+    if (!process.env.RENDER) {
+      try {
+        await pushActivitiesToCloud(normalizedList, 'Strava Webhook Realtime');
+      } catch (_) {}
+    }
+
+    return { success: true, action: 'merged', athlete: runnerName, distanceKm: distKm, activityId: activityIdStr };
+  }
+
+  return { success: false, reason: 'unknown_aspect_type', aspect_type };
 }
 
 // Lưu imported activities
@@ -3533,26 +3714,26 @@ app.post('/api/challenge/imported', (req, res) => {
   try {
     let data = req.body;
     if (Array.isArray(data)) {
-        // Tự động phát hiện và đăng ký Athlete ID mới từ activities được tải lên
-        try {
-          data.forEach(act => {
-            if (act.athlete && act.athlete.id) {
-              const athId = act.athlete.id.toString();
-              const fn = (act.athlete.firstname || '').trim();
-              const ln = (act.athlete.lastname || '').trim();
-              const fullName = `${fn} ${ln}`.trim();
-              if (fullName && !ln.endsWith('.') && fullName !== 'Unknown Athlete') {
-                registerAthleteToCsvAndMapping({
-                  athleteId: athId,
-                  fullName: fullName
-                });
-              }
+      // Tự động phát hiện và đăng ký Athlete ID mới từ activities được tải lên
+      try {
+        data.forEach(act => {
+          if (act.athlete && act.athlete.id) {
+            const athId = act.athlete.id.toString();
+            const fn = (act.athlete.firstname || '').trim();
+            const ln = (act.athlete.lastname || '').trim();
+            const fullName = `${fn} ${ln}`.trim();
+            if (fullName && !ln.endsWith('.') && fullName !== 'Unknown Athlete') {
+              registerAthleteToCsvAndMapping({
+                athleteId: athId,
+                fullName: fullName
+              });
             }
-          });
-        } catch (e) {
-          console.warn('Lỗi auto-register từ imported activities:', e.message);
-        }
-        data = mapAthleteNamesUsingCSV(data);
+          }
+        });
+      } catch (e) {
+        console.warn('Lỗi auto-register từ imported activities:', e.message);
+      }
+      data = mapAthleteNamesUsingCSV(data);
     }
 
     let existing = [];
@@ -3568,36 +3749,36 @@ app.post('/api/challenge/imported', (req, res) => {
     // Nếu có query replaceByDate, tìm khoảng thời gian (min, max) của file tải lên
     // và xóa tất cả các activity cũ nằm trong khoảng thời gian đó.
     if (req.query.replaceByDate === 'true' && Array.isArray(data) && data.length > 0) {
-        const dailyRanges = {};
+      const dailyRanges = {};
 
-        data.forEach(act => {
-            if (act.start_date_local) {
-                const dateStr = act.start_date_local.substring(0, 10); // YYYY-MM-DD
-                const actTime = new Date(act.start_date_local).getTime();
-                if (!dailyRanges[dateStr]) {
-                    dailyRanges[dateStr] = { min: actTime, max: actTime };
-                } else {
-                    if (actTime < dailyRanges[dateStr].min) dailyRanges[dateStr].min = actTime;
-                    if (actTime > dailyRanges[dateStr].max) dailyRanges[dateStr].max = actTime;
-                }
-            }
-        });
-
-        const intervals = Object.values(dailyRanges).map(range => ({
-            min: range.min - 4000, // nới rộng 4s
-            max: range.max + 4000  // nới rộng 4s
-        }));
-
-        if (intervals.length > 0) {
-            existing = existing.filter(act => {
-                if (!act.start_date_local) return true;
-                const actTime = new Date(act.start_date_local).getTime();
-                // Check if actTime falls into ANY of the intervals
-                const isWithinAnyInterval = intervals.some(interval => actTime >= interval.min && actTime <= interval.max);
-                // Keep it if it does NOT fall into any interval
-                return !isWithinAnyInterval;
-            });
+      data.forEach(act => {
+        if (act.start_date_local) {
+          const dateStr = act.start_date_local.substring(0, 10); // YYYY-MM-DD
+          const actTime = new Date(act.start_date_local).getTime();
+          if (!dailyRanges[dateStr]) {
+            dailyRanges[dateStr] = { min: actTime, max: actTime };
+          } else {
+            if (actTime < dailyRanges[dateStr].min) dailyRanges[dateStr].min = actTime;
+            if (actTime > dailyRanges[dateStr].max) dailyRanges[dateStr].max = actTime;
+          }
         }
+      });
+
+      const intervals = Object.values(dailyRanges).map(range => ({
+        min: range.min - 4000, // nới rộng 4s
+        max: range.max + 4000  // nới rộng 4s
+      }));
+
+      if (intervals.length > 0) {
+        existing = existing.filter(act => {
+          if (!act.start_date_local) return true;
+          const actTime = new Date(act.start_date_local).getTime();
+          // Check if actTime falls into ANY of the intervals
+          const isWithinAnyInterval = intervals.some(interval => actTime >= interval.min && actTime <= interval.max);
+          // Keep it if it does NOT fall into any interval
+          return !isWithinAnyInterval;
+        });
+      }
     }
 
     const merged = Array.isArray(data) ? mergeActivitiesList(existing, data) : existing;
@@ -3643,7 +3824,7 @@ app.post('/api/admin/auto-fix-members', getToken, async (req, res) => {
     // Duyệt qua participants trong config
     for (const [key, p] of Object.entries(config.participants || {})) {
       let athId = p.athleteId || p.id;
-      
+
       // Nếu chưa có ID, thử trích xuất từ avatar URL
       if (!athId && p.profile_medium && p.profile_medium.includes('/athletes/')) {
         const m = p.profile_medium.match(/\/athletes\/(\d+)\//);
@@ -3656,7 +3837,7 @@ app.post('/api/admin/auto-fix-members', getToken, async (req, res) => {
       }
 
       const isAbbrev = !p.lastname || p.lastname.endsWith('.') || !p.name || p.name.endsWith('.');
-      
+
       if (athId) {
         p.athleteId = athId;
         p.id = athId;
@@ -3852,13 +4033,13 @@ app.post('/api/auth/logout', async (req, res) => {
     // Xóa file cookie strava tạm đã lưu
     const cookieFile = path.join(__dirname, '../Storage/.strava-cookies.json');
     if (fs.existsSync(cookieFile)) {
-      try { fs.unlinkSync(cookieFile); } catch (_) {}
+      try { fs.unlinkSync(cookieFile); } catch (_) { }
     }
 
     // Nếu chạy trên Desktop App (có remote debugging port 9222), xóa sạch cookies trình duyệt Chrome
     try {
       await clearCookiesFromActiveBrowser();
-    } catch (_) {}
+    } catch (_) { }
 
     res.json({ message: 'Đã đăng xuất và làm mới phiên' });
   } catch (error) {
@@ -3937,21 +4118,51 @@ app.post('/api/screenshot/full-table', async (req, res) => {
 
       // Switch month tab if specified
       if (targetMonth) {
-        const monthBtn = document.querySelector(`.month-pill[data-month="${targetMonth}"], .tab[data-month="${targetMonth}"]`);
-        if (monthBtn) {
-          monthBtn.click();
-        } else {
-          const monthPills = document.querySelectorAll('.month-pill, .tabs .tab');
-          monthPills.forEach(pill => {
-            const txt = pill.textContent || '';
-            if (pill.getAttribute('data-month') === targetMonth.toString() ||
-                txt.includes(`Tháng ${targetMonth}/`) || 
-                txt.includes(`/${targetMonth}/`) ||
-                txt.startsWith(`${targetMonth}/`)) {
-              pill.click();
+        return new Promise((resolve) => {
+          // Try to use the new month dropdown first
+          const trigger = document.querySelector('.month-dropdown-trigger');
+          if (trigger) {
+            trigger.click();
+            setTimeout(() => {
+              const items = document.querySelectorAll('.month-dropdown-item');
+              let clicked = false;
+              items.forEach(item => {
+                const txt = item.textContent || '';
+                if (txt === `T${targetMonth}` || txt.includes(targetMonth.toString())) {
+                  item.click();
+                  clicked = true;
+                }
+              });
+              if (!clicked) {
+                // hide dropdown if nothing clicked
+                trigger.click();
+              }
+              // Hide the chevron icon in the screenshot
+              const chevron = trigger.querySelector('svg');
+              if (chevron) chevron.style.display = 'none';
+
+              resolve();
+            }, 100);
+          } else {
+            // Fallback for older UI
+            const monthBtn = document.querySelector(`.month-pill[data-month="${targetMonth}"], .tab[data-month="${targetMonth}"]`);
+            if (monthBtn) {
+              monthBtn.click();
+            } else {
+              const monthPills = document.querySelectorAll('.month-pill, .tabs .tab');
+              monthPills.forEach(pill => {
+                const txt = pill.textContent || '';
+                if (pill.getAttribute('data-month') === targetMonth.toString() ||
+                  txt.includes(`Tháng ${targetMonth}/`) ||
+                  txt.includes(`/${targetMonth}/`) ||
+                  txt.startsWith(`${targetMonth}/`)) {
+                  pill.click();
+                }
+              });
             }
-          });
-        }
+            resolve();
+          }
+        });
       }
 
       const view = document.querySelector('.challenge-view') || document.querySelector('.app-main');
@@ -3999,9 +4210,9 @@ app.post('/api/screenshot/full-table', async (req, res) => {
     res.status(500).json({ error: err.message || 'Không thể tạo ảnh chụp màn hình qua Chrome' });
   } finally {
     if (browser) {
-      try { await browser.close(); } catch (e) {}
+      try { await browser.close(); } catch (e) { }
     }
-    try { fs.rmSync(tempProfileDir, { recursive: true, force: true }); } catch (e) {}
+    try { fs.rmSync(tempProfileDir, { recursive: true, force: true }); } catch (e) { }
   }
 });
 
@@ -4061,7 +4272,7 @@ app.get('/api/app/check-update', async (req, res) => {
       try {
         const localData = JSON.parse(fs.readFileSync(localVersionPath, 'utf8'));
         if (localData.version) currentVersion = localData.version;
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const remoteUrl = `${RENDER_CLOUD_URL}/api/app/version`;
@@ -4091,8 +4302,8 @@ app.get('/api/app/check-update', async (req, res) => {
         currentVersion,
         cloudConnected: false,
         notDeployedYet,
-        message: notDeployedYet 
-          ? 'Render Cloud chưa được cập nhật phiên bản mới lên GitHub.' 
+        message: notDeployedYet
+          ? 'Render Cloud chưa được cập nhật phiên bản mới lên GitHub.'
           : 'Không thể kết nối tới Cloud Server (máy chủ Render có thể đang sleep hoặc chưa phản hồi).'
       });
     }
@@ -4126,7 +4337,7 @@ app.post('/api/app/apply-update', async (req, res) => {
     const tempZip = path.join(tempDir, 'update_temp.zip');
 
     console.log(`[Auto-Update] Đang tải gói cập nhật từ ${downloadUrl}...`);
-    
+
     const downloadRes = await fetch(downloadUrl);
     if (!downloadRes.ok) {
       throw new Error(`Không thể tải gói cập nhật từ Cloud (Status: ${downloadRes.status})`);
@@ -4141,11 +4352,11 @@ app.post('/api/app/apply-update', async (req, res) => {
     // Dùng PowerShell Expand-Archive giải nén an toàn
     const rootDir = path.resolve(__dirname, '..');
     const psCmd = `powershell -NoProfile -Command "Expand-Archive -Path '${tempZip.replace(/'/g, "''")}' -DestinationPath '${rootDir.replace(/'/g, "''")}' -Force"`;
-    
+
     execSync(psCmd, { stdio: 'pipe' });
 
     // Xóa file tạm
-    try { fs.unlinkSync(tempZip); } catch (e) {}
+    try { fs.unlinkSync(tempZip); } catch (e) { }
 
     console.log('[Auto-Update] Giải nén thành công! Bảo toàn nguyên vẹn thư mục Storage/.');
 
@@ -4193,7 +4404,7 @@ app.get('/api/penalties/summary', (req, res) => {
   try {
     const data = loadPenaltiesData();
     const queryMonth = req.query.month || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    
+
     let monthDueTotal = 0;
     let monthPaidTotal = 0;
     let monthUnpaidTotal = 0;
@@ -4202,8 +4413,8 @@ app.get('/api/penalties/summary', (req, res) => {
 
     data.members.forEach(m => {
       const monthFee = m.monthlyPenaltiesVND ? (m.monthlyPenaltiesVND[queryMonth] || 0) : 0;
-      const statusObj = (m.monthlyPaymentStatus && m.monthlyPaymentStatus[queryMonth]) 
-        ? m.monthlyPaymentStatus[queryMonth] 
+      const statusObj = (m.monthlyPaymentStatus && m.monthlyPaymentStatus[queryMonth])
+        ? m.monthlyPaymentStatus[queryMonth]
         : { status: m.financialSummary?.paymentStatus || 'unpaid' };
 
       if (monthFee > 0) {
@@ -4406,7 +4617,7 @@ app.get('/api/penalties/export-csv', (req, res) => {
       res.setHeader('Content-Disposition', 'attachment; filename="member_penalties_mapped.csv"');
       return res.send(fs.readFileSync(csvPath));
     }
-    
+
     // Nếu chưa có file csv, tạo từ json
     const data = loadPenaltiesData();
     let csv = '\uFEFFSTT,Họ và Tên,Strava Athlete ID,Vai Trò,Tổng Tiền Phạt (VNĐ),Xếp Hạng Phạt,Tổng KM Lịch Sử,Xếp Hạng KM\n';
@@ -4460,7 +4671,7 @@ app.post('/api/scripts/execute', async (req, res) => {
     if (!scriptPath || !fs.existsSync(scriptPath)) {
       return res.status(400).json({ error: 'Đường dẫn script không hợp lệ hoặc file không tồn tại.' });
     }
-    
+
     // Yêu cầu chỉ chạy file .bat
     if (!scriptPath.toLowerCase().endsWith('.bat')) {
       return res.status(400).json({ error: 'Chỉ hỗ trợ chạy file .bat.' });
@@ -4469,13 +4680,13 @@ app.post('/api/scripts/execute', async (req, res) => {
     // Spawn script in a new detached cmd window
     const scriptDir = path.dirname(scriptPath);
     const scriptFile = path.basename(scriptPath);
-    
+
     const child = spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/c', scriptFile], {
       detached: true,
       cwd: scriptDir,
       stdio: 'ignore'
     });
-    
+
     child.unref();
 
     addAuditLog(`Execute Script`, req.body.adminId || 'System Admin', `Ran ${scriptFile}`);
@@ -4516,7 +4727,7 @@ server.on('error', (e) => {
   if (e.code === 'EADDRINUSE') {
     console.warn(`⚠️ Cổng ${PORT} đang tạm bận (TimeWait), tự động thử lại sau 1.5s...`);
     setTimeout(() => {
-      try { server.close(); } catch(_) {}
+      try { server.close(); } catch (_) { }
       server.listen(PORT, '0.0.0.0');
     }, 1500);
   } else {

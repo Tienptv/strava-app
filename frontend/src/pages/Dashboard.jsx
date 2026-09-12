@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, TrendingUp, Flame, Users, ChevronRight, RefreshCw, LayoutDashboard, Target } from 'lucide-react';
+import { MapPin, Clock, TrendingUp, Flame, Users, ChevronRight, RefreshCw, LayoutDashboard, Target, Activity } from 'lucide-react';
 import ActivityCard from '../components/ActivityCard';
 import StatsChart from '../components/StatsChart';
 import ChallengeTable from '../components/ChallengeTable';
@@ -469,6 +469,14 @@ export default function Dashboard({
             challengeData={challengeData}
             lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
           />
+
+          <div className="dashboard-section-header">
+            <h3 className="dashboard-section-title">
+              <Activity size={18} className="dashboard-section-icon" />
+              {t('careerOverview')}
+            </h3>
+          </div>
+
           <div className="stats-grid">
             <div className="stat-card stat-card--distance">
               <div className="stat-card__header">

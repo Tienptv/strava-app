@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLang } from '../i18n/LangContext';
-import { Target, Edit2, Check, X, ShieldAlert, ShieldCheck, Info, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Target, Edit2, Check, X, ShieldAlert, ShieldCheck, Info, Sparkles, CheckCircle2, Clock, Activity, Calendar, TrendingUp, BarChart2 } from 'lucide-react';
 import { getAthleteMatchKey } from '../utils/challengeStats';
 
 export default function PersonalGoal({ 
@@ -221,26 +221,164 @@ export default function PersonalGoal({
   const percent = goal > 0 ? Math.min(Math.round((currentDist / goal) * 100) || 0, 100) : 0;
   const isGoalReached = goal > 0 && currentDist >= goal;
 
-  // Tính tiền phạt dự kiến nếu có cam kết phạt và target > 0
-  let penaltyDue = 0;
-  let remainingKm = 0;
-  if (hasPenalty && goal > 0) {
-    remainingKm = Math.max(0, Math.round((goal - currentDist) * 10) / 10);
-    if (remainingKm > 0) {
-      const rawK = 200 * (remainingKm / goal);
-      penaltyDue = Math.min(200, Math.ceil(rawK / 10) * 10);
-    }
-  }
-
   // Format month text
   const monthName = new Date(currentYear, currentMonth - 1, 1).toLocaleDateString(
     lang === 'vi' ? 'vi-VN' : 'en-US', 
     { month: 'long', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh' }
   );
 
+  // Smart Pace & Days Analysis
+  const paceAnalysis = useMemo(() => {
+    const today = new Date();
+    const isCurrentMonth = (today.getMonth() + 1 === currentMonth) && (today.getFullYear() === currentYear);
+    const isPastMonth = (currentYear < today.getFullYear()) || (currentYear === today.getFullYear() && currentMonth < (today.getMonth() + 1));
+    const isFutureMonth = (currentYear > today.getFullYear()) || (currentYear === today.getFullYear() && currentMonth > (today.getMonth() + 1));
+
+    let daysPassed = 0;
+    let daysLeft = 0;
+    const totalDaysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+    if (isCurrentMonth) {
+      daysPassed = today.getDate();
+      daysLeft = Math.max(1, totalDaysInMonth - daysPassed + 1); // including today
+    } else if (isPastMonth) {
+      daysPassed = totalDaysInMonth;
+      daysLeft = 0;
+    } else {
+      daysPassed = 0;
+      daysLeft = totalDaysInMonth;
+    }
+
+    const remainingKm = Math.max(0, Math.round((goal - currentDist) * 10) / 10);
+    const requiredPacePerDay = (daysLeft > 0 && remainingKm > 0) ? (remainingKm / daysLeft).toFixed(1) : '0.0';
+    const expectedPercent = totalDaysInMonth > 0 ? (daysPassed / totalDaysInMonth) * 100 : 0;
+    const currentPercent = goal > 0 ? (currentDist / goal) * 100 : 0;
+
+    return {
+      isCurrentMonth,
+      isPastMonth,
+      isFutureMonth,
+      daysPassed,
+      daysLeft,
+      totalDaysInMonth,
+      remainingKm,
+      requiredPacePerDay,
+      expectedPercent,
+      currentPercent
+    };
+  }, [goal, currentDist, currentYear, currentMonth]);
+
+  // Tính tiền phạt dự kiến nếu có cam kết phạt và target > 0
+  let penaltyDue = 0;
+  if (hasPenalty && goal > 0) {
+    if (paceAnalysis.remainingKm > 0) {
+      const rawK = 200 * (paceAnalysis.remainingKm / goal);
+      penaltyDue = Math.min(200, Math.ceil(rawK / 10) * 10);
+    }
+  }
+
+  // Calculate Monthly Statistics
+  const monthlyStats = useMemo(() => {
+    let totalDist = 0;
+    let totalTime = 0;
+    let longestRun = 0;
+    let runsCount = 0;
+    const activeDaysSet = new Set();
+
+    if (activities && activities.length > 0) {
+      activities.forEach(act => {
+        if (act.start_date_local && act.distance) {
+          const actDateStr = act.start_date_local.endsWith('Z') ? act.start_date_local.slice(0, -1) : act.start_date_local;
+          const actDate = new Date(actDateStr);
+          if (actDate.getFullYear() === currentYear && (actDate.getMonth() + 1) === currentMonth) {
+            const type = (act.type || '').toLowerCase();
+            if (['run', 'virtualrun', 'trailrun', 'trail run'].includes(type) || type.includes('run') || type.includes('trail') || !type) {
+              const distKm = act.distance / 1000;
+              totalDist += distKm;
+              if (act.moving_time) totalTime += act.moving_time;
+              if (distKm > longestRun) longestRun = distKm;
+              runsCount++;
+              activeDaysSet.add(actDate.getDate());
+            }
+          }
+        }
+      });
+    }
+    
+    let avgPaceStr = '--:--';
+    if (totalDist > 0 && totalTime > 0) {
+      const paceSecondsPerKm = totalTime / totalDist;
+      const mins = Math.floor(paceSecondsPerKm / 60);
+      const secs = Math.floor(paceSecondsPerKm % 60);
+      avgPaceStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    const hours = Math.floor(totalTime / 3600);
+    const minutes = Math.floor((totalTime % 3600) / 60);
+    const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+
+    return {
+      totalDistance: Math.round(totalDist * 10) / 10,
+      totalTimeStr: timeStr,
+      activeDays: activeDaysSet.size,
+      runsCount,
+      longestRun: Math.round(longestRun * 10) / 10,
+      averagePace: avgPaceStr,
+      avgDistPerRun: runsCount > 0 ? Math.round((totalDist / runsCount) * 10) / 10 : 0
+    };
+  }, [activities, currentYear, currentMonth]);
+
+  const aiCoach = useMemo(() => {
+    if (goal <= 0) {
+      return {
+        message: lang === 'vi' ? 'Hãy thiết lập mục tiêu tháng để nhận tư vấn và kế hoạch tập luyện cá nhân hóa!' : 'Set a monthly goal to get personalized coaching and training plans!',
+        type: 'info'
+      };
+    }
+    
+    if (isGoalReached) {
+      return {
+        message: lang === 'vi' ? 'Tuyệt vời! Bạn đã đạt mục tiêu tháng này. Hãy nghỉ ngơi phục hồi hoặc đặt thêm một mục tiêu phụ (stretch goal) nhé.' : 'Incredible! You reached your goal. Take some rest or push for a stretch goal.',
+        type: 'success'
+      };
+    }
+
+    if (paceAnalysis.isPastMonth) {
+      return {
+        message: lang === 'vi' ? 'Tháng này đã kết thúc. Chúc bạn có những thành tích tốt hơn trong tương lai!' : 'This month has ended. Wish you better achievements in the future!',
+        type: 'info'
+      };
+    }
+
+    if (paceAnalysis.isFutureMonth) {
+      return {
+        message: lang === 'vi' ? 'Tháng này chưa bắt đầu. Hãy lên kế hoạch tập luyện sẵn sàng nhé!' : 'This month hasn\'t started yet. Get ready!',
+        type: 'info'
+      };
+    }
+
+    if (paceAnalysis.currentPercent >= paceAnalysis.expectedPercent) {
+      return {
+        message: lang === 'vi' 
+          ? `Làm tốt lắm! Bạn đang đi đúng tiến độ. Cứ giữ nhịp độ tối thiểu ${paceAnalysis.requiredPacePerDay} km/ngày, bạn sẽ hoàn thành mục tiêu dễ dàng.` 
+          : `Great job! You are on track. Maintain at least ${paceAnalysis.requiredPacePerDay} km/day to hit your goal easily.`,
+        type: 'success'
+      };
+    } else {
+      return {
+        message: lang === 'vi' 
+          ? `Bạn đang chậm hơn tiến độ dự kiến. Cần chạy trung bình ${paceAnalysis.requiredPacePerDay} km/ngày trong ${paceAnalysis.daysLeft} ngày còn lại. Hãy sắp xếp thời gian nhé!` 
+          : `You're slightly behind schedule. You need to run ${paceAnalysis.requiredPacePerDay} km/day for the remaining ${paceAnalysis.daysLeft} days. You can do it!`,
+        type: 'warning'
+      };
+    }
+  }, [goal, isGoalReached, paceAnalysis, lang]);
+
   return (
-    <div className="personal-goal-card">
-      <div className="personal-goal__main">
+    <div className="personal-goal-dashboard pg-layout-2col">
+      
+      {/* COLUMN 1: HERO CARD (MONTHLY GOAL + STATS + AI COACH) */}
+      <div className="pg-card pg-hero-card">
         <div className="personal-goal__header">
           <div className="personal-goal__title">
             <div className="personal-goal__icon-badge">
@@ -251,6 +389,7 @@ export default function PersonalGoal({
               <span className="personal-goal__month-subtitle"> ({monthName})</span>
             </div>
           </div>
+          
           {!isEditing && (
             <button 
               className="btn-icon btn-edit-goal" 
@@ -311,6 +450,7 @@ export default function PersonalGoal({
           </form>
         ) : (
           <>
+            {/* Goal Progress Bar */}
             <div className="personal-goal__stats">
               <div className="goal-numbers">
                 <span className="current-dist">{currentDist.toFixed(1)}</span>
@@ -336,13 +476,109 @@ export default function PersonalGoal({
             {isGoalReached && (
               <p className="goal-congrats">🎉 {t('goalReached')}</p>
             )}
+
+            {/* Smart Pacing Metrics Bar */}
+            <div className="pg-goal-smart-metrics">
+              <div className="smart-metric-item">
+                <span className="smart-metric-label">{t('daysRemaining')}</span>
+                <span className="smart-metric-val">
+                  {paceAnalysis.isCurrentMonth ? `${paceAnalysis.daysLeft} ${lang === 'vi' ? 'ngày' : 'days'}` : (paceAnalysis.isPastMonth ? (lang === 'vi' ? 'Đã hết' : 'Ended') : `${paceAnalysis.daysLeft} ${lang === 'vi' ? 'ngày' : 'days'}`)}
+                </span>
+              </div>
+              <div className="smart-metric-divider" />
+              <div className="smart-metric-item">
+                <span className="smart-metric-label">{lang === 'vi' ? 'Còn thiếu' : 'Remaining'}</span>
+                <span className="smart-metric-val highlight">
+                  {isGoalReached ? '0 km' : `${paceAnalysis.remainingKm} km`}
+                </span>
+              </div>
+              <div className="smart-metric-divider" />
+              <div className="smart-metric-item">
+                <span className="smart-metric-label">{t('dailyPaceTarget')}</span>
+                <span className="smart-metric-val accent">
+                  {isGoalReached ? (lang === 'vi' ? 'Đã hoàn thành' : 'Completed') : `${paceAnalysis.requiredPacePerDay} km/${lang === 'vi' ? 'ngày' : 'day'}`}
+                </span>
+              </div>
+            </div>
+
+            {/* 3x2 Monthly Stats Grid */}
+            <div className="monthly-stats-grid">
+              <div className="stat-widget">
+                <div className="stat-widget-icon"><Activity size={17} /></div>
+                <div className="stat-widget-info">
+                  <span className="stat-widget-label">{lang === 'vi' ? 'Tổng Km' : 'Total Distance'}</span>
+                  <span className="stat-widget-value">{monthlyStats.totalDistance} <small>km</small></span>
+                </div>
+              </div>
+              <div className="stat-widget">
+                <div className="stat-widget-icon"><Clock size={17} /></div>
+                <div className="stat-widget-info">
+                  <span className="stat-widget-label">{lang === 'vi' ? 'Thời gian' : 'Moving Time'}</span>
+                  <span className="stat-widget-value">{monthlyStats.totalTimeStr}</span>
+                </div>
+              </div>
+              <div className="stat-widget">
+                <div className="stat-widget-icon"><Calendar size={17} /></div>
+                <div className="stat-widget-info">
+                  <span className="stat-widget-label">{lang === 'vi' ? 'Ngày chạy' : 'Active Days'}</span>
+                  <span className="stat-widget-value">{monthlyStats.activeDays} <small>{lang === 'vi' ? 'ngày' : 'days'}</small></span>
+                </div>
+              </div>
+              <div className="stat-widget">
+                <div className="stat-widget-icon"><BarChart2 size={17} /></div>
+                <div className="stat-widget-info">
+                  <span className="stat-widget-label">{lang === 'vi' ? 'Tốc độ TB' : 'Avg Pace'}</span>
+                  <span className="stat-widget-value">{monthlyStats.averagePace} <small>/km</small></span>
+                </div>
+              </div>
+              <div className="stat-widget">
+                <div className="stat-widget-icon"><TrendingUp size={17} /></div>
+                <div className="stat-widget-info">
+                  <span className="stat-widget-label">{lang === 'vi' ? 'Dài nhất' : 'Longest Run'}</span>
+                  <span className="stat-widget-value">{monthlyStats.longestRun} <small>km</small></span>
+                </div>
+              </div>
+              <div className="stat-widget">
+                <div className="stat-widget-icon"><Target size={17} /></div>
+                <div className="stat-widget-info">
+                  <span className="stat-widget-label">{lang === 'vi' ? 'Số lần chạy' : 'Total Runs'}</span>
+                  <span className="stat-widget-value">{monthlyStats.runsCount} <small>{lang === 'vi' ? 'lần' : 'runs'}</small></span>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Coach / Recommendations */}
+            <div className={`ai-coach-box ai-coach-${aiCoach.type}`}>
+              <div className="ai-coach-icon">
+                <Sparkles size={17} />
+              </div>
+              <div className="ai-coach-content">
+                <h4 className="ai-coach-title">
+                  {lang === 'vi' ? 'Tư vấn & Kế hoạch' : 'Coach Recommendations'}
+                </h4>
+                <p className="ai-coach-message">{aiCoach.message}</p>
+              </div>
+            </div>
           </>
         )}
       </div>
 
-      {!isEditing && (
-        <div className="personal-goal__side-panel">
-          <div className="personal-goal__penalty-footer">
+      {/* COLUMN 2: ASIDE CARD (DISCIPLINE & CLUB FUND) */}
+      <div className="pg-card pg-aside-penalty-card">
+        <div className="personal-goal__header">
+          <div className="personal-goal__title">
+            <div className="personal-goal__icon-badge" style={{ background: 'rgba(255, 152, 0, 0.1)' }}>
+              <ShieldAlert size={20} color="#FF9800" />
+            </div>
+            <div>
+              <span className="personal-goal__main-title">{t('disciplineAndFund')}</span>
+              <span className="personal-goal__month-subtitle"> ({monthName})</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="pg-aside-content">
+          <div className="personal-goal__penalty-section">
             {hasPenalty ? (
               <div className={`penalty-status-box ${isGoalReached ? 'penalty-status-safe' : 'penalty-status-active'}`}>
                 <div className="penalty-status-header">
@@ -364,60 +600,71 @@ export default function PersonalGoal({
                     </span>
                   )}
                 </div>
-                {!isGoalReached && goal > 0 && (
-                  <p className="penalty-status-desc">
-                    🏃 {lang === 'vi' ? `Bạn còn thiếu ${remainingKm} km để hoàn thành mục tiêu và không phải nộp phạt.` : `You need ${remainingKm} more km to complete your goal and avoid penalty.`}
-                  </p>
-                )}
+                <p className="penalty-status-desc">
+                  {isGoalReached ? (
+                    lang === 'vi' 
+                      ? '🎉 Xuất sắc! Bạn đã hoàn thành mục tiêu đề ra và không bị phạt tiền tháng này.' 
+                      : '🎉 Outstanding! You reached your goal and have 0k penalty.'
+                  ) : (
+                    lang === 'vi' 
+                      ? `🏃 Bạn còn thiếu ${paceAnalysis.remainingKm} km để hoàn thành mục tiêu và tránh nộp phạt.` 
+                      : `🏃 You need ${paceAnalysis.remainingKm} more km to complete your goal and avoid penalty.`
+                  )}
+                </p>
               </div>
             ) : (
               <div className="penalty-status-box penalty-status-none">
-                <Info size={16} color="var(--text-muted)" />
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  {t('penaltyNotCommitted')}
-                </span>
-                <button 
-                  type="button" 
-                  className="btn-premium-action" 
-                  onClick={isLockedByDate ? undefined : handleStartEdit}
-                  title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : ''}
-                  style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed', textDecoration: 'none' } : {}}
-                  disabled={isLockedByDate}
-                >
-                  <Sparkles size={14} style={{ marginRight: 6 }} />
-                  {lang === 'vi' ? 'Tham gia Đóng góp' : 'Join Challenge'}
-                </button>
-              </div>
-            )}
-
-            {saveSuccess && (
-              <div className="sync-success-pill">
-                <CheckCircle2 size={14} color="#10b981" />
-                <span>{t('syncedWithAdmin')}</span>
-              </div>
-            )}
-
-            {allTimeFinancial && (allTimeFinancial.totalPenaltyVND > 0 || allTimeFinancial.allTimeKmMoneyFile > 0) && (
-              <div className="club-contribution-box">
-                <span className="club-contribution-label">
-                  <Sparkles size={14} color="#ea580c" />
-                  {lang === 'vi' ? 'Đóng góp Quỹ CLB All-Time:' : 'Club All-Time Contribution:'}
-                </span>
-                <div className="club-contribution-value">
-                  <span className="amount">
-                    {(allTimeFinancial.totalPenaltyVND || 0).toLocaleString('vi-VN')} VNĐ
+                <div className="penalty-status-header">
+                  <Info size={18} className="penalty-icon neutral" />
+                  <span className="penalty-status-title" style={{ color: 'var(--text-secondary)' }}>
+                    {t('penaltyNotCommitted')}
                   </span>
-                  {allTimeFinancial.penaltyRank && (
-                    <span className="rank-badge">
-                      #{allTimeFinancial.penaltyRank}
-                    </span>
-                  )}
+                  <button 
+                    type="button" 
+                    className="btn-premium-action" 
+                    onClick={isLockedByDate ? undefined : handleStartEdit}
+                    title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : ''}
+                    style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed', textDecoration: 'none', marginLeft: 'auto' } : { marginLeft: 'auto' }}
+                    disabled={isLockedByDate}
+                  >
+                    <Sparkles size={14} style={{ marginRight: 6 }} />
+                    {lang === 'vi' ? 'Tham gia Phạt' : 'Join Penalty'}
+                  </button>
                 </div>
+                <p className="penalty-status-desc" style={{ color: 'var(--text-muted)' }}>
+                  🏃 {lang === 'vi' ? 'Tham gia mục tiêu có phạt để nâng cao kỷ luật và đóng góp quỹ nhóm.' : 'Join penalty goals to increase discipline and contribute to the club fund.'}
+                </p>
               </div>
             )}
           </div>
+
+          {saveSuccess && (
+            <div className="sync-success-pill">
+              <CheckCircle2 size={14} color="#10b981" />
+              <span>{t('syncedWithAdmin')}</span>
+            </div>
+          )}
+
+          {/* Club All-Time Contribution */}
+          <div className="personal-goal__club-contribution">
+            <div className="contribution-header">
+              <div className="contribution-meta">
+                <span className="contribution-title">{t('clubAllTimeContribution')}</span>
+                <span className="contribution-sub">{lang === 'vi' ? 'Tích lũy toàn thời gian' : 'All-time accumulation'}</span>
+              </div>
+              {allTimeFinancial && allTimeFinancial.penaltyRank > 0 && (
+                <span className="contribution-rank" title={lang === 'vi' ? 'Thứ hạng đóng góp' : 'Contribution Rank'}>
+                  Top #{allTimeFinancial.penaltyRank}
+                </span>
+              )}
+            </div>
+            <div className="contribution-value">
+              {allTimeFinancial ? (allTimeFinancial.totalPenaltyVND || 0).toLocaleString('vi-VN') : '0'} <small>VNĐ</small>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
+
     </div>
   );
 }

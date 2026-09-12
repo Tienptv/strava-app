@@ -40,7 +40,9 @@ import {
   Lock,
   Terminal,
   Play,
-  Loader
+  Loader,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { processChallengeData } from '../utils/challengeStats';
@@ -353,6 +355,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             showDistanceProgress: data.showDistanceProgress !== false,
             showTimeProgress: data.showTimeProgress !== false,
             showTodayMarker: data.showTodayMarker !== false,
+            showEventNames: data.showEventNames !== false,
             events: Array.isArray(data.events) ? data.events : []
           });
         }
@@ -1957,6 +1960,28 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                   <Calendar size={18} color="var(--accent)" />
                   {lang === 'en' ? `Timeline Races & Events (${(goalData?.events || []).length})` : `Danh Sách Giải Chạy & Sự Kiện Trên Timeline (${(goalData?.events || []).length})`}
                 </h3>
+                <button
+                  type="button"
+                  className={`btn-toggle-goal-vis ${goalData?.showEventNames !== false ? 'is-visible' : 'is-hidden'}`}
+                  onClick={() => {
+                    const nextVal = goalData?.showEventNames === false;
+                    const updated = { ...goalData, showEventNames: nextVal };
+                    setGoalData(updated);
+                    handleSaveGoalSettings(updated, false);
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem',
+                    border: '1px solid',
+                    backgroundColor: goalData?.showEventNames !== false ? 'var(--accent)' : 'transparent',
+                    color: goalData?.showEventNames !== false ? 'white' : 'var(--text-secondary)',
+                    borderColor: goalData?.showEventNames !== false ? 'var(--accent)' : '#cbd5e1',
+                    cursor: 'pointer', transition: 'all 0.2s', fontWeight: 600
+                  }}
+                >
+                  {goalData?.showEventNames !== false ? <Eye size={16} /> : <EyeOff size={16} />}
+                  {lang === 'en' ? 'Show Timeline Names' : 'Hiện tên trên Timeline'}
+                </button>
               </div>
 
               {(goalData?.events || []).length === 0 ? (
