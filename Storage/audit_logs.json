@@ -1,5 +1,19 @@
 [
   {
+    "id": "1789234968854",
+    "timestamp": "2026-09-12T17:42:48.854Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (287 mục), targets.json (50 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
+    "id": "1789234963545",
+    "timestamp": "2026-09-12T17:42:43.545Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (287 mục), targets.json (50 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
     "id": "1789223201336",
     "timestamp": "2026-09-12T14:26:41.336Z",
     "action": "Cập nhật Cấu hình thử thách",
@@ -1383,20 +1397,6 @@
     "timestamp": "2026-09-05T08:19:34.158Z",
     "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
     "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2026)"
-  },
-  {
-    "id": "1788596334804",
-    "timestamp": "2026-09-05T08:18:54.804Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788596141353",
-    "timestamp": "2026-09-05T08:15:41.353Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "pham tien",
     "details": "Đã cập nhật cấu hình Club Goal (2026)"
   }
 ]
