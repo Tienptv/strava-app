@@ -46,3 +46,17 @@
     5. **Hiệu ứng chuyển động (Physics Transition):** Mượt mà `transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1)`.
     6. **Trạng thái Disabled:** Mờ 55%, chuột `not-allowed`, vô hiệu hóa transform/shadow.
 
+---
+
+## 4. Quy Tắc Đa Ngôn Ngữ Đồng Bộ (Bilingual Parity & Full i18n Rule)
+- **Yêu cầu cốt lõi:**
+  - Khi người dùng chọn giao diện **English (`en`)**: Toàn bộ nội dung hiển thị (tiêu đề, nút bấm, nhãn bảng biểu, chú thích tooltip, hộp thoại thông báo Swal, phản hồi phân tích của AI Running Coach...) **bắt buộc phải hiển thị 100% bằng Tiếng Anh**.
+  - Khi người dùng chọn giao diện **Việt Nam (`vi`)**: Toàn bộ nội dung hiển thị **bắt buộc phải hiển thị 100% bằng Tiếng Việt**.
+- **Tuyệt đối không trộn lẫn ngôn ngữ (Zero Language Mixing):**
+  - Nghiêm cấm để sót văn bản Tiếng Việt khi giao diện đang ở chế độ Tiếng Anh, và ngược lại.
+- **Kỹ thuật bắt buộc:**
+  - Không hardcode chuỗi ký tự đơn ngữ vào mã nguồn. Luôn dùng `t('key')` từ [translations.js](file:///c:/Users/926166/OneDrive%20-%20Haskoning/Tien_926166/Strava_Desktop_Software/frontend/src/i18n/translations.js) hoặc cấu trúc rẽ nhánh `lang === 'en' ? '...' : '...'`.
+  - Khi thêm key mới, bắt buộc phải định nghĩa song song cả 2 mục `vi` và `en` trong `translations.js`.
+  - Các API sinh văn bản cho client (như AI Coach advice, Weekly training plan, xuất báo cáo) bắt buộc phải nhận tham số `lang` và trả về kết quả đúng ngôn ngữ tương ứng.
+
+

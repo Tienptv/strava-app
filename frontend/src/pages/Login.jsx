@@ -117,45 +117,19 @@ export default function Login({ onLogin, onGuestAccess }) {
 
           <button 
             type="button" 
-            className="btn" 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '8px', 
-              fontSize: '0.85rem',
-              fontWeight: 500,
-              padding: '10px 16px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: '8px',
-              color: '#475569',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+            className="btn-switch-account" 
             onClick={() => onLogin(true)}
             title={t('switchAccountHint')}
           >
             <RefreshCw size={15} />
-            {t('switchAccount')}
+            <span>{t('switchAccount')}</span>
           </button>
           
           <a 
             href="https://www.strava.com/account/recover" 
             target="_blank" 
             rel="noopener noreferrer"
-            style={{
-              fontSize: '0.8rem',
-              color: 'var(--accent)',
-              textAlign: 'center',
-              textDecoration: 'none',
-              marginTop: '4px',
-              fontWeight: 500
-            }}
-            onMouseOver={(e) => e.currentTarget.style.textDecoration = 'underline'}
-            onMouseOut={(e) => e.currentTarget.style.textDecoration = 'none'}
+            className="login-forgot-link"
           >
             {lang === 'en' ? 'Forgot Strava Password?' : 'Quên mật khẩu Strava?'}
           </a>

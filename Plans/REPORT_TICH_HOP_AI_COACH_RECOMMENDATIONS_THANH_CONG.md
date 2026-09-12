@@ -224,3 +224,40 @@ Mọi nút bấm trong toàn bộ phần mềm (Sidebar, Navbar, Login, Personal
 - Đã ghi nhận trực tiếp vào `GEMINI.md` tại **Mục 3: Quy Tắc Chuẩn Thương Hiệu Haskoning & Thiết Kế Giao Diện Đồng Bộ**.
 - Đã tạo vĩnh viễn tệp quy tắc `.agents/rules/haskoning_ui_branding_rule.md` để Antigravity IDE tự động áp dụng cho mọi phiên làm việc tiếp theo.
 
+---
+
+## 8. Quy Tắc Đa Ngôn Ngữ Đồng Bộ (Bilingual Parity & Full i18n Rule - Đã Nạp Vào Brain)
+
+### 8.1. Yêu Cầu Cốt Lõi Về Đa Ngôn Ngữ (Bilingual Parity)
+Phần mềm hỗ trợ song ngữ toàn diện: **English (`en`)** và **Tiếng Việt (`vi`)**:
+- **Chế độ English (`en`):** 
+  - Toàn bộ nội dung hiển thị (tiêu đề trang, nút bấm, tiêu đề cột bảng, tooltip, thông báo popup SweetAlert2, phản hồi phân tích của AI Running Coach, kế hoạch tuần 7 ngày...) **bắt buộc phải hiển thị 100% bằng Tiếng Anh**.
+- **Chế độ Việt Nam (`vi`):** 
+  - Toàn bộ nội dung hiển thị **bắt buộc phải hiển thị 100% bằng Tiếng Việt**.
+- **Nguyên tắc Zero Language Mixing:** Tuyệt đối không để sót văn bản Tiếng Việt trong giao diện Tiếng Anh, và ngược lại.
+
+### 8.2. Quy Chuẩn Kỹ Thuật Bắt Buộc
+1. **Frontend:** Luôn sử dụng context `useLang()` với hàm `t('key')` từ [translations.js](file:///c:/Users/926166/OneDrive%20-%20Haskoning/Tien_926166/Strava_Desktop_Software/frontend/src/i18n/translations.js) hoặc cấu trúc rẽ nhánh `lang === 'en' ? '...' : '...'`. Không bao giờ hardcode chuỗi ký tự đơn ngữ.
+2. **Backend & AI Coach:** Mọi API tạo nội dung cho người dùng (`/api/ai/coach-advice`, `/api/ai/weekly-plan`) đều nhận tham số `lang` và trả về kết quả chuẩn theo ngôn ngữ đã chọn.
+
+### 8.3. Danh Mục Tệp Đã Nạp Vào Brain
+- **`GEMINI.md` (Workspace Rules):** Bổ sung **Mục 4: Quy Tắc Đa Ngôn Ngữ Đồng Bộ (Bilingual Parity & Full i18n Rule)**.
+- **`.agents/rules/bilingual_i18n_rule.md`:** Tệp hướng dẫn chuyên sâu cho Agent, bảo đảm duy trì tính năng đa ngôn ngữ trong mọi phiên phát triển tương lai.
+
+### 8.4. Kết Quả Kiểm Thử Thực Tế Các Quy Tắc Brain (PASS 9/9 - 100% SUCCESS)
+```
+--- TEST ALL 4 RULES IN BRAIN ---
+TEST 1 [GEMINI.md Rule 1 - Sync Rule]: PASS
+TEST 2 [GEMINI.md Rule 2 - 100% Honest Testing]: PASS
+TEST 3 [GEMINI.md Rule 3 - Haskoning Branding]: PASS
+TEST 4 [GEMINI.md Rule 4 - Bilingual Parity (EN/VI)]: PASS
+TEST 5 [.agents/rules/pc_desktop_sync_rule.md]: PASS
+TEST 6 [.agents/rules/testing_and_verification_rule.md]: PASS
+TEST 7 [.agents/rules/haskoning_ui_branding_rule.md]: PASS
+TEST 8 [.agents/rules/bilingual_i18n_rule.md]: PASS
+TEST 9 [translations.js has VI and EN]: PASS
+
+OVERALL STATUS: ALL TESTS PASSED (100% SUCCESS)
+```
+
+

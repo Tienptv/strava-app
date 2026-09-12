@@ -468,7 +468,7 @@ button:disabled {
 .goal-edit-modal .btn-save:hover:not(:disabled),
 .btn:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--accent-light) 0%, #003666 100%);
-  color: #ffffff;
+  color: #ffffff !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0, 163, 166, 0.42);
   filter: brightness(1.05);
@@ -505,7 +505,7 @@ button:disabled {
 .goal-edit-modal .btn-cancel:hover:not(:disabled) {
   background: rgba(0, 163, 166, 0.12);
   border-color: var(--accent);
-  color: var(--accent-dark);
+  color: var(--primary-navy) !important;
   transform: translateY(-2px);
   box-shadow: var(--shadow-button-navy);
 }
@@ -518,6 +518,64 @@ button:disabled {
 .goal-edit-modal .btn-cancel:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
   box-shadow: 0 1px 3px rgba(0, 45, 84, 0.08);
+}
+
+/* Switch Account Button (Login Page) - Ultra High Contrast AAA */
+.btn-switch-account {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 11px 16px;
+  background: #ffffff;
+  border: 1.5px solid rgba(0, 45, 84, 0.18);
+  border-radius: var(--radius-sm);
+  color: var(--primary-navy);
+  box-shadow: 0 1px 3px rgba(0, 45, 84, 0.05);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.btn-switch-account svg {
+  color: var(--accent);
+  transition: all 0.25s ease;
+}
+
+.btn-switch-account:hover:not(:disabled) {
+  background: var(--primary-navy) !important;
+  border-color: var(--primary-navy) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 45, 84, 0.28);
+}
+
+.btn-switch-account:hover:not(:disabled) svg {
+  color: var(--secondary) !important;
+  transform: rotate(180deg);
+}
+
+.btn-switch-account:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 6px rgba(0, 45, 84, 0.15);
+}
+
+.login-forgot-link {
+  font-size: 0.82rem;
+  color: var(--primary-navy);
+  text-align: center;
+  text-decoration: none;
+  margin-top: 4px;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.login-forgot-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
 }
 
 /* Energy / Accent Button (Lime Green -> Teal) */
