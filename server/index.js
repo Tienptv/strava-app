@@ -168,6 +168,35 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 
+// ==========================================
+// BUILD ID & VERSION IDENTIFIER
+// ==========================================
+function getAppBuildId() {
+  if (process.env.RENDER_GIT_COMMIT) {
+    return process.env.RENDER_GIT_COMMIT;
+  }
+  const distIndexPath = path.join(__dirname, '../dist/index.html');
+  if (fs.existsSync(distIndexPath)) {
+    try {
+      const stat = fs.statSync(distIndexPath);
+      return `build_${Math.floor(stat.mtimeMs)}`;
+    } catch (_) {}
+  }
+  const versionPath = path.join(__dirname, '../version.json');
+  if (fs.existsSync(versionPath)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(versionPath, 'utf8'));
+      if (data.version) return `v_${data.version}`;
+    } catch (_) {}
+  }
+  return 'v_1.2.3';
+}
+
+app.use((req, res, next) => {
+  res.setHeader('x-app-build-id', getAppBuildId());
+  next();
+});
+
 // Quản lý token xác thực Strava (lưu trữ cố định trong Storage/tokens.json)
 const tokenStore = new Map();
 
@@ -4235,15 +4264,26 @@ function isNewerVersion(latest, current) {
   return false;
 }
 
-// 1. Trả về thông tin version hiện tại của server
+// 1. Trả về thông tin version hiện tại của server kèm buildId
 app.get('/api/app/version', (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     const versionPath = path.join(__dirname, '../version.json');
+    let data = { version: '1.2.3', releaseDate: '2026-09-05' };
     if (fs.existsSync(versionPath)) {
-      const data = JSON.parse(fs.readFileSync(versionPath, 'utf8'));
-      return res.json(data);
+      try {
+        data = JSON.parse(fs.readFileSync(versionPath, 'utf8'));
+      } catch (_) {}
     }
-    return res.json({ version: '1.2.0', releaseDate: '2026-09-05' });
+    const buildId = getAppBuildId();
+    return res.json({
+      ...data,
+      buildId,
+      serverTime: new Date().toISOString()
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -4704,8 +4744,31 @@ app.post('/api/scripts/execute', async (req, res) => {
 // Cấu hình để backend Node.js tự động phục vụ file giao diện React (khi deploy)
 const distPath = path.join(__dirname, '../dist');
 if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath));
+  // 1. Static assets có hash (vd: /assets/index-Bx8z.js) cache 1 năm vì hash thay đổi khi build mới
+  const assetsPath = path.join(distPath, 'assets');
+  if (fs.existsSync(assetsPath)) {
+    app.use('/assets', express.static(assetsPath, {
+      maxAge: '1y',
+      immutable: true
+    }));
+  }
+
+  // 2. Các file tĩnh thông thường (favicon, logo, icons): kiểm tra nếu là file HTML thì cấm cache tuyệt đối
+  app.use(express.static(distPath, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+    }
+  }));
+
+  // 3. SPA Fallback: Mọi route React đều trả về index.html kèm header cấm cache tuyệt đối
   app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }

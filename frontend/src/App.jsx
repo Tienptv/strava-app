@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import { useLang } from './i18n/LangContext';
 import { APP_VERSION } from './config/version';
+import { useAutoUpdate, AutoUpdateToast } from './utils/useAutoUpdate';
 
 const API_BASE = '/api';
 
@@ -20,14 +21,14 @@ function App() {
   const [userRoles, setUserRoles] = useState({ isSuperAdmin: false, isSubAdmin: false, isAdmin: false });
   const { t } = useLang();
 
+  // Tự động kiểm tra phiên bản mới từ Render Cloud và reload mượt mà
+  const { updateAvailable, newVersionInfo, countdown, reloadNow } = useAutoUpdate();
+
   // Kiểm tra đã đăng nhập chưa hoặc có cờ Guest Mode
   useEffect(() => {
     const storedAppVersion = localStorage.getItem('appVersion');
     if (storedAppVersion !== APP_VERSION) {
-      localStorage.clear();
       localStorage.setItem('appVersion', APP_VERSION);
-      window.location.reload();
-      return;
     }
 
     const isGuestQuery = window.location.search.includes('guest=') || window.location.pathname === '/leaderboard';
@@ -277,6 +278,14 @@ function App() {
           </Routes>
         </main>
       </div>
+
+      {/* Thông báo tự động làm mới giao diện khi có bản cập nhật mới trên Cloud */}
+      <AutoUpdateToast 
+        updateAvailable={updateAvailable} 
+        countdown={countdown} 
+        newVersionInfo={newVersionInfo} 
+        onReloadNow={reloadNow} 
+      />
     </BrowserRouter>
   );
 }
