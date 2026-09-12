@@ -40,9 +40,12 @@ export default function Login({ onLogin, onGuestAccess }) {
 
       <div className="login-card">
         <div className="login-card__icon" style={{ background: 'transparent', boxShadow: 'none' }}>
-          <img src="/logo.webp" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          <img src="/logo.webp" alt="Haskoning Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
         <h1 className="login-card__title">{t('appTitle')}</h1>
+        <div style={{ color: 'var(--accent)', fontWeight: 600, fontStyle: 'italic', fontSize: '0.92rem', letterSpacing: '0.02em', margin: '-6px 0 10px' }}>
+          Enhancing Society Together
+        </div>
         <p className="login-card__subtitle">
           {t('appSubtitle')}
         </p>

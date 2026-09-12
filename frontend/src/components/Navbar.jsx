@@ -16,10 +16,15 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
         style={{ cursor: 'pointer' }}
         onClick={() => navigate('/')}
       >
-        <div className="navbar__brand-icon" style={{ background: 'transparent' }}>
-          <img src="/logo.webp" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        <div className="navbar__brand-icon" style={{ background: 'transparent', width: 34, height: 34 }}>
+          <img src="/logo.webp" alt="Haskoning Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
-        200K Running Club
+        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+          <span style={{ fontWeight: 800, color: 'var(--primary-navy)', letterSpacing: '-0.01em' }}>200K Running Club</span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 600, fontStyle: 'italic', letterSpacing: '0.02em' }}>
+            Enhancing Society Together
+          </span>
+        </div>
       </div>
 
       <div className="navbar__nav">

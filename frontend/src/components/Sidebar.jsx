@@ -698,12 +698,12 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
           {/* Nút Upload CSV/Folder - Giới hạn bởi quyền importActivities */}
           {(isSuperAdmin || !permissions || permissions.importActivities !== false) && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(0, 45, 84, 0.05)', color: '#002D54', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
+              <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', fontSize: '13px', fontWeight: 'bold' }}>
                 <Upload size={16} style={{ marginRight: 6 }} />
                 {t('selectFile')}
                 <input type="file" accept=".csv" multiple onChange={handleCsvUpload} style={{ display: 'none' }} />
               </label>
-              <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', background: 'rgba(0, 45, 84, 0.05)', color: '#002D54', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', fontWeight: 'bold' }}>
+              <label className="btn btn--secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '10px 8px', fontSize: '13px', fontWeight: 'bold' }}>
                 <Upload size={16} style={{ marginRight: 6 }} />
                 {t('selectFolder')}
                 <input type="file" webkitdirectory="true" onChange={handleCsvUpload} style={{ display: 'none' }} />
@@ -977,10 +977,10 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                     }
 
                   }}
+                  className="btn btn--primary"
                   style={{ 
                     flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
-                    padding: '10px 8px', background: '#e3f2fd', color: '#002D54', 
-                    border: '1px solid #90caf9', borderRadius: '6px', fontSize: '13px', 
+                    padding: '10px 8px', fontSize: '13px', 
                     fontWeight: 'bold'
                   }}
                   title={lang === 'en' ? 'Scrape Strava activities & auto sync to Render Cloud' : 'Cào dữ liệu Strava và tự động đồng bộ ngay lên Render Cloud'}
@@ -1010,18 +1010,12 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                 justifyContent: 'center', 
                 cursor: 'pointer', 
                 padding: '10px 8px', 
-                background: '#ffffff', 
-                color: '#002D54', 
-                border: '1px solid #cbd5e1', 
-                borderRadius: '6px', 
                 fontSize: '13px', 
-                fontWeight: 'bold',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                transition: 'all 0.2s ease'
+                fontWeight: 'bold'
               }}
               title={t('screenshotTooltip')}
             >
-              <Camera size={16} style={{ marginRight: 6, color: '#00A3A6' }} />
+              <Camera size={16} style={{ marginRight: 6, color: 'var(--accent)' }} />
               <span>{t('screenshot') || 'Chụp màn hình'}</span>
             </button>
           </div>

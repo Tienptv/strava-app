@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLang } from '../i18n/LangContext';
-import { Target, Edit2, Check, X, ShieldAlert, ShieldCheck, Info, Sparkles, CheckCircle2, Clock, Activity, Calendar, TrendingUp, BarChart2 } from 'lucide-react';
+import { Target, Edit2, Check, X, ShieldAlert, ShieldCheck, Info, Sparkles, CheckCircle2, Clock, Activity, Calendar, TrendingUp, BarChart2, RotateCw, CalendarDays } from 'lucide-react';
 import { getAthleteMatchKey } from '../utils/challengeStats';
 
 export default function PersonalGoal({ 
@@ -328,32 +328,37 @@ export default function PersonalGoal({
     };
   }, [activities, currentYear, currentMonth]);
 
-  const aiCoach = useMemo(() => {
+  // Fallback quy tắc cơ bản (hiển thị ngay lập tức khi chưa có dữ liệu AI)
+  const fallbackCoach = useMemo(() => {
     if (goal <= 0) {
       return {
         message: lang === 'vi' ? 'Hãy thiết lập mục tiêu tháng để nhận tư vấn và kế hoạch tập luyện cá nhân hóa!' : 'Set a monthly goal to get personalized coaching and training plans!',
-        type: 'info'
+        type: 'info',
+        badge: 'Goal Setup'
       };
     }
     
     if (isGoalReached) {
       return {
         message: lang === 'vi' ? 'Tuyệt vời! Bạn đã đạt mục tiêu tháng này. Hãy nghỉ ngơi phục hồi hoặc đặt thêm một mục tiêu phụ (stretch goal) nhé.' : 'Incredible! You reached your goal. Take some rest or push for a stretch goal.',
-        type: 'success'
+        type: 'success',
+        badge: 'Goal Reached 🎯'
       };
     }
 
     if (paceAnalysis.isPastMonth) {
       return {
         message: lang === 'vi' ? 'Tháng này đã kết thúc. Chúc bạn có những thành tích tốt hơn trong tương lai!' : 'This month has ended. Wish you better achievements in the future!',
-        type: 'info'
+        type: 'info',
+        badge: 'Month Ended'
       };
     }
 
     if (paceAnalysis.isFutureMonth) {
       return {
         message: lang === 'vi' ? 'Tháng này chưa bắt đầu. Hãy lên kế hoạch tập luyện sẵn sàng nhé!' : 'This month hasn\'t started yet. Get ready!',
-        type: 'info'
+        type: 'info',
+        badge: 'Upcoming Month'
       };
     }
 
@@ -362,17 +367,90 @@ export default function PersonalGoal({
         message: lang === 'vi' 
           ? `Làm tốt lắm! Bạn đang đi đúng tiến độ. Cứ giữ nhịp độ tối thiểu ${paceAnalysis.requiredPacePerDay} km/ngày, bạn sẽ hoàn thành mục tiêu dễ dàng.` 
           : `Great job! You are on track. Maintain at least ${paceAnalysis.requiredPacePerDay} km/day to hit your goal easily.`,
-        type: 'success'
+        type: 'success',
+        badge: 'On Track 👍'
       };
     } else {
       return {
         message: lang === 'vi' 
           ? `Bạn đang chậm hơn tiến độ dự kiến. Cần chạy trung bình ${paceAnalysis.requiredPacePerDay} km/ngày trong ${paceAnalysis.daysLeft} ngày còn lại. Hãy sắp xếp thời gian nhé!` 
           : `You're slightly behind schedule. You need to run ${paceAnalysis.requiredPacePerDay} km/day for the remaining ${paceAnalysis.daysLeft} days. You can do it!`,
-        type: 'warning'
+        type: 'warning',
+        badge: 'Behind Schedule ⚠️'
       };
     }
   }, [goal, isGoalReached, paceAnalysis, lang]);
+
+  // AI Running Coach States
+  const [aiAdvice, setAiAdvice] = useState(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+  const [weeklyPlan, setWeeklyPlan] = useState(null);
+  const [showWeeklyModal, setShowWeeklyModal] = useState(false);
+  const [loadingWeeklyPlan, setLoadingWeeklyPlan] = useState(false);
+
+  // Gọi API lấy tư vấn AI Coach theo hoạt động
+  const handleFetchAiAdvice = useCallback(async (force = false) => {
+    if (!apiFetch) return;
+    setLoadingAi(true);
+    try {
+      const res = await apiFetch('/ai/coach-advice', {
+        method: 'POST',
+        body: JSON.stringify({
+          athlete,
+          activities,
+          goal,
+          currentDist,
+          paceAnalysis,
+          hasPenalty,
+          penaltyDue,
+          lang,
+          forceRefresh: force
+        })
+      });
+      if (res && res.message) {
+        setAiAdvice(res);
+      }
+    } catch (err) {
+      console.warn('Lỗi khi tải AI Coach Advice:', err.message);
+    } finally {
+      setLoadingAi(false);
+    }
+  }, [apiFetch, athlete, activities, goal, currentDist, paceAnalysis, hasPenalty, penaltyDue, lang]);
+
+  // Tự động gọi phân tích khi mount hoặc khi activities thay đổi
+  useEffect(() => {
+    handleFetchAiAdvice(false);
+  }, [handleFetchAiAdvice]);
+
+  // Gọi API lấy Kế hoạch tập luyện tuần (Weekly Plan)
+  const handleFetchWeeklyPlan = useCallback(async (force = false) => {
+    if (!apiFetch) return;
+    setLoadingWeeklyPlan(true);
+    setShowWeeklyModal(true);
+    try {
+      const res = await apiFetch('/ai/weekly-plan', {
+        method: 'POST',
+        body: JSON.stringify({
+          athlete,
+          activities,
+          goal,
+          currentDist,
+          paceAnalysis,
+          hasPenalty,
+          penaltyDue,
+          lang,
+          forceRefresh: force
+        })
+      });
+      if (res && res.schedule) {
+        setWeeklyPlan(res);
+      }
+    } catch (err) {
+      console.warn('Lỗi khi tải Weekly Plan:', err.message);
+    } finally {
+      setLoadingWeeklyPlan(false);
+    }
+  }, [apiFetch, athlete, activities, goal, currentDist, paceAnalysis, hasPenalty, penaltyDue, lang]);
 
   return (
     <div className="personal-goal-dashboard pg-layout-2col">
@@ -548,16 +626,60 @@ export default function PersonalGoal({
             </div>
 
             {/* AI Coach / Recommendations */}
-            <div className={`ai-coach-box ai-coach-${aiCoach.type}`}>
-              <div className="ai-coach-icon">
-                <Sparkles size={17} />
+            <div className={`ai-coach-box ai-coach-${aiAdvice?.type || fallbackCoach.type}`}>
+              <div className="ai-coach-header-row">
+                <div className="ai-coach-title-wrap">
+                  <div className="ai-coach-icon">
+                    <Sparkles size={16} />
+                  </div>
+                  <h4 className="ai-coach-title">
+                    {lang === 'vi' ? 'Tư vấn & Kế hoạch' : 'Coach Recommendations'}
+                  </h4>
+                  <span className="ai-coach-badge">
+                    {aiAdvice?.badge || fallbackCoach.badge}
+                  </span>
+                </div>
+                
+                <div className="ai-coach-actions">
+                  <button 
+                    type="button" 
+                    className="btn-ai-coach-action"
+                    onClick={() => handleFetchWeeklyPlan()}
+                    title={lang === 'vi' ? 'Xem kế hoạch tập luyện 7 ngày trong tuần' : 'View 7-day training plan'}
+                  >
+                    <CalendarDays size={13} />
+                    <span>{lang === 'vi' ? 'Kế hoạch tuần' : 'Weekly Plan'}</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className={`btn-ai-coach-refresh ${loadingAi ? 'is-loading' : ''}`}
+                    onClick={() => handleFetchAiAdvice(true)}
+                    title={lang === 'vi' ? 'Phân tích lại với AI' : 'Refresh AI analysis'}
+                    disabled={loadingAi}
+                  >
+                    <RotateCw size={13} className={loadingAi ? 'spin-icon' : ''} />
+                  </button>
+                </div>
               </div>
-              <div className="ai-coach-content">
-                <h4 className="ai-coach-title">
-                  {lang === 'vi' ? 'Tư vấn & Kế hoạch' : 'Coach Recommendations'}
-                </h4>
-                <p className="ai-coach-message">{aiCoach.message}</p>
+
+              <div className="ai-coach-body">
+                {loadingAi ? (
+                  <div className="ai-coach-generating">
+                    <span className="ai-dot-pulse" />
+                    <span>{lang === 'vi' ? 'AI Coach đang phân tích hoạt động & thể lực...' : 'AI Coach is analyzing activities & stamina...'}</span>
+                  </div>
+                ) : (
+                  <p className="ai-coach-message">{aiAdvice?.message || fallbackCoach.message}</p>
+                )}
               </div>
+
+              {aiAdvice?.actionPlan && !loadingAi && (
+                <div className="ai-coach-action-plan">
+                  <span className="action-plan-label">{lang === 'vi' ? '💡 Bài tập tiếp theo:' : '💡 Next Workout:'}</span>
+                  <span className="action-plan-text">{aiAdvice.actionPlan}</span>
+                </div>
+              )}
             </div>
           </>
         )}
@@ -665,6 +787,131 @@ export default function PersonalGoal({
         </div>
       </div>
 
+      {/* MODAL: WEEKLY TRAINING PLAN (KẾ HOẠCH TUẦN CHI TIẾT) */}
+      {showWeeklyModal && (
+        <div className="weekly-plan-modal-overlay" onClick={() => setShowWeeklyModal(false)}>
+          <div className="weekly-plan-modal" onClick={e => e.stopPropagation()}>
+            <div className="weekly-plan-modal__header">
+              <div className="weekly-plan-modal__title-wrap">
+                <div className="weekly-plan-modal__icon-badge">
+                  <CalendarDays size={20} color="#00A3A6" />
+                </div>
+                <div>
+                  <h3 className="weekly-plan-modal__title">
+                    {lang === 'vi' ? 'Lịch Trình Tập Luyện Tuần Này' : 'Weekly Training Schedule'}
+                  </h3>
+                  <span className="weekly-plan-modal__subtitle">
+                    {weeklyPlan ? (
+                      lang === 'vi' 
+                        ? `Đã chạy ${weeklyPlan.totalRanThisWeek} km • Mục tiêu tuần: ${weeklyPlan.weeklyGoalKm} km`
+                        : `Ran ${weeklyPlan.totalRanThisWeek} km • Week Target: ${weeklyPlan.weeklyGoalKm} km`
+                    ) : (
+                      lang === 'vi' ? 'Đang phân tích số liệu tuần...' : 'Analyzing weekly workload...'
+                    )}
+                  </span>
+                </div>
+              </div>
+              
+              <button 
+                className="btn-modal-close" 
+                onClick={() => setShowWeeklyModal(false)}
+                title={lang === 'vi' ? 'Đóng' : 'Close'}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="weekly-plan-modal__body">
+              {loadingWeeklyPlan ? (
+                <div className="weekly-plan-loading">
+                  <span className="ai-dot-pulse" />
+                  <p>{lang === 'vi' ? 'AI Coach đang tối ưu kế hoạch 7 ngày...' : 'AI Coach is optimizing your 7-day schedule...'}</p>
+                </div>
+              ) : weeklyPlan ? (
+                <>
+                  {weeklyPlan.coachSummary && (
+                    <div className="weekly-plan-summary-box">
+                      <Sparkles size={16} className="summary-sparkle-icon" />
+                      <p>{weeklyPlan.coachSummary}</p>
+                    </div>
+                  )}
+
+                  <div className="weekly-schedule-grid">
+                    {weeklyPlan.schedule?.map(slot => (
+                      <div 
+                        key={slot.dayIndex} 
+                        className={`schedule-card ${slot.isToday ? 'is-today' : ''} ${slot.isCompleted ? 'is-completed' : ''} ${slot.workoutType?.includes('Rest') || slot.workoutType?.includes('Nghỉ') ? 'is-rest' : ''}`}
+                      >
+                        <div className="schedule-card__header">
+                          <span className="schedule-day-name">{slot.dayName}</span>
+                          <span className="schedule-date">{slot.dateStr}</span>
+                        </div>
+
+                        <div className="schedule-card__badge-row">
+                          {slot.isCompleted ? (
+                            <span className="schedule-status-badge completed">
+                              <CheckCircle2 size={12} /> {slot.ranKm} km
+                            </span>
+                          ) : slot.isToday ? (
+                            <span className="schedule-status-badge today">
+                              {lang === 'vi' ? 'Hôm nay' : 'Today'}
+                            </span>
+                          ) : (
+                            <span className={`schedule-status-badge ${slot.badge?.toLowerCase() || 'plan'}`}>
+                              {slot.badge || 'Plan'}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="schedule-card__workout">
+                          <span className="workout-type-name">
+                            {slot.isCompleted 
+                              ? (lang === 'vi' ? 'Đã hoàn thành' : 'Completed') 
+                              : slot.workoutType || (lang === 'vi' ? 'Nghỉ ngơi' : 'Rest')}
+                          </span>
+                          {!slot.isCompleted && slot.suggestedKm > 0 && (
+                            <span className="workout-km-target">{slot.suggestedKm} km</span>
+                          )}
+                        </div>
+
+                        {slot.focus && !slot.isCompleted && (
+                          <div className="schedule-card__focus">
+                            <small>{slot.focus}</small>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="weekly-plan-empty">
+                  <p>{lang === 'vi' ? 'Không thể tạo kế hoạch tuần.' : 'Unable to generate schedule.'}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="weekly-plan-modal__footer">
+              <button 
+                type="button" 
+                className="btn-modal-refresh"
+                onClick={() => handleFetchWeeklyPlan(true)}
+                disabled={loadingWeeklyPlan}
+              >
+                <RotateCw size={14} className={loadingWeeklyPlan ? 'spin-icon' : ''} />
+                <span>{lang === 'vi' ? 'Tạo lại kế hoạch' : 'Regenerate'}</span>
+              </button>
+
+              <button 
+                type="button" 
+                className="btn-modal-done"
+                onClick={() => setShowWeeklyModal(false)}
+              >
+                {lang === 'vi' ? 'Đã hiểu' : 'Got it'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

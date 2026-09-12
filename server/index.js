@@ -11,6 +11,7 @@ import { scrapeClubActivities, loginAndGetCookie, getSavedCookie, extractCookies
 import https from 'https';
 import { ZipArchive } from 'archiver';
 import { execSync, spawn } from 'child_process';
+import { getAiCoachAdvice, getWeeklyTrainingPlan } from './ai_coach_service.js';
 
 dotenv.config();
 
@@ -4736,6 +4737,42 @@ app.post('/api/scripts/execute', async (req, res) => {
     console.error('Lỗi khi chạy script:', err);
     res.status(500).json({ error: err.message });
   }
+});
+
+// ==========================================
+// AI RUNNING COACH ENDPOINTS
+// ==========================================
+// 1. Lấy lời khuyên AI Coach cá nhân hóa theo hoạt động & mục tiêu
+app.post('/api/ai/coach-advice', async (req, res) => {
+  try {
+    const { forceRefresh = false, ...inputData } = req.body || {};
+    const advice = await getAiCoachAdvice(inputData, forceRefresh);
+    res.json(advice);
+  } catch (err) {
+    console.error('[API /api/ai/coach-advice] Lỗi:', err);
+    res.status(500).json({ error: err.message || 'Lỗi khi lấy tư vấn AI Coach' });
+  }
+});
+
+// 2. Sinh Kế hoạch tập luyện 7 ngày trong tuần (Weekly Training Plan)
+app.post('/api/ai/weekly-plan', async (req, res) => {
+  try {
+    const plan = await getWeeklyTrainingPlan(req.body || {});
+    res.json(plan);
+  } catch (err) {
+    console.error('[API /api/ai/weekly-plan] Lỗi:', err);
+    res.status(500).json({ error: err.message || 'Lỗi khi tạo kế hoạch tuần' });
+  }
+});
+
+// 3. Trạng thái AI Engine
+app.get('/api/ai/status', (req, res) => {
+  const hasKey = !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim());
+  res.json({
+    active: true,
+    hasGeminiKey: hasKey,
+    provider: hasKey ? 'Google Gemini' : 'Smart Heuristic Engine'
+  });
 });
 
 // ==========================================
