@@ -13,11 +13,11 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
     <nav className="navbar">
       <div
         className="navbar__brand"
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: 'pointer', gap: '6px' }}
         onClick={() => navigate('/')}
       >
-        <div className="navbar__brand-icon" style={{ background: 'transparent', width: 34, height: 34 }}>
-          <img src="/logo.webp" alt="Haskoning Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        <div className="navbar__brand-icon" style={{ background: 'transparent', width: 38, height: 35, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src="/logo-tight.webp" alt="Haskoning Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
           <span style={{ fontWeight: 800, color: 'var(--primary-navy)', letterSpacing: '-0.01em' }}>200K Running Club</span>
@@ -59,22 +59,22 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
             style={{
               background: 'transparent',
               border: '1px solid rgba(0, 163, 166, 0.3)',
-              borderRadius: '20px',
-              padding: '4px 10px',
+              borderRadius: '10px',
+              padding: '2px 6px',
               cursor: 'pointer',
               fontWeight: 800,
               color: 'var(--primary-navy)',
               display: 'flex',
               alignItems: 'baseline',
-              gap: '4px',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              gap: '2px',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
-            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'rgba(0, 163, 166, 0.05)'; }}
+            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'rgba(0, 163, 166, 0.05)'; }}
             onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(0, 163, 166, 0.3)'; e.currentTarget.style.background = 'transparent'; }}
           >
-            <span style={{ fontSize: lang === 'en' ? '1.05rem' : '0.7rem', opacity: lang === 'en' ? 1 : 0.4, transition: 'all 0.3s ease' }}>EN</span>
-            <span style={{ fontSize: '0.85rem', opacity: 0.3, fontWeight: 400 }}>/</span>
-            <span style={{ fontSize: lang === 'vi' ? '1.05rem' : '0.7rem', opacity: lang === 'vi' ? 1 : 0.4, transition: 'all 0.3s ease' }}>VI</span>
+            <span style={{ fontSize: lang === 'en' ? '0.62rem' : '0.48rem', opacity: lang === 'en' ? 1 : 0.4, transition: 'all 0.25s ease' }}>EN</span>
+            <span style={{ fontSize: '0.52rem', opacity: 0.3, fontWeight: 400 }}>/</span>
+            <span style={{ fontSize: lang === 'vi' ? '0.62rem' : '0.48rem', opacity: lang === 'vi' ? 1 : 0.4, transition: 'all 0.25s ease' }}>VI</span>
           </button>
         </div>
 

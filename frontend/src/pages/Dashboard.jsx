@@ -467,6 +467,7 @@ export default function Dashboard({
             challengeYear={challengeYear}
             challengeParticipants={challengeParticipants}
             challengeData={challengeData}
+            isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
             lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
           />
 

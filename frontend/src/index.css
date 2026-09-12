@@ -136,8 +136,9 @@ img {
   backdrop-filter: blur(20px) saturate(1.5);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  height: 64px;
+  padding: 0 24px 0 20px;
+  min-height: 64px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -146,7 +147,7 @@ img {
 .navbar__brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   font-weight: 800;
   font-size: 1.25rem;
   color: var(--text-primary);
@@ -154,14 +155,13 @@ img {
 }
 
 .navbar__brand-icon {
-  width: 32px;
-  height: 32px;
-  background: var(--gradient-accent);
-  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 35px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .navbar__nav {
@@ -3438,8 +3438,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .personal-goal__stats {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 0.6rem;
+  align-items: flex-end;
+  margin-bottom: 2px;
 }
 
 .club-goal__stats {
@@ -3460,6 +3460,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   display: flex;
   align-items: baseline;
   gap: 6px;
+  line-height: 1;
 }
 
 .current-dist {
@@ -3467,12 +3468,14 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   font-weight: 800;
   color: var(--primary-navy);
   letter-spacing: -0.5px;
+  line-height: 1;
 }
 
 .total-goal {
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--text-secondary);
+  line-height: 1;
 }
 
 .goal-percent-badge {
@@ -3483,6 +3486,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid rgba(0, 163, 166, 0.2);
+  align-self: flex-end;
+  line-height: 1.2;
 }
 
 .goal-percent-badge.is-complete {
@@ -5241,7 +5246,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 4px;
 }
 
 .personal-goal__title {
@@ -5275,7 +5280,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .current-dist {
@@ -5295,7 +5300,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   background: rgba(0, 45, 84, 0.08);
   border-radius: 6px;
   overflow: hidden;
-  margin: 16px 0;
+  margin: 4px 0 6px 0;
   position: relative;
 }
 
@@ -5399,10 +5404,24 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .penalty-status-box {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 12px;
-  margin-top: 10px;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-top: 0;
+}
+
+.penalty-status-box .btn-premium-action {
+  padding: 3px 10px;
+  font-size: 0.74rem;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.penalty-status-desc {
+  font-size: 0.72rem;
+  margin: 0;
+  line-height: 1.35;
 }
 
 .penalty-status-active {
@@ -7341,7 +7360,24 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .pg-hero-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 0;
+  height: 100%;
+}
+
+.pg-goal-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0 0 10px 0;
+}
+
+.pg-goal-progress-wrap .personal-goal__stats {
+  margin: 0 0 10px 0;
+}
+
+.pg-goal-progress-wrap .progress-bar-container {
+  margin: 0 0 10px 0;
 }
 
 .pg-aside-penalty-card {
@@ -7352,9 +7388,376 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .pg-aside-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   flex: 1;
+  justify-content: flex-start;
+}
+
+/* OPTION 1 & 2: WALLET DEFENSE & SAVINGS TIER */
+.pg-savings-defense-card {
+  background: linear-gradient(135deg, rgba(0, 163, 166, 0.05) 0%, rgba(120, 190, 32, 0.05) 100%);
+  border: 1px solid rgba(0, 163, 166, 0.2);
+  border-radius: 10px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.pg-savings-defense-card:hover {
+  border-color: rgba(0, 163, 166, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 163, 166, 0.08);
+}
+
+.savings-card-header {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+.savings-header-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.savings-header-title .savings-icon {
+  color: #00A3A6;
+  flex-shrink: 0;
+}
+
+.savings-badge-pill {
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(0, 163, 166, 0.1);
+  color: #00A3A6;
+  border: 1px solid rgba(0, 163, 166, 0.2);
+  white-space: nowrap;
+}
+
+.savings-badge-pill strong {
+  font-weight: 800;
+  color: #008080;
+}
+
+.savings-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0, 45, 84, 0.06);
+  overflow: hidden;
+  position: relative;
+}
+
+.savings-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #00A3A6 0%, #78BE20 100%);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.savings-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.savings-milestone-hint {
+  color: #0284c7;
+  font-weight: 600;
+}
+
+.savings-rate-hint {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.savings-note.safe {
+  color: #15803d;
+  font-weight: 700;
+  background: rgba(34, 197, 94, 0.08);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+/* WHY JOIN PENALTY CARD (INSPIRATIONAL PROMPT) */
+.pg-why-penalty-card {
+  background: rgba(255, 152, 0, 0.04);
+  border: 1px dashed rgba(255, 152, 0, 0.28);
+  border-radius: 10px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.why-penalty-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.why-penalty-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.70rem;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+/* OPTION 1: CLUB TREASURY IMPACT */
+.pg-treasury-impact-card {
+  background: rgba(0, 45, 84, 0.025);
+  border: 1px solid rgba(0, 45, 84, 0.09);
+  border-radius: 10px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.pg-treasury-impact-card:hover {
+  border-color: rgba(0, 45, 84, 0.2);
+  background: rgba(0, 45, 84, 0.04);
+}
+
+.treasury-impact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.treasury-impact-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.treasury-share-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(0, 45, 84, 0.08);
+  color: var(--primary-navy);
+  white-space: nowrap;
+}
+
+.treasury-purpose-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.purpose-pill {
+  font-size: 0.67rem;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.btn-treasury-quick-link {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #00A3A6;
+  background: rgba(0, 163, 166, 0.06);
+  border: 1px solid rgba(0, 163, 166, 0.25);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-treasury-quick-link:hover {
+  transform: translateY(-2px);
+  background: rgba(0, 163, 166, 0.12);
+  border-color: #00A3A6;
+  box-shadow: 0 4px 14px rgba(0, 163, 166, 0.25);
+}
+
+.btn-treasury-quick-link:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* OPTION 3: PERSONAL PENALTY HISTORY (HIỂN THỊ TOÀN BỘ, USER CHỈ XEM, ADMIN TƯƠNG TÁC) */
+.pg-admin-penalty-history {
+  background: rgba(241, 245, 249, 0.6);
+  border: 1px dashed rgba(100, 116, 139, 0.3);
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pg-admin-penalty-history.is-readonly-user {
+  cursor: default;
+  user-select: none;
+}
+
+.pg-admin-penalty-history.is-readonly-user .admin-history-item {
+  cursor: default;
+}
+
+.pg-admin-penalty-history.is-readonly-user .admin-history-status {
+  pointer-events: none;
+  cursor: default;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.pg-admin-penalty-history.is-admin-interactive {
+  border-color: rgba(0, 163, 166, 0.35);
+  background: rgba(240, 253, 250, 0.5);
+}
+
+.admin-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admin-history-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.admin-only-badge {
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.admin-only-badge.is-locked-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.admin-only-badge.is-interactive-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.admin-history-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-history-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.6fr;
+  align-items: center;
+  font-size: 0.72rem;
+  padding: 2px 0;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.2);
+}
+
+.admin-history-item:last-child {
+  border-bottom: none;
+}
+
+.admin-history-month {
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.admin-history-amount {
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  padding-right: 4px;
+}
+
+.admin-history-status {
+  font-size: 0.67rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  justify-self: end;
+}
+
+.admin-history-status.is-paid {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.admin-history-status.is-unpaid {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.admin-history-status.is-safe {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.pg-admin-penalty-history.is-admin-interactive .admin-history-status.is-clickable {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pg-admin-penalty-history.is-admin-interactive .admin-history-status.is-clickable:hover {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 3px 10px rgba(0, 45, 84, 0.18);
+  filter: brightness(0.96);
+}
+
+.pg-admin-penalty-history.is-admin-interactive .admin-history-status.is-clickable:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Header styles for the cards */
@@ -7362,7 +7765,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .personal-goal__title {
@@ -7404,7 +7807,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   border: 1px solid rgba(0, 163, 166, 0.14);
   border-radius: 12px;
   padding: 10px 14px;
-  margin: 14px 0 16px 0;
+  margin: 0;
   gap: 8px;
 }
 
@@ -7454,17 +7857,17 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-top: 0;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .stat-widget {
   background: var(--bg-secondary, rgba(248, 250, 252, 0.7));
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   transition: all 0.2s ease;
 }
 
@@ -7476,8 +7879,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .stat-widget-icon {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   background: rgba(0, 163, 166, 0.08);
   color: #00A3A6;
@@ -7494,7 +7897,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .stat-widget-label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
@@ -7505,26 +7908,28 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .stat-widget-value {
-  font-size: 1.05rem;
+  font-size: 1.0rem;
   font-weight: 700;
   color: var(--primary-navy);
   line-height: 1.2;
 }
 
 .stat-widget-value small {
-  font-size: 0.72rem;
+  font-size: 0.70rem;
   font-weight: 500;
   color: var(--text-secondary);
 }
 
 /* AI Coach / Recommendations Upgrade */
 .ai-coach-box {
-  margin-top: auto;
-  padding: 14px 16px;
-  border-radius: 14px;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1; /* Tự động co giãn chiếm toàn bộ khoảng trống còn lại, cách mép card đúng 20px */
   animation: modal-fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   border-left: 4px solid transparent;
   background: #f8fafc;
@@ -7575,6 +7980,17 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   background: linear-gradient(135deg, rgba(0, 163, 166, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
   color: #0284c7;
   border: 1px solid rgba(0, 163, 166, 0.25);
+  white-space: nowrap;
+}
+
+.ai-coach-readiness-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.28);
   white-space: nowrap;
 }
 
@@ -7715,6 +8131,67 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .action-plan-text {
   color: var(--text-primary);
   font-weight: 500;
+}
+
+.ai-coach-extended-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.ai-coach-insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .ai-coach-insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ai-coach-insight-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 45, 84, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-coach-insight-card:hover {
+  border-color: rgba(0, 163, 166, 0.35);
+  box-shadow: 0 3px 8px rgba(0, 163, 166, 0.08);
+  transform: translateY(-1px);
+}
+
+.ai-coach-insight-card.strategy-card {
+  border-left: 3px solid #00A3A6;
+}
+
+.ai-coach-insight-card.recovery-card {
+  border-left: 3px solid #10b981;
+}
+
+.insight-card-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.insight-card-text {
+  margin: 0;
+  font-size: 0.73rem;
+  color: var(--text-secondary);
+  line-height: 1.38;
 }
 
 .ai-coach-success {
@@ -8070,17 +8547,17 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .personal-goal__penalty-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .personal-goal__club-contribution {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px 16px;
+  gap: 4px;
+  padding: 8px 12px;
   background: linear-gradient(135deg, rgba(255, 152, 0, 0.06) 0%, rgba(255, 183, 77, 0.08) 100%);
   border: 1px solid rgba(255, 152, 0, 0.22);
-  border-radius: 14px;
+  border-radius: 10px;
   margin-top: auto;
   position: relative;
   overflow: hidden;
@@ -8101,39 +8578,39 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .contribution-meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .personal-goal__club-contribution .contribution-title {
-  font-size: 0.88rem;
+  font-size: 0.80rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .contribution-sub {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
   font-weight: 500;
 }
 
 .personal-goal__club-contribution .contribution-value {
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: #d97706;
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
   letter-spacing: -0.5px;
 }
 
 .personal-goal__club-contribution .contribution-value small {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -8141,9 +8618,9 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .personal-goal__club-contribution .contribution-rank {
   background: rgba(217, 119, 6, 0.15);
   border: 1px solid rgba(217, 119, 6, 0.3);
-  padding: 3px 8px;
+  padding: 2px 6px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.70rem;
   font-weight: 800;
   color: #b45309;
 }

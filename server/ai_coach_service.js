@@ -417,6 +417,9 @@ HÃY TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON HỢP LỆ THEO CẤU TRÚC:
           badge: parsed.badge || 'AI Coach ✨',
           message: parsed.message,
           actionPlan: parsed.actionPlan || '',
+          strategyTip: parsed.strategyTip || '',
+          recoveryTip: parsed.recoveryTip || '',
+          readinessScore: parsed.readinessScore || null,
           provider: 'gemini'
         };
       }
@@ -429,12 +432,68 @@ HÃY TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON HỢP LỆ THEO CẤU TRÚC:
 }
 
 /**
+ * Chuẩn hóa và bổ sung các trường tư vấn mở rộng cho AI Coach
+ */
+function formatAdviceResult(res, ctx, isVi) {
+  if (!res) return res;
+  let strategyTip = res.strategyTip || '';
+  if (!strategyTip) {
+    if (ctx.isGoalReached) {
+      strategyTip = isVi
+        ? 'Đã hoàn thành mục tiêu tháng. Duy trì các bài chạy nhẹ 3-5km dưỡng sức.'
+        : 'Monthly goal completed. Maintain easy 3-5km recovery runs.';
+    } else if (ctx.goal <= 0) {
+      strategyTip = isVi
+        ? 'Hãy chọn mục tiêu tháng từ 50km - 150km phù hợp với thể lực.'
+        : 'Set a suitable monthly goal between 50km - 150km.';
+    } else {
+      const remainingWeeks = Math.max(1, Math.ceil(ctx.daysLeft / 7));
+      const sessionsPerWeek = Math.min(4, Math.max(2, Math.round(parseFloat(ctx.remainingKm) / 6) || 3));
+      const kmPerSession = (parseFloat(ctx.remainingKm) / (remainingWeeks * sessionsPerWeek)).toFixed(1);
+      strategyTip = isVi
+        ? `Duy trì ~${sessionsPerWeek} buổi/tuần, mỗi buổi ~${kmPerSession} km để về đích bền bỉ.`
+        : `Aim for ~${sessionsPerWeek} runs/week (~${kmPerSession} km each) to hit your target smoothly.`;
+    }
+  }
+
+  let recoveryTip = res.recoveryTip || '';
+  if (!recoveryTip) {
+    if (ctx.streak >= 3 || ctx.paceIntensity === 'fast') {
+      recoveryTip = isVi
+        ? 'Bù 400ml nước điện giải sau chạy, chườm lạnh cơ bắp và giãn cơ kỹ 10 phút.'
+        : 'Sip 400ml electrolytes post-run, cold compress, and do 10 mins stretching.';
+    } else {
+      recoveryTip = isVi
+        ? 'Uống đủ 2-2.5L nước/ngày, nạp đủ protein sau chạy và ngủ đủ 7-8 tiếng.'
+        : 'Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.';
+    }
+  }
+
+  let readinessScore = res.readinessScore;
+  if (!readinessScore) {
+    if (ctx.streak >= 4) readinessScore = 74;
+    else if (ctx.streak >= 2) readinessScore = 85;
+    else if (ctx.daysSinceLastRun >= 5) readinessScore = 76;
+    else if (ctx.daysSinceLastRun >= 3) readinessScore = 82;
+    else readinessScore = 92;
+  }
+
+  return {
+    ...res,
+    strategyTip,
+    recoveryTip,
+    readinessScore
+  };
+}
+
+/**
  * Hàm chính: Lấy lời khuyên AI Coach (có Caching thông minh)
  */
 export async function getAiCoachAdvice(inputData, forceRefresh = false) {
   const athleteKey = inputData.athlete?.id ? String(inputData.athlete.id) : (inputData.athlete?.firstname || 'default_user');
   const todayStr = new Date().toISOString().slice(0, 10);
   const cache = readAiCache();
+  const isVi = (inputData.lang || 'vi') === 'vi';
 
   const ctx = extractRunnerContext(inputData);
   const latestActId = ctx.latestRun?.id ? String(ctx.latestRun.id) : 'no_act';
@@ -442,7 +501,8 @@ export async function getAiCoachAdvice(inputData, forceRefresh = false) {
 
   // Kiểm tra cache nếu không ép buộc refresh
   if (!forceRefresh && cache[cacheKey]) {
-    return { ...cache[cacheKey], fromCache: true };
+    const cached = formatAdviceResult(cache[cacheKey], ctx, isVi);
+    return { ...cached, fromCache: true };
   }
 
   let result = null;
@@ -461,6 +521,8 @@ export async function getAiCoachAdvice(inputData, forceRefresh = false) {
     result = generateHeuristicAdvice(ctx, inputData.lang || 'vi');
     result.provider = 'Smart Heuristic Engine';
   }
+
+  result = formatAdviceResult(result, ctx, isVi);
 
   // Lưu vào Cache
   cache[cacheKey] = {

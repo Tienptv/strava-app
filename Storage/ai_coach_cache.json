@@ -52,5 +52,26 @@
     "actionPlan": "Next session: 8 km at conversational pace.",
     "provider": "Smart Heuristic Engine",
     "generatedAt": "2026-09-12T16:00:54.347Z"
+  },
+  "120540594_20142281380_2026-09-12_vi": {
+    "title": "Tư vấn & Kế hoạch",
+    "type": "info",
+    "badge": "On Track 👍",
+    "message": "Bài chạy 4.5 km (pace 7:01) duy trì phong độ ổn định. Bạn còn thiếu 95.5 km trong 18 ngày (5.3 km/ngày). Duy trì đều đặn 3-4 buổi/tuần bạn sẽ về đích an toàn!",
+    "actionPlan": "Buổi tới: Chạy 8 km ở nhịp thở trò chuyện thoải mái.",
+    "provider": "Smart Heuristic Engine",
+    "generatedAt": "2026-09-12T17:50:19.667Z"
+  },
+  "120540594_no_act_2026-09-12_vi": {
+    "title": "Tư vấn & Kế hoạch",
+    "type": "warning",
+    "badge": "Inactivity Alert ⚠️",
+    "message": "Đã 999 ngày rồi bạn chưa xỏ giày! Cơ bắp đang dần nguội và mục tiêu tháng còn thiếu 77.2 km (4.3 km/ngày). Tuyệt đối không chạy gấp đôi để \"bù\" ngày nghỉ; hãy khởi động thật kỹ và bắt đầu lại bằng bài chạy nhẹ 3-4km hôm nay! Lưu ý áp lực cam kết quỹ 150k đang tăng dần!",
+    "actionPlan": "Khởi động khớp cổ chân/gối, chạy nhẹ 3-4km pace thoải mái.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Duy trì ~4 buổi/tuần, mỗi buổi ~6.4 km để về đích bền bỉ.",
+    "recoveryTip": "Uống đủ 2-2.5L nước/ngày, nạp đủ protein sau chạy và ngủ đủ 7-8 tiếng.",
+    "readinessScore": 76,
+    "generatedAt": "2026-09-12T18:41:47.363Z"
   }
 }

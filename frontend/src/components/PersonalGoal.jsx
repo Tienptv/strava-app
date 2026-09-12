@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLang } from '../i18n/LangContext';
-import { Target, Edit2, Check, X, ShieldAlert, ShieldCheck, Info, Sparkles, CheckCircle2, Clock, Activity, Calendar, TrendingUp, BarChart2, RotateCw, CalendarDays } from 'lucide-react';
+import { 
+  Target, Edit2, Check, X, ShieldAlert, ShieldCheck, Info, Sparkles, 
+  CheckCircle2, Clock, Activity, Calendar, TrendingUp, BarChart2, RotateCw, 
+  CalendarDays, Wallet, Award, Lock, Eye
+} from 'lucide-react';
 import { getAthleteMatchKey } from '../utils/challengeStats';
+import TreasuryTransparencyModal from './TreasuryTransparencyModal';
+import Swal from 'sweetalert2';
 
 export default function PersonalGoal({ 
   activities = [], 
@@ -23,15 +29,22 @@ export default function PersonalGoal({
   const userMatchKey = getAthleteMatchKey(athlete, challengeParticipants);
   const userKey = userMatchKey ? `${userMatchKey}_${currentYear}_${currentMonth}` : null;
 
-  const [goal, setGoal] = useState(100);
+  const [goal, setGoal] = useState(0);
   const [hasPenalty, setHasPenalty] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [tempGoal, setTempGoal] = useState('100');
+  const [tempGoal, setTempGoal] = useState('');
   const [tempPenalty, setTempPenalty] = useState(false);
   const [currentDist, setCurrentDist] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [allTimeFinancial, setAllTimeFinancial] = useState(null);
+  const [showTreasuryModal, setShowTreasuryModal] = useState(false);
+  const [clubMetadata, setClubMetadata] = useState(null);
+  const [matchedMemberRecord, setMatchedMemberRecord] = useState(null);
+
+  const effectiveIsAdmin = Boolean(
+    isAdmin || (athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && String(athlete.id) === String(import.meta.env.VITE_ADMIN_STRAVA_ID))
+  );
 
   // Calculate if editing is locked by date
   let isLockedByDate = false;
@@ -50,21 +63,29 @@ export default function PersonalGoal({
     }
   }
 
-  // Fetch all-time financial contribution from penalties ledger
+  // Fetch all-time financial contribution and penalties ledger
   useEffect(() => {
     if (apiFetch) {
       apiFetch('/penalties/ledger')
         .then(res => {
-          if (res && Array.isArray(res.members)) {
-            const athId = athlete?.id ? String(athlete.id) : null;
-            const normFullName = `${athlete?.firstname || ''} ${athlete?.lastname || ''}`.trim().toLowerCase();
-            const match = res.members.find(m => 
-              (athId && m.athleteId && String(m.athleteId) === athId) ||
-              (m.rawName && userMatchKey && m.rawName.toLowerCase() === userMatchKey.toLowerCase()) ||
-              (normFullName && m.fullName && m.fullName.toLowerCase() === normFullName)
-            );
-            if (match && match.financialSummary) {
-              setAllTimeFinancial(match.financialSummary);
+          if (res) {
+            if (res.metadata) {
+              setClubMetadata(res.metadata);
+            }
+            if (Array.isArray(res.members)) {
+              const athId = athlete?.id ? String(athlete.id) : null;
+              const normFullName = `${athlete?.firstname || ''} ${athlete?.lastname || ''}`.trim().toLowerCase();
+              const match = res.members.find(m => 
+                (athId && m.athleteId && String(m.athleteId) === athId) ||
+                (m.rawName && userMatchKey && m.rawName.toLowerCase() === userMatchKey.toLowerCase()) ||
+                (normFullName && m.fullName && m.fullName.toLowerCase() === normFullName)
+              );
+              if (match) {
+                setMatchedMemberRecord(match);
+                if (match.financialSummary) {
+                  setAllTimeFinancial(match.financialSummary);
+                }
+              }
             }
           }
         })
@@ -79,30 +100,47 @@ export default function PersonalGoal({
       const data = await apiFetch('/challenge/targets', { cache: 'no-store' });
       if (data && userKey && data[userKey]) {
         const item = data[userKey];
-        if (item.target !== undefined && item.target !== '') {
+        if (item.target !== undefined && item.target !== null && item.target !== '') {
           const num = Number(item.target);
           const validNum = !isNaN(num) && num > 0 ? num : 0;
           setGoal(validNum);
-          setTempGoal(validNum > 0 ? String(validNum) : '100');
+          setTempGoal(validNum > 0 ? String(validNum) : '');
+        } else {
+          setGoal(0);
+          setTempGoal('');
         }
         if (item.penalty !== undefined) {
           setHasPenalty(Boolean(item.penalty));
           setTempPenalty(Boolean(item.penalty));
+        } else {
+          setHasPenalty(false);
+          setTempPenalty(false);
         }
       } else if (data && userMatchKey && data[userMatchKey]) {
         // Fallback to non-month-specific key if existing
         const item = data[userMatchKey];
-        if (item.target !== undefined && item.target !== '') {
+        if (item.target !== undefined && item.target !== null && item.target !== '') {
           const num = Number(item.target);
-          if (!isNaN(num) && num > 0) {
-            setGoal(num);
-            setTempGoal(String(num));
-          }
+          const validNum = !isNaN(num) && num > 0 ? num : 0;
+          setGoal(validNum);
+          setTempGoal(validNum > 0 ? String(validNum) : '');
+        } else {
+          setGoal(0);
+          setTempGoal('');
         }
         if (item.penalty !== undefined) {
           setHasPenalty(Boolean(item.penalty));
           setTempPenalty(Boolean(item.penalty));
+        } else {
+          setHasPenalty(false);
+          setTempPenalty(false);
         }
+      } else {
+        // No target record exists -> default to 0 (no target)
+        setGoal(0);
+        setTempGoal('');
+        setHasPenalty(false);
+        setTempPenalty(false);
       }
     } catch (e) {
       console.error('Error loading target from API:', e);
@@ -116,11 +154,14 @@ export default function PersonalGoal({
       if (e && e.detail) {
         const { matchKey, year: updatedYear, month: updatedMonth, target, penalty } = e.detail;
         if (matchKey === userMatchKey && updatedYear == currentYear && updatedMonth == currentMonth) {
-          if (target !== undefined) {
+          if (target !== undefined && target !== null && target !== '') {
             const num = Number(target);
             const validTarget = !isNaN(num) && num > 0 ? num : 0;
             setGoal(validTarget);
-            setTempGoal(validTarget > 0 ? String(validTarget) : '100');
+            setTempGoal(validTarget > 0 ? String(validTarget) : '');
+          } else {
+            setGoal(0);
+            setTempGoal('');
           }
           if (penalty !== undefined) {
             setHasPenalty(Boolean(penalty));
@@ -249,8 +290,8 @@ export default function PersonalGoal({
       daysLeft = totalDaysInMonth;
     }
 
-    const remainingKm = Math.max(0, Math.round((goal - currentDist) * 10) / 10);
-    const requiredPacePerDay = (daysLeft > 0 && remainingKm > 0) ? (remainingKm / daysLeft).toFixed(1) : '0.0';
+    const remainingKm = goal > 0 ? Math.max(0, Math.round((goal - currentDist) * 10) / 10) : 0;
+    const requiredPacePerDay = (goal > 0 && daysLeft > 0 && remainingKm > 0) ? (remainingKm / daysLeft).toFixed(1) : '0.0';
     const expectedPercent = totalDaysInMonth > 0 ? (daysPassed / totalDaysInMonth) * 100 : 0;
     const currentPercent = goal > 0 ? (currentDist / goal) * 100 : 0;
 
@@ -276,6 +317,175 @@ export default function PersonalGoal({
       penaltyDue = Math.min(200, Math.ceil(rawK / 10) * 10);
     }
   }
+
+  // 1. Dữ liệu Tiết kiệm Tiền phạt & Bảo vệ Ví tiền (Phương án 1 & 2)
+  const savingsData = useMemo(() => {
+    if (!hasPenalty || goal <= 0) return null;
+    const maxPenaltyK = 200;
+    const penaltySavedK = Math.max(0, maxPenaltyK - penaltyDue);
+    const penaltySavedVND = penaltySavedK * 1000;
+    const maxPenaltyVND = maxPenaltyK * 1000;
+    const savedPercent = Math.min(100, Math.round((penaltySavedK / maxPenaltyK) * 100));
+    const savingsPerKm = goal > 0 ? Math.round(maxPenaltyVND / goal) : 0;
+
+    let nextThresholdK = 0;
+    if (penaltyDue > 150) nextThresholdK = 150;
+    else if (penaltyDue > 100) nextThresholdK = 100;
+    else if (penaltyDue > 50) nextThresholdK = 50;
+    else if (penaltyDue > 0) nextThresholdK = 0;
+
+    let kmNeededForNextTier = 0;
+    if (penaltyDue > 0) {
+      const kmAtNextThreshold = goal * (nextThresholdK / maxPenaltyK);
+      kmNeededForNextTier = Math.max(0.1, Math.round((paceAnalysis.remainingKm - kmAtNextThreshold) * 10) / 10);
+    }
+
+    return {
+      penaltySavedK,
+      penaltySavedVND,
+      maxPenaltyVND,
+      savedPercent,
+      savingsPerKm,
+      nextThresholdK,
+      kmNeededForNextTier,
+      isFullySaved: penaltyDue === 0 && isGoalReached
+    };
+  }, [hasPenalty, goal, penaltyDue, paceAnalysis.remainingKm, isGoalReached]);
+
+  // 2. Tác động Quỹ CLB (Phương án 1)
+  const treasuryImpact = useMemo(() => {
+    const memberTotal = allTimeFinancial?.totalPenaltyVND || 0;
+    const clubTotal = clubMetadata?.totalPenaltyFundCollected || 16900000;
+    const sharePct = clubTotal > 0 ? ((memberTotal / clubTotal) * 100).toFixed(1) : '0.0';
+    const completedMonths = allTimeFinancial?.targetCompletedMonths || 0;
+
+    return {
+      memberTotal,
+      clubTotal,
+      sharePct,
+      completedMonths,
+      rank: allTimeFinancial?.penaltyRank || 0
+    };
+  }, [allTimeFinancial, clubMetadata]);
+
+  // 3. Lịch sử nộp phạt cá nhân (Phương án 3: Hiển thị cho tất cả thành viên, Admin tương tác, User chỉ xem)
+  const adminPenaltyHistory = useMemo(() => {
+    let penaltiesObj = {};
+    let paymentStatusObj = {};
+
+    if (matchedMemberRecord && matchedMemberRecord.monthlyPenaltiesVND) {
+      penaltiesObj = matchedMemberRecord.monthlyPenaltiesVND;
+      paymentStatusObj = matchedMemberRecord.monthlyPaymentStatus || {};
+    }
+
+    const months = Object.keys(penaltiesObj).sort().reverse();
+    if (months.length > 0) {
+      return months.slice(0, 3).map(mKey => {
+        const penaltyAmount = penaltiesObj[mKey] || 0;
+        const payment = paymentStatusObj[mKey] || { status: penaltyAmount === 0 ? 'safe' : 'unpaid' };
+        const [y, m] = mKey.split('-');
+        const label = lang === 'vi' ? `T${parseInt(m, 10)}/${y}` : `M${parseInt(m, 10)}/${y}`;
+        return {
+          monthKey: mKey,
+          label,
+          penaltyAmount,
+          status: payment.status || (penaltyAmount === 0 ? 'safe' : 'unpaid')
+        };
+      });
+    }
+
+    // Fallback: Nếu runner chưa có bản ghi phạt, hiển thị 3 tháng gần nhất với trạng thái 0đ Đạt chuẩn
+    const fallbackMonths = [];
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(currentYear, currentMonth - 1 - i, 1);
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      const mKey = `${y}-${String(m).padStart(2, '0')}`;
+      const label = lang === 'vi' ? `T${m}/${y}` : `M${m}/${y}`;
+      fallbackMonths.push({
+        monthKey: mKey,
+        label,
+        penaltyAmount: 0,
+        status: 'safe'
+      });
+    }
+    return fallbackMonths;
+  }, [matchedMemberRecord, lang, currentYear, currentMonth]);
+
+  // Admin bấm chuyển trạng thái nộp phạt (Paid/Unpaid)
+  const handleAdminTogglePenaltyStatus = async (item) => {
+    if (!effectiveIsAdmin) return;
+    if (item.penaltyAmount === 0) {
+      Swal.fire({
+        title: t('safeStatusTag'),
+        text: t('safeNoPenaltyAlert'),
+        icon: 'info',
+        confirmButtonColor: '#00A3A6',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    const nextStatus = item.status === 'paid' ? 'unpaid' : 'paid';
+    const confirmText = nextStatus === 'paid'
+      ? t('confirmToggleToPaid').replace('{month}', item.label)
+      : t('confirmToggleToUnpaid').replace('{month}', item.label);
+
+    const result = await Swal.fire({
+      title: t('confirmUpdatePenaltyStatus'),
+      text: confirmText,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#00A3A6',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: lang === 'vi' ? 'Xác nhận' : 'Confirm',
+      cancelButtonText: lang === 'vi' ? 'Hủy' : 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await apiFetch('/penalties/payment', {
+          method: 'POST',
+          body: JSON.stringify({
+            athleteId: athlete?.id || null,
+            rawName: matchedMemberRecord?.rawName || matchedMemberRecord?.fullName || userMatchKey,
+            month: item.monthKey,
+            status: nextStatus,
+            actor: 'Admin'
+          })
+        });
+
+        // Cập nhật state cục bộ để UI phản hồi ngay lập tức
+        setMatchedMemberRecord(prev => {
+          if (!prev) return prev;
+          const newPaymentStatus = { ...(prev.monthlyPaymentStatus || {}) };
+          newPaymentStatus[item.monthKey] = {
+            status: nextStatus,
+            paidAt: nextStatus === 'paid' ? new Date().toISOString() : null,
+            updatedBy: 'Admin',
+            updatedAt: new Date().toISOString()
+          };
+          return { ...prev, monthlyPaymentStatus: newPaymentStatus };
+        });
+
+        window.dispatchEvent(new CustomEvent('challengeTargetsUpdated', { detail: { refresh: true } }));
+
+        Swal.fire({
+          title: t('updatePenaltySuccess'),
+          icon: 'success',
+          timer: 1600,
+          showConfirmButton: false
+        });
+      } catch (err) {
+        Swal.fire({
+          title: lang === 'vi' ? 'Lỗi' : 'Error',
+          text: err.message,
+          icon: 'error',
+          confirmButtonColor: '#002D54'
+        });
+      }
+    }
+  };
 
   // Calculate Monthly Statistics
   const monthlyStats = useMemo(() => {
@@ -388,6 +598,46 @@ export default function PersonalGoal({
   const [showWeeklyModal, setShowWeeklyModal] = useState(false);
   const [loadingWeeklyPlan, setLoadingWeeklyPlan] = useState(false);
 
+  // Lời khuyên mở rộng cho Coach Recommendations (Chiến lược tuần, Phục hồi, Bài tập kế tiếp)
+  const effectiveActionPlan = useMemo(() => {
+    if (aiAdvice?.actionPlan) return aiAdvice.actionPlan;
+    if (goal <= 0) return lang === 'vi' ? 'Chọn mục tiêu từ 50km - 150km phù hợp với thể lực.' : 'Set a realistic target between 50km - 150km.';
+    if (isGoalReached) return lang === 'vi' ? 'Chạy thả lỏng 3-5km hoặc nghỉ ngơi phục hồi dưỡng sức.' : 'Easy 3-5km recovery jog or active rest.';
+    const nextKm = Math.max(3, Math.min(8, Math.round(parseFloat(paceAnalysis.requiredPacePerDay) * 1.5)));
+    return lang === 'vi' 
+      ? `Buổi tới: Chạy ${nextKm} km ở nhịp thở trò chuyện thoải mái (Zone 2).` 
+      : `Next session: ${nextKm} km at conversational pace (Zone 2).`;
+  }, [aiAdvice, goal, isGoalReached, paceAnalysis, lang]);
+
+  const effectiveStrategyTip = useMemo(() => {
+    if (aiAdvice?.strategyTip) return aiAdvice.strategyTip;
+    if (isGoalReached) {
+      return lang === 'vi' 
+        ? 'Đã hoàn thành cự ly tháng. Hãy duy trì các bài chạy ngắn tích lũy hiếu khí nhẹ nhàng.' 
+        : 'Monthly goal completed. Switch to short aerobic maintenance runs.';
+    }
+    if (goal <= 0) {
+      return lang === 'vi' 
+        ? 'Chọn mục tiêu phù hợp để AI Coach lập chiến lược phân bổ km mỗi tuần.' 
+        : 'Set a goal so AI Coach can map out your weekly mileage.';
+    }
+    const remainingWeeks = Math.max(1, Math.ceil(paceAnalysis.daysLeft / 7));
+    const sessionsPerWeek = Math.min(4, Math.max(2, Math.round(paceAnalysis.remainingKm / 6) || 3));
+    const kmPerSession = (paceAnalysis.remainingKm / (remainingWeeks * sessionsPerWeek)).toFixed(1);
+    return lang === 'vi'
+      ? `Duy trì ~${sessionsPerWeek} buổi/tuần, mỗi buổi ~${kmPerSession} km để hoàn thành mục tiêu ${goal} km bền bỉ, không dồn áp lực cuối tháng.`
+      : `Aim for ~${sessionsPerWeek} runs/week (~${kmPerSession} km each) to hit ${goal} km smoothly without late-month strain.`;
+  }, [aiAdvice, goal, isGoalReached, paceAnalysis, lang]);
+
+  const effectiveRecoveryTip = useMemo(() => {
+    if (aiAdvice?.recoveryTip) return aiAdvice.recoveryTip;
+    return lang === 'vi'
+      ? 'Bù 300-500ml nước điện giải ngay sau chạy, nạp 20g protein trong 45 phút đầu và ngủ đủ 7-8 tiếng để phục hồi sợi cơ.'
+      : 'Sip 300-500ml electrolytes post-run, consume 20g protein within 45 mins, and prioritize 7-8h sleep for muscle repair.';
+  }, [aiAdvice, lang]);
+
+  const readinessScore = aiAdvice?.readinessScore || (monthlyStats.runsCount >= 3 ? 88 : 92);
+
   // Gọi API lấy tư vấn AI Coach theo hoạt động
   const handleFetchAiAdvice = useCallback(async (force = false) => {
     if (!apiFetch) return;
@@ -472,12 +722,12 @@ export default function PersonalGoal({
             <button 
               className="btn-icon btn-edit-goal" 
               onClick={isLockedByDate ? undefined : handleStartEdit} 
-              title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('editGoal')}
+              title={isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : (goal > 0 ? t('editGoal') : t('setGoal'))}
               style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               disabled={isLockedByDate}
             >
               <Edit2 size={16} />
-              <span style={{ fontSize: '0.8rem', marginLeft: '4px', fontWeight: 600 }}>{t('editGoal')}</span>
+              <span style={{ fontSize: '0.8rem', marginLeft: '4px', fontWeight: 600 }}>{goal > 0 ? t('editGoal') : t('setGoal')}</span>
             </button>
           )}
         </div>
@@ -528,54 +778,56 @@ export default function PersonalGoal({
           </form>
         ) : (
           <>
-            {/* Goal Progress Bar */}
-            <div className="personal-goal__stats">
-              <div className="goal-numbers">
-                <span className="current-dist">{currentDist.toFixed(1)}</span>
-                <span className="total-goal">/ {goal > 0 ? `${goal} km` : `${t('target')}: 0 km`}</span>
+            {/* Goal Progress Section (Tight Grouping) */}
+            <div className="pg-goal-progress-wrap">
+              <div className="personal-goal__stats" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div className="goal-numbers" style={{ display: 'flex', alignItems: 'baseline', gap: '6px', lineHeight: 1 }}>
+                  <span className="current-dist" style={{ lineHeight: 1 }}>{currentDist.toFixed(1)}</span>
+                  <span className="total-goal" style={{ lineHeight: 1 }}>/ {goal > 0 ? `${goal} km` : `${t('noGoalSet')} (0 km)`}</span>
+                </div>
+                <div className={`goal-percent-badge ${isGoalReached ? 'is-complete' : ''}`} style={{ alignSelf: 'flex-end', lineHeight: 1.2, marginBottom: 0 }}>
+                  {goal > 0 ? `${percent}% ${isGoalReached ? '🎯' : ''}` : '--'}
+                </div>
               </div>
-              <div className={`goal-percent-badge ${isGoalReached ? 'is-complete' : ''}`}>
-                {percent}% {isGoalReached ? '🎯' : ''}
-              </div>
-            </div>
 
-            <div className="progress-bar-container">
-              <div 
-                className="progress-bar-fill" 
-                style={{ 
-                  width: `${Math.max(percent, goal > 0 ? 3 : 0)}%`,
-                  background: isGoalReached 
-                    ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' 
-                    : 'linear-gradient(90deg, #00A3A6 0%, #B5D334 100%)'
-                }}
-              ></div>
-            </div>
-
-            {isGoalReached && (
-              <p className="goal-congrats">🎉 {t('goalReached')}</p>
-            )}
-
-            {/* Smart Pacing Metrics Bar */}
-            <div className="pg-goal-smart-metrics">
-              <div className="smart-metric-item">
-                <span className="smart-metric-label">{t('daysRemaining')}</span>
-                <span className="smart-metric-val">
-                  {paceAnalysis.isCurrentMonth ? `${paceAnalysis.daysLeft} ${lang === 'vi' ? 'ngày' : 'days'}` : (paceAnalysis.isPastMonth ? (lang === 'vi' ? 'Đã hết' : 'Ended') : `${paceAnalysis.daysLeft} ${lang === 'vi' ? 'ngày' : 'days'}`)}
-                </span>
+              <div className="progress-bar-container">
+                <div 
+                  className="progress-bar-fill" 
+                  style={{ 
+                    width: `${goal > 0 ? Math.max(percent, 3) : 0}%`,
+                    background: isGoalReached 
+                      ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' 
+                      : 'linear-gradient(90deg, #00A3A6 0%, #B5D334 100%)'
+                  }}
+                ></div>
               </div>
-              <div className="smart-metric-divider" />
-              <div className="smart-metric-item">
-                <span className="smart-metric-label">{lang === 'vi' ? 'Còn thiếu' : 'Remaining'}</span>
-                <span className="smart-metric-val highlight">
-                  {isGoalReached ? '0 km' : `${paceAnalysis.remainingKm} km`}
-                </span>
-              </div>
-              <div className="smart-metric-divider" />
-              <div className="smart-metric-item">
-                <span className="smart-metric-label">{t('dailyPaceTarget')}</span>
-                <span className="smart-metric-val accent">
-                  {isGoalReached ? (lang === 'vi' ? 'Đã hoàn thành' : 'Completed') : `${paceAnalysis.requiredPacePerDay} km/${lang === 'vi' ? 'ngày' : 'day'}`}
-                </span>
+
+              {isGoalReached && (
+                <p className="goal-congrats">🎉 {t('goalReached')}</p>
+              )}
+
+              {/* Smart Pacing Metrics Bar */}
+              <div className="pg-goal-smart-metrics">
+                <div className="smart-metric-item">
+                  <span className="smart-metric-label">{t('daysRemaining')}</span>
+                  <span className="smart-metric-val">
+                    {paceAnalysis.isCurrentMonth ? `${paceAnalysis.daysLeft} ${lang === 'vi' ? 'ngày' : 'days'}` : (paceAnalysis.isPastMonth ? (lang === 'vi' ? 'Đã hết' : 'Ended') : `${paceAnalysis.daysLeft} ${lang === 'vi' ? 'ngày' : 'days'}`)}
+                  </span>
+                </div>
+                <div className="smart-metric-divider" />
+                <div className="smart-metric-item">
+                  <span className="smart-metric-label">{t('remainingDistance')}</span>
+                  <span className="smart-metric-val highlight">
+                    {goal <= 0 ? '--' : (isGoalReached ? '0 km' : `${paceAnalysis.remainingKm} km`)}
+                  </span>
+                </div>
+                <div className="smart-metric-divider" />
+                <div className="smart-metric-item">
+                  <span className="smart-metric-label">{t('dailyPaceTarget')}</span>
+                  <span className="smart-metric-val accent">
+                    {goal <= 0 ? '--' : (isGoalReached ? (lang === 'vi' ? 'Đã hoàn thành' : 'Completed') : `${paceAnalysis.requiredPacePerDay} km/${lang === 'vi' ? 'ngày' : 'day'}`)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -638,6 +890,11 @@ export default function PersonalGoal({
                   <span className="ai-coach-badge">
                     {aiAdvice?.badge || fallbackCoach.badge}
                   </span>
+                  {readinessScore && (
+                    <span className="ai-coach-readiness-pill" title={t('coachReadinessLabel')}>
+                      ⚡ {t('readinessTag')} {readinessScore}%
+                    </span>
+                  )}
                 </div>
                 
                 <div className="ai-coach-actions">
@@ -674,10 +931,32 @@ export default function PersonalGoal({
                 )}
               </div>
 
-              {aiAdvice?.actionPlan && !loadingAi && (
-                <div className="ai-coach-action-plan">
-                  <span className="action-plan-label">{lang === 'vi' ? '💡 Bài tập tiếp theo:' : '💡 Next Workout:'}</span>
-                  <span className="action-plan-text">{aiAdvice.actionPlan}</span>
+              {!loadingAi && (
+                <div className="ai-coach-extended-section">
+                  {/* Highlight Next Workout */}
+                  <div className="ai-coach-action-plan">
+                    <span className="action-plan-label">💡 {t('nextWorkoutLabel')}:</span>
+                    <span className="action-plan-text">{effectiveActionPlan}</span>
+                  </div>
+
+                  {/* 2-Column Strategy & Recovery Cards */}
+                  <div className="ai-coach-insights-grid">
+                    <div className="ai-coach-insight-card strategy-card">
+                      <div className="insight-card-header">
+                        <TrendingUp size={13} color="#00A3A6" />
+                        <span>{t('weeklyStrategyLabel')}</span>
+                      </div>
+                      <p className="insight-card-text">{effectiveStrategyTip}</p>
+                    </div>
+
+                    <div className="ai-coach-insight-card recovery-card">
+                      <div className="insight-card-header">
+                        <Activity size={13} color="#10b981" />
+                        <span>{t('recoveryNutritionLabel')}</span>
+                      </div>
+                      <p className="insight-card-text">{effectiveRecoveryTip}</p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -764,6 +1043,130 @@ export default function PersonalGoal({
             <div className="sync-success-pill">
               <CheckCircle2 size={14} color="#10b981" />
               <span>{t('syncedWithAdmin')}</span>
+            </div>
+          )}
+
+          {/* OPTION 1 & 2: WALLET DEFENSE & SAVINGS TIER */}
+          {savingsData && (
+            <div className="pg-savings-defense-card">
+              <div className="savings-card-header">
+                <div className="savings-header-title">
+                  <Wallet size={15} className="savings-icon" />
+                  <span>{t('penaltySavedSoFar')}</span>
+                </div>
+                <span className="savings-badge-pill">
+                  {t('savedAmount')}: <strong>{savingsData.penaltySavedK}k</strong> / 200k
+                </span>
+              </div>
+
+              <div className="savings-progress-track">
+                <div 
+                  className="savings-progress-bar" 
+                  style={{ width: `${savingsData.savedPercent}%` }}
+                />
+              </div>
+
+              <div className="savings-card-details">
+                {savingsData.isFullySaved ? (
+                  <div className="savings-note safe">
+                    {t('savedFullPenaltyCongrats')}
+                  </div>
+                ) : (
+                  <>
+                    <div className="savings-milestone-hint">
+                      💡 {t('runMoreToReduceTo')
+                        .replace('{km}', savingsData.kmNeededForNextTier)
+                        .replace('{amount}', savingsData.nextThresholdK)}
+                    </div>
+                    <div className="savings-rate-hint">
+                      ⚡ {t('perKmSavingsDesc')
+                        .replace('{rate}', savingsData.savingsPerKm.toLocaleString('vi-VN'))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* IF NO PENALTY COMMITTED: INSPIRATIONAL PROMPT */}
+          {!hasPenalty && (
+            <div className="pg-why-penalty-card">
+              <div className="why-penalty-header">
+                <Sparkles size={15} color="#FF9800" />
+                <span>{t('whyJoinDisciplineTitle')}</span>
+              </div>
+              <ul className="why-penalty-list">
+                <li>{t('whyJoinDisciplineP1')}</li>
+                <li>{t('whyJoinDisciplineP2')}</li>
+              </ul>
+            </div>
+          )}
+
+          {/* OPTION 1: CLUB TREASURY IMPACT & TRANSPARENCY LINK */}
+          <div className="pg-treasury-impact-card">
+            <div className="treasury-impact-header">
+              <div className="treasury-impact-title-wrap">
+                <Award size={15} color="#002D54" />
+                <span>{t('clubFundImpact')}</span>
+              </div>
+              <span className="treasury-share-badge">
+                {t('clubFundSharePct').replace('{pct}', treasuryImpact.sharePct)}
+              </span>
+            </div>
+
+            <div className="treasury-purpose-pills">
+              <span className="purpose-pill">🎽 {t('fundPurposeRunningKit')}</span>
+              <span className="purpose-pill">💧 {t('fundPurposeHydration')}</span>
+              <span className="purpose-pill">🍕 {t('fundPurposeGala')}</span>
+            </div>
+
+            <button 
+              type="button" 
+              className="btn-treasury-quick-link"
+              onClick={() => setShowTreasuryModal(true)}
+              title={t('viewTreasuryDetails')}
+            >
+              <Eye size={13} style={{ marginRight: 5 }} />
+              {t('viewTreasuryDetails')}
+            </button>
+          </div>
+
+          {/* OPTION 3: PERSONAL PENALTY HISTORY (HIỂN THỊ CHO TẤT CẢ, ADMIN TƯƠNG TÁC, USER CHỈ XEM) */}
+          {adminPenaltyHistory.length > 0 && (
+            <div 
+              className={`pg-admin-penalty-history ${effectiveIsAdmin ? 'is-admin-interactive' : 'is-readonly-user'}`}
+              title={!effectiveIsAdmin ? t('nonAdminNoClickTooltip') : undefined}
+            >
+              <div className="admin-history-header">
+                <div className="admin-history-title-wrap">
+                  <Lock size={13} color="#002D54" />
+                  <span>{t('adminPenaltyHistoryTitle')}</span>
+                </div>
+                <span 
+                  className={`admin-only-badge ${effectiveIsAdmin ? 'is-interactive-badge' : 'is-locked-badge'}`}
+                  title={effectiveIsAdmin ? t('adminClickToToggleTooltip') : t('nonAdminNoClickTooltip')}
+                >
+                  {effectiveIsAdmin ? `⚡ ${t('adminInteractiveTag')}` : `🔒 ${t('viewOnlyTag')}`}
+                </span>
+              </div>
+
+              <div className="admin-history-grid">
+                {adminPenaltyHistory.map(item => (
+                  <div key={item.monthKey} className="admin-history-item">
+                    <span className="admin-history-month">{item.label}</span>
+                    <span className="admin-history-amount">
+                      {item.penaltyAmount > 0 ? `${item.penaltyAmount.toLocaleString('vi-VN')} đ` : '0 đ'}
+                    </span>
+                    <span 
+                      className={`admin-history-status ${item.penaltyAmount === 0 ? 'is-safe' : item.status === 'paid' ? 'is-paid' : 'is-unpaid'} ${effectiveIsAdmin && item.penaltyAmount > 0 ? 'is-clickable' : ''}`}
+                      onClick={effectiveIsAdmin ? () => handleAdminTogglePenaltyStatus(item) : undefined}
+                      title={effectiveIsAdmin ? (item.penaltyAmount > 0 ? t('adminClickToToggleTooltip') : t('safeNoPenaltyAlert')) : t('nonAdminNoClickTooltip')}
+                    >
+                      {item.penaltyAmount === 0 ? t('safeStatusTag') : item.status === 'paid' ? t('paidStatusTag') : t('unpaidStatusTag')}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -912,6 +1315,15 @@ export default function PersonalGoal({
           </div>
         </div>
       )}
+
+      {/* READ-ONLY TREASURY TRANSPARENCY MODAL */}
+      <TreasuryTransparencyModal 
+        isOpen={showTreasuryModal}
+        onClose={() => setShowTreasuryModal(false)}
+        apiFetch={apiFetch}
+        currentMonth={currentMonth}
+        currentYear={currentYear}
+      />
     </div>
   );
 }
