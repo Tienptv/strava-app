@@ -11,7 +11,15 @@ export function LangProvider({ children }) {
     localStorage.setItem('lang', newLang);
   };
 
-  const t = (key) => translations[lang]?.[key] || translations.vi[key] || key;
+  const t = (key, params = {}) => {
+    let str = translations[lang]?.[key] || translations.vi[key] || key;
+    if (params && typeof str === 'string') {
+      Object.entries(params).forEach(([k, v]) => {
+        str = str.replaceAll(`{${k}}`, v);
+      });
+    }
+    return str;
+  };
 
   return (
     <LangContext.Provider value={{ lang, switchLang, t }}>

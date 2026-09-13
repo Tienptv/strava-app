@@ -73,5 +73,29 @@
     "recoveryTip": "Uống đủ 2-2.5L nước/ngày, nạp đủ protein sau chạy và ngủ đủ 7-8 tiếng.",
     "readinessScore": 76,
     "generatedAt": "2026-09-12T18:41:47.363Z"
+  },
+  "133066813_20151492482_2026-09-13_en": {
+    "title": "Coach Recommendations",
+    "type": "info",
+    "badge": "On Track 👍",
+    "message": "Good steady run of 3.4 km (pace 13:21). Remaining: 73.8 km in 18 days (4.1 km/day). Maintain 3-4 runs per week to comfortably reach the finish line!",
+    "actionPlan": "Next session: 6 km at conversational pace.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Aim for ~4 runs/week (~6.1 km each) to hit your target smoothly.",
+    "recoveryTip": "Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.",
+    "readinessScore": 85,
+    "generatedAt": "2026-09-13T03:49:46.094Z"
+  },
+  "133066813_20151492482_2026-09-13_vi": {
+    "title": "Tư vấn & Kế hoạch",
+    "type": "info",
+    "badge": "On Track 👍",
+    "message": "Bài chạy 3.4 km (pace 13:21) duy trì phong độ ổn định. Bạn còn thiếu 73.8 km trong 18 ngày (4.1 km/ngày). Duy trì đều đặn 3-4 buổi/tuần bạn sẽ về đích an toàn!",
+    "actionPlan": "Buổi tới: Chạy 6 km ở nhịp thở trò chuyện thoải mái.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Duy trì ~4 buổi/tuần, mỗi buổi ~6.1 km để về đích bền bỉ.",
+    "recoveryTip": "Uống đủ 2-2.5L nước/ngày, nạp đủ protein sau chạy và ngủ đủ 7-8 tiếng.",
+    "readinessScore": 85,
+    "generatedAt": "2026-09-13T03:49:34.679Z"
   }
 }

@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { getAthleteAvatar } from '../utils/avatar';
-import { Search, Star, Flame, Trophy, ChevronDown, ChevronUp, Calendar, Clock, MapPin, Award, CheckCircle2, AlertTriangle, Table } from 'lucide-react';
+import ChallengeTable from './ChallengeTable';
+import { Search, Star, Trophy, ChevronDown, ChevronUp, Calendar, Clock, Award, RotateCw } from 'lucide-react';
 
 const MONTH_NAMES_EN = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -16,13 +17,21 @@ export default function MobileLeaderboard({
   apiFetch,
   athlete,
   nameMapping = {},
-  onToggleFullTable
+  isAdmin = false,
+  allowEditOthers = false,
+  lockTargetsAfterDate = 0,
+  onYearChange
 }) {
   const { lang, t } = useLang();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all' | 'top3' | 'completed' | 'penalty' | 'streak'
   const [expandedKey, setExpandedKey] = useState(null);
+  const [viewType, setViewType] = useState('cards'); // 'cards' | 'table'
+  const [isLandscapeMode, setIsLandscapeMode] = useState(false);
+
+  const activeMonthRef = useRef(null);
+
   const [pinnedRunners, setPinnedRunners] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('pinnedRunners') || '[]');
@@ -33,6 +42,68 @@ export default function MobileLeaderboard({
 
   const [userData, setUserData] = useState({});
   const [penaltiesLedger, setPenaltiesLedger] = useState([]);
+
+  // Tự động xoay ngang màn hình khi chọn xem bảng xếp hạng theo yêu cầu người dùng
+  const tryLockLandscape = async () => {
+    try {
+      if (window.screen?.orientation?.lock) {
+        await window.screen.orientation.lock('landscape');
+        setIsLandscapeMode(true);
+      }
+    } catch (_) {
+      // Một số trình duyệt di động yêu cầu fullscreen hoặc không hỗ trợ lock()
+    }
+  };
+
+  const tryUnlockOrientation = () => {
+    try {
+      if (window.screen?.orientation?.unlock) {
+        window.screen.orientation.unlock();
+      }
+    } catch (_) {}
+  };
+
+  // Cố gắng xoay ngang tự động khi component Leaderboard được mở
+  useEffect(() => {
+    tryLockLandscape();
+
+    const handleOrientationChange = () => {
+      const isLandscape = window.matchMedia('(orientation: landscape)').matches;
+      setIsLandscapeMode(isLandscape);
+    };
+    window.addEventListener('resize', handleOrientationChange);
+    window.addEventListener('orientationchange', handleOrientationChange);
+
+    return () => {
+      window.removeEventListener('resize', handleOrientationChange);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      tryUnlockOrientation();
+    };
+  }, []);
+
+  // Tự động cuộn tháng active ra giữa màn hình
+  useEffect(() => {
+    if (activeMonthRef.current) {
+      activeMonthRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+  }, [month]);
+
+  // Xử lý nút bấm chuyển đổi giữa Dạng Thẻ và Dạng Bảng Xoay Ngang
+  const handleToggleLandscape = async () => {
+    if (viewType === 'cards' && !isLandscapeMode) {
+      setViewType('table');
+      setIsLandscapeMode(true);
+      await tryLockLandscape();
+    } else {
+      setViewType('cards');
+      setIsLandscapeMode(false);
+      tryUnlockOrientation();
+    }
+  };
 
   // Tải target / penalty
   useEffect(() => {
@@ -188,13 +259,15 @@ export default function MobileLeaderboard({
 
   return (
     <div className="mobile-leaderboard-container">
-      {/* Month Scroll Pill Bar */}
+      {/* Month Scroll Pill Bar with Auto-scroll */}
       <div className="mobile-month-bar">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => {
           const isActive = month === m;
           return (
             <button
               key={m}
+              ref={isActive ? activeMonthRef : null}
+              type="button"
               className={`mobile-month-pill ${isActive ? 'active' : ''}`}
               onClick={() => setMonth && setMonth(m)}
             >
@@ -207,29 +280,81 @@ export default function MobileLeaderboard({
       {/* Summary KPI Cards Bar */}
       <div className="mobile-kpi-strip">
         <div className="mobile-kpi-card">
-          <span className="mobile-kpi-label">🏃 {lang === 'en' ? 'Runners' : 'VĐV Tham Gia'}</span>
+          <span className="mobile-kpi-label">🏃 {t('totalRunnersKpi')}</span>
           <span className="mobile-kpi-value">{monthlyStats.totalRunners}</span>
         </div>
         <div className="mobile-kpi-card highlight-dist">
-          <span className="mobile-kpi-label">🏁 {lang === 'en' ? 'Total Dist' : 'Tổng Km Tháng'}</span>
+          <span className="mobile-kpi-label">🏁 {t('totalDistance')}</span>
           <span className="mobile-kpi-value">{monthlyStats.totalKm} <small>km</small></span>
         </div>
         <div className="mobile-kpi-card highlight-fund">
-          <span className="mobile-kpi-label">💰 {lang === 'en' ? 'Penalty Fund' : 'Quỹ Phạt Tháng'}</span>
+          <span className="mobile-kpi-label">💰 {t('monthDueKpi')}</span>
           <span className="mobile-kpi-value">{(monthlyStats.totalPenaltyDue / 1000).toLocaleString('vi-VN')} <small>k</small></span>
         </div>
       </div>
 
-      {/* View Toggle Bar (Cards vs Full Table) */}
+      {/* View Toggle Bar (Dạng Thẻ vs Xoay Ngang Toàn Bảng 31 Ngày) */}
       <div className="mobile-view-toggle-bar">
-        <div className="mobile-toggle-group" style={{ justifyContent: 'center' }}>
-          <button className="mobile-toggle-btn active">
+        <div className="mobile-toggle-group">
+          <button 
+            type="button"
+            className={`mobile-toggle-btn ${viewType === 'cards' && !isLandscapeMode ? 'active' : ''}`}
+            onClick={() => {
+              setViewType('cards');
+              setIsLandscapeMode(false);
+              tryUnlockOrientation();
+            }}
+          >
             📱 {lang === 'en' ? 'Card View' : 'Dạng Thẻ'}
+          </button>
+          <button 
+            type="button"
+            className={`mobile-toggle-btn ${viewType === 'table' || isLandscapeMode ? 'active' : ''}`}
+            onClick={handleToggleLandscape}
+          >
+            <RotateCw size={13} style={{ marginRight: 4 }} />
+            {viewType === 'table' || isLandscapeMode ? t('portraitRotateBtn') : t('landscapeRotateBtn')}
           </button>
         </div>
       </div>
 
-      {/* Top 3 Podium Cards (Only if no search active) */}
+      {/* Chế độ xem bảng xoay ngang (Landscape Full Table) */}
+      {(viewType === 'table' || isLandscapeMode) ? (
+        <div className="mobile-landscape-table-container">
+          <div className="mobile-landscape-hint-bar">
+            <span>💡 {t('landscapeHint')}</span>
+            <button 
+              type="button" 
+              className="btn-exit-landscape"
+              onClick={() => {
+                setViewType('cards');
+                setIsLandscapeMode(false);
+                tryUnlockOrientation();
+              }}
+            >
+              📱 {t('portraitRotateBtn')}
+            </button>
+          </div>
+
+          <div className="mobile-landscape-table-wrapper">
+            <ChallengeTable 
+              challengeData={challengeData}
+              year={year}
+              month={month}
+              apiFetch={apiFetch}
+              athlete={athlete}
+              isAdmin={isAdmin}
+              allowEditOthers={allowEditOthers}
+              lockTargetsAfterDate={lockTargetsAfterDate}
+              nameMapping={nameMapping}
+              onMonthChange={setMonth}
+              onYearChange={onYearChange}
+            />
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Top 3 Podium Cards (Only if no search active) */}
       {!searchQuery && filterType === 'all' && top3.length > 0 && (
         <div className="mobile-podium-section">
           <div className="mobile-podium-title">
@@ -251,7 +376,7 @@ export default function MobileLeaderboard({
                 />
                 <div className="podium-name">{top3[1].displayName}</div>
                 <div className="podium-km">{top3[1].totalDistance.toFixed(1)} km</div>
-                <div className="podium-sub">{top3[1].target ? `${top3[1].target}km target` : 'Tự do'}</div>
+                <div className="podium-sub">{top3[1].target ? `${top3[1].target}km target` : t('freeRunning')}</div>
               </div>
             )}
 
@@ -270,7 +395,7 @@ export default function MobileLeaderboard({
                 />
                 <div className="podium-name">{top3[0].displayName}</div>
                 <div className="podium-km">{top3[0].totalDistance.toFixed(1)} km</div>
-                <div className="podium-sub">{top3[0].target ? `${top3[0].target}km target` : 'Tự do'}</div>
+                <div className="podium-sub">{top3[0].target ? `${top3[0].target}km target` : t('freeRunning')}</div>
               </div>
             )}
 
@@ -288,7 +413,7 @@ export default function MobileLeaderboard({
                 />
                 <div className="podium-name">{top3[2].displayName}</div>
                 <div className="podium-km">{top3[2].totalDistance.toFixed(1)} km</div>
-                <div className="podium-sub">{top3[2].target ? `${top3[2].target}km target` : 'Tự do'}</div>
+                <div className="podium-sub">{top3[2].target ? `${top3[2].target}km target` : t('freeRunning')}</div>
               </div>
             )}
           </div>
@@ -301,7 +426,7 @@ export default function MobileLeaderboard({
           <Search size={16} className="search-icon" />
           <input 
             type="text" 
-            placeholder={lang === 'en' ? 'Search athlete by name...' : 'Tìm kiếm VĐV theo tên...'}
+            placeholder={t('searchAthletePlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -350,7 +475,7 @@ export default function MobileLeaderboard({
         {filteredRunners.length === 0 ? (
           <div className="mobile-empty-state">
             <div style={{ fontSize: '2rem' }}>🔍</div>
-            <p>{lang === 'en' ? 'No athletes found matching criteria.' : 'Không tìm thấy VĐV phù hợp.'}</p>
+            <p>{t('noAthletesFound')}</p>
           </div>
         ) : (
           filteredRunners.map(runner => {
@@ -380,7 +505,7 @@ export default function MobileLeaderboard({
                         className="runner-card-avatar"
                       />
                       {runner.maxStreak >= 3 && (
-                        <span className={`streak-badge ${runner.maxStreak >= 5 ? 'streak-fire-blue' : ''}`} title={`Streak ${runner.maxStreak} ngày!`}>
+                        <span className={`streak-badge ${runner.maxStreak >= 5 ? 'streak-fire-blue' : ''}`} title={`Streak ${runner.maxStreak} ${t('daysCountUnit')}!`}>
                           🔥{runner.maxStreak}
                         </span>
                       )}
@@ -398,7 +523,7 @@ export default function MobileLeaderboard({
                         {runner.target > 0 ? (
                           <span><strong>{runner.totalDistance.toFixed(1)} / {runner.target}</strong> km</span>
                         ) : (
-                          <span className="text-muted">{lang === 'en' ? 'Free running' : 'Chạy tự do'}</span>
+                          <span className="text-muted">{t('freeRunning')}</span>
                         )}
                       </div>
                     </div>
@@ -422,7 +547,7 @@ export default function MobileLeaderboard({
                           <span className="badge-penalty-free">✅ 0k</span>
                         ) : (
                           <span className={`badge-penalty-owing ${runner.isPaid ? 'is-paid' : ''}`}>
-                            {runner.isPaid ? '✓ Đã nộp' : `⚠️ ${runner.penaltyAmount}k`}
+                            {runner.isPaid ? `✓ ${t('paidStatusShort')}` : `⚠️ ${runner.penaltyAmount}k`}
                           </span>
                         )}
                       </div>
@@ -457,7 +582,7 @@ export default function MobileLeaderboard({
 
                 {/* Expand Accordion Indicator */}
                 <div className="runner-card-expand-indicator">
-                  <span>{isExpanded ? (lang === 'en' ? 'Hide daily details' : 'Thu gọn chi tiết') : (lang === 'en' ? 'Tap for 31-day activity breakdown' : 'Xem lịch chạy 31 ngày')}</span>
+                  <span>{isExpanded ? t('hideDailyDetails') : t('viewDailyDetails')}</span>
                   {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </div>
 
@@ -470,7 +595,7 @@ export default function MobileLeaderboard({
                     <div className="expanded-metrics-row">
                       <div className="exp-metric-col">
                         <span className="exp-label"><Calendar size={12} /> {lang === 'en' ? 'Active Days' : 'Số ngày chạy'}</span>
-                        <span className="exp-val">{runner.daysCount || Object.values(runner.dailyDistances || {}).filter(d => d > 0).length} / {daysInMonth} ngày</span>
+                        <span className="exp-val">{runner.daysCount || Object.values(runner.dailyDistances || {}).filter(d => d > 0).length} / {daysInMonth} {t('daysCountUnit')}</span>
                       </div>
                       <div className="exp-metric-col">
                         <span className="exp-label"><Clock size={12} /> {lang === 'en' ? 'Total Time' : 'Tổng giờ chạy'}</span>
@@ -485,7 +610,7 @@ export default function MobileLeaderboard({
                     {/* 31-Day Heatmap Calendar Grid */}
                     <div className="expanded-days-calendar">
                       <div className="expanded-calendar-header">
-                        <span>{lang === 'en' ? `Activity Heatmap (${month}/${year})` : `Nhật ký từng ngày (Tháng ${month}/${year})`}</span>
+                        <span>{t('activityHeatmapTitle')} ({month}/{year})</span>
                       </div>
                       <div className="expanded-days-grid">
                         {daysArray.map(day => {
@@ -495,7 +620,7 @@ export default function MobileLeaderboard({
                             <div 
                               key={day} 
                               className={`exp-day-cell ${hasRun ? 'has-run' : 'rest-day'}`}
-                              title={`Ngày ${day}: ${hasRun ? `${dist.toFixed(1)} km` : 'Nghỉ'}`}
+                              title={hasRun ? t('dayHeatmapRun', { day, km: (dist >= 10 ? Math.round(dist) : dist.toFixed(1)) }) : t('dayHeatmapRest', { day })}
                             >
                               <span className="exp-day-num">{day}</span>
                               <span className="exp-day-km">{hasRun ? (dist >= 10 ? Math.round(dist) : dist.toFixed(1)) : '·'}</span>
@@ -511,6 +636,8 @@ export default function MobileLeaderboard({
           })
         )}
       </div>
+    </>
+    )}
     </div>
   );
 }

@@ -290,36 +290,51 @@ export default function Dashboard({
         <div className="challenge-view">
           {/* Trên Mobile: Chỉ hiển thị Hành trình năm khi chọn tab 'journey' */}
           {(!isMobile || mobileActiveNavTab === 'journey') && (
-            <>
+            <div className="mobile-journey-section">
               <ClubGoalProgress totalDistance={combinedTotalDistance} apiFetch={apiFetch} isAdmin={isAdmin} />
-              
-              {isMobile && (
-                <div style={{ marginTop: '20px' }}>
-                  {/* Removed redundant challenge-tabs for mobile tab Journey */}
-                  
-                  {loadingChallenge ? (
-                    <div className="loading">
-                      <div className="loading__spinner"></div>
-                      <div className="loading__text">{t('loadingChallengeData')}</div>
-                    </div>
-                  ) : (
-                    <ChallengeTable 
-                      challengeData={challengeData} 
-                      year={challengeYear} 
-                      month={challengeMonth} 
-                      apiFetch={apiFetch}
-                      athlete={athlete}
-                      isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
-                      allowEditOthers={challengeConfig?.allowEditOthers}
-                      lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
-                      nameMapping={nameMapping}
-                      onMonthChange={setChallengeMonth}
-                      onYearChange={setChallengeYear}
-                    />
-                  )}
+            </div>
+          )}
+
+          {/* Trên Mobile: Hiển thị Mục Tiêu Cá Nhân & AI Coach khi chọn tab 'mygoal' */}
+          {isMobile && mobileActiveNavTab === 'mygoal' && (
+            <div className="mobile-mygoal-section">
+              {athlete?.isGuest ? (
+                <div className="card" style={{ padding: '24px 20px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border)', background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🎯</div>
+                  <h3 style={{ margin: '0 0 8px', color: 'var(--primary-navy)', fontWeight: 800 }}>
+                    {t('guestGoalPromptTitle')}
+                  </h3>
+                  <p style={{ margin: '0 0 20px', fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    {t('guestGoalPromptDesc')}
+                  </p>
+                  <a
+                    href="/"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      localStorage.removeItem('isGuest');
+                      localStorage.removeItem('athleteId');
+                      window.location.href = '/';
+                    }}
+                    className="btn btn--primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '10px', fontWeight: 700 }}
+                  >
+                    🚀 {t('guestLoginNow')}
+                  </a>
                 </div>
+              ) : (
+                <PersonalGoal 
+                  activities={activities} 
+                  athlete={athlete}
+                  apiFetch={apiFetch}
+                  challengeMonth={challengeMonth}
+                  challengeYear={challengeYear}
+                  challengeParticipants={challengeParticipants}
+                  challengeData={challengeData}
+                  isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
+                  lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                />
               )}
-            </>
+            </div>
           )}
           
           {(!isMobile || mobileActiveNavTab === 'leaderboard') && (
@@ -337,7 +352,7 @@ export default function Dashboard({
                 background: 'linear-gradient(135deg, rgba(0, 45, 84, 0.96) 0%, rgba(0, 75, 135, 0.94) 50%, rgba(0, 163, 166, 0.92) 100%)',
                 color: '#ffffff',
                 boxShadow: '0 4px 16px rgba(0, 45, 84, 0.15)',
-                marginBottom: '24px'
+                marginBottom: '20px'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
@@ -398,6 +413,7 @@ export default function Dashboard({
                   </button>
                 </div>
               </div>
+
             {/* Trên điện thoại luôn hiển thị MobileLeaderboard trong tab Rankings */}
             {isMobile ? (
               loadingChallenge ? (
@@ -414,7 +430,10 @@ export default function Dashboard({
                   apiFetch={apiFetch}
                   athlete={athlete}
                   nameMapping={nameMapping}
-                  nameMapping={nameMapping}
+                  isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
+                  allowEditOthers={challengeConfig?.allowEditOthers}
+                  lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                  onYearChange={setChallengeYear}
                 />
               )
             ) : (
@@ -610,13 +629,7 @@ export default function Dashboard({
           activeTab={mobileActiveNavTab}
           onTabSelect={(tab) => {
             setMobileActiveNavTab(tab);
-            if (tab === 'journey') {
-              const journeyEl = document.querySelector('.club-goal-progress-card') || document.querySelector('.club-goal-progress-container');
-              if (journeyEl) journeyEl.scrollIntoView({ behavior: 'smooth' });
-            } else if (tab === 'leaderboard') {
-              const bxhEl = document.querySelector('.mobile-leaderboard-container') || document.querySelector('.challenge-section-wrapper');
-              if (bxhEl) bxhEl.scrollIntoView({ behavior: 'smooth' });
-            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onOpenTreasury={() => setShowTreasuryModal(true)}
           onFindMe={() => {

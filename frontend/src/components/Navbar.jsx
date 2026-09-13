@@ -78,6 +78,19 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
           </button>
         </div>
 
+        {/* Mobile Quick Admin Button */}
+        {isAdmin && (
+          <button
+            type="button"
+            className={`navbar__mobile-admin-btn ${location.pathname === '/administer' ? 'active' : ''}`}
+            onClick={() => navigate(location.pathname === '/administer' ? '/' : '/administer')}
+            title={location.pathname === '/administer' ? t('dashboard') : 'Administrator'}
+          >
+            {location.pathname === '/administer' ? <LayoutDashboard size={16} /> : <Shield size={16} />}
+            <span className="mobile-admin-label">{location.pathname === '/administer' ? t('dashboard') : 'Admin'}</span>
+          </button>
+        )}
+
         {athlete.isGuest ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
@@ -92,8 +105,8 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
             }}>
               🏃
             </div>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--accent, #00A3A6)' }}>
-              {lang === 'en' ? 'Guest Viewer' : 'Khách Xem'}
+            <span className="navbar__guest-label" style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--accent, #00A3A6)' }}>
+              {lang === 'en' ? 'Guest' : 'Khách'}
             </span>
             <button 
               className="navbar__logout" 
@@ -102,14 +115,15 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
                 background: 'var(--primary-navy, #002D54)',
                 color: '#ffffff',
                 border: 'none',
-                padding: '4px 10px',
+                padding: '4px 8px',
                 borderRadius: '6px',
-                fontSize: '0.75rem',
+                fontSize: '0.72rem',
                 fontWeight: 600,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
               }}
             >
-              {lang === 'en' ? 'Strava Login' : 'Đăng nhập'}
+              {lang === 'en' ? 'Login' : 'Đăng nhập'}
             </button>
           </div>
         ) : (
@@ -121,11 +135,11 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
                 className="navbar__avatar"
               />
             )}
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              {athlete.firstname} {athlete.lastname}
+            <span className="navbar__username" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              {athlete.firstname}
             </span>
-            <button className="navbar__logout" onClick={onLogout}>
-              <LogOut size={14} style={{ verticalAlign: 'text-bottom' }} /> {t('logout')}
+            <button className="navbar__logout" onClick={onLogout} title={t('logout')}>
+              <LogOut size={14} style={{ verticalAlign: 'text-bottom' }} /> <span className="navbar__logout-text">{t('logout')}</span>
             </button>
           </>
         )}

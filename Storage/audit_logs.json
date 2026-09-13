@@ -1,5 +1,19 @@
 [
   {
+    "id": "1789271339934",
+    "timestamp": "2026-09-13T03:48:59.934Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (275 mục), targets.json (50 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789271338844",
+    "timestamp": "2026-09-13T03:48:58.844Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (275 mục), targets.json (50 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
     "id": "1789234981236",
     "timestamp": "2026-09-12T17:43:01.236Z",
     "action": "Git Push",
@@ -1384,19 +1398,5 @@
     "action": "Kéo dữ liệu Cloud",
     "user": "133066813",
     "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (188 mục), targets.json (32 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
-  },
-  {
-    "id": "1788598856663",
-    "timestamp": "2026-09-05T09:00:56.663Z",
-    "action": "Thu hồi quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Thu hồi quyền admin của: pham tien (ID: 120540594)"
-  },
-  {
-    "id": "1788596377431",
-    "timestamp": "2026-09-05T08:19:37.431Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2026)"
   }
 ]

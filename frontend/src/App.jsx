@@ -21,6 +21,13 @@ function App() {
   const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
   const [userRoles, setUserRoles] = useState({ isSuperAdmin: false, isSubAdmin: false, isAdmin: false });
   const { t, lang } = useLang();
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Tự động kiểm tra phiên bản mới từ Render Cloud và reload mượt mà
   const { updateAvailable, newVersionInfo, countdown, reloadNow } = useAutoUpdate();
@@ -247,7 +254,7 @@ function App() {
     <BrowserRouter>
       {athlete && <Navbar athlete={athlete} onLogout={handleLogout} isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} />}
       <div className={athlete ? "app-layout" : ""}>
-        {athlete && isAdmin && (
+        {athlete && isAdmin && !isMobile && (
           <Sidebar 
             apiFetch={apiFetch} 
             currentMonth={challengeMonth}

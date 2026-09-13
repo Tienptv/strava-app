@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, MapPin, DollarSign, User, Search } from 'lucide-react';
+import { Trophy, Target, MapPin, Search, Coins } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 
 export default function MobileBottomNav({
@@ -8,7 +8,7 @@ export default function MobileBottomNav({
   onOpenTreasury,
   onFindMe
 }) {
-  const { lang } = useLang();
+  const { t } = useLang();
 
   const handleTabClick = (tabKey) => {
     if (tabKey === 'treasury') {
@@ -25,58 +25,80 @@ export default function MobileBottomNav({
   };
 
   return (
-    <nav className="mobile-bottom-nav">
+    <nav className="mobile-bottom-nav" aria-label="Mobile Navigation">
       {/* 1. BXH */}
       <button 
+        type="button"
         className={`mobile-nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`}
         onClick={() => handleTabClick('leaderboard')}
       >
         <div className="mobile-nav-icon">
-          <Trophy size={20} />
+          <Trophy size={19} />
         </div>
         <span className="mobile-nav-label">
-          {lang === 'en' ? 'Rankings' : 'BXH'}
+          {t('navLeaderboard')}
         </span>
+        {activeTab === 'leaderboard' && <span className="mobile-nav-indicator" />}
       </button>
 
-      {/* 2. Hành Trình CLB */}
+      {/* 2. Mục Tiêu Cá Nhân & AI Coach */}
       <button 
+        type="button"
+        className={`mobile-nav-item ${activeTab === 'mygoal' ? 'active' : ''}`}
+        onClick={() => handleTabClick('mygoal')}
+      >
+        <div className="mobile-nav-icon">
+          <Target size={19} />
+        </div>
+        <span className="mobile-nav-label">
+          {t('navMyGoal')}
+        </span>
+        {activeTab === 'mygoal' && <span className="mobile-nav-indicator" />}
+      </button>
+
+      {/* 3. Hành Trình CLB */}
+      <button 
+        type="button"
         className={`mobile-nav-item ${activeTab === 'journey' ? 'active' : ''}`}
         onClick={() => handleTabClick('journey')}
       >
         <div className="mobile-nav-icon">
-          <MapPin size={20} />
+          <MapPin size={19} />
         </div>
         <span className="mobile-nav-label">
-          {lang === 'en' ? 'Journey' : 'Hành Trình'}
+          {t('navJourney')}
         </span>
+        {activeTab === 'journey' && <span className="mobile-nav-indicator" />}
       </button>
 
-      {/* 3. Quỹ CLB */}
+      {/* 4. Quỹ CLB */}
       <button 
-        className="mobile-nav-item"
+        type="button"
+        className={`mobile-nav-item ${activeTab === 'treasury' ? 'active' : ''}`}
         onClick={() => handleTabClick('treasury')}
       >
         <div className="mobile-nav-icon">
-          <span style={{ fontSize: '18px' }}>💰</span>
+          <Coins size={19} />
         </div>
         <span className="mobile-nav-label">
-          {lang === 'en' ? 'Treasury' : 'Quỹ CLB'}
+          {t('navTreasury')}
         </span>
       </button>
 
-      {/* 4. Tìm VĐV / Của tôi */}
+      {/* 5. Tìm VĐV */}
       <button 
+        type="button"
         className="mobile-nav-item"
         onClick={() => handleTabClick('findme')}
       >
         <div className="mobile-nav-icon">
-          <Search size={20} />
+          <Search size={19} />
         </div>
         <span className="mobile-nav-label">
-          {lang === 'en' ? 'Search' : 'Tìm Tôi'}
+          {t('navSearch')}
         </span>
       </button>
     </nav>
   );
 }
+

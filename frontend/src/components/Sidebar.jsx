@@ -802,7 +802,6 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                   min="1"
                 />
                 <button 
-                  className="btn btn--secondary"
                   onClick={async () => {
                     if (!selectedClubId) {
                       Swal.fire(t('selectGroupFirst'), '', 'warning');

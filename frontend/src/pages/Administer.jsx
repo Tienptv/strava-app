@@ -72,6 +72,16 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
     }
   }, [searchParams, location.state]);
 
+  // Mobile Detection & Penalties View Mode
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+  const [penaltiesViewMode, setPenaltiesViewMode] = useState('auto'); // 'auto' | 'cards' | 'table'
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // ==========================================
   // STATE: 1. CHALLENGE SETTINGS
   // ==========================================
@@ -3116,9 +3126,27 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                   <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--primary-navy)' }}>
                     {lang === 'en' ? `Detailed List - Month ${reportMonth}/${reportYear} (${filteredReportRows.length} runners)` : `Danh Sách Thu Phạt Tháng ${reportMonth}/${reportYear} (${filteredReportRows.length} runner)`}
                   </h4>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    {lang === 'en' ? 'Click on Payment Status badge to mark as Paid / Unpaid' : 'Nhấp vào huy hiệu Trạng thái để chuyển đổi Đã nộp / Chưa nộp'}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      {lang === 'en' ? 'Click on Payment Status badge to mark as Paid / Unpaid' : 'Nhấp vào huy hiệu Trạng thái để chuyển đổi Đã nộp / Chưa nộp'}
+                    </span>
+                    <div className="mobile-toggle-group">
+                      <button
+                        type="button"
+                        className={`mobile-toggle-btn ${(penaltiesViewMode === 'cards' || (penaltiesViewMode === 'auto' && isMobile)) ? 'active' : ''}`}
+                        onClick={() => setPenaltiesViewMode('cards')}
+                      >
+                        📱 {t('mobilePenaltiesCardView')}
+                      </button>
+                      <button
+                        type="button"
+                        className={`mobile-toggle-btn ${(penaltiesViewMode === 'table' || (penaltiesViewMode === 'auto' && !isMobile)) ? 'active' : ''}`}
+                        onClick={() => setPenaltiesViewMode('table')}
+                      >
+                        📊 {t('mobilePenaltiesTableView')}
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {loadingPenalties ? (
@@ -3129,6 +3157,103 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                 ) : filteredReportRows.length === 0 ? (
                   <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
                     {t('noRunnersFoundFilter')}
+                  </div>
+                ) : (penaltiesViewMode === 'cards' || (penaltiesViewMode === 'auto' && isMobile)) ? (
+                  /* ========================================================= */
+                  /* MOBILE CARDS VIEW CHO SUB-ADMIN TRÊN ĐIỆN THOẠI          */
+                  /* ========================================================= */
+                  <div className="admin-penalty-cards-list">
+                    {filteredReportRows.map((r, i) => (
+                      <div key={r.matchKey || i} className={`admin-pcard ${r.paymentStatus === 'paid' ? 'is-paid' : (r.penaltyAmountK > 0 ? 'is-owing' : '')}`}>
+                        <div className="admin-pcard-header">
+                          <div className="admin-pcard-user">
+                            <span className="admin-pcard-rank">#{i + 1}</span>
+                            {r.avatarUrl ? (
+                              <img src={r.avatarUrl} alt={r.displayName} className="admin-pcard-avatar" />
+                            ) : (
+                              <div className="admin-pcard-avatar-placeholder">{(r.displayName || '?').charAt(0)}</div>
+                            )}
+                            <div className="admin-pcard-name-block">
+                              <span className="admin-pcard-name">{r.displayName}</span>
+                              <span className="admin-pcard-sub">
+                                {r.status === 'safe' && <span className="text-success font-semibold">✓ {t('statusSafeBadge')}</span>}
+                                {r.status === 'owing' && <span className="text-danger font-semibold">⚠️ {t('statusOwingBadge')}</span>}
+                                {r.status === 'no_target' && <span className="text-warning font-semibold">⚡ {t('statusNoTargetBadge')}</span>}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="admin-pcard-penalty-amt">
+                            {r.penaltyAmountK > 0 ? (
+                              <span className="penalty-val">{(r.penaltyAmountK * 1000).toLocaleString('vi-VN')} đ</span>
+                            ) : (
+                              <span className="penalty-zero">0 đ</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="admin-pcard-body">
+                          <div className="admin-pcard-stats-row">
+                            <div className="admin-pcard-stat-item">
+                              <span className="stat-lbl">{t('colTargetKm')}</span>
+                              <div className="target-input-wrap">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={r.targetKm === 0 ? '' : r.targetKm}
+                                  placeholder="0"
+                                  onChange={(e) => handleAdminTargetChange(r.matchKey, e.target.value)}
+                                  className="admin-pcard-target-input"
+                                />
+                                <small>km</small>
+                              </div>
+                            </div>
+                            <div className="admin-pcard-stat-item">
+                              <span className="stat-lbl">{t('colDistanceRun')}</span>
+                              <span className="stat-val font-bold">{r.totalDist.toFixed(1)} km</span>
+                            </div>
+                            <div className="admin-pcard-stat-item">
+                              <span className="stat-lbl">{t('colRemainingKm')}</span>
+                              <span className={`stat-val ${r.diffKm > 0 ? 'text-danger font-bold' : 'text-success font-bold'}`}>
+                                {r.diffKm > 0 ? `-${r.diffKm.toFixed(1)} km` : '0 km'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="admin-pcard-progress-row">
+                            <div className="admin-pcard-progress-bar">
+                              <div 
+                                className="admin-pcard-progress-fill" 
+                                style={{ 
+                                  width: `${Math.min(r.progressPct, 100)}%`,
+                                  background: r.progressPct >= 100 ? '#10b981' : (r.progressPct >= 50 ? '#00A3A6' : '#f59e0b')
+                                }}
+                              />
+                            </div>
+                            <span className="progress-pct">{r.progressPct}%</span>
+                          </div>
+                        </div>
+
+                        <div className="admin-pcard-actions">
+                          {r.hasPenalty && r.penaltyAmountK > 0 ? (
+                            <button
+                              type="button"
+                              onClick={() => handleTogglePayment(r.athleteId, r.displayName, r.paymentStatus, r.paymentNote)}
+                              className={`admin-pcard-pay-btn ${r.paymentStatus === 'paid' ? 'btn-paid' : 'btn-unpaid'}`}
+                            >
+                              {r.paymentStatus === 'paid' ? (
+                                <>✓ {t('paidStatusBadge')} ({(r.penaltyAmountK * 1000).toLocaleString('vi-VN')} đ)</>
+                              ) : (
+                                <>⚠️ {t('unpaidStatusBadge')} - Bấm để xác nhận thu ({(r.penaltyAmountK * 1000).toLocaleString('vi-VN')} đ)</>
+                              )}
+                            </button>
+                          ) : (
+                            <div className="admin-pcard-safe-text">
+                              ✅ {t('statusSafeBadge')} (Không phát sinh phạt)
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div style={{ overflowX: 'auto' }}>
