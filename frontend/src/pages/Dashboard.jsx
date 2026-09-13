@@ -34,18 +34,29 @@ export default function Dashboard({
 
   // Mobile responsiveness & Navigation
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+  const [isForcedLandscape, setIsForcedLandscape] = useState(false);
   const [mobileViewType, setMobileViewType] = useState('card'); // 'card' | 'table'
   const [showTreasuryModal, setShowTreasuryModal] = useState(false);
   const [mobileActiveNavTab, setMobileActiveNavTab] = useState('leaderboard');
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setIsForcedLandscape(false);
+      }
+    };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
   }, []);
 
   // Challenge States
-  const [viewMode, setViewMode] = useState(athlete?.isGuest ? 'challenge' : 'overview'); // 'overview' | 'challenge'
+  const [viewMode, setViewMode] = useState(isMobile || athlete?.isGuest ? 'challenge' : 'overview'); // 'overview' | 'challenge'
   const [internalMonth, setInternalMonth] = useState(new Date().getMonth() + 1);
   const [internalYear, setInternalYear] = useState(new Date().getFullYear());
 
@@ -254,7 +265,10 @@ export default function Dashboard({
   }
 
   return (
-    <div className="dashboard" style={{ paddingBottom: isMobile ? '88px' : '24px' }}>
+    <div 
+      className={`dashboard ${isForcedLandscape ? 'forced-landscape-container' : ''}`} 
+      style={{ paddingBottom: (isMobile && !isForcedLandscape) ? '88px' : '24px' }}
+    >
       <div className="dashboard__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 className="dashboard__greeting">
@@ -266,7 +280,7 @@ export default function Dashboard({
           </h1>
           <p className="dashboard__date">{today}</p>
         </div>
-        {!athlete?.isGuest && (
+        {(!isMobile || isForcedLandscape) && !athlete?.isGuest && (
           <div className="view-mode-toggle">
             <button 
               className={`btn ${viewMode === 'overview' ? 'btn--primary' : 'btn--secondary'}`}
@@ -322,17 +336,78 @@ export default function Dashboard({
                   </a>
                 </div>
               ) : (
-                <PersonalGoal 
-                  activities={activities} 
-                  athlete={athlete}
-                  apiFetch={apiFetch}
-                  challengeMonth={challengeMonth}
-                  challengeYear={challengeYear}
-                  challengeParticipants={challengeParticipants}
-                  challengeData={challengeData}
-                  isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
-                  lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
-                />
+                <>
+                  <PersonalGoal 
+                    activities={activities} 
+                    athlete={athlete}
+                    apiFetch={apiFetch}
+                    challengeMonth={challengeMonth}
+                    challengeYear={challengeYear}
+                    challengeParticipants={challengeParticipants}
+                    challengeData={challengeData}
+                    isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
+                    lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                  />
+
+                  {/* Thống kê cá nhân & Hoạt động gần đây trên Mobile */}
+                  <div className="dashboard-section-header" style={{ marginTop: '24px' }}>
+                    <h3 className="dashboard-section-title">
+                      <Activity size={18} className="dashboard-section-icon" />
+                      {t('careerOverview')}
+                    </h3>
+                  </div>
+
+                  <div className="stats-grid">
+                    <div className="stat-card stat-card--distance">
+                      <div className="stat-card__header">
+                        <span className="stat-card__label">{t('totalDistance')}</span>
+                        <div className="stat-card__icon"><MapPin size={20} /></div>
+                      </div>
+                      <div className="stat-card__value">{totalDistance} km</div>
+                      <div className="stat-card__sub">{t('allActivities')}</div>
+                    </div>
+                    <div className="stat-card stat-card--time">
+                      <div className="stat-card__header">
+                        <span className="stat-card__label">{t('totalTime')}</span>
+                        <div className="stat-card__icon"><Clock size={20} /></div>
+                      </div>
+                      <div className="stat-card__value">{totalTime}</div>
+                      <div className="stat-card__sub">{t('movingTime')}</div>
+                    </div>
+                    <div className="stat-card stat-card--elevation">
+                      <div className="stat-card__header">
+                        <span className="stat-card__label">{t('totalElevation')}</span>
+                        <div className="stat-card__icon"><TrendingUp size={20} /></div>
+                      </div>
+                      <div className="stat-card__value">{totalElevation} m</div>
+                      <div className="stat-card__sub">{t('elevationGain')}</div>
+                    </div>
+                    <div className="stat-card stat-card--recent">
+                      <div className="stat-card__header">
+                        <span className="stat-card__label">{t('recentActivities')}</span>
+                        <div className="stat-card__icon"><Flame size={20} /></div>
+                      </div>
+                      <div className="stat-card__value">{recentCount}</div>
+                      <div className="stat-card__sub">{t('last4Weeks')}</div>
+                    </div>
+                  </div>
+
+                  {activities.length > 0 && (
+                    <div className="section" style={{ marginTop: '24px' }}>
+                      <div className="section__header">
+                        <h2 className="section__title">{t('recentActivities')}</h2>
+                        <button className="btn btn--secondary" onClick={loadData} style={{padding: '6px 14px', fontSize: '0.8rem'}}>
+                          <RefreshCw size={14} /> {t('refresh')}
+                        </button>
+                      </div>
+                      <div className="activities-list">
+                        {activities.slice(0, 8).map((activity) => (
+                          <ActivityCard key={activity.id} activity={activity} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -347,12 +422,12 @@ export default function Dashboard({
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
                 gap: '12px',
-                padding: '12px 16px',
+                padding: '10px 14px',
                 borderRadius: '14px',
                 background: 'linear-gradient(135deg, rgba(0, 45, 84, 0.96) 0%, rgba(0, 75, 135, 0.94) 50%, rgba(0, 163, 166, 0.92) 100%)',
                 color: '#ffffff',
                 boxShadow: '0 4px 16px rgba(0, 45, 84, 0.15)',
-                marginBottom: '20px'
+                marginBottom: '10px'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
@@ -414,8 +489,8 @@ export default function Dashboard({
                 </div>
               </div>
 
-            {/* Trên điện thoại luôn hiển thị MobileLeaderboard trong tab Rankings */}
-            {isMobile ? (
+            {/* Trên điện thoại luôn hiển thị MobileLeaderboard trong tab Rankings trừ khi bật xoay ngang cưỡng bức */}
+            {(isMobile && !isForcedLandscape) ? (
               loadingChallenge ? (
                 <div className="loading">
                   <div className="loading__spinner"></div>
@@ -434,6 +509,8 @@ export default function Dashboard({
                   allowEditOthers={challengeConfig?.allowEditOthers}
                   lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
                   onYearChange={setChallengeYear}
+                  isForcedLandscape={isForcedLandscape}
+                  onToggleForcedLandscape={(val) => setIsForcedLandscape(val)}
                 />
               )
             ) : (
@@ -623,16 +700,36 @@ export default function Dashboard({
         currentYear={challengeYear}
       />
 
+      {/* Nút thoát Xoay Ngang khi đang ở chế độ xoay cưỡng bức (Portrait Orientation Lock ON) */}
+      {isForcedLandscape && (
+        <button
+          type="button"
+          className="floating-portrait-return-btn"
+          onClick={() => {
+            setIsForcedLandscape(false);
+            try {
+              if (window.screen?.orientation?.unlock) window.screen.orientation.unlock();
+              if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+            } catch (_) {}
+          }}
+          aria-label={t('portraitRotateBtn')}
+        >
+          📱 {t('portraitRotateBtn')}
+        </button>
+      )}
+
       {/* Mobile Bottom Navigation */}
-      {isMobile && (
+      {(isMobile && !isForcedLandscape) && (
         <MobileBottomNav 
           activeTab={mobileActiveNavTab}
           onTabSelect={(tab) => {
+            setViewMode('challenge');
             setMobileActiveNavTab(tab);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onOpenTreasury={() => setShowTreasuryModal(true)}
           onFindMe={() => {
+            setViewMode('challenge');
             setMobileActiveNavTab('leaderboard');
             setMobileViewType('card');
             setTimeout(() => {

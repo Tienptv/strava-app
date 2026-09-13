@@ -1,5 +1,12 @@
 [
   {
+    "id": "1789285638430",
+    "timestamp": "2026-09-13T07:47:18.430Z",
+    "action": "Git Push",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
+  },
+  {
     "id": "1789285590391",
     "timestamp": "2026-09-13T07:46:30.391Z",
     "action": "Kéo dữ liệu Cloud",
@@ -1391,12 +1398,5 @@
     "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
     "user": "Tien PhamTV",
     "details": "Đã cập nhật cấu hình Club Goal (2026)"
-  },
-  {
-    "id": "1788599861636",
-    "timestamp": "2026-09-05T09:17:41.636Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
   }
 ]

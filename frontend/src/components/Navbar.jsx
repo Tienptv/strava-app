@@ -16,12 +16,12 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
         style={{ cursor: 'pointer', gap: '6px' }}
         onClick={() => navigate('/')}
       >
-        <div className="navbar__brand-icon" style={{ background: 'transparent', width: 38, height: 35, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="navbar__brand-icon" style={{ background: 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <img src="/logo-tight.webp" alt="Haskoning Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
-          <span style={{ fontWeight: 800, color: 'var(--primary-navy)', letterSpacing: '-0.01em' }}>200K Running Club</span>
-          <span style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 600, fontStyle: 'italic', letterSpacing: '0.02em' }}>
+        <div className="navbar__brand-text">
+          <span className="navbar__brand-title">200K Running Club</span>
+          <span className="navbar__brand-slogan">
             Enhancing Society Together
           </span>
         </div>
@@ -78,18 +78,6 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
           </button>
         </div>
 
-        {/* Mobile Quick Admin Button */}
-        {isAdmin && (
-          <button
-            type="button"
-            className={`navbar__mobile-admin-btn ${location.pathname === '/administer' ? 'active' : ''}`}
-            onClick={() => navigate(location.pathname === '/administer' ? '/' : '/administer')}
-            title={location.pathname === '/administer' ? t('dashboard') : 'Administrator'}
-          >
-            {location.pathname === '/administer' ? <LayoutDashboard size={16} /> : <Shield size={16} />}
-            <span className="mobile-admin-label">{location.pathname === '/administer' ? t('dashboard') : 'Admin'}</span>
-          </button>
-        )}
 
         {athlete.isGuest ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -128,13 +116,29 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
           </div>
         ) : (
           <>
-            {athlete.profile_medium && (
-              <img
-                src={athlete.profile_medium}
-                alt={athlete.firstname}
-                className="navbar__avatar"
-              />
-            )}
+            <div 
+              className={`navbar__avatar-wrapper ${isAdmin ? 'navbar__avatar-wrapper--admin' : ''}`}
+              title={isAdmin ? (isSuperAdmin ? '⭐ Super Admin (Haskoning)' : '🛡️ Admin (Haskoning)') : athlete.firstname}
+              onClick={() => isAdmin && navigate('/administer')}
+              style={{ cursor: isAdmin ? 'pointer' : 'default' }}
+            >
+              {athlete.profile_medium ? (
+                <img
+                  src={athlete.profile_medium}
+                  alt={athlete.firstname}
+                  className="navbar__avatar"
+                />
+              ) : (
+                <div className="navbar__avatar navbar__avatar--fallback">
+                  {(athlete.firstname || 'U')[0].toUpperCase()}
+                </div>
+              )}
+              {isAdmin && (
+                <span className="navbar__avatar-admin-badge" title={isSuperAdmin ? 'Super Admin' : 'Admin'}>
+                  {isSuperAdmin ? '⭐' : '🛡️'}
+                </span>
+              )}
+            </div>
             <span className="navbar__username" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               {athlete.firstname}
             </span>

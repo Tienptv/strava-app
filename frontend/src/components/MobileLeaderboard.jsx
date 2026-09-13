@@ -20,7 +20,9 @@ export default function MobileLeaderboard({
   isAdmin = false,
   allowEditOthers = false,
   lockTargetsAfterDate = 0,
-  onYearChange
+  onYearChange,
+  isForcedLandscape = false,
+  onToggleForcedLandscape
 }) {
   const { lang, t } = useLang();
 
@@ -29,8 +31,6 @@ export default function MobileLeaderboard({
   const [expandedKey, setExpandedKey] = useState(null);
   const [viewType, setViewType] = useState('cards'); // 'cards' | 'table'
   const [isLandscapeMode, setIsLandscapeMode] = useState(false);
-
-  const activeMonthRef = useRef(null);
 
   const [pinnedRunners, setPinnedRunners] = useState(() => {
     try {
@@ -47,6 +47,9 @@ export default function MobileLeaderboard({
   const tryLockLandscape = async () => {
     try {
       if (window.screen?.orientation?.lock) {
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen().catch(() => {});
+        }
         await window.screen.orientation.lock('landscape');
         setIsLandscapeMode(true);
       }
@@ -60,13 +63,14 @@ export default function MobileLeaderboard({
       if (window.screen?.orientation?.unlock) {
         window.screen.orientation.unlock();
       }
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
     } catch (_) {}
   };
 
   // Cố gắng xoay ngang tự động khi component Leaderboard được mở
   useEffect(() => {
-    tryLockLandscape();
-
     const handleOrientationChange = () => {
       const isLandscape = window.matchMedia('(orientation: landscape)').matches;
       setIsLandscapeMode(isLandscape);
@@ -81,19 +85,18 @@ export default function MobileLeaderboard({
     };
   }, []);
 
-  // Tự động cuộn tháng active ra giữa màn hình
-  useEffect(() => {
-    if (activeMonthRef.current) {
-      activeMonthRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center'
-      });
-    }
-  }, [month]);
-
   // Xử lý nút bấm chuyển đổi giữa Dạng Thẻ và Dạng Bảng Xoay Ngang
   const handleToggleLandscape = async () => {
+    if (onToggleForcedLandscape) {
+      const nextState = !isForcedLandscape;
+      onToggleForcedLandscape(nextState);
+      if (nextState) {
+        await tryLockLandscape();
+      } else {
+        tryUnlockOrientation();
+      }
+      return;
+    }
     if (viewType === 'cards' && !isLandscapeMode) {
       setViewType('table');
       setIsLandscapeMode(true);
@@ -237,14 +240,10 @@ export default function MobileLeaderboard({
       list = list.filter(r => r.displayName.toLowerCase().includes(q));
     }
 
-    if (filterType === 'top3') {
-      list = list.filter(r => r.originalRank <= 3);
-    } else if (filterType === 'completed') {
+    if (filterType === 'completed') {
       list = list.filter(r => r.isCompleted);
     } else if (filterType === 'penalty') {
       list = list.filter(r => r.penaltyAmount !== null && r.penaltyAmount > 0);
-    } else if (filterType === 'streak') {
-      list = list.filter(r => r.maxStreak >= 3);
     }
 
     // Đưa các thẻ đã ghim (Pinned) hoặc IsMe lên đầu trang
@@ -259,22 +258,46 @@ export default function MobileLeaderboard({
 
   return (
     <div className="mobile-leaderboard-container">
-      {/* Month Scroll Pill Bar with Auto-scroll */}
-      <div className="mobile-month-bar">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => {
-          const isActive = month === m;
-          return (
-            <button
-              key={m}
-              ref={isActive ? activeMonthRef : null}
-              type="button"
-              className={`mobile-month-pill ${isActive ? 'active' : ''}`}
-              onClick={() => setMonth && setMonth(m)}
-            >
-              {lang === 'en' ? `${MONTH_NAMES_EN[m - 1]} '${String(year).slice(2)}` : `Thg ${m}`}
-            </button>
-          );
-        })}
+      {/* View Toggle Bar (Dạng Thẻ vs Xoay Ngang Toàn Bảng 31 Ngày + Dropdown Chọn Tháng) */}
+      <div className="mobile-view-toggle-bar">
+        <button 
+          type="button"
+          className={`mobile-toggle-btn ${viewType === 'cards' && !isForcedLandscape && !isLandscapeMode ? 'active' : ''}`}
+          onClick={() => {
+            setViewType('cards');
+            setIsLandscapeMode(false);
+            if (onToggleForcedLandscape) onToggleForcedLandscape(false);
+            tryUnlockOrientation();
+          }}
+        >
+          📱 {lang === 'en' ? 'Card View' : 'Dạng Thẻ'}
+        </button>
+        <button 
+          type="button"
+          className={`mobile-toggle-btn ${viewType === 'table' || isForcedLandscape || isLandscapeMode ? 'active' : ''}`}
+          onClick={handleToggleLandscape}
+        >
+          <RotateCw size={12} style={{ marginRight: 4, flexShrink: 0 }} />
+          {viewType === 'table' || isForcedLandscape || isLandscapeMode ? t('portraitRotateBtn') : t('landscapeRotateBtn')}
+        </button>
+
+        {/* Nút dropdown chọn tháng theo yêu cầu người dùng đặt bên cạnh nút Rotate Landscape */}
+        <div className="mobile-month-dropdown-wrap">
+          <Calendar size={12} className="mobile-month-select-icon" />
+          <select 
+            className="mobile-month-select"
+            value={month}
+            onChange={(e) => setMonth && setMonth(Number(e.target.value))}
+            aria-label={t('month')}
+          >
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => (
+              <option key={m} value={m}>
+                {lang === 'en' ? `${MONTH_NAMES_EN[m - 1]} '${String(year).slice(2)}` : `Tháng ${m}/${year}`}
+              </option>
+            ))}
+          </select>
+          <ChevronDown size={12} className="mobile-month-select-arrow" />
+        </div>
       </div>
 
       {/* Summary KPI Cards Bar */}
@@ -290,31 +313,6 @@ export default function MobileLeaderboard({
         <div className="mobile-kpi-card highlight-fund">
           <span className="mobile-kpi-label">💰 {t('monthDueKpi')}</span>
           <span className="mobile-kpi-value">{(monthlyStats.totalPenaltyDue / 1000).toLocaleString('vi-VN')} <small>k</small></span>
-        </div>
-      </div>
-
-      {/* View Toggle Bar (Dạng Thẻ vs Xoay Ngang Toàn Bảng 31 Ngày) */}
-      <div className="mobile-view-toggle-bar">
-        <div className="mobile-toggle-group">
-          <button 
-            type="button"
-            className={`mobile-toggle-btn ${viewType === 'cards' && !isLandscapeMode ? 'active' : ''}`}
-            onClick={() => {
-              setViewType('cards');
-              setIsLandscapeMode(false);
-              tryUnlockOrientation();
-            }}
-          >
-            📱 {lang === 'en' ? 'Card View' : 'Dạng Thẻ'}
-          </button>
-          <button 
-            type="button"
-            className={`mobile-toggle-btn ${viewType === 'table' || isLandscapeMode ? 'active' : ''}`}
-            onClick={handleToggleLandscape}
-          >
-            <RotateCw size={13} style={{ marginRight: 4 }} />
-            {viewType === 'table' || isLandscapeMode ? t('portraitRotateBtn') : t('landscapeRotateBtn')}
-          </button>
         </div>
       </div>
 
@@ -444,12 +442,6 @@ export default function MobileLeaderboard({
             {lang === 'en' ? 'All' : 'Tất cả'} ({processedRunners.length})
           </button>
           <button 
-            className={`filter-chip ${filterType === 'top3' ? 'active' : ''}`}
-            onClick={() => setFilterType('top3')}
-          >
-            🏆 Top 3
-          </button>
-          <button 
             className={`filter-chip ${filterType === 'completed' ? 'active' : ''}`}
             onClick={() => setFilterType('completed')}
           >
@@ -460,12 +452,6 @@ export default function MobileLeaderboard({
             onClick={() => setFilterType('penalty')}
           >
             ⚠️ {lang === 'en' ? 'Penalty' : 'Có phạt'}
-          </button>
-          <button 
-            className={`filter-chip ${filterType === 'streak' ? 'active' : ''}`}
-            onClick={() => setFilterType('streak')}
-          >
-            🔥 Streak (≥3d)
           </button>
         </div>
       </div>

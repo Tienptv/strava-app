@@ -65,6 +65,13 @@
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Viewport & Safe Area Dimensions (iOS Notch, Dynamic Island, Android Gesture Bar) */
+  --app-height: 100dvh;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 /* ==========================================
@@ -137,8 +144,8 @@ img {
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   border-bottom: 1px solid var(--border);
   padding: 0 24px 0 20px;
-  min-height: 64px;
-  height: 68px;
+  min-height: 70px;
+  height: 74px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -147,21 +154,45 @@ img {
 .navbar__brand {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   font-weight: 800;
-  font-size: 1.25rem;
   color: var(--text-primary);
   letter-spacing: -0.02em;
+  flex-shrink: 0;
 }
 
 .navbar__brand-icon {
-  width: 38px;
-  height: 35px;
+  width: 52px;
+  height: 48px;
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.navbar__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.navbar__brand-title {
+  font-weight: 800;
+  color: var(--primary-navy);
+  letter-spacing: -0.01em;
+  font-size: 1.55rem;
+  white-space: nowrap;
+}
+
+.navbar__brand-slogan {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .navbar__nav {
@@ -201,6 +232,77 @@ img {
   gap: 12px;
 }
 
+/* ==========================================
+   ADMIN AVATAR HASKONING BRAND RING EFFECT
+   ========================================== */
+.navbar__avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Khung tròn hiệu ứng màu logo Haskoning (Lime Green, Teal/Cyan, Primary Navy) */
+.navbar__avatar-wrapper--admin {
+  padding: 2.5px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #78BE20 0%, #00A3E0 35%, #00A3A6 65%, #002D54 100%);
+  background-size: 250% 250%;
+  animation: haskoningAdminRingRotate 4s ease infinite;
+  box-shadow: 0 0 10px rgba(0, 163, 166, 0.5), 0 0 4px rgba(120, 190, 32, 0.4);
+}
+
+@keyframes haskoningAdminRingRotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.navbar__avatar-wrapper--admin:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 14px rgba(0, 163, 166, 0.7), 0 0 6px rgba(120, 190, 32, 0.6);
+}
+
+.navbar__avatar-wrapper--admin .navbar__avatar {
+  border: 1.5px solid #ffffff !important;
+}
+
+.navbar__avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-navy, #002D54);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  border-radius: 50%;
+}
+
+.navbar__avatar-admin-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 10px;
+  line-height: 1;
+  background: #ffffff;
+  border-radius: 50%;
+  padding: 1.5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
 .navbar__avatar {
   width: 36px;
   height: 36px;
@@ -208,6 +310,7 @@ img {
   border: 2px solid var(--border);
   object-fit: cover;
   transition: border-color var(--transition-fast);
+  display: block;
 }
 
 .navbar__avatar:hover {
@@ -1512,6 +1615,12 @@ button:focus-visible,
   font-size: 0.85rem;
 }
 
+@media (max-width: 768px) {
+  .view-mode-toggle {
+    display: none !important;
+  }
+}
+
 .challenge-view {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
@@ -2762,8 +2871,18 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
     padding: 16px;
   }
 
+  .dashboard__header {
+    margin-bottom: 10px;
+  }
+
   .dashboard__greeting {
-    font-size: 1.35rem;
+    font-size: 1.22rem;
+    line-height: 1.25;
+    margin-bottom: 2px;
+  }
+
+  .dashboard__date {
+    font-size: 0.8rem;
   }
 
   .stats-grid {
@@ -2817,6 +2936,27 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
     min-width: 28px;
     max-width: 28px;
   }
+
+  .navbar {
+    padding: 0 14px;
+    min-height: 66px;
+    height: 70px;
+  }
+
+  .navbar__brand-icon {
+    width: 44px;
+    height: 42px;
+  }
+
+  .navbar__brand-title {
+    font-size: 1.35rem;
+    white-space: nowrap;
+  }
+
+  .navbar__brand-slogan {
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2834,6 +2974,16 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
     gap: 12px;
   }
 
+  .navbar {
+    padding: 0 10px;
+    min-height: 62px;
+    height: 66px;
+  }
+
+  .navbar__user {
+    gap: 6px;
+  }
+
   .navbar__username {
     display: none;
   }
@@ -2842,19 +2992,227 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
     display: none;
   }
 
-  .navbar__brand-icon {
-    width: 28px;
-    height: 28px;
-    font-size: 0.9rem;
+  .navbar__avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .navbar__avatar-wrapper--admin {
+    padding: 2px;
+    box-shadow: 0 0 8px rgba(0, 163, 166, 0.45), 0 0 3px rgba(120, 190, 32, 0.35);
+  }
+
+  .navbar__avatar-admin-badge {
+    bottom: -3px;
+    right: -3px;
+    font-size: 8px;
+    padding: 1px;
+  }
+
+  .navbar__logout {
+    padding: 6px;
   }
 
   .navbar__brand {
-    font-size: 1.1rem;
+    gap: 7px;
+    flex-shrink: 0;
+  }
+
+  .navbar__brand-icon {
+    width: 38px;
+    height: 36px;
+  }
+
+  .navbar__brand-title {
+    font-size: 1.25rem;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+  }
+
+  .navbar__brand-slogan {
+    font-size: 0.72rem;
+    white-space: nowrap;
   }
 
   .sidebar__footer {
     padding-bottom: 24px;
   }
+}
+
+@media (max-width: 380px) {
+  .navbar {
+    padding: 0 6px;
+  }
+
+  .navbar__user {
+    gap: 4px;
+  }
+
+  .navbar__brand-icon {
+    width: 32px;
+    height: 30px;
+  }
+
+  .navbar__brand-title {
+    font-size: 1.10rem;
+    white-space: nowrap;
+  }
+
+  .navbar__brand-slogan {
+    font-size: 0.62rem;
+    white-space: nowrap;
+  }
+}
+
+/* ==========================================
+   ADAPTIVE DEVICE SYSTEM (SCREEN TIERS & ORIENTATION)
+   ========================================== */
+
+/* 1. COMPACT PHONES (< 375px: iPhone SE, Galaxy Z Flip cover, small Android) */
+html[data-screen-tier="compact"] .navbar {
+  padding: 0 8px;
+  min-height: 58px;
+  height: 62px;
+}
+
+html[data-screen-tier="compact"] .navbar__brand {
+  gap: 5px;
+}
+
+html[data-screen-tier="compact"] .navbar__brand-icon {
+  width: 30px;
+  height: 28px;
+}
+
+html[data-screen-tier="compact"] .navbar__brand-title {
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+html[data-screen-tier="compact"] .navbar__brand-slogan {
+  font-size: 0.58rem;
+  white-space: nowrap;
+}
+
+html[data-screen-tier="compact"] .navbar__user {
+  gap: 4px;
+}
+
+html[data-screen-tier="compact"] .navbar__avatar {
+  width: 28px;
+  height: 28px;
+}
+
+html[data-screen-tier="compact"] .mobile-bottom-nav {
+  height: 56px;
+  padding-bottom: max(4px, var(--sab));
+}
+
+html[data-screen-tier="compact"] .mobile-nav-label {
+  font-size: 0.58rem;
+}
+
+html[data-screen-tier="compact"] .mobile-kpi-card {
+  padding: 6px 4px;
+}
+
+html[data-screen-tier="compact"] .mobile-kpi-value {
+  font-size: 1.05rem;
+}
+
+/* 2. STANDARD PHONES (375px - 430px: iPhone 12/13/14/15/16, Galaxy S21-S24) */
+html[data-screen-tier="standard"] .navbar {
+  padding: 0 12px;
+  min-height: 64px;
+  height: 66px;
+}
+
+html[data-screen-tier="standard"] .navbar__brand-icon {
+  width: 38px;
+  height: 36px;
+}
+
+html[data-screen-tier="standard"] .navbar__brand-title {
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+html[data-screen-tier="standard"] .navbar__brand-slogan {
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+html[data-screen-tier="standard"] .mobile-bottom-nav {
+  height: 64px;
+  padding-bottom: max(6px, var(--sab));
+}
+
+/* 3. LARGE PHONES / PHABLETS (431px - 600px: iPhone Pro Max, Galaxy Ultra) */
+html[data-screen-tier="large"] .navbar {
+  padding: 0 16px;
+  min-height: 68px;
+  height: 70px;
+}
+
+html[data-screen-tier="large"] .navbar__brand-icon {
+  width: 44px;
+  height: 42px;
+}
+
+html[data-screen-tier="large"] .navbar__brand-title {
+  font-size: 1.35rem;
+  white-space: nowrap;
+}
+
+html[data-screen-tier="large"] .navbar__brand-slogan {
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+html[data-screen-tier="large"] .mobile-bottom-nav {
+  height: 66px;
+  padding-bottom: max(8px, var(--sab));
+}
+
+html[data-screen-tier="large"] .mobile-kpi-card {
+  padding: 12px 10px;
+}
+
+html[data-screen-tier="large"] .mobile-kpi-value {
+  font-size: 1.25rem;
+}
+
+/* 4. LANDSCAPE MOBILE VIEW (Khi xoay ngang điện thoại) */
+html[data-orientation="landscape"][data-is-mobile="true"] .navbar {
+  min-height: 48px;
+  height: 50px;
+  padding: 0 16px;
+}
+
+html[data-orientation="landscape"][data-is-mobile="true"] .navbar__brand-icon {
+  width: 28px;
+  height: 26px;
+}
+
+html[data-orientation="landscape"][data-is-mobile="true"] .navbar__brand-title {
+  font-size: 1.05rem;
+}
+
+html[data-orientation="landscape"][data-is-mobile="true"] .navbar__brand-slogan {
+  display: none;
+}
+
+html[data-orientation="landscape"][data-is-mobile="true"] .mobile-bottom-nav {
+  height: 46px;
+  padding-bottom: max(2px, var(--sab));
+}
+
+html[data-orientation="landscape"][data-is-mobile="true"] .mobile-nav-label {
+  font-size: 0.55rem;
+}
+
+html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-table-wrapper {
+  max-height: calc(var(--app-height, 100dvh) - 105px);
 }
 
 /* ==========================================
@@ -5833,8 +6191,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 4px;
+  gap: 10px;
+  margin-top: 0;
 }
 
 /* Month Scroll Bar */
@@ -5877,13 +6235,13 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .mobile-kpi-strip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 4px;
 }
 
 .mobile-kpi-card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 8px 6px;
+  border-radius: 10px;
+  padding: 6px 4px;
   border: 1px solid #e2e8f0;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
@@ -5900,10 +6258,10 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .mobile-kpi-value {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 900;
   color: var(--primary-navy, #002D54);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .mobile-kpi-card.highlight-dist .mobile-kpi-value {
@@ -5914,39 +6272,85 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   color: #e11d48;
 }
 
-/* View Toggle Bar */
+/* View Toggle Bar (Card View + Leaderboard + Month Dropdown in 3-column Grid) */
 .mobile-view-toggle-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f1f5f9;
-  padding: 2px;
-  border-radius: 10px;
-}
-
-.mobile-toggle-group {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
+  width: 100%;
 }
 
 .mobile-toggle-btn {
-  border: none;
-  background: transparent;
-  padding: 4px 8px;
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 4px 4px;
   border-radius: 8px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  height: 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  white-space: nowrap;
+  box-sizing: border-box;
   transition: all 0.2s ease;
 }
 
 .mobile-toggle-btn.active {
   background: #ffffff;
+  border-color: #cbd5e1;
   color: var(--primary-navy, #002D54);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0, 45, 84, 0.12);
+}
+
+/* Month Dropdown Wrap next to Leaderboard */
+.mobile-month-dropdown-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 2px 14px 2px 20px;
+  height: 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.mobile-month-select-icon {
+  position: absolute;
+  left: 6px;
+  color: var(--accent, #00A3A6);
+  pointer-events: none;
+}
+
+.mobile-month-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--primary-navy, #002D54);
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  text-align: center;
+  width: 100%;
+}
+
+.mobile-month-select-arrow {
+  position: absolute;
+  right: 5px;
+  color: #64748b;
+  pointer-events: none;
 }
 
 .mobile-toggle-hint {
@@ -5957,11 +6361,11 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 /* Top 3 Podium Section */
 .mobile-podium-section {
-  margin: 4px 0 6px;
-  padding: 14px 10px 12px;
+  margin: 0;
+  padding: 8px 6px 6px;
   background: linear-gradient(180deg, rgba(254, 240, 138, 0.22) 0%, rgba(255, 255, 255, 0.9) 100%);
   border: 1px solid rgba(234, 179, 8, 0.25);
-  border-radius: 16px;
+  border-radius: 12px;
 }
 
 .mobile-podium-title {
@@ -5969,27 +6373,30 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: #854d0e;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  margin-bottom: 14px;
+  margin-bottom: 6px;
 }
 
 .mobile-podium-grid {
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
 }
 
 .podium-card {
-  flex: 1;
-  max-width: 110px;
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  max-width: none;
   background: #ffffff;
-  border-radius: 14px;
-  padding: 12px 6px 10px;
+  border-radius: 12px;
+  padding: 8px 4px 6px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   cursor: pointer;
@@ -6004,7 +6411,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .podium-card.rank-1 {
   border: 2px solid #eab308;
   background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
-  transform: translateY(-8px);
+  transform: translateY(-6px);
   z-index: 2;
   box-shadow: 0 6px 16px rgba(234, 179, 8, 0.2);
 }
@@ -6021,19 +6428,19 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 .podium-crown {
   position: absolute;
-  top: -14px;
+  top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .podium-badge {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 10px;
-  margin-bottom: 6px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  margin-bottom: 4px;
   background: rgba(0, 0, 0, 0.05);
 }
 
@@ -6043,8 +6450,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .podium-avatar {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
@@ -6054,31 +6461,40 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .podium-avatar.main {
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   border: 2.5px solid #eab308;
 }
 
 .podium-name {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: var(--primary-navy, #002D54);
-  margin-top: 6px;
+  margin-top: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 100%;
+  max-width: 100%;
+  display: block;
 }
 
 .podium-km {
-  font-size: 0.95rem;
+  font-size: 0.90rem;
   font-weight: 900;
   color: var(--accent, #00A3A6);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .podium-sub {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  max-width: 100%;
+  display: block;
 }
 
 /* Search & Filter Bar */
@@ -6130,35 +6546,38 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .mobile-filter-chips {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-
-.mobile-filter-chips::-webkit-scrollbar {
-  display: none;
+  width: 100%;
+  padding-bottom: 0;
 }
 
 .filter-chip {
+  width: 100%;
+  text-align: center;
   border: 1px solid #e2e8f0;
   background: #ffffff;
   color: #475569;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.74rem;
+  padding: 6px 4px;
+  border-radius: 8px;
+  font-size: 0.72rem;
   line-height: normal;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .filter-chip.active {
   background: var(--primary-navy, #002D54);
   color: #ffffff;
   border-color: var(--primary-navy, #002D54);
+  box-shadow: 0 2px 6px rgba(0, 45, 84, 0.2);
 }
 
 /* Mobile Runner Cards */
@@ -6677,6 +7096,57 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
+/* Forced Landscape Mode (for mobile devices with Portrait Orientation Lock ON) */
+.forced-landscape-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vh !important;
+  width: 100dvh !important;
+  height: 100vw !important;
+  height: 100dvw !important;
+  transform-origin: 0 0 !important;
+  transform: rotate(90deg) translateY(-100%) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  z-index: 99999 !important;
+  background: var(--bg-primary, #f8fafc) !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-sizing: border-box !important;
+  padding: 12px 16px 88px 16px !important;
+}
+
+.floating-portrait-return-btn {
+  position: fixed !important;
+  bottom: 18px !important;
+  right: 18px !important;
+  z-index: 1000000 !important;
+  background: linear-gradient(135deg, var(--brand-cyan, #00A3A6) 0%, var(--primary-navy, #002D54) 100%) !important;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  border-radius: 24px !important;
+  padding: 8px 16px !important;
+  font-family: 'Inter', -apple-system, sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.78rem !important;
+  box-shadow: 0 6px 20px rgba(0, 45, 84, 0.35) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  letter-spacing: 0.01em !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.floating-portrait-return-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 163, 166, 0.45) !important;
+}
+
+.floating-portrait-return-btn:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
 /* Mobile Penalty Cards for Sub-Admins in Administer */
 .admin-penalty-cards-list {
   display: flex;
@@ -7180,12 +7650,24 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
    ========================================================================== */
 @media (max-width: 768px) {
 
-  /* Expand cards to edges */
-  .club-goal-card,
+  /* Mobile challenge view and centered section wrapper */
+  .challenge-view {
+    padding: 10px !important;
+    margin-top: 10px !important;
+    border-radius: 16px !important;
+  }
+
   .challenge-section-wrapper {
-    margin-left: -16px;
-    margin-right: -16px;
-    border-radius: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .club-goal-card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 12px !important;
+    width: 100% !important;
   }
 
   /* Scale down the runner avatar and adjust position */

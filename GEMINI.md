@@ -59,4 +59,16 @@
   - Khi thêm key mới, bắt buộc phải định nghĩa song song cả 2 mục `vi` và `en` trong `translations.js`.
   - Các API sinh văn bản cho client (như AI Coach advice, Weekly training plan, xuất báo cáo) bắt buộc phải nhận tham số `lang` và trả về kết quả đúng ngôn ngữ tương ứng.
 
+---
+
+## 5. Quy Tắc Luôn Lập Kế Hoạch Cho Người Dùng Review Trước Khi Thực Thi (Mandatory Plan-First & User Review Rule)
+- **Bắt buộc tạo Plan sau mỗi yêu cầu (Prompt) của người dùng:**
+  - Ngay sau mỗi prompt yêu cầu từ người dùng (thêm tính năng mới, chỉnh sửa giao diện, sửa lỗi logic, can thiệp mã nguồn...), AI **bắt buộc phải nghiên cứu và tạo Kế Hoạch Triển Khai (`implementation_plan.md`) trước tiên**.
+  - Kế hoạch phải được xây dựng rõ ràng, phân tích nguyên nhân kỹ thuật, đề xuất giải pháp, liệt kê cụ thể các file sẽ chỉnh sửa và kế hoạch kiểm thử thực tế.
+  - Bắt buộc thiết lập `RequestFeedback: true` và `UserFacing: true` trong metadata của plan.
+- **Tạo điều kiện để người dùng Review & Bổ sung ý kiến (Review & Comments):**
+  - AI phải chỉ rõ các điểm cốt lõi và câu hỏi mở (nếu có) để người dùng có thể thoải mái để lại comment, góp ý thêm hoặc điều chỉnh yêu cầu trước khi chốt.
+- **Tuyệt đối không tự ý viết code trước khi được phê duyệt:**
+  - AI tuyệt đối **KHÔNG được tự ý sửa file mã nguồn hay chạy các lệnh thay đổi hệ thống** trước khi người dùng xem xét kế hoạch, bổ sung comment và bấm **Proceed / Approve**.
+
 

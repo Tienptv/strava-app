@@ -9,6 +9,7 @@ import Sidebar from './components/Sidebar';
 import { useLang } from './i18n/LangContext';
 import { APP_VERSION } from './config/version';
 import { useAutoUpdate, AutoUpdateToast } from './utils/useAutoUpdate';
+import { useDeviceScreen } from './utils/useDeviceScreen';
 import Swal from 'sweetalert2';
 
 const API_BASE = '/api';
@@ -21,13 +22,7 @@ function App() {
   const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
   const [userRoles, setUserRoles] = useState({ isSuperAdmin: false, isSubAdmin: false, isAdmin: false });
   const { t, lang } = useLang();
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const { isMobile } = useDeviceScreen();
 
   // Tự động kiểm tra phiên bản mới từ Render Cloud và reload mượt mà
   const { updateAvailable, newVersionInfo, countdown, reloadNow } = useAutoUpdate();
