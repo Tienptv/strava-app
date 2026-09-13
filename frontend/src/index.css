@@ -7128,8 +7128,10 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
 
 .floating-portrait-return-btn {
   position: fixed !important;
-  bottom: 18px !important;
+  top: 18px !important;
   right: 18px !important;
+  bottom: auto !important;
+  left: auto !important;
   z-index: 1000000 !important;
   background: linear-gradient(135deg, var(--brand-cyan, #00A3A6) 0%, var(--primary-navy, #002D54) 100%) !important;
   color: #ffffff !important;
