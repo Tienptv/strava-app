@@ -3,10 +3,5 @@
     "access_token": "ea5cf656030ebdb3649735194b841e5d4a2eaeb5",
     "refresh_token": "2591a2fe458c298e3edbff078e34dbb64cd1ca65",
     "expires_at": 1789312383
-  },
-  "133066813": {
-    "access_token": "ad92f74634706eb4428a0ecac6e68673b133386f",
-    "refresh_token": "e4a1c65a799ca9f08354b68445c4ad3c86fd9e46",
-    "expires_at": 1789342342
   }
 }

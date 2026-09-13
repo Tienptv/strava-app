@@ -1,5 +1,19 @@
 [
   {
+    "id": "1789321117163",
+    "timestamp": "2026-09-13T17:38:37.163Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
+    "id": "1789321069024",
+    "timestamp": "2026-09-13T17:37:49.024Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
     "id": "1789321011268",
     "timestamp": "2026-09-13T17:36:51.269Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1384,19 +1398,5 @@
     "action": "Cấp quyền Admin",
     "user": "Super Admin (133066813)",
     "details": "Cấp quyền admin cho: pham tien (ID: 120540594, Key: pham_T.)"
-  },
-  {
-    "id": "1788682537117",
-    "timestamp": "2026-09-06T08:15:37.117Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788676443031",
-    "timestamp": "2026-09-06T06:34:03.031Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2026)"
   }
 ]
