@@ -7105,6 +7105,8 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
   width: 100dvh !important;
   height: 100vw !important;
   height: 100dvw !important;
+  max-width: none !important;
+  max-height: none !important;
   transform-origin: 0 0 !important;
   transform: rotate(90deg) translateY(-100%) !important;
   overflow-x: hidden !important;
@@ -7114,6 +7116,14 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
   -webkit-overflow-scrolling: touch !important;
   box-sizing: border-box !important;
   padding: 12px 16px 88px 16px !important;
+}
+
+.forced-landscape-container .dashboard__header,
+.forced-landscape-container .challenge-view,
+.forced-landscape-container .challenge-section-wrapper,
+.forced-landscape-container .card.club-treasury-banner {
+  max-width: 100% !important;
+  width: 100% !important;
 }
 
 .floating-portrait-return-btn {
