@@ -5078,7 +5078,7 @@ app.post('/api/wpn/subscribe', (req, res) => {
       return res.status(400).json({ error: 'Thiếu thông tin đăng ký' });
     }
 
-    const subs = JSON.parse(readStorageFile(WPN_SUBS_FILE) || '{}');
+    const subs = JSON.parse((fs.existsSync(WPN_SUBS_FILE) ? fs.readFileSync(WPN_SUBS_FILE, 'utf8') : '{}')) || {};
     if (!subs[athleteId]) subs[athleteId] = [];
 
     // Kiểm tra trùng lặp endpoint
@@ -5108,7 +5108,7 @@ app.post('/api/wpn/unsubscribe', (req, res) => {
       return res.status(400).json({ error: 'Thiếu thông tin hủy đăng ký' });
     }
 
-    const subs = JSON.parse(readStorageFile(WPN_SUBS_FILE) || '{}');
+    const subs = JSON.parse((fs.existsSync(WPN_SUBS_FILE) ? fs.readFileSync(WPN_SUBS_FILE, 'utf8') : '{}')) || {};
     if (subs[athleteId]) {
       subs[athleteId] = subs[athleteId].filter(s => s.endpoint !== endpoint);
       writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
