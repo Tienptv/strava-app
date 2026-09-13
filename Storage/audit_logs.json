@@ -1,5 +1,12 @@
 [
   {
+    "id": "1789321011268",
+    "timestamp": "2026-09-13T17:36:51.269Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (288 mục), targets.json (51 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
     "id": "1789320912501",
     "timestamp": "2026-09-13T17:35:12.501Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1388,13 +1395,6 @@
   {
     "id": "1788676443031",
     "timestamp": "2026-09-06T06:34:03.031Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2026)"
-  },
-  {
-    "id": "1788676162028",
-    "timestamp": "2026-09-06T06:29:22.028Z",
     "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
     "user": "Tien PhamTV",
     "details": "Đã cập nhật cấu hình Club Goal (2026)"
