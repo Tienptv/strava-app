@@ -84,7 +84,7 @@
     "strategyTip": "Aim for ~4 runs/week (~6.1 km each) to hit your target smoothly.",
     "recoveryTip": "Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.",
     "readinessScore": 85,
-    "generatedAt": "2026-09-13T03:49:46.094Z"
+    "generatedAt": "2026-09-13T14:09:43.433Z"
   },
   "133066813_20151492482_2026-09-13_vi": {
     "title": "Tư vấn & Kế hoạch",
@@ -121,5 +121,29 @@
     "recoveryTip": "Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.",
     "readinessScore": 92,
     "generatedAt": "2026-09-13T09:09:33.002Z"
+  },
+  "133066813_no_act_2026-09-13_en": {
+    "title": "Coach Recommendations",
+    "type": "info",
+    "badge": "Smart Coach",
+    "message": "Set your monthly goal to unlock intelligent training advice and personalized workouts!",
+    "actionPlan": "Set a realistic target between 50km - 150km.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Set a suitable monthly goal between 50km - 150km.",
+    "recoveryTip": "Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.",
+    "readinessScore": 76,
+    "generatedAt": "2026-09-13T14:32:26.503Z"
+  },
+  "120540594_1001_2026-09-13_vi": {
+    "title": "Tư vấn & Kế hoạch",
+    "type": "info",
+    "badge": "Smart Coach",
+    "message": "Hãy thiết lập mục tiêu tháng để nhận phân tích chi tiết và kế hoạch chạy bộ khoa học!",
+    "actionPlan": "Đặt mục tiêu từ 50km - 150km phù hợp với thể lực.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Hãy chọn mục tiêu tháng từ 50km - 150km phù hợp với thể lực.",
+    "recoveryTip": "Bù 400ml nước điện giải sau chạy, chườm lạnh cơ bắp và giãn cơ kỹ 10 phút.",
+    "readinessScore": 85,
+    "generatedAt": "2026-09-13T14:32:57.402Z"
   }
 }
