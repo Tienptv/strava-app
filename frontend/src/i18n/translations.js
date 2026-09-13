@@ -6,9 +6,14 @@ const translations = {
 
     // PWA & Notification
     installPwaTitle: 'Cài đặt ứng dụng để nhận thông báo',
+    installPwaGuidePrefix: 'Bấm',
+    installPwaGuideMid: 'dưới màn hình Safari, chọn',
+    installPwaGuideAction: 'Thêm vào MH chính',
+    installPwaDismissHint: 'Hoặc bấm ✕ để đóng và tiếp tục lướt web trên Safari',
     enableNotifications: 'Bật thông báo',
     enableNotificationsDesc: 'Không bỏ lỡ cảnh báo và cập nhật quan trọng từ HRC.',
     enable: 'Bật',
+    dismiss: 'Đóng',
 
 
     // Login
@@ -500,9 +505,14 @@ const translations = {
 
     // PWA & Notification
     installPwaTitle: 'Install app to receive notifications',
+    installPwaGuidePrefix: 'Tap',
+    installPwaGuideMid: 'in Safari toolbar, choose',
+    installPwaGuideAction: 'Add to Home Screen',
+    installPwaDismissHint: 'Or tap ✕ to dismiss and continue browsing in Safari',
     enableNotifications: 'Enable notifications',
     enableNotificationsDesc: 'Do not miss important alerts and updates from HRC.',
     enable: 'Enable',
+    dismiss: 'Dismiss',
 
 
     // Login
