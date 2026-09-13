@@ -1,10 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, LogOut, Shield } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
+import NotificationBell from './NotificationBell';
 
-
-
-export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
+export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin, apiFetch }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { lang, switchLang, t } = useLang();
@@ -142,6 +141,7 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin }) {
             <span className="navbar__username" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               {athlete.firstname}
             </span>
+            <NotificationBell apiFetch={apiFetch} athlete={athlete} />
             <button className="navbar__logout" onClick={onLogout} title={t('logout')}>
               <LogOut size={14} style={{ verticalAlign: 'text-bottom' }} /> <span className="navbar__logout-text">{t('logout')}</span>
             </button>

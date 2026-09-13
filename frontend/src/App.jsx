@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
+import { Settings as SettingsIcon } from 'lucide-react';
+import NotificationPermissionBanner from './components/NotificationPermissionBanner';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ClubView from './pages/ClubView';
@@ -260,6 +262,7 @@ function App() {
           />
         )}
         <main className={athlete ? "app-main" : ""}>
+          {athlete && <NotificationPermissionBanner apiFetch={apiFetch} athleteId={athleteId} />}
           <Routes>
             <Route
               path="/"

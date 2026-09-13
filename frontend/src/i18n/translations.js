@@ -4,6 +4,13 @@ const translations = {
     dashboard: 'Dashboard',
     logout: 'Đăng xuất',
 
+    // PWA & Notification
+    installPwaTitle: 'Cài đặt ứng dụng để nhận thông báo',
+    enableNotifications: 'Bật thông báo',
+    enableNotificationsDesc: 'Không bỏ lỡ cảnh báo và cập nhật quan trọng từ HRC.',
+    enable: 'Bật',
+
+
     // Login
     appTitle: '200K Running Club',
     appSubtitle: 'Theo dõi dữ liệu thể thao cá nhân và nhóm từ Strava. Xem thống kê, biểu đồ và hoạt động chi tiết.',
@@ -56,6 +63,28 @@ const translations = {
     challengeTab: 'Challenge',
     loadingChallengeData: 'Đang tải dữ liệu Challenge...',
     month: 'Tháng',
+    searchActivities: 'Tìm theo tên bài tập...',
+    filterAll: 'Tất cả môn',
+    filterRun: '🏃 Chạy bộ',
+    filterRide: '🚴 Đạp xe',
+    filterWalk: '🚶 Đi bộ',
+    sortBy: 'Sắp xếp',
+    sortNewest: 'Mới nhất',
+    sortLongest: 'Cự ly dài nhất',
+    sortFastest: 'Pace nhanh nhất',
+    viewGrid: 'Lưới thẻ thể thao',
+    viewList: 'Danh sách chi tiết',
+    heartRate: 'Nhịp tim',
+    calories: 'Calo',
+    viewOnStrava: 'Xem trên Strava',
+    activityDetails: 'Chi tiết hoạt động',
+    elapsedTime: 'Thời gian thực tế',
+    maxSpeed: 'Tốc độ tối đa',
+    maxHeartRate: 'Nhịp tim tối đa',
+    noActivitiesFound: 'Không tìm thấy hoạt động nào phù hợp',
+    clearFilters: 'Xóa bộ lọc',
+    indoorWorkout: 'Tập trong nhà / Không có GPS',
+    prBadge: 'Kỷ lục',
 
     // Goals
     personalGoalTitle: 'Mục tiêu cá nhân',
@@ -469,6 +498,13 @@ const translations = {
     dashboard: 'Dashboard',
     logout: 'Logout',
 
+    // PWA & Notification
+    installPwaTitle: 'Install app to receive notifications',
+    enableNotifications: 'Enable notifications',
+    enableNotificationsDesc: 'Do not miss important alerts and updates from HRC.',
+    enable: 'Enable',
+
+
     // Login
     appTitle: '200K Running Club',
     appSubtitle: 'Track your personal and group sports data from Strava. View statistics, charts, and detailed activities.',
@@ -521,6 +557,28 @@ const translations = {
     challengeTab: 'Challenge',
     loadingChallengeData: 'Loading Challenge data...',
     month: 'Month',
+    searchActivities: 'Search by activity name...',
+    filterAll: 'All Sports',
+    filterRun: '🏃 Running',
+    filterRide: '🚴 Cycling',
+    filterWalk: '🚶 Walking',
+    sortBy: 'Sort by',
+    sortNewest: 'Newest',
+    sortLongest: 'Longest distance',
+    sortFastest: 'Fastest pace',
+    viewGrid: 'Sport Grid View',
+    viewList: 'Compact List View',
+    heartRate: 'Heart Rate',
+    calories: 'Calories',
+    viewOnStrava: 'View on Strava',
+    activityDetails: 'Activity Details',
+    elapsedTime: 'Elapsed Time',
+    maxSpeed: 'Max Speed',
+    maxHeartRate: 'Max Heart Rate',
+    noActivitiesFound: 'No matching activities found',
+    clearFilters: 'Clear filters',
+    indoorWorkout: 'Indoor / No GPS Track',
+    prBadge: 'PR',
 
     // Goals
     personalGoalTitle: 'Personal Goal',

@@ -9,9 +9,11 @@ import puppeteer from 'puppeteer-core';
 import { StravaAPI } from './strava.js';
 import { scrapeClubActivities, loginAndGetCookie, getSavedCookie, extractCookiesFromActiveBrowser, clearCookiesFromActiveBrowser, getBrowserExecutable } from './scraper.js';
 import https from 'https';
+import webPush from 'web-push';
 import { ZipArchive } from 'archiver';
 import { execSync, spawn } from 'child_process';
 import { getAiCoachAdvice, getWeeklyTrainingPlan } from './ai_coach_service.js';
+import { startCronJobs } from './cron.js';
 
 dotenv.config();
 
@@ -33,6 +35,8 @@ const ADMINS_FILE = path.join(__dirname, '../Storage/admins.json');
 const AUDIT_LOGS_FILE = path.join(__dirname, '../Storage/audit_logs.json');
 const PENALTIES_FILE = path.join(__dirname, '../Storage/member_penalties_mapping.json');
 const SUPER_ADMIN_ID = (process.env.VITE_ADMIN_STRAVA_ID || '133066813').toString();
+const BANK_CONFIG_FILE = path.join(__dirname, '../Storage/bank_config.json');
+const WPN_SUBS_FILE = path.join(__dirname, '../Storage/wpn_subscriptions.json');
 
 // ==========================================
 // TỰ ĐỘNG ĐỒNG BỘ 2 CHIỀU GIỮA GIT ROOT & DESKTOP APP STORAGE
@@ -4801,13 +4805,7 @@ if (fs.existsSync(distPath)) {
     }
   }));
 
-  // 3. SPA Fallback: Mọi route React đều trả về index.html kèm header cấm cache tuyệt đối
-  app.get('*', (req, res) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
+  // Note: wildcard route has been moved below to avoid blocking new APIs
 }
 
 // Resilience: Bắt mọi ngoại lệ chưa được xử lý để máy chủ không bị crash
@@ -4817,6 +4815,371 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason) => {
   console.error('⚠️ [UnhandledRejection]:', reason?.message || reason);
 });
+
+// ===================================================================
+// NOTIFICATION & REMINDER SYSTEM APIs
+// ===================================================================
+
+// Helper: Load bank config
+function loadBankConfig() {
+  try {
+    if (fs.existsSync(BANK_CONFIG_FILE)) return JSON.parse(fs.readFileSync(BANK_CONFIG_FILE, 'utf8'));
+  } catch (_) {}
+  return { bankCode: '', accountNumber: '', accountName: '', bankName: '' };
+}
+
+// Helper: Get current week's date range (Mon-Sun)
+function getCurrentWeekRange() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 1=Mon...
+  const diffToMon = (day === 0) ? -6 : 1 - day;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMon);
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  return { monday, sunday };
+}
+
+// Helper: Parse km ran this month/week from imported/historical activities
+function getKmByRunner(monthKey) {
+  const kmMap = {};
+  const { monday, sunday } = getCurrentWeekRange();
+  const weekKmMap = {};
+  try {
+    const imported = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8') || '[]');
+    const historical = JSON.parse(fs.readFileSync(HISTORICAL_FILE, 'utf8') || '[]');
+    const allActs = [...(Array.isArray(imported) ? imported : []), ...(Array.isArray(historical) ? historical : [])];
+    allActs.forEach(act => {
+      if (act.type !== 'Run' && act.sport_type !== 'Run') return;
+      const actDate = new Date(act.start_date_local || act.start_date);
+      const actMonth = `${actDate.getFullYear()}-${String(actDate.getMonth()+1).padStart(2,'0')}`;
+      const name = act.athlete_name || act.athleteName || '';
+      const km = (act.distance || 0) / 1000;
+      if (actMonth === monthKey) {
+        kmMap[name] = (kmMap[name] || 0) + km;
+      }
+      if (actDate >= monday && actDate <= sunday) {
+        weekKmMap[name] = (weekKmMap[name] || 0) + km;
+      }
+    });
+  } catch (_) {}
+  return { monthKmMap: kmMap, weekKmMap };
+}
+
+// 1. GET /api/notifications/reminders/summary — Tóm tắt dữ liệu nhắc nhở
+app.get('/api/notifications/reminders/summary', (req, res) => {
+  try {
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    const targets = JSON.parse(fs.readFileSync(TARGETS_FILE, 'utf8') || '{}');
+    const penalties = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8') || '{"members":[]}');
+    const bankConfig = loadBankConfig();
+    const { monthKmMap, weekKmMap } = getKmByRunner(monthKey);
+
+    // Tìm người thiếu km tháng này (có target > 0, penalty = true)
+    const shortfallRunners = [];
+    const monthSuffix = `_${year}_${month}`;
+    Object.entries(targets).forEach(([key, val]) => {
+      if (!key.endsWith(monthSuffix)) return;
+      const targetKm = parseFloat(val.target) || 0;
+      if (targetKm <= 0) return;
+      const hasPenalty = val.penalty === true;
+      const runnerName = key.replace(monthSuffix, '').replace(/_/g, ' ').trim();
+      // Tìm km thực tế từ activities (khớp tên)
+      let actualKm = 0;
+      Object.entries(monthKmMap).forEach(([actName, km]) => {
+        if (actName.toLowerCase().includes(runnerName.split(' ')[0].toLowerCase())) {
+          actualKm = Math.max(actualKm, km);
+        }
+      });
+      // Tuần này
+      let weekKm = 0;
+      Object.entries(weekKmMap).forEach(([actName, km]) => {
+        if (actName.toLowerCase().includes(runnerName.split(' ')[0].toLowerCase())) {
+          weekKm = Math.max(weekKm, km);
+        }
+      });
+      const pctMonth = targetKm > 0 ? Math.round((actualKm / targetKm) * 100) : 0;
+      shortfallRunners.push({
+        key, runnerName, targetKm, actualKm: Math.round(actualKm * 10) / 10,
+        shortfallKm: Math.max(0, Math.round((targetKm - actualKm) * 10) / 10),
+        pctMonth, weekKm: Math.round(weekKm * 10) / 10,
+        hasPenalty
+      });
+    });
+    shortfallRunners.sort((a, b) => a.pctMonth - b.pctMonth);
+
+    // Tìm người nợ phạt chưa nộp
+    const owingPenalties = [];
+    penalties.members.forEach(m => {
+      const unpaidMonths = [];
+      if (m.monthlyPenaltiesVND) {
+        Object.entries(m.monthlyPenaltiesVND).forEach(([mo, fee]) => {
+          if (fee <= 0) return;
+          const statusObj = m.monthlyPaymentStatus?.[mo];
+          const isPaid = statusObj?.status === 'paid';
+          if (!isPaid) unpaidMonths.push({ month: mo, fee });
+        });
+      }
+      if (unpaidMonths.length > 0) {
+        const totalOwing = unpaidMonths.reduce((s, x) => s + x.fee, 0);
+        owingPenalties.push({
+          athleteId: m.athleteId, fullName: m.fullName, rawName: m.rawName,
+          totalOwing, unpaidMonths
+        });
+      }
+    });
+    owingPenalties.sort((a, b) => b.totalOwing - a.totalOwing);
+
+    res.json({
+      monthKey, generatedAt: new Date().toISOString(),
+      shortfallRunners, owingPenalties, bankConfig,
+      weekInfo: {
+        dayOfWeek: now.getDay(),
+        isWeekend: now.getDay() === 6 || now.getDay() === 0
+      }
+    });
+  } catch (err) {
+    console.error('Lỗi /api/notifications/reminders/summary:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. GET /api/notifications/user — Thông báo cá nhân hóa theo athleteId
+app.get('/api/notifications/user', (req, res) => {
+  try {
+    const { athleteId, matchKey } = req.query;
+    if (!athleteId && !matchKey) return res.json({ notifications: [] });
+
+    const now = new Date();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const monthSuffix = `_${year}_${month}`;
+    const targets = JSON.parse(fs.readFileSync(TARGETS_FILE, 'utf8') || '{}');
+    const penalties = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8') || '{"members":[]}');
+    const { monthKmMap, weekKmMap } = getKmByRunner(monthKey);
+
+    const notifications = [];
+
+    // Tìm member trong penalties
+    const member = penalties.members.find(m =>
+      (athleteId && m.athleteId && String(m.athleteId) === String(athleteId)) ||
+      (matchKey && (m.rawName?.toLowerCase() === matchKey.toLowerCase() ||
+        m.fullName?.toLowerCase() === matchKey.toLowerCase()))
+    );
+
+    if (member) {
+      // Kiểm tra nợ phạt
+      const unpaidMonths = [];
+      if (member.monthlyPenaltiesVND) {
+        Object.entries(member.monthlyPenaltiesVND).forEach(([mo, fee]) => {
+          if (fee <= 0) return;
+          const statusObj = member.monthlyPaymentStatus?.[mo];
+          if (statusObj?.status !== 'paid') unpaidMonths.push({ month: mo, fee });
+        });
+      }
+      if (unpaidMonths.length > 0) {
+        const totalOwing = unpaidMonths.reduce((s, x) => s + x.fee, 0);
+        notifications.push({
+          id: `penalty_${athleteId || matchKey}`,
+          type: 'penalty', priority: 'high',
+          titleVi: '💸 Nhắc nhở nộp tiền phạt', titleEn: '💸 Penalty Payment Reminder',
+          bodyVi: `Bạn còn ${unpaidMonths.length} tháng phạt chưa nộp, tổng ${totalOwing.toLocaleString('vi-VN')}đ`,
+          bodyEn: `You have ${unpaidMonths.length} unpaid penalty month(s), total ${totalOwing.toLocaleString('vi-VN')}đ`,
+          data: { totalOwing, unpaidMonths }, createdAt: new Date().toISOString()
+        });
+      }
+    }
+
+    // Kiểm tra tiến độ km tháng này
+    const mk = matchKey || (member?.rawName);
+    if (mk) {
+      const targetKey = Object.keys(targets).find(k =>
+        k.endsWith(monthSuffix) && k.replace(monthSuffix, '').toLowerCase().replace(/_/g,' ').trim().includes(mk.split(' ')[0].toLowerCase())
+      );
+      if (targetKey) {
+        const tval = targets[targetKey];
+        const targetKm = parseFloat(tval.target) || 0;
+        if (targetKm > 0) {
+          let actualKm = 0;
+          Object.entries(monthKmMap).forEach(([actName, km]) => {
+            if (actName.toLowerCase().includes(mk.split(' ')[0].toLowerCase())) actualKm = Math.max(actualKm, km);
+          });
+          const pct = Math.round((actualKm / targetKm) * 100);
+          const shortfall = Math.max(0, Math.round((targetKm - actualKm) * 10) / 10);
+          const daysLeft = new Date(year, month, 0).getDate() - now.getDate();
+          if (pct >= 100) {
+            notifications.push({
+              id: `goal_complete_${year}_${month}`, type: 'kudos', priority: 'low',
+              titleVi: '🎉 Xuất sắc! Đã về đích!', titleEn: '🎉 Goal Achieved!',
+              bodyVi: `Bạn đã đạt ${pct}% mục tiêu tháng này. Tiếp tục giữ phong độ nhé!`,
+              bodyEn: `You've reached ${pct}% of this month's target. Keep it up!`,
+              data: { pct, actualKm, targetKm }, createdAt: new Date().toISOString()
+            });
+          } else if (pct < 80) {
+            notifications.push({
+              id: `goal_shortfall_${year}_${month}`, type: 'goal',
+              priority: daysLeft <= 7 ? 'high' : 'medium',
+              titleVi: `🎯 Còn thiếu ${shortfall}km để về đích!`,
+              titleEn: `🎯 ${shortfall}km left to reach your goal!`,
+              bodyVi: `Bạn mới đạt ${pct}% (${Math.round(actualKm*10)/10}/${targetKm}km). Còn ${daysLeft} ngày trong tháng.`,
+              bodyEn: `You're at ${pct}% (${Math.round(actualKm*10)/10}/${targetKm}km). ${daysLeft} days left this month.`,
+              data: { pct, actualKm, targetKm, shortfall, daysLeft }, createdAt: new Date().toISOString()
+            });
+          }
+        }
+      }
+    }
+
+    res.json({ notifications, generatedAt: new Date().toISOString() });
+  } catch (err) {
+    console.error('Lỗi /api/notifications/user:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. GET /api/treasury/bank-config — Xem cấu hình ngân hàng thủ quỹ
+app.get('/api/treasury/bank-config', (req, res) => {
+  try {
+    res.json(loadBankConfig());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/treasury/bank-config — Admin lưu cấu hình ngân hàng thủ quỹ
+app.post('/api/treasury/bank-config', (req, res) => {
+  try {
+    const { bankCode, accountNumber, accountName, bankName } = req.body;
+    if (!accountNumber || !accountName) return res.status(400).json({ error: 'Thiếu số tài khoản hoặc tên chủ tài khoản' });
+    const config = { bankCode: (bankCode || '').toUpperCase(), accountNumber: String(accountNumber).trim(), accountName: String(accountName).trim().toUpperCase(), bankName: String(bankName || bankCode || '').trim() };
+    writeStorageFile(BANK_CONFIG_FILE, JSON.stringify(config, null, 2));
+    res.json({ success: true, config });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===================================================================
+// START NOTIFICATION & REMINDER SYSTEM APIs
+// ===================================================================
+
+// API Đăng ký Web Push Notification
+app.post('/api/wpn/subscribe', (req, res) => {
+  try {
+    const { athleteId, subscription, device } = req.body;
+    if (!athleteId || !subscription) {
+      return res.status(400).json({ error: 'Thiếu thông tin đăng ký' });
+    }
+
+    const subs = JSON.parse(readStorageFile(WPN_SUBS_FILE) || '{}');
+    if (!subs[athleteId]) subs[athleteId] = [];
+
+    // Kiểm tra trùng lặp endpoint
+    const exists = subs[athleteId].find(s => s.endpoint === subscription.endpoint);
+    if (!exists) {
+      subs[athleteId].push({
+        ...subscription,
+        device: device || 'Unknown Device',
+        registeredAt: new Date().toISOString()
+      });
+      writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
+      console.log(`[WPN] Đã thêm subscription cho user ${athleteId} trên ${device}`);
+    }
+
+    res.json({ success: true, message: 'Đăng ký nhận thông báo thành công' });
+  } catch (err) {
+    console.error('[API /api/wpn/subscribe] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API Hủy đăng ký Web Push Notification
+app.post('/api/wpn/unsubscribe', (req, res) => {
+  try {
+    const { athleteId, endpoint } = req.body;
+    if (!athleteId || !endpoint) {
+      return res.status(400).json({ error: 'Thiếu thông tin hủy đăng ký' });
+    }
+
+    const subs = JSON.parse(readStorageFile(WPN_SUBS_FILE) || '{}');
+    if (subs[athleteId]) {
+      subs[athleteId] = subs[athleteId].filter(s => s.endpoint !== endpoint);
+      writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
+      console.log(`[WPN] Đã hủy subscription cho user ${athleteId}`);
+    }
+
+    res.json({ success: true, message: 'Hủy nhận thông báo thành công' });
+  } catch (err) {
+    console.error('[API /api/wpn/unsubscribe] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API Gửi Web Push Notification (Admin only)
+app.post('/api/wpn/send', (req, res) => {
+  try {
+    const { title, body, url, icon, targetId } = req.body;
+    if (!title || !body) return res.status(400).json({ error: 'Thiếu title hoặc body' });
+
+    const subs = JSON.parse(readStorageFile(WPN_SUBS_FILE) || '{}');
+    let targetEndpoints = [];
+
+    if (targetId && targetId !== 'all') {
+      if (subs[targetId]) targetEndpoints = subs[targetId];
+    } else {
+      // Send to all
+      for (const key in subs) {
+        targetEndpoints = targetEndpoints.concat(subs[key]);
+      }
+    }
+
+    if (targetEndpoints.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy thiết bị nào để push' });
+    }
+
+    const payload = JSON.stringify({ title, body, url, icon });
+    const promises = targetEndpoints.map(sub => {
+      return webPush.sendNotification(sub, payload).catch(err => {
+        console.error('[WPN Send Error]', err);
+        return null;
+      });
+    });
+
+    Promise.all(promises).then(results => {
+      const successCount = results.filter(r => r !== null).length;
+      res.json({ success: true, message: `Đã gửi thành công ${successCount}/${targetEndpoints.length} thiết bị` });
+    });
+
+  } catch (err) {
+    console.error('[API /api/wpn/send] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===================================================================
+// END NOTIFICATION APIs
+// ===================================================================
+
+// 3. SPA Fallback: Mọi route React đều trả về index.html kèm header cấm cache tuyệt đối
+// Route này PHẢI nằm cuối cùng sau TẤT CẢ các API!
+if (fs.existsSync(path.join(__dirname, '../dist'))) {
+  app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+  });
+}
+
+// Khởi chạy các Cron jobs cho Notification
+startCronJobs();
 
 // Start Server (Listen on 0.0.0.0 for seamless 127.0.0.1 and localhost compatibility)
 const server = app.listen(PORT, '0.0.0.0', () => {

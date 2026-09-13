@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, RefreshCw } from 'lucide-react';
 import ActivityCard from '../components/ActivityCard';
+import ActivityDetailModal from '../components/ActivityDetailModal';
 import { useLang } from '../i18n/LangContext';
 
 export default function ClubView({ apiFetch }) {
@@ -10,6 +11,7 @@ export default function ClubView({ apiFetch }) {
   const [club, setClub] = useState(null);
   const [members, setMembers] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('activities');
   const { t } = useLang();
@@ -144,7 +146,12 @@ export default function ClubView({ apiFetch }) {
           {activities.length > 0 ? (
             <div className="activities-list">
               {activities.map((activity, idx) => (
-                <ActivityCard key={idx} activity={activity} showAthlete />
+                <ActivityCard 
+                  key={idx} 
+                  activity={activity} 
+                  showAthlete 
+                  onSelectActivity={(act) => setSelectedActivity(act)}
+                />
               ))}
             </div>
           ) : (
@@ -212,6 +219,14 @@ export default function ClubView({ apiFetch }) {
             </div>
           )}
         </div>
+      )}
+
+      {/* Activity Detail Modal */}
+      {selectedActivity && (
+        <ActivityDetailModal 
+          activity={selectedActivity} 
+          onClose={() => setSelectedActivity(null)} 
+        />
       )}
     </div>
   );

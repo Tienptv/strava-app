@@ -42,12 +42,14 @@ import {
   Play,
   Loader,
   Eye,
-  EyeOff
+  EyeOff,
+  BellRing
 } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { processChallengeData } from '../utils/challengeStats';
 import { loadChallengeData } from '../utils/challengeDataLoader';
 import { APP_VERSION } from '../config/version';
+import SmartReminderTool from '../components/SmartReminderTool';
 
 export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, permissions }) {
   const navigate = useNavigate();
@@ -58,7 +60,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // Active Tab: 'settings', 'roles', 'logs', 'data', 'penalties'
   const getInitialTab = () => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders'];
     return (tabParam && validTabs.includes(tabParam)) ? tabParam : 'settings';
   };
   const [activeTab, setActiveTab] = useState(getInitialTab);
@@ -66,7 +68,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // Đồng bộ activeTab khi URL query param hoặc location state thay đổi
   useEffect(() => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders'];
     if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
       setActiveTab(tabParam);
     }
@@ -1656,6 +1658,16 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           >
             <Terminal size={20} />
             <span style={{ flex: 1 }}>{lang === 'en' ? 'System Scripts' : 'Hệ thống Scripts'}</span>
+          </button>
+
+          <button
+            onClick={() => handleTabClick('reminders')}
+            className={`tab ${activeTab === 'reminders' ? 'tab--active' : ''}`}
+            style={{ opacity: !isSuperAdmin && effectivePermissions.penaltiesTargets === false ? 0.6 : 1 }}
+          >
+            <BellRing size={20} />
+            <span style={{ flex: 1 }}>{lang === 'en' ? 'Reminders & Notifications' : 'Nhắc nhở & Thông báo'}</span>
+            {!isSuperAdmin && effectivePermissions.penaltiesTargets === false && <Lock size={14} color="#94a3b8" />}
           </button>
         </div>
 
@@ -3709,6 +3721,15 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB CONTENT 7: REMINDERS & NOTIFICATIONS (SMART REMINDER TOOL)              */}
+      {/* ========================================================================= */}
+      {activeTab === 'reminders' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <SmartReminderTool apiFetch={apiFetch} athlete={athlete} />
         </div>
       )}
 

@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, TrendingUp, Flame, Users, ChevronRight, RefreshCw, LayoutDashboard, Target, Activity } from 'lucide-react';
+import { 
+  MapPin, Clock, TrendingUp, Flame, Users, ChevronRight, RefreshCw, 
+  LayoutDashboard, Target, Activity, Search, X, LayoutGrid, List 
+} from 'lucide-react';
 import ActivityCard from '../components/ActivityCard';
+import ActivityDetailModal from '../components/ActivityDetailModal';
 import StatsChart from '../components/StatsChart';
 import ChallengeTable from '../components/ChallengeTable';
 import ChallengeCharts from '../components/ChallengeCharts';
@@ -38,6 +42,66 @@ export default function Dashboard({
   const [mobileViewType, setMobileViewType] = useState('card'); // 'card' | 'table'
   const [showTreasuryModal, setShowTreasuryModal] = useState(false);
   const [mobileActiveNavTab, setMobileActiveNavTab] = useState('leaderboard');
+
+  // Desktop Activities View States
+  const [activityViewMode, setActivityViewMode] = useState(() => {
+    try {
+      return localStorage.getItem('strava_activity_view_mode') || 'grid';
+    } catch (e) {
+      return 'grid';
+    }
+  });
+  const [activitySearch, setActivitySearch] = useState('');
+  const [activitySportFilter, setActivitySportFilter] = useState('all');
+  const [activitySortBy, setActivitySortBy] = useState('newest');
+  const [selectedActivityDetail, setSelectedActivityDetail] = useState(null);
+
+  const filteredActivities = useMemo(() => {
+    let list = [...activities];
+
+    // 1. Search by title
+    if (activitySearch.trim()) {
+      const q = activitySearch.toLowerCase();
+      list = list.filter((act) => (act.name || '').toLowerCase().includes(q));
+    }
+
+    // 2. Filter by sport type
+    if (activitySportFilter !== 'all') {
+      list = list.filter((act) => {
+        const t = (act.type || act.sport_type || '').toLowerCase();
+        if (activitySportFilter === 'run') {
+          return ['run', 'trailrun', 'virtualrun', 'trail run'].includes(t) || t.includes('run') || t.includes('trail');
+        }
+        if (activitySportFilter === 'ride') {
+          return ['ride', 'virtualride', 'ebikeride', 'cycling'].includes(t) || t.includes('ride') || t.includes('bike');
+        }
+        if (activitySportFilter === 'walk') {
+          return ['walk', 'hike'].includes(t) || t.includes('walk') || t.includes('hike');
+        }
+        return true;
+      });
+    }
+
+    // 3. Sort
+    if (activitySortBy === 'longest') {
+      list.sort((a, b) => (b.distance || 0) - (a.distance || 0));
+    } else if (activitySortBy === 'fastest') {
+      list.sort((a, b) => {
+        const paceA = (a.distance > 0 && a.moving_time > 0) ? a.moving_time / (a.distance / 1000) : 999999;
+        const paceB = (b.distance > 0 && b.moving_time > 0) ? b.moving_time / (b.distance / 1000) : 999999;
+        return paceA - paceB;
+      });
+    } else {
+      // 'newest'
+      list.sort((a, b) => {
+        const dateA = new Date(a.start_date_local || a.start_date || 0);
+        const dateB = new Date(b.start_date_local || b.start_date || 0);
+        return dateB - dateA;
+      });
+    }
+
+    return list;
+  }, [activities, activitySearch, activitySportFilter, activitySortBy]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -361,7 +425,7 @@ export default function Dashboard({
                     <div className="stat-card stat-card--distance">
                       <div className="stat-card__header">
                         <span className="stat-card__label">{t('totalDistance')}</span>
-                        <div className="stat-card__icon"><MapPin size={20} /></div>
+                        <div className="stat-card__icon"><MapPin size={16} /></div>
                       </div>
                       <div className="stat-card__value">{totalDistance} km</div>
                       <div className="stat-card__sub">{t('allActivities')}</div>
@@ -369,7 +433,7 @@ export default function Dashboard({
                     <div className="stat-card stat-card--time">
                       <div className="stat-card__header">
                         <span className="stat-card__label">{t('totalTime')}</span>
-                        <div className="stat-card__icon"><Clock size={20} /></div>
+                        <div className="stat-card__icon"><Clock size={16} /></div>
                       </div>
                       <div className="stat-card__value">{totalTime}</div>
                       <div className="stat-card__sub">{t('movingTime')}</div>
@@ -377,7 +441,7 @@ export default function Dashboard({
                     <div className="stat-card stat-card--elevation">
                       <div className="stat-card__header">
                         <span className="stat-card__label">{t('totalElevation')}</span>
-                        <div className="stat-card__icon"><TrendingUp size={20} /></div>
+                        <div className="stat-card__icon"><TrendingUp size={16} /></div>
                       </div>
                       <div className="stat-card__value">{totalElevation} m</div>
                       <div className="stat-card__sub">{t('elevationGain')}</div>
@@ -385,7 +449,7 @@ export default function Dashboard({
                     <div className="stat-card stat-card--recent">
                       <div className="stat-card__header">
                         <span className="stat-card__label">{t('recentActivities')}</span>
-                        <div className="stat-card__icon"><Flame size={20} /></div>
+                        <div className="stat-card__icon"><Flame size={16} /></div>
                       </div>
                       <div className="stat-card__value">{recentCount}</div>
                       <div className="stat-card__sub">{t('last4Weeks')}</div>
@@ -402,7 +466,12 @@ export default function Dashboard({
                       </div>
                       <div className="activities-list">
                         {activities.slice(0, 8).map((activity) => (
-                          <ActivityCard key={activity.id} activity={activity} />
+                          <ActivityCard 
+                            key={activity.id} 
+                            activity={activity} 
+                            viewMode="list"
+                            onSelectActivity={(act) => setSelectedActivityDetail(act)}
+                          />
                         ))}
                       </div>
                     </div>
@@ -578,7 +647,7 @@ export default function Dashboard({
             <div className="stat-card stat-card--distance">
               <div className="stat-card__header">
                 <span className="stat-card__label">{t('totalDistance')}</span>
-                <div className="stat-card__icon"><MapPin size={20} /></div>
+                <div className="stat-card__icon"><MapPin size={16} /></div>
               </div>
               <div className="stat-card__value">{totalDistance} km</div>
               <div className="stat-card__sub">{t('allActivities')}</div>
@@ -586,7 +655,7 @@ export default function Dashboard({
             <div className="stat-card stat-card--time">
               <div className="stat-card__header">
                 <span className="stat-card__label">{t('totalTime')}</span>
-                <div className="stat-card__icon"><Clock size={20} /></div>
+                <div className="stat-card__icon"><Clock size={16} /></div>
               </div>
               <div className="stat-card__value">{totalTime}</div>
               <div className="stat-card__sub">{t('movingTime')}</div>
@@ -594,7 +663,7 @@ export default function Dashboard({
             <div className="stat-card stat-card--elevation">
               <div className="stat-card__header">
                 <span className="stat-card__label">{t('totalElevation')}</span>
-                <div className="stat-card__icon"><TrendingUp size={20} /></div>
+                <div className="stat-card__icon"><TrendingUp size={16} /></div>
               </div>
               <div className="stat-card__value">{totalElevation} m</div>
               <div className="stat-card__sub">{t('elevationGain')}</div>
@@ -602,7 +671,7 @@ export default function Dashboard({
             <div className="stat-card stat-card--recent">
               <div className="stat-card__header">
                 <span className="stat-card__label">{t('recentActivities')}</span>
-                <div className="stat-card__icon"><Flame size={20} /></div>
+                <div className="stat-card__icon"><Flame size={16} /></div>
               </div>
               <div className="stat-card__value">{recentCount}</div>
               <div className="stat-card__sub">{t('last4Weeks')}</div>
@@ -632,17 +701,123 @@ export default function Dashboard({
 
           {activeTab === 'activities' && (
             <div className="section">
-              <div className="section__header">
-                <h2 className="section__title">{t('recentActivities')}</h2>
-                <button className="btn btn--secondary" onClick={loadData} style={{padding: '6px 14px', fontSize: '0.8rem'}}>
-                  <RefreshCw size={14} /> {t('refresh')}
-                </button>
+              <div className="section__header section__header--activities">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <h2 className="section__title" style={{ margin: 0 }}>{t('recentActivities')}</h2>
+                  <span className="activity-count-badge">
+                    {filteredActivities.length}{filteredActivities.length !== activities.length ? ` / ${activities.length}` : ''}
+                  </span>
+                </div>
+
+                <div className="activity-toolbar">
+                  {/* Search Input */}
+                  <div className="activity-search-box">
+                    <Search size={14} className="activity-search-icon" />
+                    <input 
+                      type="text"
+                      placeholder={t('searchActivities')}
+                      value={activitySearch}
+                      onChange={(e) => setActivitySearch(e.target.value)}
+                      className="activity-search-input"
+                    />
+                    {activitySearch && (
+                      <button 
+                        type="button"
+                        className="activity-search-clear"
+                        onClick={() => setActivitySearch('')}
+                        title={t('clearFilters')}
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Sport Filter */}
+                  <select
+                    value={activitySportFilter}
+                    onChange={(e) => setActivitySportFilter(e.target.value)}
+                    className="activity-select"
+                  >
+                    <option value="all">{t('filterAll')}</option>
+                    <option value="run">{t('filterRun')}</option>
+                    <option value="ride">{t('filterRide')}</option>
+                    <option value="walk">{t('filterWalk')}</option>
+                  </select>
+
+                  {/* Sort by */}
+                  <select
+                    value={activitySortBy}
+                    onChange={(e) => setActivitySortBy(e.target.value)}
+                    className="activity-select"
+                  >
+                    <option value="newest">{t('sortNewest')}</option>
+                    <option value="longest">{t('sortLongest')}</option>
+                    <option value="fastest">{t('sortFastest')}</option>
+                  </select>
+
+                  {/* View Mode Toggle: Grid vs List (Desktop) */}
+                  <div className="activity-view-toggle">
+                    <button
+                      type="button"
+                      className={`activity-view-btn ${activityViewMode === 'grid' ? 'active' : ''}`}
+                      onClick={() => {
+                        setActivityViewMode('grid');
+                        try { localStorage.setItem('strava_activity_view_mode', 'grid'); } catch(e){}
+                      }}
+                      title={t('viewGrid')}
+                    >
+                      <LayoutGrid size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`activity-view-btn ${activityViewMode === 'list' ? 'active' : ''}`}
+                      onClick={() => {
+                        setActivityViewMode('list');
+                        try { localStorage.setItem('strava_activity_view_mode', 'list'); } catch(e){}
+                      }}
+                      title={t('viewList')}
+                    >
+                      <List size={15} />
+                    </button>
+                  </div>
+
+                  {/* Refresh Button */}
+                  <button className="btn btn--secondary" onClick={loadData} style={{padding: '6px 14px', fontSize: '0.8rem'}}>
+                    <RefreshCw size={14} /> {t('refresh')}
+                  </button>
+                </div>
               </div>
-              <div className="activities-list">
-                {activities.map((activity) => (
-                  <ActivityCard key={activity.id} activity={activity} />
-                ))}
-              </div>
+
+              {filteredActivities.length > 0 ? (
+                <div className={activityViewMode === 'grid' ? 'activities-grid' : 'activities-list'}>
+                  {filteredActivities.map((activity) => (
+                    <ActivityCard 
+                      key={activity.id} 
+                      activity={activity} 
+                      viewMode={activityViewMode}
+                      onSelectActivity={(act) => setSelectedActivityDetail(act)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state" style={{ padding: '40px 20px', textAlign: 'center' }}>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '14px', fontSize: '0.95rem' }}>
+                    {t('noActivitiesFound')}
+                  </p>
+                  {(activitySearch || activitySportFilter !== 'all') && (
+                    <button 
+                      className="btn btn--secondary"
+                      onClick={() => {
+                        setActivitySearch('');
+                        setActivitySportFilter('all');
+                      }}
+                      style={{ padding: '6px 16px', fontSize: '0.85rem' }}
+                    >
+                      {t('clearFilters')}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -740,6 +915,14 @@ export default function Dashboard({
               }
             }, 100);
           }}
+        />
+      )}
+
+      {/* Activity Detail Modal */}
+      {selectedActivityDetail && (
+        <ActivityDetailModal 
+          activity={selectedActivityDetail} 
+          onClose={() => setSelectedActivityDetail(null)} 
         />
       )}
     </div>
