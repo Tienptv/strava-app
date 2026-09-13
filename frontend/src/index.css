@@ -143,9 +143,9 @@ img {
   backdrop-filter: blur(20px) saturate(1.5);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   border-bottom: 1px solid var(--border);
-  padding: 0 24px 0 20px;
-  min-height: 70px;
-  height: 74px;
+  padding: var(--sat) 24px 0 20px;
+  min-height: calc(70px + var(--sat));
+  height: calc(74px + var(--sat));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3520,7 +3520,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   }
 
   .navbar {
-    padding: 0 16px;
+    padding: var(--sat) 16px;
   }
 
   .dashboard {
@@ -3594,9 +3594,9 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   }
 
   .navbar {
-    padding: 0 14px;
-    min-height: 66px;
-    height: 70px;
+    padding: var(--sat) 14px;
+    min-height: calc(66px + var(--sat));
+    height: calc(70px + var(--sat));
   }
 
   .navbar__brand-icon {
@@ -3631,9 +3631,9 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
   }
 
   .navbar {
-    padding: 0 10px;
-    min-height: 62px;
-    height: 66px;
+    padding: var(--sat) 10px;
+    min-height: calc(62px + var(--sat));
+    height: calc(66px + var(--sat));
   }
 
   .navbar__user {
@@ -3697,7 +3697,7 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 @media (max-width: 380px) {
   .navbar {
-    padding: 0 6px;
+    padding: var(--sat) 6px;
   }
 
   .navbar__user {
@@ -3726,9 +3726,9 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 
 /* 1. COMPACT PHONES (< 375px: iPhone SE, Galaxy Z Flip cover, small Android) */
 html[data-screen-tier="compact"] .navbar {
-  padding: 0 8px;
-  min-height: 58px;
-  height: 62px;
+  padding: var(--sat) 8px;
+  min-height: calc(58px + var(--sat));
+  height: calc(62px + var(--sat));
 }
 
 html[data-screen-tier="compact"] .navbar__brand {
@@ -3760,7 +3760,7 @@ html[data-screen-tier="compact"] .navbar__avatar {
 }
 
 html[data-screen-tier="compact"] .mobile-bottom-nav {
-  height: 56px;
+  height: calc(56px + var(--sab));
   padding-bottom: max(4px, var(--sab));
 }
 
@@ -3778,9 +3778,9 @@ html[data-screen-tier="compact"] .mobile-kpi-value {
 
 /* 2. STANDARD PHONES (375px - 430px: iPhone 12/13/14/15/16, Galaxy S21-S24) */
 html[data-screen-tier="standard"] .navbar {
-  padding: 0 12px;
-  min-height: 64px;
-  height: 66px;
+  padding: var(--sat) 12px;
+  min-height: calc(64px + var(--sat));
+  height: calc(66px + var(--sat));
 }
 
 html[data-screen-tier="standard"] .navbar__brand-icon {
@@ -3799,15 +3799,15 @@ html[data-screen-tier="standard"] .navbar__brand-slogan {
 }
 
 html[data-screen-tier="standard"] .mobile-bottom-nav {
-  height: 64px;
+  height: calc(64px + var(--sab));
   padding-bottom: max(6px, var(--sab));
 }
 
 /* 3. LARGE PHONES / PHABLETS (431px - 600px: iPhone Pro Max, Galaxy Ultra) */
 html[data-screen-tier="large"] .navbar {
-  padding: 0 16px;
-  min-height: 68px;
-  height: 70px;
+  padding: var(--sat) 16px;
+  min-height: calc(68px + var(--sat));
+  height: calc(70px + var(--sat));
 }
 
 html[data-screen-tier="large"] .navbar__brand-icon {
@@ -3826,7 +3826,7 @@ html[data-screen-tier="large"] .navbar__brand-slogan {
 }
 
 html[data-screen-tier="large"] .mobile-bottom-nav {
-  height: 66px;
+  height: calc(66px + var(--sab));
   padding-bottom: max(8px, var(--sab));
 }
 
@@ -3840,9 +3840,9 @@ html[data-screen-tier="large"] .mobile-kpi-value {
 
 /* 4. LANDSCAPE MOBILE VIEW (Khi xoay ngang điện thoại) */
 html[data-orientation="landscape"][data-is-mobile="true"] .navbar {
-  min-height: 48px;
-  height: 50px;
-  padding: 0 16px;
+  min-height: calc(48px + var(--sat));
+  height: calc(50px + var(--sat));
+  padding: var(--sat) 16px;
 }
 
 html[data-orientation="landscape"][data-is-mobile="true"] .navbar__brand-icon {
@@ -3859,7 +3859,7 @@ html[data-orientation="landscape"][data-is-mobile="true"] .navbar__brand-slogan 
 }
 
 html[data-orientation="landscape"][data-is-mobile="true"] .mobile-bottom-nav {
-  height: 46px;
+  height: calc(46px + var(--sab));
   padding-bottom: max(2px, var(--sab));
 }
 
@@ -7606,7 +7606,7 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: calc(64px + var(--sab));
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
