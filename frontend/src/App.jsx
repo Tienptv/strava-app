@@ -12,6 +12,7 @@ import { useLang } from './i18n/LangContext';
 import { APP_VERSION } from './config/version';
 import { useAutoUpdate, AutoUpdateToast } from './utils/useAutoUpdate';
 import { useDeviceScreen } from './utils/useDeviceScreen';
+import { initVisitorTracker } from './services/visitorTracker';
 import Swal from 'sweetalert2';
 
 const API_BASE = '/api';
@@ -52,6 +53,11 @@ function App() {
     }
     setLoading(false);
   }, []);
+
+  // Khởi chạy theo dõi phiên truy cập trực tiếp (Live Visitor Heartbeat Tracker)
+  useEffect(() => {
+    initVisitorTracker({ athlete, athleteId });
+  }, [athlete, athleteId]);
 
   // Đăng nhập nhanh chế độ Khách (Xem công khai trên Render / điện thoại)
   const handleGuestLogin = () => {

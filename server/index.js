@@ -37,6 +37,7 @@ const PENALTIES_FILE = path.join(__dirname, '../Storage/member_penalties_mapping
 const SUPER_ADMIN_ID = (process.env.VITE_ADMIN_STRAVA_ID || '133066813').toString();
 const BANK_CONFIG_FILE = path.join(__dirname, '../Storage/bank_config.json');
 const WPN_SUBS_FILE = path.join(__dirname, '../Storage/wpn_subscriptions.json');
+const VISITOR_SESSIONS_FILE = path.join(__dirname, '../Storage/visitor_sessions.json');
 
 // ==========================================
 // TỰ ĐỘNG ĐỒNG BỘ 2 CHIỀU GIỮA GIT ROOT & DESKTOP APP STORAGE
@@ -5478,6 +5479,188 @@ app.post('/api/wpn/send', async (req, res) => {
 
 // ===================================================================
 // END NOTIFICATION APIs
+// ===================================================================
+
+// ===================================================================
+// START LIVE VISITOR TRACKING & MOBILE ANALYTICS APIs
+// ===================================================================
+
+function loadVisitorSessions() {
+  try {
+    if (fs.existsSync(VISITOR_SESSIONS_FILE)) {
+      return JSON.parse(fs.readFileSync(VISITOR_SESSIONS_FILE, 'utf8')) || {};
+    }
+  } catch (_) {}
+  return {};
+}
+
+function saveVisitorSessions(sessions) {
+  try {
+    writeStorageFile(VISITOR_SESSIONS_FILE, JSON.stringify(sessions, null, 2));
+  } catch (err) {
+    console.error('Lỗi lưu visitor_sessions:', err);
+  }
+}
+
+// 1. POST /api/analytics/heartbeat — Nhận gói tin ping nhịp tim từ client
+app.post('/api/analytics/heartbeat', (req, res) => {
+  try {
+    const {
+      visitorId,
+      athleteId,
+      athleteName,
+      avatar,
+      isGuest,
+      deviceType,
+      deviceModel,
+      browser,
+      os,
+      isPwa,
+      pathname,
+      eventType,
+      screenSize
+    } = req.body;
+
+    if (!visitorId) {
+      return res.status(400).json({ error: 'Missing visitorId' });
+    }
+
+    // Trích xuất IP client từ proxy Render
+    const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+    const clientIp = (typeof rawIp === 'string' ? rawIp.split(',')[0] : '').trim();
+
+    const sessions = loadVisitorSessions();
+    const now = new Date();
+    const nowIso = now.toISOString();
+
+    const existing = sessions[visitorId] || {
+      visitorId,
+      firstSeen: nowIso,
+      pageViewsCount: 0,
+      pagesHistory: []
+    };
+
+    // Cập nhật thông tin phiên
+    existing.lastSeen = nowIso;
+    existing.clientIp = clientIp;
+    existing.deviceType = deviceType || existing.deviceType || 'Desktop';
+    existing.deviceModel = deviceModel || existing.deviceModel || 'Unknown Device';
+    existing.browser = browser || existing.browser || 'Browser';
+    existing.os = os || existing.os || 'Unknown';
+    existing.isPwa = typeof isPwa === 'boolean' ? isPwa : (existing.isPwa || false);
+    existing.isGuest = typeof isGuest === 'boolean' ? isGuest : true;
+    if (screenSize) existing.screenSize = screenSize;
+
+    if (athleteId && athleteId !== 'guest') {
+      existing.athleteId = String(athleteId);
+      existing.athleteName = athleteName || existing.athleteName || '';
+      existing.isGuest = false;
+      if (avatar) existing.avatar = avatar;
+    } else if (!existing.athleteId && athleteName) {
+      existing.athleteName = athleteName;
+    }
+
+    if (pathname) {
+      existing.lastPage = pathname;
+      if (!Array.isArray(existing.pagesHistory)) existing.pagesHistory = [];
+      if (!existing.pagesHistory.includes(pathname)) {
+        existing.pagesHistory.push(pathname);
+      }
+      if (eventType === 'open' || eventType === 'focus') {
+        existing.pageViewsCount = (existing.pageViewsCount || 0) + 1;
+      }
+    }
+
+    // Tính thời gian xem tính bằng phút
+    const firstSeenDate = new Date(existing.firstSeen || nowIso);
+    existing.durationMinutes = Math.max(1, Math.round((now - firstSeenDate) / 60000));
+
+    sessions[visitorId] = existing;
+
+    // Tự động giữ tối đa 200 phiên gần nhất
+    const keys = Object.keys(sessions);
+    if (keys.length > 200) {
+      const sortedKeys = keys.sort((a, b) => new Date(sessions[b].lastSeen) - new Date(sessions[a].lastSeen));
+      const pruned = {};
+      sortedKeys.slice(0, 200).forEach(k => { pruned[k] = sessions[k]; });
+      saveVisitorSessions(pruned);
+    } else {
+      saveVisitorSessions(sessions);
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. GET /api/admin/live-visitors — Lấy dữ liệu giám sát trực tuyến cho Admin
+app.get('/api/admin/live-visitors', (req, res) => {
+  try {
+    const sessions = loadVisitorSessions();
+    const now = Date.now();
+    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    const ONLINE_THRESHOLD_MS = 3 * 60 * 1000; // 3 phút được coi là đang online
+
+    let onlineCount = 0;
+    let mobileToday = 0;
+    let desktopToday = 0;
+    const todayVisitors = new Set();
+
+    const sessionList = Object.values(sessions).map(s => {
+      const lastSeenTime = new Date(s.lastSeen).getTime();
+      const isOnline = (now - lastSeenTime) <= ONLINE_THRESHOLD_MS;
+      if (isOnline) onlineCount++;
+
+      const isToday = s.lastSeen && s.lastSeen.startsWith(todayStr);
+      if (isToday) {
+        todayVisitors.add(s.visitorId);
+        if (s.deviceType === 'Mobile') mobileToday++;
+        else desktopToday++;
+      }
+
+      return {
+        ...s,
+        isOnline,
+        secondsAgo: Math.max(0, Math.round((now - lastSeenTime) / 1000))
+      };
+    });
+
+    // Sắp xếp: Ai đang online lên đầu, sau đó sắp xếp theo lastSeen mới nhất
+    sessionList.sort((a, b) => {
+      if (a.isOnline !== b.isOnline) return a.isOnline ? -1 : 1;
+      return new Date(b.lastSeen) - new Date(a.lastSeen);
+    });
+
+    res.json({
+      success: true,
+      stats: {
+        onlineNow: onlineCount,
+        mobileToday,
+        desktopToday,
+        totalToday: todayVisitors.size,
+        totalTracked: sessionList.length
+      },
+      sessions: sessionList
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. DELETE /api/admin/live-visitors — Xóa lịch sử phiên truy cập
+app.delete('/api/admin/live-visitors', (req, res) => {
+  try {
+    writeStorageFile(VISITOR_SESSIONS_FILE, JSON.stringify({}, null, 2));
+    res.json({ success: true, message: 'Đã dọn sạch lịch sử người truy cập' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===================================================================
+// END LIVE VISITOR TRACKING APIs
 // ===================================================================
 
 // 3. SPA Fallback: Mọi route React đều trả về index.html kèm header cấm cache tuyệt đối

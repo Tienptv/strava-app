@@ -43,13 +43,15 @@ import {
   Loader,
   Eye,
   EyeOff,
-  BellRing
+  BellRing,
+  Radio
 } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { processChallengeData } from '../utils/challengeStats';
 import { loadChallengeData } from '../utils/challengeDataLoader';
 import { APP_VERSION } from '../config/version';
 import SmartReminderTool from '../components/SmartReminderTool';
+import LiveVisitorsTool from '../components/LiveVisitorsTool';
 
 export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, permissions }) {
   const navigate = useNavigate();
@@ -57,10 +59,10 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   const [searchParams, setSearchParams] = useSearchParams();
   const { lang, t } = useLang();
 
-  // Active Tab: 'settings', 'roles', 'logs', 'data', 'penalties'
+  // Active Tab: 'settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors'
   const getInitialTab = () => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors'];
     return (tabParam && validTabs.includes(tabParam)) ? tabParam : 'settings';
   };
   const [activeTab, setActiveTab] = useState(getInitialTab);
@@ -68,7 +70,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // Đồng bộ activeTab khi URL query param hoặc location state thay đổi
   useEffect(() => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors'];
     if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
       setActiveTab(tabParam);
     }
@@ -1668,6 +1670,14 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             <BellRing size={20} />
             <span style={{ flex: 1 }}>{lang === 'en' ? 'Reminders & Notifications' : 'Nhắc nhở & Thông báo'}</span>
             {!isSuperAdmin && effectivePermissions.penaltiesTargets === false && <Lock size={14} color="#94a3b8" />}
+          </button>
+
+          <button
+            onClick={() => handleTabClick('visitors')}
+            className={`tab ${activeTab === 'visitors' ? 'tab--active' : ''}`}
+          >
+            <Radio size={20} />
+            <span style={{ flex: 1 }}>{lang === 'en' ? 'Live Visitors' : 'Người dùng trực tuyến'}</span>
           </button>
         </div>
 
@@ -3730,6 +3740,15 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       {activeTab === 'reminders' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <SmartReminderTool apiFetch={apiFetch} athlete={athlete} />
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB CONTENT 8: LIVE VISITORS (QUẢN LÝ & GIÁM SÁT NGƯỜI TRUY CẬP RENDER)     */}
+      {/* ========================================================================= */}
+      {activeTab === 'visitors' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <LiveVisitorsTool apiFetch={apiFetch} isSuperAdmin={isSuperAdmin} />
         </div>
       )}
 
