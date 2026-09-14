@@ -4900,7 +4900,16 @@ app.get('/api/notifications/reminders/summary', (req, res) => {
       const targetKm = parseFloat(val.target) || 0;
       if (targetKm <= 0) return;
       const hasPenalty = val.penalty === true;
-      const runnerName = key.replace(monthSuffix, '').replace(/_/g, ' ').trim();
+      const cleanKey = key.replace(monthSuffix, '');
+      const runnerName = cleanKey.replace(/_/g, ' ').trim();
+      let mapInfo = null;
+      try {
+        const nameMapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8') || '{}');
+        mapInfo = nameMapping[cleanKey] || nameMapping[runnerName] || nameMapping[cleanKey.toLowerCase()];
+      } catch (_) {}
+      const athleteId = mapInfo?.athleteId || '';
+      const fullName = mapInfo?.fullName || runnerName;
+
       // Tìm km thực tế từ activities (khớp tên)
       let actualKm = 0;
       Object.entries(monthKmMap).forEach(([actName, km]) => {
@@ -4917,7 +4926,7 @@ app.get('/api/notifications/reminders/summary', (req, res) => {
       });
       const pctMonth = targetKm > 0 ? Math.round((actualKm / targetKm) * 100) : 0;
       shortfallRunners.push({
-        key, runnerName, targetKm, actualKm: Math.round(actualKm * 10) / 10,
+        key, cleanKey, runnerName, fullName, athleteId, targetKm, actualKm: Math.round(actualKm * 10) / 10,
         shortfallKm: Math.max(0, Math.round((targetKm - actualKm) * 10) / 10),
         pctMonth, weekKm: Math.round(weekKm * 10) / 10,
         hasPenalty
@@ -5129,6 +5138,54 @@ app.get('/api/wpn/athletes-roster', (req, res) => {
   }
 });
 
+// Helper: Ánh xạ đa chiều giữa athleteId, fullName, abbreviatedName (Tien P.) và cleanKey (Tien_P.)
+function getAthleteAliases(identifier) {
+  if (!identifier) return [];
+  const idStr = String(identifier).trim();
+  if (!idStr || idStr === 'all' || idStr === 'guest') return [];
+  const idLower = idStr.toLowerCase();
+  const aliases = new Set([idStr]);
+
+  // Tách bỏ hậu tố tháng (ví dụ: Tien_P._2026_9 -> Tien_P.)
+  const stripped = idStr.replace(/_\d{4}_\d{1,2}$/, '');
+  if (stripped) aliases.add(stripped);
+
+  try {
+    if (fs.existsSync(NAME_MAPPING_FILE)) {
+      const mapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8')) || {};
+      for (const [mapKey, item] of Object.entries(mapping)) {
+        const itemKey = item?.key || mapKey;
+        const itemAbbr = item?.abbreviatedName || mapKey;
+        const itemFull = item?.fullName || '';
+        const itemId = item?.athleteId ? String(item?.athleteId) : '';
+
+        const matches = (
+          mapKey.toLowerCase() === idLower ||
+          itemKey.toLowerCase() === idLower ||
+          itemAbbr.toLowerCase() === idLower ||
+          itemFull.toLowerCase() === idLower ||
+          (itemId && itemId === idStr) ||
+          (stripped && (
+            stripped.toLowerCase() === mapKey.toLowerCase() ||
+            stripped.toLowerCase() === itemKey.toLowerCase() ||
+            stripped.toLowerCase() === itemAbbr.toLowerCase()
+          ))
+        );
+
+        if (matches) {
+          if (mapKey) aliases.add(mapKey);
+          if (itemKey) aliases.add(itemKey);
+          if (itemAbbr) aliases.add(itemAbbr);
+          if (itemFull) aliases.add(itemFull);
+          if (itemId) aliases.add(itemId);
+        }
+      }
+    }
+  } catch (_) {}
+
+  return Array.from(aliases);
+}
+
 // Endpoint trả về trạng thái thiết bị của các VĐV
 app.get('/api/wpn/subscribers-status', async (req, res) => {
   try {
@@ -5139,8 +5196,9 @@ app.get('/api/wpn/subscribers-status', async (req, res) => {
       } catch (e) { subs = {}; }
     }
 
-    // Nếu trên PC local chưa có subs hoặc trống, thử kéo từ Render Cloud
-    if (Object.keys(subs).length === 0) {
+    // Nếu trên PC local chưa có subs hoặc có cờ forceCloud, thử kéo từ Render Cloud
+    const forceCloud = req.query.forceCloud === 'true' || Object.keys(subs).length === 0;
+    if (forceCloud) {
       try {
         const cloudUrl = (process.env.VITE_RENDER_API_URL || 'https://strava-app-86t5.onrender.com').replace(/\/$/, '');
         const cloudRes = await fetch(`${cloudUrl}/api/wpn/subscribers-raw`, {
@@ -5150,7 +5208,17 @@ app.get('/api/wpn/subscribers-status', async (req, res) => {
         if (cloudRes.ok) {
           const cloudSubs = await cloudRes.json();
           if (cloudSubs && typeof cloudSubs === 'object') {
-            subs = cloudSubs;
+            // Hợp nhất subs từ cloud vào subs local
+            for (const [k, arr] of Object.entries(cloudSubs)) {
+              if (!subs[k]) subs[k] = [];
+              if (Array.isArray(arr)) {
+                arr.forEach(item => {
+                  if (item && item.endpoint && !subs[k].some(x => x.endpoint === item.endpoint)) {
+                    subs[k].push(item);
+                  }
+                });
+              }
+            }
             writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
           }
         }
@@ -5163,11 +5231,20 @@ app.get('/api/wpn/subscribers-status', async (req, res) => {
     for (const [key, devList] of Object.entries(subs)) {
       if (Array.isArray(devList) && devList.length > 0) {
         devList.forEach(d => { if (d.endpoint) uniqueEndpoints.add(d.endpoint); });
-        athleteMap[key] = {
+        const devInfo = {
           registered: true,
           deviceCount: devList.length,
           devices: devList.map(d => d.device || 'Mobile Device')
         };
+        athleteMap[key] = devInfo;
+
+        // Tự động ánh xạ cho tất cả các dạng tên / ID khác của VĐV này
+        const aliases = getAthleteAliases(key);
+        for (const a of aliases) {
+          if (!athleteMap[a]) {
+            athleteMap[a] = devInfo;
+          }
+        }
       }
     }
 
@@ -5218,12 +5295,24 @@ app.post('/api/wpn/subscribe', (req, res) => {
       }
     };
 
-    if (athleteId) addSubToKey(athleteId);
-    if (athleteName) addSubToKey(athleteName);
-    if (athleteKey && athleteKey !== athleteName) addSubToKey(athleteKey);
+    // Ánh xạ tất cả alias (ID, Họ tên thật, Tên viết tắt Tien P., File Key Tien_P.)
+    const allAliases = new Set([
+      ...getAthleteAliases(athleteId),
+      ...getAthleteAliases(athleteName),
+      ...getAthleteAliases(athleteKey)
+    ]);
+    if (allAliases.size === 0) {
+      if (athleteId) allAliases.add(String(athleteId));
+      if (athleteName) allAliases.add(String(athleteName));
+      if (athleteKey) allAliases.add(String(athleteKey));
+    }
+
+    for (const alias of allAliases) {
+      addSubToKey(alias);
+    }
 
     writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
-    console.log(`[WPN] Đã lưu subscription cho VĐV [${athleteId || ''} - ${athleteName || ''}] trên ${device}`);
+    console.log(`[WPN] Đã lưu subscription cho VĐV [${athleteId || ''} - ${athleteName || ''}] trên ${device} với ${allAliases.size} aliases`);
 
     res.json({ success: true, message: 'Đăng ký nhận thông báo thành công' });
   } catch (err) {
@@ -5247,11 +5336,16 @@ app.post('/api/wpn/unsubscribe', (req, res) => {
       } catch (e) { subs = {}; }
     }
 
-    if (subs[athleteId]) {
-      subs[athleteId] = subs[athleteId].filter(s => s.endpoint !== endpoint);
-      writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
-      console.log(`[WPN] Đã hủy subscription cho user ${athleteId}`);
+    const aliases = getAthleteAliases(athleteId);
+    if (aliases.length === 0) aliases.push(String(athleteId));
+
+    for (const a of aliases) {
+      if (subs[a]) {
+        subs[a] = subs[a].filter(s => s.endpoint !== endpoint);
+      }
     }
+    writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
+    console.log(`[WPN] Đã hủy subscription cho user ${athleteId}`);
 
     res.json({ success: true, message: 'Hủy nhận thông báo thành công' });
   } catch (err) {
@@ -5292,9 +5386,19 @@ app.post('/api/wpn/send', async (req, res) => {
         }
         return eps;
       }
-      if (s[target]) addEps(s[target]);
-      if (key && s[key]) addEps(s[key]);
-      if (name && s[name]) addEps(s[name]);
+
+      const allTargets = new Set([
+        ...getAthleteAliases(target),
+        ...getAthleteAliases(key),
+        ...getAthleteAliases(name)
+      ]);
+      if (target) allTargets.add(String(target));
+      if (key) allTargets.add(String(key));
+      if (name) allTargets.add(String(name));
+
+      for (const t of allTargets) {
+        if (s[t]) addEps(s[t]);
+      }
       return eps;
     };
 

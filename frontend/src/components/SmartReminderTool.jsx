@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Send, Copy, Check, RefreshCw, Users, AlertTriangle, Target, Zap, 
-  ChevronDown, ChevronUp, Settings, Save, X, Smartphone, Bell, BellRing, Radio 
+  ChevronDown, ChevronUp, Settings, Save, X, Smartphone, Bell, BellRing, Radio, CloudDownload 
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useLang } from '../i18n/LangContext';
@@ -175,9 +175,23 @@ function RunningReminderTab({ data, subscribersStatus, lang, t, onRefresh }) {
     }
   };
 
+  // Helper tìm kiếm đăng ký thiết bị theo tất cả alias (ID, runnerName, fullName, cleanKey, key)
+  const getSubInfo = (r) => {
+    const map = subscribersStatus?.athleteMap || {};
+    return (
+      (r.athleteId && map[r.athleteId]) ||
+      (r.runnerName && map[r.runnerName]) ||
+      (r.fullName && map[r.fullName]) ||
+      (r.cleanKey && map[r.cleanKey]) ||
+      (r.key && map[r.key]) ||
+      null
+    );
+  };
+
   // Bắn push riêng cho 1 cá nhân
   const handlePushRunner = async (r) => {
-    const isSubscribed = subscribersStatus?.athleteMap?.[r.athleteId]?.registered || subscribersStatus?.athleteMap?.[r.key]?.registered;
+    const subInfo = getSubInfo(r);
+    const isSubscribed = subInfo?.registered;
 
     if (!isSubscribed) {
       Swal.fire({
@@ -227,9 +241,9 @@ function RunningReminderTab({ data, subscribersStatus, lang, t, onRefresh }) {
       });
 
       const res = await sendPushNotification({
-        targetId: r.athleteId,
-        athleteKey: r.key,
-        athleteName: r.runnerName,
+        targetId: r.athleteId || r.cleanKey || r.runnerName,
+        athleteKey: r.cleanKey || r.runnerName,
+        athleteName: r.fullName || r.runnerName,
         title: formValues.title,
         body: formValues.body,
         url: '/'
@@ -322,8 +336,9 @@ function RunningReminderTab({ data, subscribersStatus, lang, t, onRefresh }) {
           {expandLowPct && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {belowTarget.map(r => {
-                const isSubscribed = subscribersStatus?.athleteMap?.[r.athleteId]?.registered || subscribersStatus?.athleteMap?.[r.key]?.registered || subscribersStatus?.athleteMap?.[r.runnerName]?.registered;
-                const devCount = subscribersStatus?.athleteMap?.[r.athleteId]?.deviceCount || subscribersStatus?.athleteMap?.[r.key]?.deviceCount || subscribersStatus?.athleteMap?.[r.runnerName]?.deviceCount || 0;
+                const subInfo = getSubInfo(r);
+                const isSubscribed = subInfo?.registered;
+                const devCount = subInfo?.deviceCount || 0;
 
                 return (
                   <div key={r.key} style={{ background: '#fff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #fee2e2', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
@@ -419,9 +434,22 @@ function PenaltyReminderTab({ data, subscribersStatus, lang, t }) {
     setTimeout(() => setCopied(null), 2000);
   };
 
+  // Helper tìm kiếm đăng ký thiết bị của người bị phạt
+  const getPersonSubInfo = (person) => {
+    const map = subscribersStatus?.athleteMap || {};
+    return (
+      (person.athleteId && map[person.athleteId]) ||
+      (person.rawName && map[person.rawName]) ||
+      (person.fullName && map[person.fullName]) ||
+      (person.cleanKey && map[person.cleanKey]) ||
+      null
+    );
+  };
+
   // Bắn Web Push phạt đến máy VĐV
   const handlePushPenalty = async (person) => {
-    const isSubscribed = subscribersStatus?.athleteMap?.[person.athleteId]?.registered || subscribersStatus?.athleteMap?.[person.rawName]?.registered;
+    const subInfo = getPersonSubInfo(person);
+    const isSubscribed = subInfo?.registered;
 
     if (!isSubscribed) {
       Swal.fire({
@@ -541,8 +569,9 @@ function PenaltyReminderTab({ data, subscribersStatus, lang, t }) {
           {owingList.map(person => {
             const isCopied = copied === (person.athleteId || person.rawName);
             const qrUrl = buildVietQRUrl(bankConfig, person.totalOwing, `Nop phat HRC ${now.getFullYear()}`);
-            const isSubscribed = subscribersStatus?.athleteMap?.[person.athleteId]?.registered || subscribersStatus?.athleteMap?.[person.rawName]?.registered || subscribersStatus?.athleteMap?.[person.fullName]?.registered;
-            const devCount = subscribersStatus?.athleteMap?.[person.athleteId]?.deviceCount || subscribersStatus?.athleteMap?.[person.rawName]?.deviceCount || subscribersStatus?.athleteMap?.[person.fullName]?.deviceCount || 0;
+            const subInfo = getPersonSubInfo(person);
+            const isSubscribed = subInfo?.registered;
+            const devCount = subInfo?.deviceCount || 0;
 
             return (
               <div key={person.athleteId || person.rawName} style={{ background: '#fff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #fee2e2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
@@ -903,13 +932,15 @@ export default function SmartReminderTool() {
   const [lastFetch, setLastFetch] = useState(null);
   const [error, setError] = useState(null);
 
+  const [pullingCloud, setPullingCloud] = useState(false);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const [summaryRes, subsRes] = await Promise.all([
         fetch('/api/notifications/reminders/summary'),
-        fetch('/api/wpn/subscribers-status').catch(() => null)
+        fetch('/api/wpn/subscribers-status?forceCloud=true').catch(() => null)
       ]);
       if (!summaryRes.ok) throw new Error(`HTTP ${summaryRes.status}`);
       const json = await summaryRes.json();
@@ -926,6 +957,37 @@ export default function SmartReminderTool() {
       setLoading(false);
     }
   }, []);
+
+  const handlePullCloud = async () => {
+    setPullingCloud(true);
+    try {
+      const res = await fetch('/api/storage/pull-from-cloud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data && data.success) {
+        Swal.fire({
+          title: '🎉 ' + (lang === 'en' ? 'Synced from Cloud!' : 'Đã đồng bộ từ Cloud!'),
+          text: lang === 'en' ? 'Latest push device registrations pulled successfully.' : 'Đã kéo thành công danh sách thiết bị điện thoại mới nhất từ Cloud về PC.',
+          icon: 'success',
+          confirmButtonColor: '#00A3A6'
+        });
+        await loadData();
+      } else {
+        throw new Error(data?.error || 'Pull failed');
+      }
+    } catch (e) {
+      Swal.fire({
+        title: '⚠️ ' + (lang === 'en' ? 'Sync Error' : 'Lỗi đồng bộ'),
+        text: e.message,
+        icon: 'warning',
+        confirmButtonColor: '#00A3A6'
+      });
+    } finally {
+      setPullingCloud(false);
+    }
+  };
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -949,14 +1011,31 @@ export default function SmartReminderTool() {
             {subscribersStatus?.totalDevices > 0 && ` • 📱 ${subscribersStatus.totalDevices} ${t('pushDeviceCount')}`}
           </p>}
         </div>
-        <button onClick={loadData} disabled={loading}
-          style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid rgba(0,163,166,0.3)', background: 'transparent', color: 'var(--accent)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.2s ease' }}
-          onMouseOver={e => { e.currentTarget.style.background = 'rgba(0,163,166,0.07)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-          onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; }}
-        >
-          <RefreshCw size={13} style={{ animation: loading ? 'spin 0.8s linear infinite' : 'none' }} />
-          {lang === 'en' ? 'Refresh' : 'Làm mới'}
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={handlePullCloud} disabled={pullingCloud || loading}
+            title={lang === 'en' ? 'Pull latest mobile registrations from Cloud' : 'Kéo dữ liệu đăng ký thiết bị mới nhất từ Render Cloud về PC'}
+            style={{
+              padding: '7px 12px', borderRadius: '8px', border: '1px solid rgba(120,190,32,0.4)',
+              background: 'rgba(120,190,32,0.08)', color: '#15803d', fontWeight: 700, fontSize: '0.78rem',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+            onMouseOver={e => { e.currentTarget.style.background = 'rgba(120,190,32,0.18)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseOut={e => { e.currentTarget.style.background = 'rgba(120,190,32,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
+            <CloudDownload size={13} style={{ animation: pullingCloud ? 'bounce 0.8s infinite' : 'none' }} />
+            {pullingCloud ? (lang === 'en' ? 'Pulling...' : 'Đang kéo...') : (lang === 'en' ? 'Pull Cloud' : 'Kéo từ Cloud')}
+          </button>
+
+          <button onClick={loadData} disabled={loading}
+            style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid rgba(0,163,166,0.3)', background: 'transparent', color: 'var(--accent)', fontWeight: 700, fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.2s ease' }}
+            onMouseOver={e => { e.currentTarget.style.background = 'rgba(0,163,166,0.07)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
+            <RefreshCw size={13} style={{ animation: loading ? 'spin 0.8s linear infinite' : 'none' }} />
+            {lang === 'en' ? 'Refresh' : 'Làm mới'}
+          </button>
+        </div>
       </div>
 
       {/* Tab switcher */}

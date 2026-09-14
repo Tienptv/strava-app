@@ -1,1 +1,58 @@
-{}
+{
+  "133066813": [
+    {
+      "endpoint": "https://test.endpoint.com/test-1",
+      "keys": {
+        "p256dh": "test",
+        "auth": "test"
+      },
+      "device": "Test Device",
+      "athleteId": "133066813",
+      "athleteName": "Tien PhamTV",
+      "athleteKey": "Tien_P.",
+      "registeredAt": "2026-09-14T05:14:58.144Z"
+    }
+  ],
+  "Tien PhamTV": [
+    {
+      "endpoint": "https://test.endpoint.com/test-1",
+      "keys": {
+        "p256dh": "test",
+        "auth": "test"
+      },
+      "device": "Test Device",
+      "athleteId": "133066813",
+      "athleteName": "Tien PhamTV",
+      "athleteKey": "Tien_P.",
+      "registeredAt": "2026-09-14T05:14:58.144Z"
+    }
+  ],
+  "Tien_P.": [
+    {
+      "endpoint": "https://test.endpoint.com/test-1",
+      "keys": {
+        "p256dh": "test",
+        "auth": "test"
+      },
+      "device": "Test Device",
+      "athleteId": "133066813",
+      "athleteName": "Tien PhamTV",
+      "athleteKey": "Tien_P.",
+      "registeredAt": "2026-09-14T05:14:58.144Z"
+    }
+  ],
+  "Tien P.": [
+    {
+      "endpoint": "https://test.endpoint.com/test-1",
+      "keys": {
+        "p256dh": "test",
+        "auth": "test"
+      },
+      "device": "Test Device",
+      "athleteId": "133066813",
+      "athleteName": "Tien PhamTV",
+      "athleteKey": "Tien_P.",
+      "registeredAt": "2026-09-14T05:14:58.144Z"
+    }
+  ]
+}

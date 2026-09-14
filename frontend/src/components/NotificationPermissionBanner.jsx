@@ -66,33 +66,57 @@ const NotificationPermissionBanner = ({ apiFetch, athleteId, athlete }) => {
       setVisible(false);
     }
 
-    // Tải danh bạ VĐV nếu ở chế độ khách
-    if (isGuest) {
-      fetch('/api/wpn/athletes-roster')
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (data && Array.isArray(data.roster)) {
-            setRoster(data.roster);
-
-            // Tự động phát hiện nếu người dùng đã từng ghim VĐV trên Bảng xếp hạng
-            try {
-              const saved = localStorage.getItem('linked_athlete');
-              if (!saved) {
-                const pinned = JSON.parse(localStorage.getItem('pinnedRunners') || '[]');
-                if (pinned.length > 0) {
-                  const match = data.roster.find(m => m.name === pinned[0] || m.matchKey === pinned[0]);
-                  if (match) {
-                    setSelectedAthlete(match);
-                    localStorage.setItem('linked_athlete', JSON.stringify(match));
-                  }
-                }
-              }
-            } catch (_) {}
-          }
-        })
-        .catch(() => {});
+    // Tự động đồng bộ Push Token nếu quyền đã được cấp trước đó và là VĐV đã đăng nhập
+    if (!isGuest && permission === 'granted' && isPushSupported && isServiceWorkerSupported) {
+      syncPushSubscription();
     }
-  }, [isGuest]);
+  }, [isGuest, permission, isPushSupported, isServiceWorkerSupported]);
+
+  // Hàm tự động đồng bộ push subscription khi mở app
+  const syncPushSubscription = async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      if (!registration || !registration.pushManager) return;
+
+      let subscription = await registration.pushManager.getSubscription();
+      const rawVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BNv3stD9r4G1c1d7Yf8EsDrNNPpP3M8aR3lx-vP-5vEe3vbIyDym9DyZ-JfVV8H18026BE3A6sIj9PvUlMl-FVA';
+      const applicationServerKey = urlBase64ToUint8Array(rawVapidKey);
+
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey
+        });
+      }
+
+      const targetId = athleteId || athlete?.id || '';
+      const targetName = athlete?.name || (athlete?.firstname ? `${athlete.firstname} ${athlete.lastname || ''}`.trim() : '');
+      const targetKey = athlete?.matchKey || '';
+
+      const ua = navigator.userAgent;
+      let deviceName = 'Mobile Device';
+      if (/android/i.test(ua)) deviceName = 'Android Chrome';
+      else if (/iphone|ipad|ipod/i.test(ua)) deviceName = isStandalone ? 'iPhone PWA' : 'iPhone Safari';
+      else if (/windows/i.test(ua)) deviceName = 'Windows PC';
+      else if (/macintosh/i.test(ua)) deviceName = 'Mac';
+
+      if (targetId && targetId !== 'guest') {
+        await apiFetch('/wpn/subscribe', {
+          method: 'POST',
+          body: JSON.stringify({
+            subscription,
+            athleteId: targetId,
+            athleteName: targetName,
+            athleteKey: targetKey,
+            device: deviceName
+          })
+        });
+        console.log(`[WPN] Tự động đồng bộ Push Token thành công cho ${targetName} (${deviceName})`);
+      }
+    } catch (err) {
+      console.warn('[WPN] Auto-sync push warning:', err.message);
+    }
+  };
 
   const handleSubscribe = async () => {
     if (!isNotificationSupported || !isServiceWorkerSupported || !isPushSupported) {
@@ -127,20 +151,9 @@ const NotificationPermissionBanner = ({ apiFetch, athleteId, athlete }) => {
         });
 
         // Xác định danh tính VĐV
-        let targetId = athleteId;
-        let targetName = athlete?.name || (athlete?.firstname ? `${athlete.firstname} ${athlete.lastname || ''}`.trim() : '');
-        let targetKey = athlete?.matchKey || '';
-
-        if (isGuest) {
-          if (selectedAthlete) {
-            targetId = selectedAthlete.id || selectedAthlete.athleteId || selectedAthlete.name;
-            targetName = selectedAthlete.name;
-            targetKey = selectedAthlete.matchKey || selectedAthlete.name;
-          } else {
-            targetId = 'guest';
-            targetName = 'Khách Xem';
-          }
-        }
+        const targetId = athleteId || athlete?.id || '';
+        const targetName = athlete?.name || (athlete?.firstname ? `${athlete.firstname} ${athlete.lastname || ''}`.trim() : '');
+        const targetKey = athlete?.matchKey || '';
 
         // Tên thiết bị thân thiện
         const ua = navigator.userAgent;
@@ -167,7 +180,24 @@ const NotificationPermissionBanner = ({ apiFetch, athleteId, athlete }) => {
             title: `🎉 ${t('phoneNotificationsEnabled')}`,
             text: t('phoneNotificationsDesc').replace('{name}', targetName || (lang === 'en' ? 'your account' : 'bạn')),
             icon: 'success',
-            confirmButtonColor: '#00A3A6'
+            showCancelButton: true,
+            confirmButtonColor: '#00A3A6',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: lang === 'en' ? '🚀 Send Test Push' : '🚀 Bắn thử thông báo',
+            cancelButtonText: lang === 'en' ? 'Close' : 'Đóng'
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              await apiFetch('/wpn/send', {
+                method: 'POST',
+                body: JSON.stringify({
+                  targetId: targetId,
+                  athleteName: targetName,
+                  title: '🏃 Haskoning Running Club',
+                  body: lang === 'en' ? '🎉 Notifications successfully connected to PC Admin!' : '🎉 Thông báo đã kết nối thành công với Ban Quản Trị!',
+                  url: '/'
+                })
+              });
+            }
           });
           setVisible(false);
           localStorage.removeItem('hide_notification_banner');
@@ -202,15 +232,8 @@ const NotificationPermissionBanner = ({ apiFetch, athleteId, athlete }) => {
     localStorage.setItem('hide_notification_banner', 'true');
   };
 
-  const handleSelectAthlete = (item) => {
-    setSelectedAthlete(item);
-    if (item) {
-      localStorage.setItem('linked_athlete', JSON.stringify(item));
-    } else {
-      localStorage.removeItem('linked_athlete');
-    }
-    setShowPicker(false);
-  };
+  // Người dùng yêu cầu: Nếu ở chế độ Guest thì tạm hold, không cần nhận thông báo
+  if (isGuest) return null;
 
   if (!visible) return null;
   if (permission === 'granted' && !isIOS) return null;
@@ -299,80 +322,6 @@ const NotificationPermissionBanner = ({ apiFetch, athleteId, athlete }) => {
           </button>
         </div>
       </div>
-
-      {/* Mục chọn danh tính khi ở chế độ Khách */}
-      {isGuest && (!isIOS || isStandalone) && (
-        <div style={{
-          marginTop: '10px',
-          paddingTop: '8px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.18)',
-          fontSize: '0.78rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '8px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <User size={13} style={{ color: '#78BE20' }} />
-            <span>{t('receivingFor')}</span>
-            <span style={{ fontWeight: 800, color: '#fbbf24' }}>
-              {selectedAthlete ? selectedAthlete.name : (lang === 'en' ? 'All Club' : 'Chung toàn CLB')}
-            </span>
-          </div>
-
-          <button
-            onClick={() => setShowPicker(v => !v)}
-            style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              border: 'none',
-              color: '#fff',
-              borderRadius: '6px',
-              padding: '3px 8px',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
-          >
-            {t('changeRecipient')}
-          </button>
-
-          {showPicker && (
-            <div style={{ width: '100%', marginTop: '6px' }}>
-              <select
-                value={selectedAthlete ? selectedAthlete.name : ''}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (!val) {
-                    handleSelectAthlete(null);
-                  } else {
-                    const found = roster.find(m => m.name === val);
-                    handleSelectAthlete(found || { name: val });
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '7px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 255, 255, 0.4)',
-                  background: '#fff',
-                  color: '#002D54',
-                  fontWeight: 700,
-                  fontSize: '0.82rem',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="">{t('generalBroadcastOnly')}</option>
-                {roster.map(m => (
-                  <option key={m.id || m.name} value={m.name}>
-                    🏃 {m.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };
