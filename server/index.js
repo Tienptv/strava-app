@@ -1263,6 +1263,17 @@ app.post('/api/storage/pull-from-cloud', async (req, res) => {
       console.warn('Lỗi kéo penalties:', e.message);
     }
 
+    // 6. Tải wpn subscriptions (thiết bị điện thoại đã đăng ký nhận thông báo)
+    try {
+      const wpnSubs = await fetchJson('/api/wpn/subscribers-raw');
+      if (wpnSubs && typeof wpnSubs === 'object') {
+        fs.writeFileSync(WPN_SUBS_FILE, JSON.stringify(wpnSubs, null, 2), 'utf8');
+        results.push(`wpn_subscriptions.json (${Object.keys(wpnSubs).length} người đăng ký)`);
+      }
+    } catch (e) {
+      console.warn('Lỗi kéo wpn_subscriptions:', e.message);
+    }
+
     addAuditLog('Kéo dữ liệu Cloud', currentAthleteId || 'Super Admin', `Đã kéo từ ${cloudUrl}: ${results.join(', ')}`);
 
     res.json({
@@ -1280,7 +1291,7 @@ app.post('/api/storage/pull-from-cloud', async (req, res) => {
 // Endpoint nhận gói dữ liệu bundle đồng bộ (chạy trên Cloud hoặc khi nhận push)
 app.post('/api/storage/sync-bundle', (req, res) => {
   try {
-    const { imported, targets, config, admins, nameMapping, clubGoal, penalties } = req.body;
+    const { imported, targets, config, admins, nameMapping, clubGoal, penalties, wpnSubscriptions } = req.body;
     const updated = [];
 
     if (Array.isArray(imported)) {
@@ -5070,6 +5081,85 @@ app.post('/api/treasury/bank-config', (req, res) => {
 // START NOTIFICATION & REMINDER SYSTEM APIs
 // ===================================================================
 
+// Khởi tạo VAPID Details cho Web Push
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || 'BNv3stD9r4G1c1d7Yf8EsDrNNPpP3M8aR3lx-vP-5vEe3vbIyDym9DyZ-JfVV8H18026BE3A6sIj9PvUlMl-FVA';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '9AmCF862Gq5NfUK4LgzwEl0slO7CNikBPAWxXVFOYhI';
+const VAPID_EMAIL = process.env.STRAVA_EMAIL || 'viettien274@gmail.com';
+
+try {
+  webPush.setVapidDetails(
+    VAPID_EMAIL.startsWith('mailto:') ? VAPID_EMAIL : `mailto:${VAPID_EMAIL}`,
+    VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY
+  );
+  console.log('🔔 [WPN] VAPID details initialized successfully');
+} catch (e) {
+  console.warn('⚠️ [WPN] Failed to set VAPID details:', e.message);
+}
+
+// Endpoint trả về raw subscriptions (phục vụ đồng bộ Cloud <-> PC)
+app.get('/api/wpn/subscribers-raw', (req, res) => {
+  try {
+    const subs = JSON.parse(readStorageFile(WPN_SUBS_FILE) || '{}');
+    res.json(subs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint trả về trạng thái thiết bị của các VĐV
+app.get('/api/wpn/subscribers-status', async (req, res) => {
+  try {
+    let subs = {};
+    if (fs.existsSync(WPN_SUBS_FILE)) {
+      try {
+        subs = JSON.parse(fs.readFileSync(WPN_SUBS_FILE, 'utf8')) || {};
+      } catch (e) { subs = {}; }
+    }
+
+    // Nếu trên PC local chưa có subs hoặc trống, thử kéo từ Render Cloud
+    if (Object.keys(subs).length === 0) {
+      try {
+        const cloudUrl = (process.env.VITE_RENDER_API_URL || 'https://strava-app-86t5.onrender.com').replace(/\/$/, '');
+        const cloudRes = await fetch(`${cloudUrl}/api/wpn/subscribers-raw`, {
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(4000)
+        });
+        if (cloudRes.ok) {
+          const cloudSubs = await cloudRes.json();
+          if (cloudSubs && typeof cloudSubs === 'object') {
+            subs = cloudSubs;
+            writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
+          }
+        }
+      } catch (_) {}
+    }
+
+    let totalDevices = 0;
+    const athleteMap = {};
+
+    for (const [athleteId, devList] of Object.entries(subs)) {
+      if (Array.isArray(devList) && devList.length > 0) {
+        totalDevices += devList.length;
+        athleteMap[athleteId] = {
+          registered: true,
+          deviceCount: devList.length,
+          devices: devList.map(d => d.device || 'Mobile Device')
+        };
+      }
+    }
+
+    res.json({
+      success: true,
+      totalDevices,
+      totalSubscribers: Object.keys(athleteMap).length,
+      athleteMap
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // API Đăng ký Web Push Notification
 app.post('/api/wpn/subscribe', (req, res) => {
   try {
@@ -5122,41 +5212,100 @@ app.post('/api/wpn/unsubscribe', (req, res) => {
   }
 });
 
-// API Gửi Web Push Notification (Admin only)
-app.post('/api/wpn/send', (req, res) => {
+// API Gửi Web Push Notification (Admin only / Broadcast hoặc cá nhân)
+app.post('/api/wpn/send', async (req, res) => {
   try {
-    const { title, body, url, icon, targetId } = req.body;
+    const { title, body, url, icon, targetId, athleteKey, athleteName } = req.body;
     if (!title || !body) return res.status(400).json({ error: 'Thiếu title hoặc body' });
 
-    const subs = JSON.parse(readStorageFile(WPN_SUBS_FILE) || '{}');
-    let targetEndpoints = [];
+    let subs = {};
+    if (fs.existsSync(WPN_SUBS_FILE)) {
+      try {
+        subs = JSON.parse(fs.readFileSync(WPN_SUBS_FILE, 'utf8')) || {};
+      } catch (e) { subs = {}; }
+    }
 
-    if (targetId && targetId !== 'all') {
-      if (subs[targetId]) targetEndpoints = subs[targetId];
-    } else {
-      // Send to all
-      for (const key in subs) {
-        targetEndpoints = targetEndpoints.concat(subs[key]);
+    const findEndpoints = (s, target, key) => {
+      let eps = [];
+      if (!target || target === 'all') {
+        for (const k in s) {
+          if (Array.isArray(s[k])) eps = eps.concat(s[k]);
+        }
+        return eps;
+      }
+      if (s[target]) eps = eps.concat(s[target]);
+      if (key && s[key] && key !== target) eps = eps.concat(s[key]);
+      return eps;
+    };
+
+    let targetEndpoints = findEndpoints(subs, targetId, athleteKey);
+
+    // Nếu không tìm thấy endpoint cục bộ trên PC, thử chuyển tiếp sang Cloud Render
+    if (targetEndpoints.length === 0) {
+      try {
+        const cloudUrl = (process.env.VITE_RENDER_API_URL || 'https://strava-app-86t5.onrender.com').replace(/\/$/, '');
+        const fwdRes = await fetch(`${cloudUrl}/api/wpn/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(req.body),
+          signal: AbortSignal.timeout(8000)
+        });
+        if (fwdRes.ok) {
+          const fwdData = await fwdRes.json();
+          return res.json({ ...fwdData, forwarded: true });
+        }
+      } catch (fwdErr) {
+        console.warn('[WPN Forward warning]:', fwdErr.message);
       }
     }
 
     if (targetEndpoints.length === 0) {
-      return res.status(404).json({ error: 'Không tìm thấy thiết bị nào để push' });
+      return res.status(404).json({
+        success: false,
+        error: `Chưa có thiết bị nào của ${athleteName || 'thành viên này'} đăng ký nhận thông báo.`,
+        errorEn: `No registered devices found for ${athleteName || 'this member'}.`
+      });
     }
 
-    const payload = JSON.stringify({ title, body, url, icon });
+    const payload = JSON.stringify({
+      title,
+      body,
+      url: url || '/',
+      icon: icon || '/icon-192.png'
+    });
+
+    const expiredEndpoints = [];
     const promises = targetEndpoints.map(sub => {
       return webPush.sendNotification(sub, payload).catch(err => {
-        console.error('[WPN Send Error]', err);
+        if (err.statusCode === 404 || err.statusCode === 410) {
+          expiredEndpoints.push(sub.endpoint);
+        }
+        console.error('[WPN Send Error]', err.statusCode || err.message);
         return null;
       });
     });
 
-    Promise.all(promises).then(results => {
-      const successCount = results.filter(r => r !== null).length;
-      res.json({ success: true, message: `Đã gửi thành công ${successCount}/${targetEndpoints.length} thiết bị` });
-    });
+    const results = await Promise.all(promises);
+    const successCount = results.filter(r => r !== null).length;
 
+    // Dọn dẹp các subscription đã hết hạn
+    if (expiredEndpoints.length > 0) {
+      try {
+        for (const k in subs) {
+          if (Array.isArray(subs[k])) {
+            subs[k] = subs[k].filter(s => !expiredEndpoints.includes(s.endpoint));
+          }
+        }
+        writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
+      } catch (_) {}
+    }
+
+    res.json({
+      success: true,
+      message: `Đã gửi thành công đến ${successCount}/${targetEndpoints.length} thiết bị!`,
+      successCount,
+      totalTargeted: targetEndpoints.length
+    });
   } catch (err) {
     console.error('[API /api/wpn/send] Lỗi:', err);
     res.status(500).json({ error: err.message });

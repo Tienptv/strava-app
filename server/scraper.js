@@ -579,7 +579,10 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
 
     console.log(`✅ Tải trang xong trong ${Date.now() - t0}ms`);
 
-    // Lấy danh sách prop strings từ DOM
+    // 1. Trích xuất prop strings từ DOM để lấy đợt bài đầu tiên và thông tin con trỏ (cursor)
+    let lastEntryDate = null;
+    let viewingAthleteId = null;
+
     const initialPropsStrings = await page.evaluate(() => {
       return Array.from(document.querySelectorAll('[data-react-props]'))
         .map(el => el.getAttribute('data-react-props'));
@@ -589,35 +592,98 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
       try {
         const props = JSON.parse(str);
         const entries = props?.appContext?.preFetchedEntries || props?.preFetchedEntries || props?.feed?.entries || props?.entries;
-        if (entries) {
+        if (entries && Array.isArray(entries)) {
           parseEntries(entries);
+          if (!viewingAthleteId) {
+            viewingAthleteId = props?.appContext?.athlete?.id || props?.viewingAthlete?.id || entries[0]?.viewingAthlete?.id;
+          }
+          if (entries.length > 0) {
+            const last = entries[entries.length - 1];
+            if (last?.activity?.startDate) {
+              lastEntryDate = last.activity.startDate;
+            }
+          }
         }
       } catch (e) {}
     }
 
-    // Scroll to fetch more if limit > runCount
-    let noNewDataCount = 0;
-    const maxEmptyScrolls = 10; // Tối đa 10 lần cuộn không có dữ liệu mới
-    
     let getRunCount = () => Array.from(allActivities.values()).filter(a => {
       const t = (a.type || '').toLowerCase();
       return ['run', 'virtualrun', 'trailrun', 'trail run'].includes(t) || t.includes('run') || t.includes('trail');
     }).length;
     let runCount = getRunCount();
+    console.log(`Đợt đầu tiên: ${runCount}/${limit} Run/TrailRun (Tổng act: ${allActivities.size})`);
 
-    while (runCount < limit && noNewDataCount < maxEmptyScrolls) {
-      const prevSize = allActivities.size;
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      await new Promise(r => setTimeout(r, 2000)); // Chờ 2s để API load
-      
-      if (allActivities.size === prevSize) {
-        noNewDataCount++;
-      } else {
-        noNewDataCount = 0;
+    // 2. TỐI ƯU HÓA: Nếu cần cào thêm (limit > runCount), gọi trực tiếp API feed từ phiên trình duyệt
+    if (runCount < limit && lastEntryDate) {
+      let initialCursor = Math.floor(new Date(lastEntryDate).getTime() / 1000);
+
+      const additionalEntries = await page.evaluate(async (clubId, athleteId, startCursor, neededCount) => {
+        const entriesList = [];
+        let cursor = startCursor;
+        let pageCount = 0;
+        const maxPages = Math.ceil(neededCount / 15) + 3;
+
+        while (cursor && entriesList.length < neededCount && pageCount < maxPages) {
+          pageCount++;
+          const apiUrl = `/clubs/${clubId}/feed?feed_type=club&athlete_id=${athleteId || ''}&club_id=${clubId}&before=${cursor}&cursor=${cursor}`;
+          try {
+            const resp = await fetch(apiUrl, {
+              headers: {
+                'x-requested-with': 'XMLHttpRequest',
+                'accept': 'application/json, text/javascript, */*; q=0.01'
+              }
+            });
+            if (!resp.ok) break;
+            const data = await resp.json();
+            const entries = data.entries || [];
+            if (entries.length === 0) break;
+
+            entriesList.push(...entries);
+
+            const lastEntry = entries[entries.length - 1];
+            if (lastEntry?.activity?.startDate) {
+              cursor = Math.floor(new Date(lastEntry.activity.startDate).getTime() / 1000);
+            } else {
+              break;
+            }
+
+            if (data.pagination && data.pagination.hasMore === false) {
+              break;
+            }
+          } catch (err) {
+            break;
+          }
+        }
+        return entriesList;
+      }, clubId, viewingAthleteId, initialCursor, (limit - runCount) * 2);
+
+      if (additionalEntries && additionalEntries.length > 0) {
+        parseEntries(additionalEntries);
+        runCount = getRunCount();
+        console.log(`⚡ Direct Feed Fetch hoàn tất: Lấy thêm ${additionalEntries.length} entries -> Hiện có ${runCount}/${limit} Run/TrailRun`);
       }
-      
-      runCount = getRunCount();
-      console.log(`Đang cuộn lấy thêm dữ liệu: ${runCount}/${limit} Run/TrailRun (Tổng act: ${allActivities.size})`);
+    }
+
+    // 3. FALLBACK: Nếu direct fetch chưa đủ và vẫn cần thêm, dùng cuộn trang dự phòng
+    if (runCount < limit) {
+      let noNewDataCount = 0;
+      const maxEmptyScrolls = 5;
+
+      while (runCount < limit && noNewDataCount < maxEmptyScrolls) {
+        const prevSize = allActivities.size;
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+        await new Promise(r => setTimeout(r, 2000));
+        
+        if (allActivities.size === prevSize) {
+          noNewDataCount++;
+        } else {
+          noNewDataCount = 0;
+        }
+        
+        runCount = getRunCount();
+        console.log(`Fallback cuộn trang: ${runCount}/${limit} Run/TrailRun (Tổng act: ${allActivities.size})`);
+      }
     }
 
     await browser.close();

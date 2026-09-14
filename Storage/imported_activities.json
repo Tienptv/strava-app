@@ -1884,18 +1884,6 @@
     }
   },
   {
-    "id": "19987713215",
-    "type": "Run",
-    "distance": 5005,
-    "moving_time": 1740,
-    "start_date_local": "2026-09-01T16:56:46Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Sơn",
-      "lastname": "Nguyễn-Lê"
-    }
-  },
-  {
     "id": "20001869985",
     "type": "Run",
     "distance": 10187,
@@ -2028,66 +2016,6 @@
     }
   },
   {
-    "id": "20002739424",
-    "type": "Run",
-    "distance": 5020,
-    "moving_time": 1758,
-    "start_date_local": "2026-09-02T16:24:35Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Sơn",
-      "lastname": "Nguyễn-Lê"
-    }
-  },
-  {
-    "id": "19998549175",
-    "type": "Run",
-    "distance": 7000,
-    "moving_time": 3129,
-    "start_date_local": "2026-09-02T06:15:08Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Huy",
-      "lastname": "Hoang"
-    }
-  },
-  {
-    "id": "19998397290",
-    "type": "Run",
-    "distance": 6590,
-    "moving_time": 3250,
-    "start_date_local": "2026-09-02T06:05:28Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Quy",
-      "lastname": "Truong"
-    }
-  },
-  {
-    "id": "20013934278",
-    "type": "Run",
-    "distance": 4200,
-    "moving_time": 2792,
-    "start_date_local": "2026-09-02T21:07:11Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Sang",
-      "lastname": "Nguyen"
-    }
-  },
-  {
-    "id": "20004409211",
-    "type": "Run",
-    "distance": 2900,
-    "moving_time": 1293,
-    "start_date_local": "2026-09-02T18:44:26Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Linh",
-      "lastname": "Tran"
-    }
-  },
-  {
     "id": "19818920435",
     "type": "Run",
     "distance": 7.4,
@@ -2100,42 +2028,6 @@
     }
   },
   {
-    "id": "20018534345",
-    "type": "Run",
-    "distance": 5010,
-    "moving_time": 2317,
-    "start_date_local": "2026-09-03T17:59:25Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Linh",
-      "lastname": "Tran"
-    }
-  },
-  {
-    "id": "20053265713",
-    "type": "Run",
-    "distance": 4110,
-    "moving_time": 2578,
-    "start_date_local": "2026-09-03T04:59:33Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Thanh",
-      "lastname": "Xuan"
-    }
-  },
-  {
-    "id": "20009941941",
-    "type": "Run",
-    "distance": 3280,
-    "moving_time": 2135,
-    "start_date_local": "2026-09-03T00:54:24Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Huy",
-      "lastname": "Vu"
-    }
-  },
-  {
     "id": "19992561619",
     "type": "Run",
     "distance": 2425.1,
@@ -2145,30 +2037,6 @@
       "id": 133066813,
       "firstname": "Tien",
       "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "20018534345",
-    "type": "Run",
-    "distance": 5011.3,
-    "moving_time": 2317,
-    "start_date_local": "2026-09-03T17:59:25Z",
-    "athlete": {
-      "id": 396392361,
-      "firstname": "Linh",
-      "lastname": "Tran"
-    }
-  },
-  {
-    "id": "20004409211",
-    "type": "Run",
-    "distance": 2908.7,
-    "moving_time": 1293,
-    "start_date_local": "2026-09-02T18:44:26Z",
-    "athlete": {
-      "id": 396392361,
-      "firstname": "Linh",
-      "lastname": "Tran"
     }
   },
   {
@@ -2196,30 +2064,6 @@
     }
   },
   {
-    "id": "20031310988",
-    "type": "Run",
-    "distance": 100,
-    "moving_time": 342,
-    "start_date_local": "2026-09-04T09:01:01Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "20026832243",
-    "type": "Run",
-    "distance": 6950,
-    "moving_time": 3402,
-    "start_date_local": "2026-09-04T05:25:03Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Quy",
-      "lastname": "Truong"
-    }
-  },
-  {
     "id": "20053268652",
     "type": "Run",
     "distance": 4110,
@@ -2229,18 +2073,6 @@
       "id": null,
       "firstname": "Thanh",
       "lastname": "Xuan"
-    }
-  },
-  {
-    "id": "20031310988",
-    "type": "Run",
-    "distance": 107.6,
-    "moving_time": 342,
-    "start_date_local": "2026-09-04T09:01:01Z",
-    "athlete": {
-      "id": 133066813,
-      "firstname": "Tien",
-      "lastname": "PhamTV"
     }
   },
   {
@@ -2505,66 +2337,6 @@
       "id": 110041582,
       "firstname": "An",
       "lastname": "Ha"
-    }
-  },
-  {
-    "id": "20042551985",
-    "type": "Run",
-    "distance": 10010,
-    "moving_time": 4500,
-    "start_date_local": "2026-09-05T13:40:24Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Sơn",
-      "lastname": "Nguyễn-Lê"
-    }
-  },
-  {
-    "id": "20041770225",
-    "type": "Run",
-    "distance": 11830,
-    "moving_time": 5580,
-    "start_date_local": "2026-09-05T05:20:17Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Huy",
-      "lastname": "Hoang"
-    }
-  },
-  {
-    "id": "20039584792",
-    "type": "Run",
-    "distance": 5710,
-    "moving_time": 2473,
-    "start_date_local": "2026-09-05T06:06:41Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Abba",
-      "lastname": "Vũ"
-    }
-  },
-  {
-    "id": "20053268642",
-    "type": "Run",
-    "distance": 3430,
-    "moving_time": 1943,
-    "start_date_local": "2026-09-05T05:03:58Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Thanh",
-      "lastname": "Xuan"
-    }
-  },
-  {
-    "id": "20030240477",
-    "type": "Run",
-    "distance": 20410,
-    "moving_time": 14460,
-    "start_date_local": "2026-09-04T05:58:19Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Vĩnh",
-      "lastname": "Phạm"
     }
   },
   {
@@ -3023,75 +2795,15 @@
     "map_url": "https://d3o5xota0a1fcr.cloudfront.net/v6/maps/32T6V3EMT7NLGRT4LVFU2KJFDGVHAWBHRVFQLTWB6PCNAJXGSGHQEADWYV7W7U7X76CHXBVIO4SYYBDG2SYQN2DCAKRINHZBMJEFQ==="
   },
   {
-    "id": "20013934278",
+    "id": "20165625011",
     "type": "Run",
-    "distance": 4199.3,
-    "moving_time": 2792,
-    "start_date_local": "2026-09-02T21:07:11Z",
+    "distance": 3750,
+    "moving_time": 2185,
+    "start_date_local": "2026-09-13T15:20:35Z",
     "athlete": {
-      "id": 125487039,
+      "id": null,
       "firstname": "Sang",
       "lastname": "Nguyen"
-    }
-  },
-  {
-    "id": "20081249127",
-    "type": "Run",
-    "distance": 4020,
-    "moving_time": 2642,
-    "start_date_local": "2026-09-08T05:01:15Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Thanh",
-      "lastname": "Xuan"
-    }
-  },
-  {
-    "id": "20074657805",
-    "type": "Run",
-    "distance": 7999.6,
-    "moving_time": 3769,
-    "start_date_local": "2026-09-07T20:29:15Z",
-    "athlete": {
-      "id": 133066813,
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "20054406130",
-    "type": "Run",
-    "distance": 3640.6,
-    "moving_time": 2854,
-    "start_date_local": "2026-09-06T07:28:04Z",
-    "athlete": {
-      "id": 133066813,
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "20097019118",
-    "type": "Run",
-    "distance": 168.2,
-    "moving_time": 470,
-    "start_date_local": "2026-09-09T09:03:28Z",
-    "athlete": {
-      "id": 133066813,
-      "firstname": "Tien",
-      "lastname": "PhamTV"
-    }
-  },
-  {
-    "id": "20128796096",
-    "type": "Run",
-    "distance": 2000,
-    "moving_time": 882,
-    "start_date_local": "2026-09-10T23:13:41Z",
-    "athlete": {
-      "id": null,
-      "firstname": "Huy",
-      "lastname": "Vu"
     }
   },
   {
@@ -3212,6 +2924,246 @@
       "id": null,
       "firstname": "Phuong",
       "lastname": "Ngo"
+    }
+  },
+  {
+    "id": "20128796096",
+    "type": "Run",
+    "distance": 2000,
+    "moving_time": 882,
+    "start_date_local": "2026-09-10T23:13:41Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Huy",
+      "lastname": "Vu"
+    }
+  },
+  {
+    "id": "20081249127",
+    "type": "Run",
+    "distance": 4020,
+    "moving_time": 2642,
+    "start_date_local": "2026-09-08T05:01:15Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Thanh",
+      "lastname": "Xuan"
+    }
+  },
+  {
+    "id": "20165625017",
+    "type": "Run",
+    "distance": 2550,
+    "moving_time": 1579,
+    "start_date_local": "2026-09-06T20:39:33Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Sang",
+      "lastname": "Nguyen"
+    }
+  },
+  {
+    "id": "20042551985",
+    "type": "Run",
+    "distance": 10010,
+    "moving_time": 4500,
+    "start_date_local": "2026-09-05T13:40:24Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Sơn",
+      "lastname": "Nguyễn-Lê"
+    }
+  },
+  {
+    "id": "20041770225",
+    "type": "Run",
+    "distance": 11830,
+    "moving_time": 5580,
+    "start_date_local": "2026-09-05T05:20:17Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Huy",
+      "lastname": "Hoang"
+    }
+  },
+  {
+    "id": "20039584792",
+    "type": "Run",
+    "distance": 5710,
+    "moving_time": 2473,
+    "start_date_local": "2026-09-05T06:06:41Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Abba",
+      "lastname": "Vũ"
+    }
+  },
+  {
+    "id": "20053268642",
+    "type": "Run",
+    "distance": 3430,
+    "moving_time": 1943,
+    "start_date_local": "2026-09-05T05:03:58Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Thanh",
+      "lastname": "Xuan"
+    }
+  },
+  {
+    "id": "20030240477",
+    "type": "Run",
+    "distance": 20410,
+    "moving_time": 14460,
+    "start_date_local": "2026-09-04T05:58:19Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Vĩnh",
+      "lastname": "Phạm"
+    }
+  },
+  {
+    "id": "20031310988",
+    "type": "Run",
+    "distance": 100,
+    "moving_time": 342,
+    "start_date_local": "2026-09-04T09:01:01Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Tien",
+      "lastname": "PhamTV"
+    }
+  },
+  {
+    "id": "20026832243",
+    "type": "Run",
+    "distance": 6950,
+    "moving_time": 3402,
+    "start_date_local": "2026-09-04T05:25:03Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Quy",
+      "lastname": "Truong"
+    }
+  },
+  {
+    "id": "20165623282",
+    "type": "Run",
+    "distance": 1830,
+    "moving_time": 1125,
+    "start_date_local": "2026-09-03T21:05:47Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Sang",
+      "lastname": "Nguyen"
+    }
+  },
+  {
+    "id": "20018534345",
+    "type": "Run",
+    "distance": 5010,
+    "moving_time": 2317,
+    "start_date_local": "2026-09-03T17:59:25Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Linh",
+      "lastname": "Tran"
+    }
+  },
+  {
+    "id": "20053265713",
+    "type": "Run",
+    "distance": 4110,
+    "moving_time": 2578,
+    "start_date_local": "2026-09-03T04:59:33Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Thanh",
+      "lastname": "Xuan"
+    }
+  },
+  {
+    "id": "20009941941",
+    "type": "Run",
+    "distance": 3280,
+    "moving_time": 2135,
+    "start_date_local": "2026-09-03T00:54:24Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Huy",
+      "lastname": "Vu"
+    }
+  },
+  {
+    "id": "20013934278",
+    "type": "Run",
+    "distance": 4200,
+    "moving_time": 2792,
+    "start_date_local": "2026-09-02T21:07:11Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Sang",
+      "lastname": "Nguyen"
+    }
+  },
+  {
+    "id": "20004409211",
+    "type": "Run",
+    "distance": 2900,
+    "moving_time": 1293,
+    "start_date_local": "2026-09-02T18:44:26Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Linh",
+      "lastname": "Tran"
+    }
+  },
+  {
+    "id": "20002739424",
+    "type": "Run",
+    "distance": 5020,
+    "moving_time": 1758,
+    "start_date_local": "2026-09-02T16:24:35Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Sơn",
+      "lastname": "Nguyễn-Lê"
+    }
+  },
+  {
+    "id": "19998549175",
+    "type": "Run",
+    "distance": 7000,
+    "moving_time": 3129,
+    "start_date_local": "2026-09-02T06:15:08Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Huy",
+      "lastname": "Hoang"
+    }
+  },
+  {
+    "id": "19998397290",
+    "type": "Run",
+    "distance": 6590,
+    "moving_time": 3250,
+    "start_date_local": "2026-09-02T06:05:28Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Quy",
+      "lastname": "Truong"
+    }
+  },
+  {
+    "id": "19987713215",
+    "type": "Run",
+    "distance": 5010,
+    "moving_time": 1740,
+    "start_date_local": "2026-09-01T16:56:46Z",
+    "athlete": {
+      "id": null,
+      "firstname": "Sơn",
+      "lastname": "Nguyễn-Lê"
     }
   },
   {

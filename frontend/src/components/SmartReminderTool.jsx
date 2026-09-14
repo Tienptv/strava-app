@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Send, Copy, Check, RefreshCw, Users, AlertTriangle, Target, Zap, ChevronDown, ChevronUp, Settings, Save, X } from 'lucide-react';
+import { 
+  Send, Copy, Check, RefreshCw, Users, AlertTriangle, Target, Zap, 
+  ChevronDown, ChevronUp, Settings, Save, X, Smartphone, Bell, BellRing, Radio 
+} from 'lucide-react';
+import Swal from 'sweetalert2';
 import { useLang } from '../i18n/LangContext';
 
 const VN_BANKS = [
@@ -32,16 +36,29 @@ function buildVietQRUrl(bankConfig, amount = 0, content = '') {
   return `${base}/${bank}-${acct}-compact2.png?amount=${amt}&addInfo=${msg}&accountName=${name}`;
 }
 
+// Helper gửi Web Push Notification
+async function sendPushNotification({ targetId, athleteKey, athleteName, title, body, url }) {
+  try {
+    const res = await fetch('/api/wpn/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetId, athleteKey, athleteName, title, body, url: url || '/' })
+    });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 // ─── Tab 1: Nhắc chạy ────────────────────────────────────────────────────────
-function RunningReminderTab({ data, lang }) {
+function RunningReminderTab({ data, subscribersStatus, lang, t, onRefresh }) {
   const [copied, setCopied] = useState(false);
   const [expandLowPct, setExpandLowPct] = useState(true);
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
+
   const now = new Date();
   const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
-  const dayOfWeek = now.getDay();
-  const dayNames = lang === 'en'
-    ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-    : ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
   const runners = data?.shortfallRunners || [];
   const penaltyRunners = runners.filter(r => r.hasPenalty && r.pctMonth < 100);
@@ -86,6 +103,156 @@ function RunningReminderTab({ data, lang }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Bắn push nhắc nhở toàn CLB
+  const handleBroadcastPush = async () => {
+    const totalDevices = subscribersStatus?.totalDevices || 0;
+    const defaultTitle = lang === 'en'
+      ? `🏃 Haskoning Running Club - Month ${now.getMonth() + 1} Goal!`
+      : `🏃 HRC 200K - Cập nhật mục tiêu tháng ${now.getMonth() + 1}!`;
+    const defaultBody = lang === 'en'
+      ? `Only ${daysLeft} days left in the month! Every km counts, lace up and let's conquer our goals together!`
+      : `Chỉ còn ${daysLeft} ngày nữa là kết thúc tháng. Hãy lên giày và cùng nhau hoàn thành mục tiêu nhé!`;
+
+    const { value: formValues } = await Swal.fire({
+      title: `<span style="font-size: 1.15rem; color: #002D54; font-weight: 800;">${t('confirmBroadcastTitle')}</span>`,
+      html: `
+        <div style="text-align: left; font-size: 0.85rem; color: #334155;">
+          <p style="margin-bottom: 12px; color: #00A3A6; font-weight: 700;">
+            📱 ${lang === 'en' ? `Targeting ${totalDevices} registered devices` : `Sẽ gửi đến ${totalDevices} thiết bị đang đăng ký`}
+          </p>
+          <label style="display: block; font-weight: 700; margin-bottom: 4px;">${t('pushTitleLabel')}:</label>
+          <input id="swal-push-title" class="swal2-input" style="width: 100%; margin: 0 0 12px; padding: 8px 12px; font-size: 0.85rem; box-sizing: border-box;" value="${defaultTitle}" />
+          <label style="display: block; font-weight: 700; margin-bottom: 4px;">${t('pushBodyLabel')}:</label>
+          <textarea id="swal-push-body" class="swal2-textarea" style="width: 100%; margin: 0; padding: 8px 12px; font-size: 0.85rem; height: 80px; box-sizing: border-box;">${defaultBody}</textarea>
+          <p style="font-size: 0.75rem; color: #64748b; margin-top: 8px;">ℹ️ ${t('broadcastNote')}</p>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonColor: '#00A3A6',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: `🚀 ${t('pushSendNow')}`,
+      cancelButtonText: lang === 'en' ? 'Cancel' : 'Hủy',
+      preConfirm: () => {
+        return {
+          title: document.getElementById('swal-push-title').value.trim(),
+          body: document.getElementById('swal-push-body').value.trim()
+        };
+      }
+    });
+
+    if (formValues && formValues.title && formValues.body) {
+      setSendingBroadcast(true);
+      Swal.fire({
+        title: lang === 'en' ? 'Broadcasting Push Notification...' : 'Đang bắn thông báo đến toàn CLB...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      const res = await sendPushNotification({
+        targetId: 'all',
+        title: formValues.title,
+        body: formValues.body,
+        url: '/'
+      });
+
+      setSendingBroadcast(false);
+
+      if (res.success) {
+        Swal.fire({
+          title: '🎉 ' + t('pushNotificationSuccess'),
+          text: res.message || (lang === 'en' ? `Delivered to ${res.successCount || totalDevices} devices.` : `Đã gửi đến ${res.successCount || totalDevices} thiết bị.`),
+          icon: 'success',
+          confirmButtonColor: '#00A3A6'
+        });
+      } else {
+        Swal.fire({
+          title: '⚠️ ' + t('pushNotificationError'),
+          text: (lang === 'en' && res.errorEn) ? res.errorEn : (res.error || 'Unknown error'),
+          icon: 'warning',
+          confirmButtonColor: '#00A3A6'
+        });
+      }
+    }
+  };
+
+  // Bắn push riêng cho 1 cá nhân
+  const handlePushRunner = async (r) => {
+    const isSubscribed = subscribersStatus?.athleteMap?.[r.athleteId]?.registered || subscribersStatus?.athleteMap?.[r.key]?.registered;
+
+    if (!isSubscribed) {
+      Swal.fire({
+        title: lang === 'en' ? 'Push Not Available' : 'Chưa Có Thiết Bị Nhận Push',
+        text: t('noRegisteredDeviceAlert'),
+        icon: 'info',
+        confirmButtonColor: '#00A3A6',
+        confirmButtonText: lang === 'en' ? 'OK' : 'Đã hiểu'
+      });
+      return;
+    }
+
+    const defaultTitle = lang === 'en' ? '🏃 Haskoning Running Club Reminder' : '🏃 Nhắc nhở chạy bộ HRC';
+    const defaultBody = lang === 'en'
+      ? `Hi ${r.runnerName}! You have reached ${r.actualKm}/${r.targetKm}km (${r.pctMonth}%). Keep going to reach your goal!`
+      : `Chào ${r.runnerName}! Bạn đã hoàn thành ${r.actualKm}/${r.targetKm}km (${r.pctMonth}%). Cùng cố gắng hoàn thành mục tiêu nhé!`;
+
+    const { value: formValues } = await Swal.fire({
+      title: `<span style="font-size: 1.1rem; color: #002D54; font-weight: 800;">📲 ${t('confirmSendPushTitle')}</span>`,
+      html: `
+        <div style="text-align: left; font-size: 0.85rem; color: #334155;">
+          <p style="margin-bottom: 8px;"><b>${t('pushRecipientLabel')}:</b> <span style="color: #002D54; font-weight: 800;">${r.runnerName}</span></p>
+          <label style="display: block; font-weight: 700; margin-bottom: 4px;">${t('pushTitleLabel')}:</label>
+          <input id="swal-runner-title" class="swal2-input" style="width: 100%; margin: 0 0 12px; padding: 8px 12px; font-size: 0.85rem; box-sizing: border-box;" value="${defaultTitle}" />
+          <label style="display: block; font-weight: 700; margin-bottom: 4px;">${t('pushBodyLabel')}:</label>
+          <textarea id="swal-runner-body" class="swal2-textarea" style="width: 100%; margin: 0; padding: 8px 12px; font-size: 0.85rem; height: 80px; box-sizing: border-box;">${defaultBody}</textarea>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonColor: '#00A3A6',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: `🚀 ${t('pushSendNow')}`,
+      cancelButtonText: lang === 'en' ? 'Cancel' : 'Hủy',
+      preConfirm: () => {
+        return {
+          title: document.getElementById('swal-runner-title').value.trim(),
+          body: document.getElementById('swal-runner-body').value.trim()
+        };
+      }
+    });
+
+    if (formValues && formValues.title && formValues.body) {
+      Swal.fire({
+        title: lang === 'en' ? 'Sending Push...' : 'Đang gửi thông báo...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      const res = await sendPushNotification({
+        targetId: r.athleteId,
+        athleteKey: r.key,
+        athleteName: r.runnerName,
+        title: formValues.title,
+        body: formValues.body,
+        url: '/'
+      });
+
+      if (res.success) {
+        Swal.fire({
+          title: '🎉 ' + t('pushNotificationSuccess'),
+          text: res.message || (lang === 'en' ? `Sent to ${r.runnerName}'s phone.` : `Đã gửi thành công đến máy của ${r.runnerName}.`),
+          icon: 'success',
+          confirmButtonColor: '#00A3A6'
+        });
+      } else {
+        Swal.fire({
+          title: '⚠️ ' + t('pushNotificationError'),
+          text: (lang === 'en' && res.errorEn) ? res.errorEn : (res.error || 'Unknown error'),
+          icon: 'warning',
+          confirmButtonColor: '#00A3A6'
+        });
+      }
+    }
+  };
+
   return (
     <div>
       {/* Tóm tắt nhanh */}
@@ -103,25 +270,45 @@ function RunningReminderTab({ data, lang }) {
         ))}
       </div>
 
-      {/* Nút 1-click copy message */}
-      <button onClick={handleCopy}
-        style={{
-          width: '100%', padding: '12px 16px', borderRadius: '12px', border: 'none',
-          background: copied ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #00A3A6 0%, #002D54 100%)',
-          color: '#fff', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-          marginBottom: '16px', boxShadow: '0 4px 14px rgba(0,163,166,0.3)',
-        }}
-      >
-        {copied ? <Check size={16} /> : <Copy size={16} />}
-        {copied
-          ? (lang === 'en' ? '✅ Copied! Paste to Zalo/Teams' : '✅ Đã chép! Dán vào Zalo/Teams')
-          : (lang === 'en' ? '📋 1-Click: Copy group reminder message' : '📋 1-Click: Sao chép tin nhắn nhắc nhóm')}
-      </button>
+      {/* 2 Nút Hành Động Đầu Trang: Copy Zalo & Broadcast Push */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+        <button onClick={handleCopy}
+          style={{
+            padding: '12px 14px', borderRadius: '10px', border: 'none',
+            background: copied ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #00A3A6 0%, #002D54 100%)',
+            color: '#fff', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: '0 4px 14px rgba(0,163,166,0.3)',
+          }}
+          onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          {copied ? <Check size={16} /> : <Copy size={16} />}
+          {copied
+            ? (lang === 'en' ? '✅ Copied!' : '✅ Đã chép!')
+            : (lang === 'en' ? '📋 Copy for Zalo' : '📋 Chép gửi Zalo')}
+        </button>
+
+        <button onClick={handleBroadcastPush} disabled={sendingBroadcast}
+          style={{
+            padding: '12px 14px', borderRadius: '10px', border: 'none',
+            background: 'linear-gradient(135deg, #78BE20 0%, #00A3A6 100%)',
+            color: '#fff', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: '0 4px 14px rgba(120, 190, 32, 0.35)',
+          }}
+          onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <Radio size={16} />
+          {t('broadcastPush')}
+        </button>
+      </div>
 
       {/* Preview message */}
-      <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '14px', fontSize: '0.78rem', whiteSpace: 'pre-wrap', lineHeight: 1.6, color: 'var(--primary-navy)', fontFamily: 'monospace', border: '1px solid #e2e8f0', maxHeight: '180px', overflowY: 'auto' }}>
+      <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '14px', fontSize: '0.78rem', whiteSpace: 'pre-wrap', lineHeight: 1.6, color: 'var(--primary-navy)', fontFamily: 'monospace', border: '1px solid #e2e8f0', maxHeight: '160px', overflowY: 'auto' }}>
         {buildGroupMessage()}
       </div>
 
@@ -133,22 +320,65 @@ function RunningReminderTab({ data, lang }) {
             {lang === 'en' ? `${belowTarget.length} runners below 80%` : `${belowTarget.length} người dưới 80% mục tiêu`}
           </button>
           {expandLowPct && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {belowTarget.map(r => (
-                <div key={r.key} style={{ background: '#fff', borderRadius: '10px', padding: '10px 12px', border: '1px solid #fee2e2', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.83rem', color: 'var(--primary-navy)' }}>{r.runnerName}</div>
-                    <div style={{ fontSize: '0.73rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {belowTarget.map(r => {
+                const isSubscribed = subscribersStatus?.athleteMap?.[r.athleteId]?.registered || subscribersStatus?.athleteMap?.[r.key]?.registered;
+                const devCount = subscribersStatus?.athleteMap?.[r.athleteId]?.deviceCount || subscribersStatus?.athleteMap?.[r.key]?.deviceCount || 0;
+
+                return (
+                  <div key={r.key} style={{ background: '#fff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #fee2e2', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 800, fontSize: '0.86rem', color: 'var(--primary-navy)' }}>{r.runnerName}</span>
+                        {isSubscribed ? (
+                          <span title={lang === 'en' ? `Phone push active (${devCount} devices)` : `Đã bật thông báo trên điện thoại (${devCount} thiết bị)`} 
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', background: 'rgba(120, 190, 32, 0.12)', color: '#15803d', padding: '2px 7px', borderRadius: '99px', fontWeight: 700 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }}></span> 📱 {devCount} {t('pushDeviceCount')}
+                          </span>
+                        ) : (
+                          <span title={t('deviceNotRegistered')} 
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', background: '#f1f5f9', color: '#64748b', padding: '2px 7px', borderRadius: '99px', fontWeight: 600 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#94a3b8' }}></span> 📱 0
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '1rem', fontWeight: 900, color: r.pctMonth < 50 ? '#ef4444' : '#f59e0b' }}>
+                        {r.pctMonth}%
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: '0.73rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                       {r.actualKm}/{r.targetKm}km • {lang === 'en' ? `Missing ${r.shortfallKm}km` : `Thiếu ${r.shortfallKm}km`}
                       {r.weekKm > 0 && ` • ${lang === 'en' ? 'This week' : 'Tuần này'}: ${r.weekKm}km`}
                     </div>
-                    <div style={{ marginTop: '5px', height: '5px', background: '#fee2e2', borderRadius: '99px', overflow: 'hidden' }}>
+
+                    {/* Thanh tiến độ */}
+                    <div style={{ height: '5px', background: '#fee2e2', borderRadius: '99px', overflow: 'hidden', marginBottom: '10px' }}>
                       <div style={{ height: '100%', width: `${Math.min(100, r.pctMonth)}%`, background: r.pctMonth < 50 ? '#ef4444' : '#f59e0b', borderRadius: '99px', transition: 'width 0.6s ease' }} />
                     </div>
+
+                    {/* Nút bấm hành động riêng cho VĐV */}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => handlePushRunner(r)}
+                        style={{
+                          flex: 1, padding: '7px 10px', borderRadius: '8px', border: 'none',
+                          background: isSubscribed ? 'linear-gradient(135deg, #00A3A6 0%, #002D54 100%)' : '#f1f5f9',
+                          color: isSubscribed ? '#fff' : '#64748b',
+                          fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
+                          boxShadow: isSubscribed ? '0 2px 8px rgba(0,163,166,0.25)' : 'none',
+                          transition: 'all 0.2s ease',
+                        }}
+                        onMouseOver={e => { if (isSubscribed) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseOut={e => { if (isSubscribed) e.currentTarget.style.transform = 'translateY(0)'; }}
+                      >
+                        <BellRing size={13} />
+                        {t('sendPush')}
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: r.pctMonth < 50 ? '#ef4444' : '#f59e0b', minWidth: '40px', textAlign: 'right' }}>{r.pctMonth}%</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -158,8 +388,8 @@ function RunningReminderTab({ data, lang }) {
 }
 
 // ─── Tab 2: Nhắc phạt + VietQR ─────────────────────────────────────────────
-function PenaltyReminderTab({ data, lang }) {
-  const [copied, setCopied] = useState(null); // athleteId of copied
+function PenaltyReminderTab({ data, subscribersStatus, lang, t }) {
+  const [copied, setCopied] = useState(null);
   const [selectedQR, setSelectedQR] = useState(null);
   const now = new Date();
   const bankConfig = data?.bankConfig || {};
@@ -187,6 +417,84 @@ function PenaltyReminderTab({ data, lang }) {
     await navigator.clipboard.writeText(buildPersonalMsg(person));
     setCopied(person.athleteId || person.rawName);
     setTimeout(() => setCopied(null), 2000);
+  };
+
+  // Bắn Web Push phạt đến máy VĐV
+  const handlePushPenalty = async (person) => {
+    const isSubscribed = subscribersStatus?.athleteMap?.[person.athleteId]?.registered || subscribersStatus?.athleteMap?.[person.rawName]?.registered;
+
+    if (!isSubscribed) {
+      Swal.fire({
+        title: lang === 'en' ? 'Push Not Available' : 'Chưa Có Thiết Bị Nhận Push',
+        text: t('noRegisteredDeviceAlert'),
+        icon: 'info',
+        confirmButtonColor: '#00A3A6',
+        confirmButtonText: lang === 'en' ? 'OK' : 'Đã hiểu'
+      });
+      return;
+    }
+
+    const defaultTitle = lang === 'en' ? '💸 Haskoning Club Penalty Reminder' : '💸 HRC: Nhắc nộp quỹ phạt';
+    const defaultBody = lang === 'en'
+      ? `Hi ${person.fullName}! You have ${person.unpaidMonths.length} unpaid penalty month(s) (Total: ${person.totalOwing.toLocaleString('vi-VN')}đ). Please check and settle with the club fund.`
+      : `Chào ${person.fullName}! Bạn đang có ${person.unpaidMonths.length} tháng nợ phạt (Tổng: ${person.totalOwing.toLocaleString('vi-VN')}đ). Vui lòng kiểm tra và hoàn thành quỹ phạt nhé!`;
+
+    const { value: formValues } = await Swal.fire({
+      title: `<span style="font-size: 1.1rem; color: #002D54; font-weight: 800;">📲 ${t('confirmSendPushTitle')}</span>`,
+      html: `
+        <div style="text-align: left; font-size: 0.85rem; color: #334155;">
+          <p style="margin-bottom: 8px;"><b>${t('pushRecipientLabel')}:</b> <span style="color: #002D54; font-weight: 800;">${person.fullName}</span></p>
+          <label style="display: block; font-weight: 700; margin-bottom: 4px;">${t('pushTitleLabel')}:</label>
+          <input id="swal-penalty-title" class="swal2-input" style="width: 100%; margin: 0 0 12px; padding: 8px 12px; font-size: 0.85rem; box-sizing: border-box;" value="${defaultTitle}" />
+          <label style="display: block; font-weight: 700; margin-bottom: 4px;">${t('pushBodyLabel')}:</label>
+          <textarea id="swal-penalty-body" class="swal2-textarea" style="width: 100%; margin: 0; padding: 8px 12px; font-size: 0.85rem; height: 80px; box-sizing: border-box;">${defaultBody}</textarea>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonColor: '#00A3A6',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: `🚀 ${t('pushSendNow')}`,
+      cancelButtonText: lang === 'en' ? 'Cancel' : 'Hủy',
+      preConfirm: () => {
+        return {
+          title: document.getElementById('swal-penalty-title').value.trim(),
+          body: document.getElementById('swal-penalty-body').value.trim()
+        };
+      }
+    });
+
+    if (formValues && formValues.title && formValues.body) {
+      Swal.fire({
+        title: lang === 'en' ? 'Sending Push...' : 'Đang gửi thông báo...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      const res = await sendPushNotification({
+        targetId: person.athleteId,
+        athleteKey: person.rawName,
+        athleteName: person.fullName,
+        title: formValues.title,
+        body: formValues.body,
+        url: '/'
+      });
+
+      if (res.success) {
+        Swal.fire({
+          title: '🎉 ' + t('pushNotificationSuccess'),
+          text: res.message || (lang === 'en' ? `Sent to ${person.fullName}'s phone.` : `Đã gửi đến điện thoại của ${person.fullName}.`),
+          icon: 'success',
+          confirmButtonColor: '#00A3A6'
+        });
+      } else {
+        Swal.fire({
+          title: '⚠️ ' + t('pushNotificationError'),
+          text: (lang === 'en' && res.errorEn) ? res.errorEn : (res.error || 'Unknown error'),
+          icon: 'warning',
+          confirmButtonColor: '#00A3A6'
+        });
+      }
+    }
   };
 
   return (
@@ -233,12 +541,28 @@ function PenaltyReminderTab({ data, lang }) {
           {owingList.map(person => {
             const isCopied = copied === (person.athleteId || person.rawName);
             const qrUrl = buildVietQRUrl(bankConfig, person.totalOwing, `Nop phat HRC ${now.getFullYear()}`);
+            const isSubscribed = subscribersStatus?.athleteMap?.[person.athleteId]?.registered || subscribersStatus?.athleteMap?.[person.rawName]?.registered;
+            const devCount = subscribersStatus?.athleteMap?.[person.athleteId]?.deviceCount || subscribersStatus?.athleteMap?.[person.rawName]?.deviceCount || 0;
+
             return (
               <div key={person.athleteId || person.rawName} style={{ background: '#fff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #fee2e2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--primary-navy)' }}>{person.fullName}</div>
-                    <div style={{ fontSize: '0.73rem', color: 'var(--text-secondary)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--primary-navy)' }}>{person.fullName}</span>
+                      {isSubscribed ? (
+                        <span title={lang === 'en' ? `Phone push active (${devCount} devices)` : `Đã bật thông báo trên điện thoại (${devCount} thiết bị)`} 
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', background: 'rgba(120, 190, 32, 0.12)', color: '#15803d', padding: '2px 7px', borderRadius: '99px', fontWeight: 700 }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e' }}></span> 📱 {devCount} {t('pushDeviceCount')}
+                        </span>
+                      ) : (
+                        <span title={t('deviceNotRegistered')} 
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.68rem', background: '#f1f5f9', color: '#64748b', padding: '2px 7px', borderRadius: '99px', fontWeight: 600 }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#94a3b8' }}></span> 📱 0
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.73rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
                       {person.unpaidMonths.length} {lang === 'en' ? 'unpaid months' : 'tháng chưa đóng'}
                     </div>
                   </div>
@@ -256,22 +580,40 @@ function PenaltyReminderTab({ data, lang }) {
                   ))}
                 </div>
 
-                {/* Actions */}
+                {/* Actions: Chép Zalo | Bắn Push phạt | QR */}
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <button onClick={() => handleCopy(person)}
                     style={{
-                      flex: 1, padding: '7px 10px', borderRadius: '8px', border: 'none',
-                      background: isCopied ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #00A3A6 0%, #002D54 100%)',
-                      color: '#fff', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer',
+                      flex: 1, padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0',
+                      background: isCopied ? '#22c55e' : '#f8fafc',
+                      color: isCopied ? '#fff' : 'var(--primary-navy)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
                       transition: 'all 0.2s ease',
                     }}>
                     {isCopied ? <Check size={13} /> : <Copy size={13} />}
-                    {isCopied ? (lang === 'en' ? 'Copied!' : 'Đã chép!') : (lang === 'en' ? 'Copy msg' : 'Chép tin nhắn')}
+                    {isCopied ? (lang === 'en' ? 'Copied!' : 'Đã chép!') : (lang === 'en' ? 'Copy Zalo' : 'Chép Zalo')}
                   </button>
+
+                  <button onClick={() => handlePushPenalty(person)}
+                    style={{
+                      flex: 1, padding: '8px 10px', borderRadius: '8px', border: 'none',
+                      background: isSubscribed ? 'linear-gradient(135deg, #00A3A6 0%, #002D54 100%)' : '#f1f5f9',
+                      color: isSubscribed ? '#fff' : '#64748b',
+                      fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
+                      boxShadow: isSubscribed ? '0 2px 8px rgba(0,163,166,0.25)' : 'none',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseOver={e => { if (isSubscribed) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                    onMouseOut={e => { if (isSubscribed) e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    <BellRing size={13} />
+                    {t('pushPenalty')}
+                  </button>
+
                   {qrUrl && (
                     <button onClick={() => setSelectedQR(qrUrl)}
-                      style={{ padding: '7px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: 'var(--primary-navy)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: 'var(--primary-navy)', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
                       📲 QR
                     </button>
                   )}
@@ -302,7 +644,161 @@ function PenaltyReminderTab({ data, lang }) {
   );
 }
 
-// ─── Tab 3: Cấu hình STK thủ quỹ ───────────────────────────────────────────
+// ─── Tab 3: Gửi Push Tùy Chỉnh (Custom Push) ────────────────────────────────
+function CustomPushTab({ data, subscribersStatus, lang, t }) {
+  const [recipient, setRecipient] = useState('all');
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [url, setUrl] = useState('/');
+  const [sending, setSending] = useState(false);
+
+  const totalDevices = subscribersStatus?.totalDevices || 0;
+  const totalSubscribers = subscribersStatus?.totalSubscribers || 0;
+  const athleteMap = subscribersStatus?.athleteMap || {};
+
+  // Danh sách runners để chọn
+  const runners = data?.shortfallRunners || [];
+
+  const handleSend = async () => {
+    if (!title.trim() || !body.trim()) {
+      Swal.fire(lang === 'en' ? 'Missing info' : 'Thiếu thông tin', lang === 'en' ? 'Please enter both title and body.' : 'Vui lòng nhập đầy đủ tiêu đề và nội dung.', 'warning');
+      return;
+    }
+
+    setSending(true);
+    Swal.fire({
+      title: lang === 'en' ? 'Sending Custom Push...' : 'Đang gửi thông báo...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    const targetObj = recipient !== 'all' ? runners.find(r => (r.athleteId === recipient || r.key === recipient)) : null;
+
+    const res = await sendPushNotification({
+      targetId: recipient,
+      athleteKey: targetObj?.key,
+      athleteName: targetObj?.runnerName,
+      title: title.trim(),
+      body: body.trim(),
+      url: url.trim() || '/'
+    });
+
+    setSending(false);
+
+    if (res.success) {
+      Swal.fire({
+        title: '🎉 ' + t('pushNotificationSuccess'),
+        text: res.message || (lang === 'en' ? 'Delivered successfully!' : 'Đã gửi thành công!'),
+        icon: 'success',
+        confirmButtonColor: '#00A3A6'
+      });
+      setTitle('');
+      setBody('');
+    } else {
+      Swal.fire({
+        title: '⚠️ ' + t('pushNotificationError'),
+        text: (lang === 'en' && res.errorEn) ? res.errorEn : (res.error || 'Unknown error'),
+        icon: 'warning',
+        confirmButtonColor: '#00A3A6'
+      });
+    }
+  };
+
+  return (
+    <div>
+      {/* Banner thống kê thiết bị */}
+      <div style={{ background: 'linear-gradient(135deg, rgba(0, 45, 84, 0.06) 0%, rgba(0, 163, 166, 0.08) 100%)', borderRadius: '12px', padding: '14px 16px', marginBottom: '18px', border: '1px solid rgba(0,163,166,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--primary-navy)' }}>
+            📱 {lang === 'en' ? 'Registered Devices Network' : 'Mạng lưới thiết bị đã đăng ký'}
+          </div>
+          <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            {lang === 'en' ? 'Members who enabled notifications on Android / iPhone PWA' : 'Các thành viên đã bật quyền nhận thông báo trên điện thoại Android / iPhone'}
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#00A3A6' }}>{totalDevices}</span>
+          <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '4px' }}>{t('pushDeviceCount')}</span>
+          <div style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 700 }}>{totalSubscribers} {lang === 'en' ? 'athletes' : 'VĐV'}</div>
+        </div>
+      </div>
+
+      {/* Form soạn Push */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        {/* Recipient */}
+        <div>
+          <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-navy)', display: 'block', marginBottom: '5px' }}>
+            {t('pushRecipientLabel')} *
+          </label>
+          <select value={recipient} onChange={e => setRecipient(e.target.value)}
+            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem', color: 'var(--primary-navy)', background: '#fff', cursor: 'pointer', boxSizing: 'border-box' }}>
+            <option value="all">📢 {t('pushRecipientAll')} ({totalDevices} {t('pushDeviceCount')})</option>
+            {runners.map(r => {
+              const hasDev = athleteMap[r.athleteId]?.registered || athleteMap[r.key]?.registered;
+              const count = athleteMap[r.athleteId]?.deviceCount || athleteMap[r.key]?.deviceCount || 0;
+              return (
+                <option key={r.athleteId || r.key} value={r.athleteId || r.key}>
+                  {hasDev ? '🟢' : '⚪'} {r.runnerName} {hasDev ? `(${count} máy)` : `(Chưa bật Push)`}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        {/* Title */}
+        <div>
+          <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-navy)', display: 'block', marginBottom: '5px' }}>
+            {t('pushTitleLabel')} *
+          </label>
+          <input type="text" value={title} onChange={e => setTitle(e.target.value)}
+            placeholder={lang === 'en' ? 'e.g. Haskoning Club Alert' : 'VD: Thông báo quan trọng từ HRC'}
+            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.88rem', fontWeight: 600, boxSizing: 'border-box' }} />
+        </div>
+
+        {/* Body */}
+        <div>
+          <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-navy)', display: 'block', marginBottom: '5px' }}>
+            {t('pushBodyLabel')} *
+          </label>
+          <textarea value={body} onChange={e => setBody(e.target.value)}
+            placeholder={lang === 'en' ? 'Enter notification message to display on phone lock screen...' : 'Nhập nội dung thông báo sẽ hiện trên màn hình khóa điện thoại...'}
+            rows={3}
+            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem', lineHeight: 1.5, boxSizing: 'border-box', resize: 'vertical' }} />
+        </div>
+
+        {/* URL */}
+        <div>
+          <label style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-navy)', display: 'block', marginBottom: '5px' }}>
+            {lang === 'en' ? 'Click action URL' : 'Đường link khi chạm vào thông báo'}
+          </label>
+          <input type="text" value={url} onChange={e => setUrl(e.target.value)}
+            placeholder="/"
+            style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.85rem', color: '#64748b', boxSizing: 'border-box' }} />
+        </div>
+
+        {/* Nút gửi */}
+        <button onClick={handleSend} disabled={sending || !title.trim() || !body.trim()}
+          style={{
+            marginTop: '8px', padding: '12px 16px', borderRadius: '10px', border: 'none',
+            background: 'linear-gradient(135deg, #78BE20 0%, #00A3A6 100%)',
+            color: '#fff', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            opacity: (sending || !title.trim() || !body.trim()) ? 0.6 : 1,
+            boxShadow: '0 4px 14px rgba(120, 190, 32, 0.35)',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          onMouseOver={e => { if (title.trim() && body.trim()) e.currentTarget.style.transform = 'translateY(-2px)'; }}
+          onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <Send size={16} />
+          {sending ? (lang === 'en' ? 'Sending...' : 'Đang gửi...') : t('pushSendNow')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tab 4: Cấu hình STK thủ quỹ ───────────────────────────────────────────
 function BankConfigTab({ lang, onSaved }) {
   const [form, setForm] = useState({ bankCode: '', accountNumber: '', accountName: '', bankName: '' });
   const [saving, setSaving] = useState(false);
@@ -399,9 +895,10 @@ function BankConfigTab({ lang, onSaved }) {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function SmartReminderTool() {
-  const { lang } = useLang();
+  const { lang, t } = useLang();
   const [activeTab, setActiveTab] = useState('running');
   const [data, setData] = useState(null);
+  const [subscribersStatus, setSubscribersStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lastFetch, setLastFetch] = useState(null);
   const [error, setError] = useState(null);
@@ -410,10 +907,18 @@ export default function SmartReminderTool() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/notifications/reminders/summary');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
+      const [summaryRes, subsRes] = await Promise.all([
+        fetch('/api/notifications/reminders/summary'),
+        fetch('/api/wpn/subscribers-status').catch(() => null)
+      ]);
+      if (!summaryRes.ok) throw new Error(`HTTP ${summaryRes.status}`);
+      const json = await summaryRes.json();
       setData(json);
+
+      if (subsRes && subsRes.ok) {
+        const subsJson = await subsRes.json();
+        setSubscribersStatus(subsJson);
+      }
       setLastFetch(new Date());
     } catch (e) {
       setError(e.message);
@@ -427,19 +932,21 @@ export default function SmartReminderTool() {
   const TABS = [
     { key: 'running', icon: <Target size={14} />, label: lang === 'en' ? 'Running reminders' : 'Nhắc chạy' },
     { key: 'penalty', icon: <AlertTriangle size={14} />, label: lang === 'en' ? 'Penalty reminders' : 'Nhắc phạt' },
+    { key: 'custompush', icon: <Radio size={14} />, label: t('customPushTab') },
     { key: 'bankconfig', icon: <Settings size={14} />, label: lang === 'en' ? 'Bank config' : 'Cấu hình STK' },
   ];
 
   return (
-    <div style={{ maxWidth: '700px' }}>
+    <div style={{ maxWidth: '720px' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary-navy)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Zap size={18} color="var(--accent)" /> {lang === 'en' ? 'Smart Reminder Tool' : 'Công cụ Nhắc nhở Thông minh'}
+            <Zap size={18} color="var(--accent)" /> {lang === 'en' ? 'Smart Reminder & Push Tool' : 'Công cụ Nhắc nhở & Bắn Push Thông minh'}
           </h3>
           {lastFetch && <p style={{ margin: '2px 0 0', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
             {lang === 'en' ? 'Updated' : 'Cập nhật'}: {lastFetch.toLocaleTimeString('vi-VN')}
+            {subscribersStatus?.totalDevices > 0 && ` • 📱 ${subscribersStatus.totalDevices} ${t('pushDeviceCount')}`}
           </p>}
         </div>
         <button onClick={loadData} disabled={loading}
@@ -453,7 +960,7 @@ export default function SmartReminderTool() {
       </div>
 
       {/* Tab switcher */}
-      <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '12px', padding: '4px', marginBottom: '16px', gap: '4px' }}>
+      <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '12px', padding: '4px', marginBottom: '16px', gap: '4px', overflowX: 'auto' }}>
         {TABS.map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             style={{
@@ -463,6 +970,7 @@ export default function SmartReminderTool() {
               color: activeTab === tab.key ? 'var(--primary-navy)' : 'var(--text-secondary)',
               boxShadow: activeTab === tab.key ? '0 2px 8px rgba(0,0,0,0.09)' : 'none',
               transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
             }}>
             {tab.icon} {tab.label}
           </button>
@@ -484,8 +992,9 @@ export default function SmartReminderTool() {
         </div>
       ) : (
         <>
-          {activeTab === 'running' && <RunningReminderTab data={data} lang={lang} />}
-          {activeTab === 'penalty' && <PenaltyReminderTab data={data} lang={lang} />}
+          {activeTab === 'running' && <RunningReminderTab data={data} subscribersStatus={subscribersStatus} lang={lang} t={t} onRefresh={loadData} />}
+          {activeTab === 'penalty' && <PenaltyReminderTab data={data} subscribersStatus={subscribersStatus} lang={lang} t={t} />}
+          {activeTab === 'custompush' && <CustomPushTab data={data} subscribersStatus={subscribersStatus} lang={lang} t={t} />}
           {activeTab === 'bankconfig' && <BankConfigTab lang={lang} onSaved={loadData} />}
         </>
       )}
