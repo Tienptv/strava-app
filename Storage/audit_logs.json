@@ -1,5 +1,19 @@
 [
   {
+    "id": "1789359181105",
+    "timestamp": "2026-09-14T04:13:01.105Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (289 mục), targets.json (51 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
+  },
+  {
+    "id": "1789358225422",
+    "timestamp": "2026-09-14T03:57:05.422Z",
+    "action": "Git Push",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
+  },
+  {
     "id": "1789358211713",
     "timestamp": "2026-09-14T03:56:51.713Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1381,20 +1395,6 @@
   {
     "id": "1788709242485",
     "timestamp": "2026-09-06T15:40:42.485Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2027)"
-  },
-  {
-    "id": "1788708891481",
-    "timestamp": "2026-09-06T15:34:51.481Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788708891468",
-    "timestamp": "2026-09-06T15:34:51.468Z",
     "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
     "user": "Tien PhamTV",
     "details": "Đã cập nhật cấu hình Club Goal (2027)"
