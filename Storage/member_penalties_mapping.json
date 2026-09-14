@@ -119,11 +119,11 @@
       },
       "monthlyPaymentStatus": {
         "2026-09": {
-          "status": "paid",
-          "paidAt": "2026-09-05T05:35:53.590Z",
+          "status": "unpaid",
+          "paidAt": null,
           "note": "Chuyển khoản Techcombank 200k",
-          "updatedBy": "Admin Test",
-          "updatedAt": "2026-09-05T05:35:53.590Z"
+          "updatedBy": "Tien PhamTV",
+          "updatedAt": "2026-09-14T03:56:27.488Z"
         },
         "2026-03": {
           "status": "paid",

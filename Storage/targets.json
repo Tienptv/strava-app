@@ -97,8 +97,8 @@
     "target": 1
   },
   "Sang_N._2026_9": {
-    "penalty": false,
-    "target": 10
+    "penalty": true,
+    "target": 20
   },
   "Linh_T._2026_9": {
     "target": 50,
