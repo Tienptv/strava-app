@@ -165,7 +165,7 @@ function addAuditLog(action, user = 'System', details = '') {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.TEST_PORT || process.env.PORT || 3001;
 
 app.use(cors({
   origin: true,
@@ -5100,8 +5100,30 @@ try {
 // Endpoint trả về raw subscriptions (phục vụ đồng bộ Cloud <-> PC)
 app.get('/api/wpn/subscribers-raw', (req, res) => {
   try {
-    const subs = JSON.parse(readStorageFile(WPN_SUBS_FILE) || '{}');
+    let subs = {};
+    if (fs.existsSync(WPN_SUBS_FILE)) {
+      try {
+        subs = JSON.parse(fs.readFileSync(WPN_SUBS_FILE, 'utf8')) || {};
+      } catch (_) { subs = {}; }
+    }
     res.json(subs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint trả về danh sách VĐV câu lạc bộ (cho điện thoại chọn danh tính)
+app.get('/api/wpn/athletes-roster', (req, res) => {
+  try {
+    const fullRoster = getAllClubMembersRoster();
+    const roster = fullRoster.map(m => ({
+      id: m.id || m.athleteId,
+      name: m.name || `${m.firstname || ''} ${m.lastname || ''}`.trim(),
+      matchKey: m.matchKey || '',
+      avatar: m.profile_medium || m.profile || null
+    })).filter(m => m.name && m.name !== 'Khách Xem');
+    roster.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    res.json({ success: true, count: roster.length, roster });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -5135,13 +5157,13 @@ app.get('/api/wpn/subscribers-status', async (req, res) => {
       } catch (_) {}
     }
 
-    let totalDevices = 0;
+    const uniqueEndpoints = new Set();
     const athleteMap = {};
 
-    for (const [athleteId, devList] of Object.entries(subs)) {
+    for (const [key, devList] of Object.entries(subs)) {
       if (Array.isArray(devList) && devList.length > 0) {
-        totalDevices += devList.length;
-        athleteMap[athleteId] = {
+        devList.forEach(d => { if (d.endpoint) uniqueEndpoints.add(d.endpoint); });
+        athleteMap[key] = {
           registered: true,
           deviceCount: devList.length,
           devices: devList.map(d => d.device || 'Mobile Device')
@@ -5151,7 +5173,7 @@ app.get('/api/wpn/subscribers-status', async (req, res) => {
 
     res.json({
       success: true,
-      totalDevices,
+      totalDevices: uniqueEndpoints.size,
       totalSubscribers: Object.keys(athleteMap).length,
       athleteMap
     });
@@ -5163,25 +5185,45 @@ app.get('/api/wpn/subscribers-status', async (req, res) => {
 // API Đăng ký Web Push Notification
 app.post('/api/wpn/subscribe', (req, res) => {
   try {
-    const { athleteId, subscription, device } = req.body;
-    if (!athleteId || !subscription) {
+    const { athleteId, athleteName, athleteKey, subscription, device } = req.body;
+    if (!subscription || (!athleteId && !athleteName)) {
       return res.status(400).json({ error: 'Thiếu thông tin đăng ký' });
     }
 
-    const subs = JSON.parse((fs.existsSync(WPN_SUBS_FILE) ? fs.readFileSync(WPN_SUBS_FILE, 'utf8') : '{}')) || {};
-    if (!subs[athleteId]) subs[athleteId] = [];
-
-    // Kiểm tra trùng lặp endpoint
-    const exists = subs[athleteId].find(s => s.endpoint === subscription.endpoint);
-    if (!exists) {
-      subs[athleteId].push({
-        ...subscription,
-        device: device || 'Unknown Device',
-        registeredAt: new Date().toISOString()
-      });
-      writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
-      console.log(`[WPN] Đã thêm subscription cho user ${athleteId} trên ${device}`);
+    let subs = {};
+    if (fs.existsSync(WPN_SUBS_FILE)) {
+      try {
+        subs = JSON.parse(fs.readFileSync(WPN_SUBS_FILE, 'utf8')) || {};
+      } catch (_) { subs = {}; }
     }
+
+    const subItem = {
+      ...subscription,
+      device: device || 'Mobile Device',
+      athleteId: athleteId ? String(athleteId) : '',
+      athleteName: athleteName || '',
+      athleteKey: athleteKey || '',
+      registeredAt: new Date().toISOString()
+    };
+
+    const addSubToKey = (key) => {
+      if (!key) return;
+      const k = String(key).trim();
+      if (!subs[k]) subs[k] = [];
+      const exists = subs[k].find(s => s.endpoint === subscription.endpoint);
+      if (!exists) {
+        subs[k].push(subItem);
+      } else {
+        Object.assign(exists, subItem);
+      }
+    };
+
+    if (athleteId) addSubToKey(athleteId);
+    if (athleteName) addSubToKey(athleteName);
+    if (athleteKey && athleteKey !== athleteName) addSubToKey(athleteKey);
+
+    writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
+    console.log(`[WPN] Đã lưu subscription cho VĐV [${athleteId || ''} - ${athleteName || ''}] trên ${device}`);
 
     res.json({ success: true, message: 'Đăng ký nhận thông báo thành công' });
   } catch (err) {
@@ -5198,7 +5240,13 @@ app.post('/api/wpn/unsubscribe', (req, res) => {
       return res.status(400).json({ error: 'Thiếu thông tin hủy đăng ký' });
     }
 
-    const subs = JSON.parse((fs.existsSync(WPN_SUBS_FILE) ? fs.readFileSync(WPN_SUBS_FILE, 'utf8') : '{}')) || {};
+    let subs = {};
+    if (fs.existsSync(WPN_SUBS_FILE)) {
+      try {
+        subs = JSON.parse(fs.readFileSync(WPN_SUBS_FILE, 'utf8')) || {};
+      } catch (e) { subs = {}; }
+    }
+
     if (subs[athleteId]) {
       subs[athleteId] = subs[athleteId].filter(s => s.endpoint !== endpoint);
       writeStorageFile(WPN_SUBS_FILE, JSON.stringify(subs, null, 2));
@@ -5225,20 +5273,32 @@ app.post('/api/wpn/send', async (req, res) => {
       } catch (e) { subs = {}; }
     }
 
-    const findEndpoints = (s, target, key) => {
+    const findEndpoints = (s, target, key, name) => {
       let eps = [];
+      const seen = new Set();
+      const addEps = (arr) => {
+        if (!Array.isArray(arr)) return;
+        for (const item of arr) {
+          if (item && item.endpoint && !seen.has(item.endpoint)) {
+            seen.add(item.endpoint);
+            eps.push(item);
+          }
+        }
+      };
+
       if (!target || target === 'all') {
         for (const k in s) {
-          if (Array.isArray(s[k])) eps = eps.concat(s[k]);
+          addEps(s[k]);
         }
         return eps;
       }
-      if (s[target]) eps = eps.concat(s[target]);
-      if (key && s[key] && key !== target) eps = eps.concat(s[key]);
+      if (s[target]) addEps(s[target]);
+      if (key && s[key]) addEps(s[key]);
+      if (name && s[name]) addEps(s[name]);
       return eps;
     };
 
-    let targetEndpoints = findEndpoints(subs, targetId, athleteKey);
+    let targetEndpoints = findEndpoints(subs, targetId, athleteKey, athleteName);
 
     // Nếu không tìm thấy endpoint cục bộ trên PC, thử chuyển tiếp sang Cloud Render
     if (targetEndpoints.length === 0) {

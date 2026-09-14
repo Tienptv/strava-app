@@ -262,7 +262,7 @@ function App() {
           />
         )}
         <main className={athlete ? "app-main" : ""}>
-          {athlete && <NotificationPermissionBanner apiFetch={apiFetch} athleteId={athleteId} />}
+          {athlete && <NotificationPermissionBanner apiFetch={apiFetch} athleteId={athleteId} athlete={athlete} />}
           <Routes>
             <Route
               path="/"

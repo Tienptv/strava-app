@@ -322,8 +322,8 @@ function RunningReminderTab({ data, subscribersStatus, lang, t, onRefresh }) {
           {expandLowPct && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {belowTarget.map(r => {
-                const isSubscribed = subscribersStatus?.athleteMap?.[r.athleteId]?.registered || subscribersStatus?.athleteMap?.[r.key]?.registered;
-                const devCount = subscribersStatus?.athleteMap?.[r.athleteId]?.deviceCount || subscribersStatus?.athleteMap?.[r.key]?.deviceCount || 0;
+                const isSubscribed = subscribersStatus?.athleteMap?.[r.athleteId]?.registered || subscribersStatus?.athleteMap?.[r.key]?.registered || subscribersStatus?.athleteMap?.[r.runnerName]?.registered;
+                const devCount = subscribersStatus?.athleteMap?.[r.athleteId]?.deviceCount || subscribersStatus?.athleteMap?.[r.key]?.deviceCount || subscribersStatus?.athleteMap?.[r.runnerName]?.deviceCount || 0;
 
                 return (
                   <div key={r.key} style={{ background: '#fff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #fee2e2', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }}>
@@ -541,8 +541,8 @@ function PenaltyReminderTab({ data, subscribersStatus, lang, t }) {
           {owingList.map(person => {
             const isCopied = copied === (person.athleteId || person.rawName);
             const qrUrl = buildVietQRUrl(bankConfig, person.totalOwing, `Nop phat HRC ${now.getFullYear()}`);
-            const isSubscribed = subscribersStatus?.athleteMap?.[person.athleteId]?.registered || subscribersStatus?.athleteMap?.[person.rawName]?.registered;
-            const devCount = subscribersStatus?.athleteMap?.[person.athleteId]?.deviceCount || subscribersStatus?.athleteMap?.[person.rawName]?.deviceCount || 0;
+            const isSubscribed = subscribersStatus?.athleteMap?.[person.athleteId]?.registered || subscribersStatus?.athleteMap?.[person.rawName]?.registered || subscribersStatus?.athleteMap?.[person.fullName]?.registered;
+            const devCount = subscribersStatus?.athleteMap?.[person.athleteId]?.deviceCount || subscribersStatus?.athleteMap?.[person.rawName]?.deviceCount || subscribersStatus?.athleteMap?.[person.fullName]?.deviceCount || 0;
 
             return (
               <div key={person.athleteId || person.rawName} style={{ background: '#fff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #fee2e2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>

@@ -32,6 +32,12 @@ const translations = {
     pushSendNow: 'Bắn thông báo ngay',
     noRegisteredDeviceAlert: 'Thành viên này chưa bật nhận thông báo trên điện thoại. Hãy dùng nút "Chép tin nhắn" để gửi qua Zalo/Teams nhé!',
     broadcastNote: 'Thông báo sẽ được gửi đến màn hình khóa của tất cả thành viên đã bật quyền nhận thông báo.',
+    selectYourName: 'Chọn tên của bạn trong CLB...',
+    receivingFor: 'Đang nhận thông báo cho:',
+    changeRecipient: 'Đổi người nhận',
+    generalBroadcastOnly: '📢 Chỉ nhận thông báo chung toàn CLB',
+    phoneNotificationsEnabled: 'Đã bật nhận thông báo thành công!',
+    phoneNotificationsDesc: 'Thiết bị này đã được liên kết với {name}. Bạn sẽ nhận thông báo tiến độ & nhắc nộp phạt trực tiếp trên màn hình khóa.',
 
 
     // Login
@@ -549,6 +555,12 @@ const translations = {
     pushSendNow: 'Send Notification Now',
     noRegisteredDeviceAlert: 'This athlete has not enabled push notifications on their phone yet. Please use the "Copy msg" button to send via Zalo/Teams!',
     broadcastNote: 'Notification will be delivered to the lock screen of all members who have enabled notifications.',
+    selectYourName: 'Select your name in the club...',
+    receivingFor: 'Receiving notifications for:',
+    changeRecipient: 'Change recipient',
+    generalBroadcastOnly: '📢 General club notifications only',
+    phoneNotificationsEnabled: 'Notifications enabled successfully!',
+    phoneNotificationsDesc: 'This device is now linked to {name}. You will receive running progress & penalty reminders on your lock screen.',
 
 
     // Login
