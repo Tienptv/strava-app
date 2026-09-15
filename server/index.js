@@ -4148,7 +4148,7 @@ app.post('/api/auth/logout', async (req, res) => {
 // FULL-PAGE SCREENSHOT VIA HEADLESS CHROME
 // ==========================================
 app.post('/api/screenshot/full-table', async (req, res) => {
-  const { month, year, athleteId, lang: currentLang, chartsCollapsed } = req.body || {};
+  const { month, year, athleteId, lang: currentLang, chartsCollapsed, targetScope } = req.body || {};
   const frontendUrl = (fs.existsSync(path.join(__dirname, '../dist')) || !process.env.FRONTEND_URL)
     ? `http://localhost:${PORT || 3001}`
     : process.env.FRONTEND_URL;
@@ -4169,22 +4169,28 @@ app.post('/api/screenshot/full-table', async (req, res) => {
         '--disable-setuid-sandbox',
         '--disable-gpu',
         '--disable-dev-shm-usage',
+        '--enable-font-antialiasing',
+        '--font-render-hinting=max',
+        '--force-color-profile=srgb',
         `--user-data-dir=${tempProfileDir}`,
-        '--window-size=2000,1200'
+        '--window-size=2100,1200'
       ]
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 2000, height: 1200, deviceScaleFactor: 2 });
+    await page.setViewport({ width: 2100, height: 1200, deviceScaleFactor: 2.5 });
 
     // Set local storage authentication & language BEFORE page loads
-    const targetAthId = (athleteId || '120540594').toString();
+    const validTokens = Array.from(tokenStore.keys());
+    const targetAthId = (athleteId && tokenStore.has(athleteId.toString()))
+      ? athleteId.toString()
+      : (validTokens[0] || athleteId || '133066813').toString();
     const targetLang = currentLang || 'vi';
 
     await page.evaluateOnNewDocument((id, lng, isCollapsed) => {
       localStorage.setItem('athleteId', id);
       localStorage.setItem('athlete', JSON.stringify({
-        id: parseInt(id, 10) || 120540594,
+        id: parseInt(id, 10) || 133066813,
         firstname: 'Admin',
         lastname: ''
       }));
@@ -4199,23 +4205,34 @@ app.post('/api/screenshot/full-table', async (req, res) => {
     await new Promise(r => setTimeout(r, 1200));
 
     // Hide navbar and expand view for clean full-page screenshot
-    await page.evaluate((targetMonth, isCollapsed) => {
+    await page.evaluate(async (targetMonth, isCollapsed, scope) => {
       const navbar = document.querySelector('.navbar');
       if (navbar) navbar.style.display = 'none';
 
       const sidebar = document.querySelector('.sidebar');
       if (sidebar) sidebar.style.display = 'none';
 
-      // Ẩn toàn bộ khối biểu đồ nếu người dùng đang chọn Collapse
-      if (isCollapsed) {
-        const chartCard = document.querySelector('.challenge-analytics-card');
-        if (chartCard) chartCard.style.display = 'none';
+      // Khi chụp riêng Bảng xếp hạng (Option 3: scope === 'leaderboard'),
+      // ta chụp trực tiếp targetEl (.challenge-container), không cần ẩn banner hay bóp méo view width
+      // để giữ nguyên luồng render tự nhiên của DOM, tránh hiện tượng phủ màu tối.
+      if (scope !== 'leaderboard') {
+        if (isCollapsed) {
+          const chartCard = document.querySelector('.challenge-analytics-card');
+          if (chartCard) chartCard.style.display = 'none';
+        }
+
+        const view = document.querySelector('.challenge-view') || document.querySelector('.app-main');
+        if (view) {
+          view.style.margin = '0 auto';
+          view.style.padding = '16px';
+          view.style.maxWidth = 'none';
+          view.style.width = '1900px';
+        }
       }
 
       // Switch month tab if specified
       if (targetMonth) {
-        return new Promise((resolve) => {
-          // Try to use the new month dropdown first
+        await new Promise((resolve) => {
           const trigger = document.querySelector('.month-dropdown-trigger');
           if (trigger) {
             trigger.click();
@@ -4230,76 +4247,123 @@ app.post('/api/screenshot/full-table', async (req, res) => {
                 }
               });
               if (!clicked) {
-                // hide dropdown if nothing clicked
                 trigger.click();
               }
-              // Hide the chevron icon in the screenshot
               const chevron = trigger.querySelector('svg');
               if (chevron) chevron.style.display = 'none';
-
               resolve();
             }, 100);
           } else {
-            // Fallback for older UI
             const monthBtn = document.querySelector(`.month-pill[data-month="${targetMonth}"], .tab[data-month="${targetMonth}"]`);
             if (monthBtn) {
               monthBtn.click();
-            } else {
-              const monthPills = document.querySelectorAll('.month-pill, .tabs .tab');
-              monthPills.forEach(pill => {
-                const txt = pill.textContent || '';
-                if (pill.getAttribute('data-month') === targetMonth.toString() ||
-                  txt.includes(`Tháng ${targetMonth}/`) ||
-                  txt.includes(`/${targetMonth}/`) ||
-                  txt.startsWith(`${targetMonth}/`)) {
-                  pill.click();
-                }
-              });
             }
             resolve();
           }
         });
       }
 
-      const view = document.querySelector('.challenge-view') || document.querySelector('.app-main');
-      if (view) {
-        view.style.margin = '0 auto';
-        view.style.padding = '16px';
-        view.style.maxWidth = 'none';
-        view.style.width = '1900px';
-      }
-
       const style = document.createElement('style');
       style.innerHTML = `
+        /* 1. Mở rộng khung chứa để hiển thị trọn vẹn 100% thành viên và dòng TOTAL */
         .challenge-table-wrapper {
           max-height: none !important;
+          height: auto !important;
           overflow: visible !important;
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 8px !important;
+          background: #ffffff !important;
         }
-        .totals-row, .totals-row td, .totals-row th, tfoot, thead, thead th, tfoot th, tfoot td {
-          position: static !important;
-          bottom: auto !important;
-          top: auto !important;
+
+        /* 2. Đảm bảo thẻ chứa Leaderboard có nền trắng tinh khiết chuẩn thương hiệu Haskoning */
+        .challenge-container {
+          height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+          background: #ffffff !important;
+          padding: 20px 24px !important;
+          border-radius: 14px !important;
+          box-sizing: border-box !important;
+          box-shadow: 0 4px 20px rgba(0, 45, 84, 0.08) !important;
         }
+
+        /* 3. Tăng cỡ chữ, độ đậm và độ sắc nét theo chuẩn Haskoning */
+        .runner-name-text {
+          font-size: 13px !important;
+          font-weight: 700 !important;
+          color: #002D54 !important;
+        }
+
+        .runner-rank {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+          color: #475569 !important;
+        }
+
+        .challenge-table td.day-cell {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+        }
+
+        .challenge-table th.day-col {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+        }
+
+        .challenge-table td.sum-cell,
+        .challenge-table th.sum-col {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+          color: #002D54 !important;
+        }
+
+        .penalty-due-badge {
+          font-size: 11.5px !important;
+          font-weight: 800 !important;
+          padding: 2px 6px !important;
+        }
+
+        .target-input {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+        }
+
+        .challenge-table th,
+        .challenge-table td {
+          border: 1px solid #cbd5e1 !important;
+        }
+
         .challenge-view, .app-main {
           height: auto !important;
           min-height: auto !important;
         }
       `;
       document.head.appendChild(style);
-    }, month, Boolean(chartsCollapsed));
+    }, month, Boolean(chartsCollapsed), targetScope);
 
     await new Promise(r => setTimeout(r, 600));
 
-    const targetEl = await page.$('.challenge-view') || await page.$('.app-main');
+    let targetEl;
+    if (targetScope === 'leaderboard') {
+      targetEl = await page.$('.challenge-container') || await page.$('.challenge-table-wrapper');
+    } else {
+      targetEl = await page.$('.challenge-view') || await page.$('.app-main');
+    }
+
     let buffer;
     if (targetEl) {
+      const elInfo = await targetEl.evaluate(el => ({ tag: el.tagName, class: el.className, w: el.offsetWidth, h: el.offsetHeight }));
+      console.log('📸 [SCREENSHOT] Target element info:', JSON.stringify(elInfo));
       buffer = await targetEl.screenshot({ type: 'png' });
     } else {
+      console.log('📸 [SCREENSHOT] Fallback full page screenshot');
       buffer = await page.screenshot({ fullPage: true, type: 'png' });
     }
 
+    const filePrefix = targetScope === 'leaderboard' ? 'Strava_Leaderboard' : 'Strava_Challenge';
+    const monthLetter = targetLang === 'en' ? 'M' : 'T';
     res.set('Content-Type', 'image/png');
-    res.set('Content-Disposition', `attachment; filename="Strava_Challenge_T${month || 'all'}_${year || '2026'}.png"`);
+    res.set('Content-Disposition', `attachment; filename="${filePrefix}_${monthLetter}${month || 'all'}_${year || '2026'}.png"`);
     res.send(buffer);
   } catch (err) {
     console.error('Lỗi chụp màn hình Chrome headless:', err);

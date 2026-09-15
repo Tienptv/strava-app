@@ -3,11 +3,12 @@ import json
 
 url = 'http://localhost:3001/api/screenshot/full-table'
 payload = {
-    "month": 8,
+    "month": 9,
     "year": 2026,
-    "athleteId": 120540594,
+    "athleteId": 133066813,
     "lang": "vi",
-    "chartsCollapsed": True
+    "chartsCollapsed": False,
+    "targetScope": "leaderboard"
 }
 
 try:

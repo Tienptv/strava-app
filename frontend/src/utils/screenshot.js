@@ -202,10 +202,85 @@ export async function captureFullTableChrome(options = {}) {
 }
 
 /**
- * 3. Hộp thoại lựa chọn chế độ chụp màn hình (Menu Chọn Kép)
+ * 3. Chụp riêng Bảng xếp hạng (Từ Tiêu Đề đến Dưới Hàng TOTAL)
+ * Kích hoạt nhân Chrome thật qua backend để mở rộng toàn bộ bảng nhưng chỉ crop
+ * riêng khu vực Bảng xếp hạng (.challenge-container), bao gồm toàn bộ runner 0 km
+ * và chân bảng TOTAL, loại trừ phần hành trình năm và quỹ CLB.
+ */
+export async function captureLeaderboardOnlyChrome(options = {}) {
+  const isEn = typeof window !== 'undefined' && localStorage.getItem('lang') === 'en';
+  const currentLang = options.lang || (isEn ? 'en' : 'vi');
+  const month = options.month || new Date().getMonth() + 1;
+  const year = options.year || new Date().getFullYear();
+  const fileName = options.fileName || (isEn ? `Strava_Leaderboard_M${month}_${year}.png` : `Strava_BangXepHang_T${month}_${year}.png`);
+  const isChartsCollapsed = options.chartsCollapsed !== undefined 
+    ? options.chartsCollapsed 
+    : (typeof window !== 'undefined' && localStorage.getItem('strava_challenge_charts_collapsed') === 'true');
+
+  Swal.fire({
+    title: isEn ? 'Exporting Leaderboard Table...' : 'Đang xuất Bảng xếp hạng...',
+    html: isEn 
+      ? 'Launching real Chrome engine to capture leaderboard from title down to Total row in Ultra HD 4K... (takes ~2s)' 
+      : 'Đang dùng nhân Chrome thật mở rộng toàn bộ thành viên đến hàng Total ở độ nét 4K... (mất ~2s)',
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  try {
+    const res = await fetch('/api/screenshot/full-table', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        month, 
+        year, 
+        athleteId: options.athleteId, 
+        lang: currentLang,
+        chartsCollapsed: isChartsCollapsed,
+        targetScope: 'leaderboard'
+      })
+    });
+
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error || `Server responded with status ${res.status}`);
+    }
+
+    const blob = await res.blob();
+    await saveAndCopyToClipboard(blob, fileName, 'Leaderboard Table Chrome', isEn);
+    return { success: true };
+  } catch (err) {
+    console.error('Lỗi captureLeaderboardOnlyChrome:', err);
+    Swal.fire({
+      icon: 'warning',
+      title: isEn ? 'Leaderboard Export Failed' : 'Chưa thể xuất Bảng xếp hạng qua Chrome',
+      html: `
+        <p style="color: #475569; font-size: 0.9rem;">
+          ${err.message}<br><br>
+          ${isEn 
+            ? 'You can use <b>Quick Capture (Windows Pixel)</b> to capture the current screen immediately!' 
+            : 'Bạn có thể chọn <b>Chụp nhanh màn hình hiện tại (Chuẩn Win)</b> để chụp tức thì!'}
+        </p>
+      `,
+      showCancelButton: true,
+      confirmButtonColor: '#00A3A6',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: isEn ? '⚡ Quick Capture Now' : '⚡ Chụp Nhanh Ngay',
+      cancelButtonText: isEn ? 'Close' : 'Đóng'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        captureNativeScreen(options);
+      }
+    });
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * 4. Hộp thoại lựa chọn chế độ chụp màn hình (Menu Chọn Chế Độ)
  * Cho phép người dùng chọn:
  *   - Lựa chọn 1: Chụp nhanh màn hình hiện tại (chuẩn pixel 100% như Win)
- *   - Lựa chọn 2: Xuất toàn bộ bảng từ đầu đến cuối (Full-Page 4K)
+ *   - Lựa chọn 2: Xuất toàn bộ giao diện thử thách (Full Overview 4K)
+ *   - Lựa chọn 3: Chụp riêng Bảng xếp hạng (Đầy đủ thành viên & Hàng Total)
  *   - Kèm mẹo phím tắt Win + Shift + S
  */
 export function showScreenshotModal(options = {}) {
@@ -218,6 +293,7 @@ export function showScreenshotModal(options = {}) {
         <span>${isEn ? 'Choose Screenshot Mode' : 'Chọn Chế Độ Chụp Màn Hình'}</span>
       </div>
     `,
+    width: '560px',
     html: `
       <div style="text-align: left; padding: 4px 0;">
         <p style="color: #64748b; font-size: 0.88rem; margin-bottom: 16px; text-align: center;">
@@ -254,7 +330,7 @@ export function showScreenshotModal(options = {}) {
           </div>
         </div>
 
-        <!-- Option 2: Full Table Export -->
+        <!-- Option 2: Full Overview Export -->
         <div id="btn-full-capture" style="
           display: flex; 
           align-items: flex-start; 
@@ -264,7 +340,7 @@ export function showScreenshotModal(options = {}) {
           background: #ffffff; 
           border-radius: 10px; 
           cursor: pointer; 
-          margin-bottom: 16px;
+          margin-bottom: 12px;
           transition: all 0.2s ease;
         " onmouseover="this.style.borderColor='#002D54'; this.style.background='#f8fafc'; this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#ffffff'; this.style.transform='none'">
           <div style="background: #002D54; color: white; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
@@ -278,6 +354,34 @@ export function showScreenshotModal(options = {}) {
               ${isEn 
                 ? 'Automatically expands the entire table (all 31 days & 25 runners) and exports Ultra HD image via real Chrome engine.' 
                 : 'Tự động mở rộng toàn bộ bảng (đầy đủ 31 ngày & tất cả 25 vận động viên), chụp từ trên xuống dưới qua nhân Chrome thật.'}
+            </div>
+          </div>
+        </div>
+
+        <!-- Option 3: Leaderboard Table Only (Targeted Scope) -->
+        <div id="btn-leaderboard-capture" style="
+          display: flex; 
+          align-items: flex-start; 
+          gap: 12px; 
+          padding: 14px; 
+          border: 2px solid #78BE20; 
+          background: #f7fee7; 
+          border-radius: 10px; 
+          cursor: pointer; 
+          margin-bottom: 16px;
+          transition: all 0.2s ease;
+        " onmouseover="this.style.background='#ecfccb'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#f7fee7'; this.style.transform='none'">
+          <div style="background: linear-gradient(135deg, #78BE20 0%, #00A3A6 100%); color: white; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; box-shadow: 0 2px 8px rgba(120, 190, 32, 0.35);">
+            📊
+          </div>
+          <div>
+            <div style="font-weight: 700; color: #3f6212; font-size: 0.95rem; margin-bottom: 3px;">
+              ${isEn ? '3. Export Leaderboard Table Only (All Runners to Total)' : '3. Chụp riêng Bảng xếp hạng (Đầy đủ thành viên & Hàng Total)'}
+            </div>
+            <div style="color: #334155; font-size: 0.82rem; line-height: 1.4;">
+              ${isEn 
+                ? 'Targeted capture from Monthly Leaderboard title down to Total row, expanding all 25+ members (including zero km) & all 31 days.' 
+                : 'Chụp chuẩn xác từ tiêu đề Bảng xếp hạng đến dưới hàng Total, tự động mở rộng tất cả thành viên (kể cả chưa có km nào) và đầy đủ 31 ngày.'}
             </div>
           </div>
         </div>
@@ -296,6 +400,7 @@ export function showScreenshotModal(options = {}) {
     didOpen: () => {
       const btnQuick = document.getElementById('btn-quick-capture');
       const btnFull = document.getElementById('btn-full-capture');
+      const btnLeaderboard = document.getElementById('btn-leaderboard-capture');
 
       if (btnQuick) {
         btnQuick.addEventListener('click', () => {
@@ -308,6 +413,13 @@ export function showScreenshotModal(options = {}) {
         btnFull.addEventListener('click', () => {
           Swal.close();
           captureFullTableChrome(options);
+        });
+      }
+
+      if (btnLeaderboard) {
+        btnLeaderboard.addEventListener('click', () => {
+          Swal.close();
+          captureLeaderboardOnlyChrome(options);
         });
       }
     }
