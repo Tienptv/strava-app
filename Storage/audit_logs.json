@@ -1,5 +1,12 @@
 [
   {
+    "id": "1789483756369",
+    "timestamp": "2026-09-15T14:49:16.369Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (302 mục), targets.json (51 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
     "id": "1789442193681",
     "timestamp": "2026-09-15T03:16:33.681Z",
     "action": "Cập nhật Cấu hình thử thách",
@@ -1391,12 +1398,5 @@
     "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
     "user": "Tien PhamTV",
     "details": "Đã cập nhật cấu hình Club Goal (2027)"
-  },
-  {
-    "id": "1788712307010",
-    "timestamp": "2026-09-06T16:31:47.010Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
   }
 ]
