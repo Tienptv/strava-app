@@ -1602,14 +1602,14 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
         
         {/* SIDEBAR TABS */}
         <div className="admin-sidebar">
-          <h3>{lang === 'en' ? 'Menu' : 'Danh mục'}</h3>
+          <h3>{t('adminMenuTitle')}</h3>
           
           <button
             onClick={() => handleTabClick('settings')}
             className={`tab ${activeTab === 'settings' ? 'tab--active' : ''}`}
             style={{ opacity: !isSuperAdmin && effectivePermissions.generalSettings === false ? 0.6 : 1 }}
           >
-            <Settings size={20} />
+            <Settings size={18} />
             <span style={{ flex: 1 }}>{t('tab1Title')}</span>
             {!isSuperAdmin && effectivePermissions.generalSettings === false && <Lock size={14} color="#94a3b8" />}
           </button>
@@ -1619,7 +1619,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             className={`tab ${activeTab === 'roles' ? 'tab--active' : ''}`}
             style={{ opacity: !isSuperAdmin && effectivePermissions.manageRoles === false ? 0.6 : 1 }}
           >
-            <Users size={20} />
+            <Users size={18} />
             <span style={{ flex: 1 }}>{t('tab2Title')}</span>
             {!isSuperAdmin && effectivePermissions.manageRoles === false && <Lock size={14} color="#94a3b8" />}
           </button>
@@ -1629,7 +1629,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             className={`tab ${activeTab === 'logs' ? 'tab--active' : ''}`}
             style={{ opacity: !isSuperAdmin && effectivePermissions.activityLogs === false ? 0.6 : 1 }}
           >
-            <FileText size={20} />
+            <FileText size={18} />
             <span style={{ flex: 1 }}>{t('tab3Title')}</span>
             {!isSuperAdmin && effectivePermissions.activityLogs === false && <Lock size={14} color="#94a3b8" />}
           </button>
@@ -1639,7 +1639,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             className={`tab ${activeTab === 'data' ? 'tab--active' : ''}`}
             style={{ opacity: !isSuperAdmin && effectivePermissions.dataManagement === false ? 0.6 : 1 }}
           >
-            <Database size={20} />
+            <Database size={18} />
             <span style={{ flex: 1 }}>{t('tab4Title')}</span>
             {!isSuperAdmin && effectivePermissions.dataManagement === false && <Lock size={14} color="#94a3b8" />}
           </button>
@@ -1649,7 +1649,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             className={`tab ${activeTab === 'penalties' ? 'tab--active' : ''}`}
             style={{ opacity: !isSuperAdmin && effectivePermissions.penaltiesTargets === false ? 0.6 : 1 }}
           >
-            <DollarSign size={20} />
+            <DollarSign size={18} />
             <span style={{ flex: 1 }}>{t('tab5Title')}</span>
             {!isSuperAdmin && effectivePermissions.penaltiesTargets === false && <Lock size={14} color="#94a3b8" />}
           </button>
@@ -1658,8 +1658,8 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             onClick={() => handleTabClick('scripts')}
             className={`tab ${activeTab === 'scripts' ? 'tab--active' : ''}`}
           >
-            <Terminal size={20} />
-            <span style={{ flex: 1 }}>{lang === 'en' ? 'System Scripts' : 'Hệ thống Scripts'}</span>
+            <Terminal size={18} />
+            <span style={{ flex: 1 }}>{t('tabScriptsTitle')}</span>
           </button>
 
           <button
@@ -1667,8 +1667,8 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             className={`tab ${activeTab === 'reminders' ? 'tab--active' : ''}`}
             style={{ opacity: !isSuperAdmin && effectivePermissions.penaltiesTargets === false ? 0.6 : 1 }}
           >
-            <BellRing size={20} />
-            <span style={{ flex: 1 }}>{lang === 'en' ? 'Reminders & Notifications' : 'Nhắc nhở & Thông báo'}</span>
+            <BellRing size={18} />
+            <span style={{ flex: 1 }}>{t('tabRemindersTitle')}</span>
             {!isSuperAdmin && effectivePermissions.penaltiesTargets === false && <Lock size={14} color="#94a3b8" />}
           </button>
 
@@ -1676,8 +1676,8 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             onClick={() => handleTabClick('visitors')}
             className={`tab ${activeTab === 'visitors' ? 'tab--active' : ''}`}
           >
-            <Radio size={20} />
-            <span style={{ flex: 1 }}>{lang === 'en' ? 'Live Visitors' : 'Người dùng trực tuyến'}</span>
+            <Radio size={18} />
+            <span style={{ flex: 1 }}>{t('tabVisitorsTitle')}</span>
           </button>
         </div>
 

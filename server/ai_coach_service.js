@@ -7,6 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getSportsScienceMetrics } from './sports_science_service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +16,7 @@ const AI_CACHE_FILE = path.join(STORAGE_DIR, 'ai_coach_cache.json');
 const CONFIG_FILE = path.join(STORAGE_DIR, 'challenge_config.json');
 
 // Đọc API Key từ config file hoặc .env
-function getGeminiApiKey() {
+export function getGeminiApiKey() {
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
     return process.env.GEMINI_API_KEY.trim();
   }
@@ -28,6 +29,45 @@ function getGeminiApiKey() {
     }
   } catch (_) {}
   return null;
+}
+
+// Đọc Model chỉ định từ config file hoặc .env
+export function getGeminiModelPreference() {
+  if (process.env.GEMINI_MODEL && process.env.GEMINI_MODEL.trim() !== '') {
+    return process.env.GEMINI_MODEL.trim();
+  }
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+      if (cfg.geminiModel && cfg.geminiModel.trim() !== '') {
+        return cfg.geminiModel.trim();
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
+// Danh sách Model Cascade theo thứ tự ưu tiên (Thác nước thông minh)
+export function getCandidateGeminiModels() {
+  const customModel = getGeminiModelPreference();
+  const models = [
+    customModel,
+    'gemini-3.8-flash',
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash'
+  ].filter(Boolean);
+  return [...new Set(models)];
+}
+
+// Định dạng tên Provider đẹp hiển thị cho UI
+export function formatProviderName(modelName) {
+  if (!modelName) return 'Google Gemini Flash';
+  if (modelName.includes('3.8')) return 'Google Gemini 3.8 Flash (High)';
+  if (modelName.includes('2.5')) return 'Google Gemini 2.5 Flash';
+  if (modelName.includes('2.0')) return 'Google Gemini 2.0 Flash';
+  if (modelName.includes('1.5')) return 'Google Gemini 1.5 Flash';
+  return `Google Gemini (${modelName})`;
 }
 
 // Đọc/Ghi Cache
@@ -177,9 +217,13 @@ export function extractRunnerContext({ athlete, activities = [], goal = 0, curre
     }
   }
 
+  // Trích xuất chỉ số Khoa Học Thể Thao chuẩn Garmin / Firstbeat & Jack Daniels VDOT
+  const athleteId = athlete?.id ? String(athlete.id) : null;
+  const sportsMetrics = getSportsScienceMetrics(activities, athleteId, latestRun);
+
   return {
     athleteName: athlete?.firstname ? `${athlete.firstname} ${athlete.lastname || ''}`.trim() : 'Runner',
-    athleteId: athlete?.id ? String(athlete.id) : null,
+    athleteId,
     goal,
     currentDist: Math.round(currentDist * 10) / 10,
     remainingKm: paceAnalysis?.remainingKm || Math.max(0, Math.round((goal - currentDist) * 10) / 10),
@@ -193,7 +237,8 @@ export function extractRunnerContext({ athlete, activities = [], goal = 0, curre
     streak,
     paceIntensity,
     cardioStrain,
-    avgMonthPaceStr
+    avgMonthPaceStr,
+    sportsMetrics
   };
 }
 
@@ -359,17 +404,27 @@ Dưới đây là dữ liệu chạy bộ thực tế của học viên:
 - Số ngày chạy liên tiếp (Streak): ${ctx.streak} ngày
 - Cường độ Pace so với trung bình tháng (${ctx.avgMonthPaceStr}/km): ${ctx.paceIntensity === 'fast' ? 'Nhanh hơn bình thường (cường độ cao)' : ctx.paceIntensity === 'recovery' ? 'Chậm hơn bình thường (chạy phục hồi)' : 'Bình thường'}
 - Tải tim mạch (Chỉ dùng để suy luận, KHÔNG ĐƯỢC để lộ số bpm): ${ctx.cardioStrain === 'high_intensity' ? 'Cường độ tim mạch cao' : ctx.cardioStrain === 'aerobic_endurance' ? 'Vùng hiếu khí bền vững' : ctx.cardioStrain === 'light_aerobic' ? 'Nhẹ nhàng phục hồi' : 'Không rõ'}
+- Tải luyện tập ACWR (Garmin/Firstbeat Workload Ratio): ${ctx.sportsMetrics?.trainingStatus?.acwr || 1.0}x
+- Trạng thái thể lực Garmin Training Status: ${isVi ? ctx.sportsMetrics?.trainingStatus?.labelVi : ctx.sportsMetrics?.trainingStatus?.labelEn} (${isVi ? ctx.sportsMetrics?.trainingStatus?.descVi : ctx.sportsMetrics?.trainingStatus?.descEn})
+- Dự đoán cự ly (Jack Daniels VDOT ${ctx.sportsMetrics?.racePredictions?.vdot || 35}): 5K: ${ctx.sportsMetrics?.racePredictions?.predicted5k || '--'}, 10K: ${ctx.sportsMetrics?.racePredictions?.predicted10k || '--'}, 21K: ${ctx.sportsMetrics?.racePredictions?.predicted21k || '--'}
+- Dải Pace Zone 2 (Easy Aerobic): ${ctx.sportsMetrics?.racePredictions?.trainingPaces?.easyZone2 || '--'} /km
+- Thời gian phục hồi khuyến nghị (Recovery Hours): ${ctx.sportsMetrics?.recovery?.remainingHours || 0} giờ còn lại
+${ctx.sportsMetrics?.biomechanics?.cadence ? `- Guồng chân (Cadence): ${ctx.sportsMetrics?.biomechanics?.cadence} spm (${isVi ? ctx.sportsMetrics?.biomechanics?.cadenceTipVi : ctx.sportsMetrics?.biomechanics?.cadenceTipEn})` : ''}
 
 QUY TẮC CỰC KỲ QUAN TRỌNG:
 1. BẢO MẬT SỨC KHỎE: Tuyệt đối KHÔNG viết số nhịp tim cụ thể (bpm) ra câu trả lời. Chỉ đánh giá định tính thể lực.
-2. COMBO [STREAK + PACE]: Nếu chạy liên tiếp >= 3 ngày với pace nhanh, BẮT BUỘC cảnh báo nguy cơ chấn thương và khuyên ngày mai nghỉ ngơi (Rest Day).
-3. INACTIVITY ALERT: Nếu số ngày nghỉ >= 3 ngày, BẮT BUỘC nhắc nhở thân thiện, khuyên không chạy bù quá đà kẻo chấn thương.
-4. ĐỘ DÀI: Ngắn gọn, súc tích (chỉ từ 2 đến 3 câu). Văn phong gần gũi, khích lệ, chuyên môn thể thao cao.
-5. NGÔN NGỮ: ${isVi ? 'Tiếng Việt' : 'Tiếng Anh'}.
+2. TRIẾT LÝ GARMIN & FIRSTBEAT:
+   - Nếu ACWR > 1.5 (Overreaching), BẮT BUỘC cảnh báo quá tải tải trọng cấp tính, khuyên giảm khối lượng hoặc nghỉ ngơi để ngừa chấn thương.
+   - Nếu ACWR trong vùng 1.0 - 1.35 (Productive), khích lệ phong độ đang ở Sweet Spot tối ưu.
+   - Luôn khuyên học viên duy trì 80% thời lượng chạy ở dải Pace Zone 2 để xây dựng nền tảng hiếu khí bền vững.
+3. COMBO [STREAK + PACE]: Nếu chạy liên tiếp >= 3 ngày với pace nhanh, BẮT BUỘC cảnh báo nguy cơ chấn thương và khuyên ngày mai nghỉ ngơi (Rest Day).
+4. INACTIVITY ALERT: Nếu số ngày nghỉ >= 3 ngày, BẮT BUỘC nhắc nhở thân thiện, khuyên không chạy bù quá đà kẻo chấn thương.
+5. ĐỘ DÀI: Ngắn gọn, súc tích (chỉ từ 2 đến 3 câu). Văn phong của một Huấn Luyện Viên Điền Kinh am hiểu y học thể thao, gần gũi, khích lệ.
+6. NGÔN NGỮ: ${isVi ? 'Tiếng Việt' : 'Tiếng Anh'}.
 
 HÃY TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON HỢP LỆ THEO CẤU TRÚC:
 {
-  "badge": "Chuỗi ngắn (vd: 'Long Run Done 🏅' hoặc 'Recovery Needed 🛑' hoặc 'Inactivity Alert ⚠️' hoặc 'On Track 👍')",
+  "badge": "Chuỗi ngắn (vd: 'Productive 🔥' hoặc 'Peaking ⚡' hoặc 'Overreaching ⚠️' hoặc 'Recovery Needed 🛑' hoặc 'Long Run Done 🏅')",
   "type": "success" | "warning" | "info",
   "message": "Nội dung 2-3 câu lời khuyên của Coach",
   "actionPlan": "Gợi ý cự ly & dạng bài tập tiếp theo (1 câu ngắn)"
@@ -390,16 +445,51 @@ HÃY TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON HỢP LỆ THEO CẤU TRÚC:
     }
   };
 
-  // Thử model gemini-1.5-flash trước, nếu lỗi fallback sang gemini-2.0-flash
-  const models = ['gemini-1.5-flash', 'gemini-2.0-flash'];
+  // Thử các model trong danh sách Waterfall Cascade (Thác nước thông minh)
+  const models = getCandidateGeminiModels();
+
   for (const model of models) {
     try {
+      const isReasoningModel = model.includes('3.8') || model.includes('2.5') || model.includes('high') || model.includes('thinking');
+
+      const baseConfig = {
+        temperature: 0.3,
+        maxOutputTokens: 800,
+        responseMimeType: 'application/json'
+      };
+
+      if (isReasoningModel) {
+        baseConfig.thinkingConfig = {
+          thinkingBudget: 1024
+        };
+      }
+
+      const requestBody = {
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: prompt }]
+          }
+        ],
+        generationConfig: baseConfig
+      };
+
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
       });
+
+      // Nếu model không hỗ trợ thinkingConfig (lỗi 400), thử lại ngay mà không có thinkingConfig
+      if (!response.ok && response.status === 400 && requestBody.generationConfig?.thinkingConfig) {
+        delete requestBody.generationConfig.thinkingConfig;
+        response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+      }
 
       if (!response.ok) {
         const errText = await response.text();
@@ -420,7 +510,7 @@ HÃY TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON HỢP LỆ THEO CẤU TRÚC:
           strategyTip: parsed.strategyTip || '',
           recoveryTip: parsed.recoveryTip || '',
           readinessScore: parsed.readinessScore || null,
-          provider: 'gemini'
+          provider: formatProviderName(model)
         };
       }
     } catch (e) {
@@ -428,7 +518,7 @@ HÃY TRẢ VỀ DUY NHẤT ĐỊNH DẠNG JSON HỢP LỆ THEO CẤU TRÚC:
     }
   }
 
-  throw new Error('Không thể kết nối tới Google Gemini API sau khi thử các model.');
+  throw new Error('Không thể kết nối tới Google Gemini API sau khi thử các model trong danh sách Waterfall.');
 }
 
 /**
@@ -482,7 +572,8 @@ function formatAdviceResult(res, ctx, isVi) {
     ...res,
     strategyTip,
     recoveryTip,
-    readinessScore
+    readinessScore,
+    sportsMetrics: ctx.sportsMetrics || null
   };
 }
 
@@ -511,7 +602,9 @@ export async function getAiCoachAdvice(inputData, forceRefresh = false) {
   if (apiKey) {
     try {
       result = await callGeminiApi(ctx, apiKey, inputData.lang || 'vi');
-      result.provider = 'Google Gemini Flash';
+      if (!result.provider) {
+        result.provider = 'Google Gemini Flash';
+      }
     } catch (err) {
       console.warn('[AI Coach] Tự động fallback sang Smart Heuristic:', err.message);
       result = generateHeuristicAdvice(ctx, inputData.lang || 'vi');

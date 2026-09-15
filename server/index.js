@@ -2679,6 +2679,43 @@ app.get('/api/challenge/targets', (req, res) => {
   }
 });
 
+// Helper: Canonicalize runner matchKey/name (e.g., 'Hà Xuân_A.' -> 'An_H.', 'An H.' -> 'An_H.')
+function getCanonicalRunnerKey(rawKey, athleteId = null) {
+  if (!rawKey && !athleteId) return '';
+  const strKey = String(rawKey || '').trim();
+  
+  // Extract month/year suffix if present (e.g., '_2026_9' or '_2026_09')
+  const suffixMatch = strKey.match(/(_\d{4}_\d{1,2})$/);
+  const suffix = suffixMatch ? suffixMatch[1] : '';
+  let baseKey = suffix ? strKey.slice(0, -suffix.length) : strKey;
+  
+  // Quick check for known athlete ID
+  const aid = String(athleteId || '').trim();
+  if (aid === '110041582') return `An_H.${suffix}`;
+  
+  const normBase = baseKey.replace(/\s+/g, ' ').replace(/_/g, ' ').trim().toLowerCase();
+  
+  // Check known aliases for Hà Xuân An directly
+  if (['ha xuan a.', 'ha xuan a', 'ha xuan an', 'hà xuân a.', 'hà xuân a', 'hà xuân an', 'an ha', 'an h.', 'an_h.', 'an_h'].includes(normBase)) {
+    return `An_H.${suffix}`;
+  }
+  
+  // Check name_mapping.json
+  try {
+    if (fs.existsSync(NAME_MAPPING_FILE)) {
+      const mapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8') || '{}');
+      if (mapping[baseKey]?.key) return `${mapping[baseKey].key}${suffix}`;
+      const foundEntry = Object.entries(mapping).find(([k, v]) => {
+        const kNorm = k.replace(/_/g, ' ').trim().toLowerCase();
+        return (kNorm === normBase) || (v.athleteId && aid && String(v.athleteId) === aid);
+      });
+      if (foundEntry && foundEntry[1]?.key) return `${foundEntry[1].key}${suffix}`;
+    }
+  } catch (_) {}
+  
+  return strKey;
+}
+
 // Cập nhật dữ liệu target/penalty
 app.post('/api/challenge/targets', (req, res) => {
   try {
@@ -2692,33 +2729,46 @@ app.post('/api/challenge/targets', (req, res) => {
       }
     }
 
+    const processItem = (matchKey, target, penalty) => {
+      if (!matchKey) return;
+      const canonicalKey = getCanonicalRunnerKey(matchKey);
+      if (!data[canonicalKey]) data[canonicalKey] = {};
+      if (target !== undefined) data[canonicalKey].target = target;
+      if (penalty !== undefined) data[canonicalKey].penalty = penalty;
+
+      // Xóa alias cũ nếu khác canonicalKey để không bao giờ bị phân mảnh
+      if (canonicalKey !== matchKey && data[matchKey]) {
+        delete data[matchKey];
+      }
+    };
+
     if (Array.isArray(payload)) {
       payload.forEach(item => {
         if (item && item.matchKey) {
-          if (!data[item.matchKey]) data[item.matchKey] = {};
-          if (item.target !== undefined) data[item.matchKey].target = item.target;
-          if (item.penalty !== undefined) data[item.matchKey].penalty = item.penalty;
+          processItem(item.matchKey, item.target, item.penalty);
         }
       });
     } else if (payload && payload.matchKey) {
-      const { matchKey, target, penalty } = payload;
-      if (!data[matchKey]) {
-        data[matchKey] = {};
-      }
-      if (target !== undefined) data[matchKey].target = target;
-      if (penalty !== undefined) data[matchKey].penalty = penalty;
+      processItem(payload.matchKey, payload.target, payload.penalty);
     } else if (payload && typeof payload === 'object') {
       // Direct object map { [matchKey]: { target, penalty } }
       Object.keys(payload).forEach(key => {
         if (payload[key] && typeof payload[key] === 'object') {
-          if (!data[key]) data[key] = {};
-          if (payload[key].target !== undefined) data[key].target = payload[key].target;
-          if (payload[key].penalty !== undefined) data[key].penalty = payload[key].penalty;
+          processItem(key, payload[key].target, payload[key].penalty);
         }
       });
     } else {
       return res.status(400).json({ error: 'Dữ liệu không hợp lệ' });
     }
+
+    // Dọn sạch vĩnh viễn các key alias như Hà Xuân_A._* nếu còn sót lại trong data
+    Object.keys(data).forEach(k => {
+      const canon = getCanonicalRunnerKey(k);
+      if (canon && canon !== k) {
+        if (!data[canon]) data[canon] = data[k];
+        delete data[k];
+      }
+    });
 
     writeStorageJson(TARGETS_FILE, data);
     res.json(data);
@@ -4856,28 +4906,117 @@ function getCurrentWeekRange() {
 
 // Helper: Parse km ran this month/week from imported/historical activities
 function getKmByRunner(monthKey) {
-  const kmMap = {};
+  const monthKmByAthleteId = {};
+  const monthKmByMatchKey = {};
+  const weekKmByAthleteId = {};
+  const weekKmByMatchKey = {};
+
   const { monday, sunday } = getCurrentWeekRange();
-  const weekKmMap = {};
+
   try {
+    let nameMapping = {};
+    if (fs.existsSync(NAME_MAPPING_FILE)) {
+      try {
+        nameMapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8') || '{}');
+      } catch (_) {}
+    }
+
+    let configParticipants = {};
+    if (fs.existsSync(CONFIG_FILE)) {
+      try {
+        const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8') || '{}');
+        configParticipants = cfg.participants || {};
+      } catch (_) {}
+    }
+
     const imported = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8') || '[]');
     const historical = JSON.parse(fs.readFileSync(HISTORICAL_FILE, 'utf8') || '[]');
     const allActs = [...(Array.isArray(imported) ? imported : []), ...(Array.isArray(historical) ? historical : [])];
+
+    // Deduplicate activities by act.id / act.id_str / act.start_date + distance
+    const seenActIds = new Set();
+
     allActs.forEach(act => {
+      if (!act) return;
       if (act.type !== 'Run' && act.sport_type !== 'Run') return;
-      const actDate = new Date(act.start_date_local || act.start_date);
-      const actMonth = `${actDate.getFullYear()}-${String(actDate.getMonth()+1).padStart(2,'0')}`;
-      const name = act.athlete_name || act.athleteName || '';
-      const km = (act.distance || 0) / 1000;
-      if (actMonth === monthKey) {
-        kmMap[name] = (kmMap[name] || 0) + km;
+
+      const actId = act.id ? String(act.id) : (act.id_str ? String(act.id_str) : null);
+      const actDateRaw = act.start_date_local || act.start_date;
+      if (!actDateRaw) return;
+
+      const dedupeKey = actId || `${actDateRaw}_${act.distance}`;
+      if (seenActIds.has(dedupeKey)) return;
+      seenActIds.add(dedupeKey);
+
+      const actDate = new Date(actDateRaw);
+      const actMonth = `${actDate.getFullYear()}-${String(actDate.getMonth() + 1).padStart(2, '0')}`;
+      const isCurrentMonth = (actMonth === monthKey);
+      const isCurrentWeek = (actDate >= monday && actDate <= sunday);
+
+      if (!isCurrentMonth && !isCurrentWeek) return;
+
+      const km = (parseFloat(act.distance) || 0) / 1000;
+      if (km <= 0) return;
+
+      // Determine athlete identity
+      let aid = act.athlete?.id ? String(act.athlete.id).trim() : '';
+      if (!aid && act.athlete?.id_str) aid = String(act.athlete.id_str).trim();
+      if (!aid && act.athleteId) aid = String(act.athleteId).trim();
+
+      const fname = act.athlete?.firstname || '';
+      const lname = act.athlete?.lastname || '';
+      const fullName = [fname, lname].filter(Boolean).join(' ').trim() || act.athlete_name || act.athleteName || act.name || '';
+
+      // Determine matchKey & canonical athleteId
+      let matchKey = '';
+      if (aid) {
+        const foundKey = Object.keys(configParticipants).find(k => {
+          const p = configParticipants[k];
+          return (p && (String(p.id) === aid || String(p.athleteId) === aid)) || (k === aid);
+        });
+        if (foundKey) matchKey = foundKey;
       }
-      if (actDate >= monday && actDate <= sunday) {
-        weekKmMap[name] = (weekKmMap[name] || 0) + km;
+
+      if (!matchKey && fullName) {
+        const foundKey = Object.keys(configParticipants).find(k => {
+          const p = configParticipants[k];
+          const pName = p ? (p.name || [p.firstname, p.lastname].filter(Boolean).join(' ')).toLowerCase() : '';
+          return pName && (pName === fullName.toLowerCase() || pName.includes(fullName.toLowerCase()) || fullName.toLowerCase().includes(pName));
+        });
+        if (foundKey) {
+          matchKey = foundKey;
+        } else {
+          matchKey = getCanonicalRunnerKey(fullName, aid);
+        }
+      }
+
+      if (!aid && matchKey) {
+        if (configParticipants[matchKey]?.id || configParticipants[matchKey]?.athleteId) {
+          aid = String(configParticipants[matchKey].athleteId || configParticipants[matchKey].id);
+        } else if (nameMapping[matchKey]?.athleteId) {
+          aid = String(nameMapping[matchKey].athleteId);
+        }
+      }
+
+      if (matchKey) {
+        matchKey = getCanonicalRunnerKey(matchKey, aid);
+      }
+
+      // Record distance
+      if (isCurrentMonth) {
+        if (aid) monthKmByAthleteId[aid] = (monthKmByAthleteId[aid] || 0) + km;
+        if (matchKey) monthKmByMatchKey[matchKey] = (monthKmByMatchKey[matchKey] || 0) + km;
+      }
+      if (isCurrentWeek) {
+        if (aid) weekKmByAthleteId[aid] = (weekKmByAthleteId[aid] || 0) + km;
+        if (matchKey) weekKmByMatchKey[matchKey] = (weekKmByMatchKey[matchKey] || 0) + km;
       }
     });
-  } catch (_) {}
-  return { monthKmMap: kmMap, weekKmMap };
+  } catch (err) {
+    console.error('Lỗi getKmByRunner:', err.message);
+  }
+
+  return { monthKmByAthleteId, monthKmByMatchKey, weekKmByAthleteId, weekKmByMatchKey };
 }
 
 // 1. GET /api/notifications/reminders/summary — Tóm tắt dữ liệu nhắc nhở
@@ -4887,52 +5026,97 @@ app.get('/api/notifications/reminders/summary', (req, res) => {
     const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
+    const monthSuffix = `_${year}_${month}`;
 
     const targets = JSON.parse(fs.readFileSync(TARGETS_FILE, 'utf8') || '{}');
     const penalties = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8') || '{"members":[]}');
     const bankConfig = loadBankConfig();
-    const { monthKmMap, weekKmMap } = getKmByRunner(monthKey);
+    const { monthKmByAthleteId, monthKmByMatchKey, weekKmByAthleteId, weekKmByMatchKey } = getKmByRunner(monthKey);
 
-    // Tìm người thiếu km tháng này (có target > 0, penalty = true)
-    const shortfallRunners = [];
-    const monthSuffix = `_${year}_${month}`;
-    Object.entries(targets).forEach(([key, val]) => {
-      if (!key.endsWith(monthSuffix)) return;
-      const targetKm = parseFloat(val.target) || 0;
-      if (targetKm <= 0) return;
-      const hasPenalty = val.penalty === true;
-      const cleanKey = key.replace(monthSuffix, '');
-      const runnerName = cleanKey.replace(/_/g, ' ').trim();
-      let mapInfo = null;
+    let configParticipants = {};
+    if (fs.existsSync(CONFIG_FILE)) {
       try {
-        const nameMapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8') || '{}');
-        mapInfo = nameMapping[cleanKey] || nameMapping[runnerName] || nameMapping[cleanKey.toLowerCase()];
+        const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8') || '{}');
+        configParticipants = cfg.participants || {};
       } catch (_) {}
-      const athleteId = mapInfo?.athleteId || '';
-      const fullName = mapInfo?.fullName || runnerName;
+    }
 
-      // Tìm km thực tế từ activities (khớp tên)
-      let actualKm = 0;
-      Object.entries(monthKmMap).forEach(([actName, km]) => {
-        if (actName.toLowerCase().includes(runnerName.split(' ')[0].toLowerCase())) {
-          actualKm = Math.max(actualKm, km);
-        }
-      });
-      // Tuần này
-      let weekKm = 0;
-      Object.entries(weekKmMap).forEach(([actName, km]) => {
-        if (actName.toLowerCase().includes(runnerName.split(' ')[0].toLowerCase())) {
-          weekKm = Math.max(weekKm, km);
-        }
-      });
+    let nameMapping = {};
+    if (fs.existsSync(NAME_MAPPING_FILE)) {
+      try {
+        nameMapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8') || '{}');
+      } catch (_) {}
+    }
+
+    // Build unique runner list from challenge participants and targets
+    const shortfallRunners = [];
+    const seenRunners = new Set();
+
+    const evaluateRunner = (rawKey, athleteId, displayInfo = {}) => {
+      if (!rawKey && !athleteId) return;
+      const canonicalKey = getCanonicalRunnerKey(rawKey, athleteId);
+      const cleanKey = canonicalKey.replace(monthSuffix, '');
+      const aid = String(athleteId || displayInfo.id || displayInfo.athleteId || nameMapping[cleanKey]?.athleteId || '').trim();
+
+      // Deduplicate check
+      const idKey = aid ? `id_${aid}` : null;
+      const matchKeyMarker = `key_${cleanKey.toLowerCase()}`;
+      if (idKey && seenRunners.has(idKey)) return;
+      if (seenRunners.has(matchKeyMarker)) return;
+
+      if (idKey) seenRunners.add(idKey);
+      seenRunners.add(matchKeyMarker);
+
+      // Lookup target in targets.json:
+      const targetObj = targets[`${cleanKey}${monthSuffix}`] || 
+                        targets[cleanKey] || 
+                        (rawKey ? targets[`${rawKey}${monthSuffix}`] || targets[rawKey] : null) || 
+                        {};
+
+      const targetKm = parseFloat(targetObj.target) || 0;
+      const hasPenalty = targetObj.penalty === true;
+      if (targetKm <= 0) return;
+
+      const runnerName = displayInfo.name || cleanKey.replace(/_/g, ' ').trim();
+      const fullName = displayInfo.fullName || displayInfo.name || nameMapping[cleanKey]?.fullName || runnerName;
+
+      // Get actual km
+      const actualKm = Math.round(((aid && monthKmByAthleteId[aid]) || monthKmByMatchKey[cleanKey] || 0) * 10) / 10;
+      const weekKm = Math.round(((aid && weekKmByAthleteId[aid]) || weekKmByMatchKey[cleanKey] || 0) * 10) / 10;
       const pctMonth = targetKm > 0 ? Math.round((actualKm / targetKm) * 100) : 0;
+      const shortfallKm = Math.max(0, Math.round((targetKm - actualKm) * 10) / 10);
+
       shortfallRunners.push({
-        key, cleanKey, runnerName, fullName, athleteId, targetKm, actualKm: Math.round(actualKm * 10) / 10,
-        shortfallKm: Math.max(0, Math.round((targetKm - actualKm) * 10) / 10),
-        pctMonth, weekKm: Math.round(weekKm * 10) / 10,
+        key: `${cleanKey}${monthSuffix}`,
+        cleanKey,
+        runnerName,
+        fullName,
+        athleteId: aid,
+        targetKm,
+        actualKm,
+        shortfallKm,
+        pctMonth,
+        weekKm,
         hasPenalty
       });
+    };
+
+    // 1. Iterate over official participants in challenge_config.json
+    Object.entries(configParticipants).forEach(([key, p]) => {
+      evaluateRunner(key, p?.id || p?.athleteId, {
+        id: p?.id || p?.athleteId,
+        name: p?.name || `${p?.firstname || ''} ${p?.lastname || ''}`.trim(),
+        fullName: p?.name
+      });
     });
+
+    // 2. Also check any target entries for the current month not yet covered
+    Object.entries(targets).forEach(([key, val]) => {
+      if (!key.endsWith(monthSuffix)) return;
+      const targetCleanKey = key.replace(monthSuffix, '');
+      evaluateRunner(targetCleanKey, null);
+    });
+
     shortfallRunners.sort((a, b) => a.pctMonth - b.pctMonth);
 
     // Tìm người nợ phạt chưa nộp
@@ -4984,7 +5168,7 @@ app.get('/api/notifications/user', (req, res) => {
     const monthSuffix = `_${year}_${month}`;
     const targets = JSON.parse(fs.readFileSync(TARGETS_FILE, 'utf8') || '{}');
     const penalties = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8') || '{"members":[]}');
-    const { monthKmMap, weekKmMap } = getKmByRunner(monthKey);
+    const { monthKmByAthleteId, monthKmByMatchKey } = getKmByRunner(monthKey);
 
     const notifications = [];
 
@@ -5019,42 +5203,35 @@ app.get('/api/notifications/user', (req, res) => {
     }
 
     // Kiểm tra tiến độ km tháng này
-    const mk = matchKey || (member?.rawName);
-    if (mk) {
-      const targetKey = Object.keys(targets).find(k =>
-        k.endsWith(monthSuffix) && k.replace(monthSuffix, '').toLowerCase().replace(/_/g,' ').trim().includes(mk.split(' ')[0].toLowerCase())
-      );
-      if (targetKey) {
-        const tval = targets[targetKey];
-        const targetKm = parseFloat(tval.target) || 0;
-        if (targetKm > 0) {
-          let actualKm = 0;
-          Object.entries(monthKmMap).forEach(([actName, km]) => {
-            if (actName.toLowerCase().includes(mk.split(' ')[0].toLowerCase())) actualKm = Math.max(actualKm, km);
-          });
-          const pct = Math.round((actualKm / targetKm) * 100);
-          const shortfall = Math.max(0, Math.round((targetKm - actualKm) * 10) / 10);
-          const daysLeft = new Date(year, month, 0).getDate() - now.getDate();
-          if (pct >= 100) {
-            notifications.push({
-              id: `goal_complete_${year}_${month}`, type: 'kudos', priority: 'low',
-              titleVi: '🎉 Xuất sắc! Đã về đích!', titleEn: '🎉 Goal Achieved!',
-              bodyVi: `Bạn đã đạt ${pct}% mục tiêu tháng này. Tiếp tục giữ phong độ nhé!`,
-              bodyEn: `You've reached ${pct}% of this month's target. Keep it up!`,
-              data: { pct, actualKm, targetKm }, createdAt: new Date().toISOString()
-            });
-          } else if (pct < 80) {
-            notifications.push({
-              id: `goal_shortfall_${year}_${month}`, type: 'goal',
-              priority: daysLeft <= 7 ? 'high' : 'medium',
-              titleVi: `🎯 Còn thiếu ${shortfall}km để về đích!`,
-              titleEn: `🎯 ${shortfall}km left to reach your goal!`,
-              bodyVi: `Bạn mới đạt ${pct}% (${Math.round(actualKm*10)/10}/${targetKm}km). Còn ${daysLeft} ngày trong tháng.`,
-              bodyEn: `You're at ${pct}% (${Math.round(actualKm*10)/10}/${targetKm}km). ${daysLeft} days left this month.`,
-              data: { pct, actualKm, targetKm, shortfall, daysLeft }, createdAt: new Date().toISOString()
-            });
-          }
-        }
+    const canonicalKey = getCanonicalRunnerKey(matchKey || member?.rawName || '', athleteId);
+    const cleanKey = canonicalKey.replace(monthSuffix, '');
+    const targetObj = targets[`${cleanKey}${monthSuffix}`] || targets[cleanKey] || {};
+    const targetKm = parseFloat(targetObj.target) || 0;
+
+    if (targetKm > 0) {
+      const aid = String(athleteId || member?.athleteId || '').trim();
+      const actualKm = Math.round(((aid && monthKmByAthleteId[aid]) || monthKmByMatchKey[cleanKey] || 0) * 10) / 10;
+      const pct = Math.round((actualKm / targetKm) * 100);
+      const shortfall = Math.max(0, Math.round((targetKm - actualKm) * 10) / 10);
+      const daysLeft = new Date(year, month, 0).getDate() - now.getDate();
+      if (pct >= 100) {
+        notifications.push({
+          id: `goal_complete_${year}_${month}`, type: 'kudos', priority: 'low',
+          titleVi: '🎉 Xuất sắc! Đã về đích!', titleEn: '🎉 Goal Achieved!',
+          bodyVi: `Bạn đã đạt ${pct}% mục tiêu tháng này. Tiếp tục giữ phong độ nhé!`,
+          bodyEn: `You've reached ${pct}% of this month's target. Keep it up!`,
+          data: { pct, actualKm, targetKm }, createdAt: new Date().toISOString()
+        });
+      } else if (pct < 80) {
+        notifications.push({
+          id: `goal_shortfall_${year}_${month}`, type: 'goal',
+          priority: daysLeft <= 7 ? 'high' : 'medium',
+          titleVi: `🎯 Còn thiếu ${shortfall}km để về đích!`,
+          titleEn: `🎯 ${shortfall}km left to reach your goal!`,
+          bodyVi: `Bạn mới đạt ${pct}% (${actualKm}/${targetKm}km). Còn ${daysLeft} ngày trong tháng.`,
+          bodyEn: `You're at ${pct}% (${actualKm}/${targetKm}km). ${daysLeft} days left this month.`,
+          data: { pct, actualKm, targetKm, shortfall, daysLeft }, createdAt: new Date().toISOString()
+        });
       }
     }
 

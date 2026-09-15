@@ -1,45 +1,6 @@
 {
   "120540594": [
     {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/fjGL-r1hbAE:APA91bGVK4axI2V-HhYGG1fvIP8wHhkoZr6cnLBxCqOUrT_zCtKNzv5EqFNxpq9977KxcxLpv3afvGPu8DoWuWSXaCZpel1WB9fYXHDnXApXbflNd23h23FdKlh59aD3vL-AecibiSOw",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BC2hnzoxzJdeV54kXdMXrljX3VzUpxII70T4G17r12NsP_9CbwtJg76EYInB-1fCTLKH--mWnnkjlZTkVllG_0I",
-        "auth": "sSt6qgitZAEPr_EozkMOAQ"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:27.996Z"
-    },
-    {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/e8SLoHj3aQE:APA91bFw1Nv9GtechG45dht2xaR_Oy23bgVAgxWoT1jRvUL6LhfYEXry-AhrZgLrjuEyOtF4TCiuD6tX6AlXlSXiIs_MBtD8FmgBqwLC2YS-DjUjEWCDxgWOtZhTKQvKUgKWNUvB5Ag2",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BIoMZyERnDRWcKPrj06zpJEWt55L2KEFBZUB_Y2MZVE56lfirLJAXWjt9Bs8W7vuRBJt5jKjgiNRR3bQf4QVgCM",
-        "auth": "amjcPOcclDVU6RtT53giqQ"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.109Z"
-    },
-    {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/fMoRz6sTJPs:APA91bHHeapVbMoafNC4gOTfkxMYyuxUYh9idb_dFCfMR3fAGgVL2dbQoZN9J8GjavLIfRIqBbxDp6SbehLyLaI4BmoNxFhvnbhuzhffYEGG09S0dA3KUNv7u4JyzBtqsqvkPyVtTp-Z",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BN1OMXqIb5-Yle-zevi2mFm5q9zmbn0ZWEREwz4OoZKv7UfQkSonk385anCy_9D8wamg3Tjm2gVXXxEM1aHvQq8",
-        "auth": "0bv1AaZ5qGwXlH3Jzer0cA"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.470Z"
-    },
-    {
       "endpoint": "https://fcm.googleapis.com/fcm/send/dR06WjWUomI:APA91bFhJU_netgRjgjKG-vSdW5YM6svp3dM757w7KIoJycTBZ813_4Hln_GeQv3tv25xEiCTf1QJyr44pieQEt2dbr4DE8g3rpAReNlKHtX8yx6z5UChg2Y_H6vjuCqw8WHlJb1hcpy",
       "expirationTime": null,
       "keys": {
@@ -50,7 +11,33 @@
       "athleteId": "120540594",
       "athleteName": "pham tien",
       "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.888Z"
+      "registeredAt": "2026-09-14T15:17:56.568Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/fv0QsH-c3f4:APA91bGK501pzpa90tkiBevYNjpBnyWea0KbJn3hCoesPgXTT-4e6xOgLAa2dmnQNyZv3sUK0NScdr0rkFA30UZporeK4HBgFmLSzUbNwsGaWI2JsGH5vbwX_r08XPHgkW08dVuw7cjO",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BNL-31rCJpdUkIf3Og_0HArgpIw-FtQlYheU1yYnn86qwHTIszUAyIHKd0NF-9Bymra6GjtYjT4CLBdHhsqLUig",
+        "auth": "K277o8yt-egSwQcc4Ioz4g"
+      },
+      "device": "Windows PC",
+      "athleteId": "120540594",
+      "athleteName": "pham tien",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T16:34:10.232Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dgNdvre2ZK8:APA91bFWVG4Xrsk8AxWWWYfOZJ9P_7xfTInqEvmNHPw8vCVAerTJlvc1syQlyWd9abQWeje6N7h1uDTe0XBPF6pA-Jgj7R6pzcPyZ0qZqs79KIcubQHbOSrQ4TVfbQLL6-sDOZaCnKz2",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BDwhodAwmAHioJqeTkDOXsk_2Xgl6MVaDviDs-jH7Ns6snMaPa3mVDwKEl7Sua9Hae-6Hpuk0LFMQsAQIITVUeY",
+        "auth": "_n0Gh5xe8f63HzPFQrxlUg"
+      },
+      "device": "Windows PC",
+      "athleteId": "120540594",
+      "athleteName": "pham tien",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T17:54:21.133Z"
     }
   ],
   "133066813": [
@@ -65,6 +52,19 @@
       "athleteName": "Tien PhamTV",
       "athleteKey": "Tien_P.",
       "registeredAt": "2026-09-14T05:14:58.144Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dgNdvre2ZK8:APA91bFWVG4Xrsk8AxWWWYfOZJ9P_7xfTInqEvmNHPw8vCVAerTJlvc1syQlyWd9abQWeje6N7h1uDTe0XBPF6pA-Jgj7R6pzcPyZ0qZqs79KIcubQHbOSrQ4TVfbQLL6-sDOZaCnKz2",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BDwhodAwmAHioJqeTkDOXsk_2Xgl6MVaDviDs-jH7Ns6snMaPa3mVDwKEl7Sua9Hae-6Hpuk0LFMQsAQIITVUeY",
+        "auth": "_n0Gh5xe8f63HzPFQrxlUg"
+      },
+      "device": "Windows PC",
+      "athleteId": "133066813",
+      "athleteName": "Tien PhamTV",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T18:55:32.429Z"
     }
   ],
   "Tien PhamTV": [
@@ -79,6 +79,19 @@
       "athleteName": "Tien PhamTV",
       "athleteKey": "Tien_P.",
       "registeredAt": "2026-09-14T05:14:58.144Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dgNdvre2ZK8:APA91bFWVG4Xrsk8AxWWWYfOZJ9P_7xfTInqEvmNHPw8vCVAerTJlvc1syQlyWd9abQWeje6N7h1uDTe0XBPF6pA-Jgj7R6pzcPyZ0qZqs79KIcubQHbOSrQ4TVfbQLL6-sDOZaCnKz2",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BDwhodAwmAHioJqeTkDOXsk_2Xgl6MVaDviDs-jH7Ns6snMaPa3mVDwKEl7Sua9Hae-6Hpuk0LFMQsAQIITVUeY",
+        "auth": "_n0Gh5xe8f63HzPFQrxlUg"
+      },
+      "device": "Windows PC",
+      "athleteId": "133066813",
+      "athleteName": "Tien PhamTV",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T18:55:32.429Z"
     }
   ],
   "Tien_P.": [
@@ -93,6 +106,19 @@
       "athleteName": "Tien PhamTV",
       "athleteKey": "Tien_P.",
       "registeredAt": "2026-09-14T05:14:58.144Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dgNdvre2ZK8:APA91bFWVG4Xrsk8AxWWWYfOZJ9P_7xfTInqEvmNHPw8vCVAerTJlvc1syQlyWd9abQWeje6N7h1uDTe0XBPF6pA-Jgj7R6pzcPyZ0qZqs79KIcubQHbOSrQ4TVfbQLL6-sDOZaCnKz2",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BDwhodAwmAHioJqeTkDOXsk_2Xgl6MVaDviDs-jH7Ns6snMaPa3mVDwKEl7Sua9Hae-6Hpuk0LFMQsAQIITVUeY",
+        "auth": "_n0Gh5xe8f63HzPFQrxlUg"
+      },
+      "device": "Windows PC",
+      "athleteId": "133066813",
+      "athleteName": "Tien PhamTV",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T18:55:32.429Z"
     }
   ],
   "Tien P.": [
@@ -107,49 +133,23 @@
       "athleteName": "Tien PhamTV",
       "athleteKey": "Tien_P.",
       "registeredAt": "2026-09-14T05:14:58.144Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dgNdvre2ZK8:APA91bFWVG4Xrsk8AxWWWYfOZJ9P_7xfTInqEvmNHPw8vCVAerTJlvc1syQlyWd9abQWeje6N7h1uDTe0XBPF6pA-Jgj7R6pzcPyZ0qZqs79KIcubQHbOSrQ4TVfbQLL6-sDOZaCnKz2",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BDwhodAwmAHioJqeTkDOXsk_2Xgl6MVaDviDs-jH7Ns6snMaPa3mVDwKEl7Sua9Hae-6Hpuk0LFMQsAQIITVUeY",
+        "auth": "_n0Gh5xe8f63HzPFQrxlUg"
+      },
+      "device": "Windows PC",
+      "athleteId": "133066813",
+      "athleteName": "Tien PhamTV",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T18:55:32.429Z"
     }
   ],
   "pham T.": [
     {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/fjGL-r1hbAE:APA91bGVK4axI2V-HhYGG1fvIP8wHhkoZr6cnLBxCqOUrT_zCtKNzv5EqFNxpq9977KxcxLpv3afvGPu8DoWuWSXaCZpel1WB9fYXHDnXApXbflNd23h23FdKlh59aD3vL-AecibiSOw",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BC2hnzoxzJdeV54kXdMXrljX3VzUpxII70T4G17r12NsP_9CbwtJg76EYInB-1fCTLKH--mWnnkjlZTkVllG_0I",
-        "auth": "sSt6qgitZAEPr_EozkMOAQ"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:27.996Z"
-    },
-    {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/e8SLoHj3aQE:APA91bFw1Nv9GtechG45dht2xaR_Oy23bgVAgxWoT1jRvUL6LhfYEXry-AhrZgLrjuEyOtF4TCiuD6tX6AlXlSXiIs_MBtD8FmgBqwLC2YS-DjUjEWCDxgWOtZhTKQvKUgKWNUvB5Ag2",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BIoMZyERnDRWcKPrj06zpJEWt55L2KEFBZUB_Y2MZVE56lfirLJAXWjt9Bs8W7vuRBJt5jKjgiNRR3bQf4QVgCM",
-        "auth": "amjcPOcclDVU6RtT53giqQ"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.109Z"
-    },
-    {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/fMoRz6sTJPs:APA91bHHeapVbMoafNC4gOTfkxMYyuxUYh9idb_dFCfMR3fAGgVL2dbQoZN9J8GjavLIfRIqBbxDp6SbehLyLaI4BmoNxFhvnbhuzhffYEGG09S0dA3KUNv7u4JyzBtqsqvkPyVtTp-Z",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BN1OMXqIb5-Yle-zevi2mFm5q9zmbn0ZWEREwz4OoZKv7UfQkSonk385anCy_9D8wamg3Tjm2gVXXxEM1aHvQq8",
-        "auth": "0bv1AaZ5qGwXlH3Jzer0cA"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.470Z"
-    },
-    {
       "endpoint": "https://fcm.googleapis.com/fcm/send/dR06WjWUomI:APA91bFhJU_netgRjgjKG-vSdW5YM6svp3dM757w7KIoJycTBZ813_4Hln_GeQv3tv25xEiCTf1QJyr44pieQEt2dbr4DE8g3rpAReNlKHtX8yx6z5UChg2Y_H6vjuCqw8WHlJb1hcpy",
       "expirationTime": null,
       "keys": {
@@ -160,50 +160,37 @@
       "athleteId": "120540594",
       "athleteName": "pham tien",
       "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.888Z"
+      "registeredAt": "2026-09-14T15:17:56.568Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/fv0QsH-c3f4:APA91bGK501pzpa90tkiBevYNjpBnyWea0KbJn3hCoesPgXTT-4e6xOgLAa2dmnQNyZv3sUK0NScdr0rkFA30UZporeK4HBgFmLSzUbNwsGaWI2JsGH5vbwX_r08XPHgkW08dVuw7cjO",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BNL-31rCJpdUkIf3Og_0HArgpIw-FtQlYheU1yYnn86qwHTIszUAyIHKd0NF-9Bymra6GjtYjT4CLBdHhsqLUig",
+        "auth": "K277o8yt-egSwQcc4Ioz4g"
+      },
+      "device": "Windows PC",
+      "athleteId": "120540594",
+      "athleteName": "pham tien",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T16:34:10.232Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dgNdvre2ZK8:APA91bFWVG4Xrsk8AxWWWYfOZJ9P_7xfTInqEvmNHPw8vCVAerTJlvc1syQlyWd9abQWeje6N7h1uDTe0XBPF6pA-Jgj7R6pzcPyZ0qZqs79KIcubQHbOSrQ4TVfbQLL6-sDOZaCnKz2",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BDwhodAwmAHioJqeTkDOXsk_2Xgl6MVaDviDs-jH7Ns6snMaPa3mVDwKEl7Sua9Hae-6Hpuk0LFMQsAQIITVUeY",
+        "auth": "_n0Gh5xe8f63HzPFQrxlUg"
+      },
+      "device": "Windows PC",
+      "athleteId": "120540594",
+      "athleteName": "pham tien",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T17:54:21.133Z"
     }
   ],
   "pham_T.": [
     {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/fjGL-r1hbAE:APA91bGVK4axI2V-HhYGG1fvIP8wHhkoZr6cnLBxCqOUrT_zCtKNzv5EqFNxpq9977KxcxLpv3afvGPu8DoWuWSXaCZpel1WB9fYXHDnXApXbflNd23h23FdKlh59aD3vL-AecibiSOw",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BC2hnzoxzJdeV54kXdMXrljX3VzUpxII70T4G17r12NsP_9CbwtJg76EYInB-1fCTLKH--mWnnkjlZTkVllG_0I",
-        "auth": "sSt6qgitZAEPr_EozkMOAQ"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:27.996Z"
-    },
-    {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/e8SLoHj3aQE:APA91bFw1Nv9GtechG45dht2xaR_Oy23bgVAgxWoT1jRvUL6LhfYEXry-AhrZgLrjuEyOtF4TCiuD6tX6AlXlSXiIs_MBtD8FmgBqwLC2YS-DjUjEWCDxgWOtZhTKQvKUgKWNUvB5Ag2",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BIoMZyERnDRWcKPrj06zpJEWt55L2KEFBZUB_Y2MZVE56lfirLJAXWjt9Bs8W7vuRBJt5jKjgiNRR3bQf4QVgCM",
-        "auth": "amjcPOcclDVU6RtT53giqQ"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.109Z"
-    },
-    {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/fMoRz6sTJPs:APA91bHHeapVbMoafNC4gOTfkxMYyuxUYh9idb_dFCfMR3fAGgVL2dbQoZN9J8GjavLIfRIqBbxDp6SbehLyLaI4BmoNxFhvnbhuzhffYEGG09S0dA3KUNv7u4JyzBtqsqvkPyVtTp-Z",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BN1OMXqIb5-Yle-zevi2mFm5q9zmbn0ZWEREwz4OoZKv7UfQkSonk385anCy_9D8wamg3Tjm2gVXXxEM1aHvQq8",
-        "auth": "0bv1AaZ5qGwXlH3Jzer0cA"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.470Z"
-    },
-    {
       "endpoint": "https://fcm.googleapis.com/fcm/send/dR06WjWUomI:APA91bFhJU_netgRjgjKG-vSdW5YM6svp3dM757w7KIoJycTBZ813_4Hln_GeQv3tv25xEiCTf1QJyr44pieQEt2dbr4DE8g3rpAReNlKHtX8yx6z5UChg2Y_H6vjuCqw8WHlJb1hcpy",
       "expirationTime": null,
       "keys": {
@@ -214,50 +201,37 @@
       "athleteId": "120540594",
       "athleteName": "pham tien",
       "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.888Z"
+      "registeredAt": "2026-09-14T15:17:56.568Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/fv0QsH-c3f4:APA91bGK501pzpa90tkiBevYNjpBnyWea0KbJn3hCoesPgXTT-4e6xOgLAa2dmnQNyZv3sUK0NScdr0rkFA30UZporeK4HBgFmLSzUbNwsGaWI2JsGH5vbwX_r08XPHgkW08dVuw7cjO",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BNL-31rCJpdUkIf3Og_0HArgpIw-FtQlYheU1yYnn86qwHTIszUAyIHKd0NF-9Bymra6GjtYjT4CLBdHhsqLUig",
+        "auth": "K277o8yt-egSwQcc4Ioz4g"
+      },
+      "device": "Windows PC",
+      "athleteId": "120540594",
+      "athleteName": "pham tien",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T16:34:10.232Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dgNdvre2ZK8:APA91bFWVG4Xrsk8AxWWWYfOZJ9P_7xfTInqEvmNHPw8vCVAerTJlvc1syQlyWd9abQWeje6N7h1uDTe0XBPF6pA-Jgj7R6pzcPyZ0qZqs79KIcubQHbOSrQ4TVfbQLL6-sDOZaCnKz2",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BDwhodAwmAHioJqeTkDOXsk_2Xgl6MVaDviDs-jH7Ns6snMaPa3mVDwKEl7Sua9Hae-6Hpuk0LFMQsAQIITVUeY",
+        "auth": "_n0Gh5xe8f63HzPFQrxlUg"
+      },
+      "device": "Windows PC",
+      "athleteId": "120540594",
+      "athleteName": "pham tien",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T17:54:21.133Z"
     }
   ],
   "pham tien": [
     {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/fjGL-r1hbAE:APA91bGVK4axI2V-HhYGG1fvIP8wHhkoZr6cnLBxCqOUrT_zCtKNzv5EqFNxpq9977KxcxLpv3afvGPu8DoWuWSXaCZpel1WB9fYXHDnXApXbflNd23h23FdKlh59aD3vL-AecibiSOw",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BC2hnzoxzJdeV54kXdMXrljX3VzUpxII70T4G17r12NsP_9CbwtJg76EYInB-1fCTLKH--mWnnkjlZTkVllG_0I",
-        "auth": "sSt6qgitZAEPr_EozkMOAQ"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:27.996Z"
-    },
-    {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/e8SLoHj3aQE:APA91bFw1Nv9GtechG45dht2xaR_Oy23bgVAgxWoT1jRvUL6LhfYEXry-AhrZgLrjuEyOtF4TCiuD6tX6AlXlSXiIs_MBtD8FmgBqwLC2YS-DjUjEWCDxgWOtZhTKQvKUgKWNUvB5Ag2",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BIoMZyERnDRWcKPrj06zpJEWt55L2KEFBZUB_Y2MZVE56lfirLJAXWjt9Bs8W7vuRBJt5jKjgiNRR3bQf4QVgCM",
-        "auth": "amjcPOcclDVU6RtT53giqQ"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.109Z"
-    },
-    {
-      "endpoint": "https://fcm.googleapis.com/fcm/send/fMoRz6sTJPs:APA91bHHeapVbMoafNC4gOTfkxMYyuxUYh9idb_dFCfMR3fAGgVL2dbQoZN9J8GjavLIfRIqBbxDp6SbehLyLaI4BmoNxFhvnbhuzhffYEGG09S0dA3KUNv7u4JyzBtqsqvkPyVtTp-Z",
-      "expirationTime": null,
-      "keys": {
-        "p256dh": "BN1OMXqIb5-Yle-zevi2mFm5q9zmbn0ZWEREwz4OoZKv7UfQkSonk385anCy_9D8wamg3Tjm2gVXXxEM1aHvQq8",
-        "auth": "0bv1AaZ5qGwXlH3Jzer0cA"
-      },
-      "device": "Windows PC",
-      "athleteId": "120540594",
-      "athleteName": "pham tien",
-      "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.470Z"
-    },
-    {
       "endpoint": "https://fcm.googleapis.com/fcm/send/dR06WjWUomI:APA91bFhJU_netgRjgjKG-vSdW5YM6svp3dM757w7KIoJycTBZ813_4Hln_GeQv3tv25xEiCTf1QJyr44pieQEt2dbr4DE8g3rpAReNlKHtX8yx6z5UChg2Y_H6vjuCqw8WHlJb1hcpy",
       "expirationTime": null,
       "keys": {
@@ -268,7 +242,33 @@
       "athleteId": "120540594",
       "athleteName": "pham tien",
       "athleteKey": "",
-      "registeredAt": "2026-09-14T14:58:28.888Z"
+      "registeredAt": "2026-09-14T15:17:56.568Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/fv0QsH-c3f4:APA91bGK501pzpa90tkiBevYNjpBnyWea0KbJn3hCoesPgXTT-4e6xOgLAa2dmnQNyZv3sUK0NScdr0rkFA30UZporeK4HBgFmLSzUbNwsGaWI2JsGH5vbwX_r08XPHgkW08dVuw7cjO",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BNL-31rCJpdUkIf3Og_0HArgpIw-FtQlYheU1yYnn86qwHTIszUAyIHKd0NF-9Bymra6GjtYjT4CLBdHhsqLUig",
+        "auth": "K277o8yt-egSwQcc4Ioz4g"
+      },
+      "device": "Windows PC",
+      "athleteId": "120540594",
+      "athleteName": "pham tien",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T16:34:10.232Z"
+    },
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/dgNdvre2ZK8:APA91bFWVG4Xrsk8AxWWWYfOZJ9P_7xfTInqEvmNHPw8vCVAerTJlvc1syQlyWd9abQWeje6N7h1uDTe0XBPF6pA-Jgj7R6pzcPyZ0qZqs79KIcubQHbOSrQ4TVfbQLL6-sDOZaCnKz2",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BDwhodAwmAHioJqeTkDOXsk_2Xgl6MVaDviDs-jH7Ns6snMaPa3mVDwKEl7Sua9Hae-6Hpuk0LFMQsAQIITVUeY",
+        "auth": "_n0Gh5xe8f63HzPFQrxlUg"
+      },
+      "device": "Windows PC",
+      "athleteId": "120540594",
+      "athleteName": "pham tien",
+      "athleteKey": "",
+      "registeredAt": "2026-09-14T17:54:21.133Z"
     }
   ]
 }

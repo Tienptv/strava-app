@@ -895,6 +895,11 @@ export default function PersonalGoal({
                       ⚡ {t('readinessTag')} {readinessScore}%
                     </span>
                   )}
+                  {aiAdvice?.provider && (
+                    <span className="ai-coach-provider-pill" title={`${t('poweredByAi')}: ${aiAdvice.provider}`}>
+                      ✨ {aiAdvice.provider.replace('Google ', '')}
+                    </span>
+                  )}
                 </div>
                 
                 <div className="ai-coach-actions">
@@ -948,7 +953,6 @@ export default function PersonalGoal({
                       </div>
                       <p className="insight-card-text">{effectiveStrategyTip}</p>
                     </div>
-
                     <div className="ai-coach-insight-card recovery-card">
                       <div className="insight-card-header">
                         <Activity size={13} color="#10b981" />
@@ -957,6 +961,105 @@ export default function PersonalGoal({
                       <p className="insight-card-text">{effectiveRecoveryTip}</p>
                     </div>
                   </div>
+
+                  {/* Garmin & Apple Sports Science Widget */}
+                  {aiAdvice?.sportsMetrics?.trainingStatus && (
+                    <div className="garmin-sports-card">
+                      <div className="garmin-sports-header">
+                        <div className="garmin-sports-title-wrap">
+                          <span className="garmin-brand-badge">GARMIN / FIRSTBEAT</span>
+                          <span className="garmin-sports-title">{t('trainingStatusTitle')}</span>
+                        </div>
+                        {aiAdvice.sportsMetrics.recovery && (
+                          <span className="recovery-pill" title={t('recoveryAdvisorTitle')}>
+                            <Clock size={12} />
+                            {aiAdvice.sportsMetrics.recovery.remainingHours > 0 
+                              ? `${aiAdvice.sportsMetrics.recovery.remainingHours} ${t('hoursRemaining')}`
+                              : t('fullyRecovered')}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Training Status Hero Banner */}
+                      <div 
+                        className="garmin-status-banner" 
+                        style={{ borderLeftColor: aiAdvice.sportsMetrics.trainingStatus.statusColor || '#00A3A6' }}
+                      >
+                        <div className="garmin-status-content">
+                          <div 
+                            className="garmin-status-name" 
+                            style={{ color: aiAdvice.sportsMetrics.trainingStatus.statusColor || '#00A3A6' }}
+                          >
+                            {lang === 'vi' ? aiAdvice.sportsMetrics.trainingStatus.labelVi : aiAdvice.sportsMetrics.trainingStatus.labelEn}
+                          </div>
+                          <p className="garmin-status-desc">
+                            {lang === 'vi' ? aiAdvice.sportsMetrics.trainingStatus.descVi : aiAdvice.sportsMetrics.trainingStatus.descEn}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* ACWR Workload Ratio Meter */}
+                      <div className="acwr-meter-box">
+                        <div className="acwr-meter-header">
+                          <span className="acwr-label">{t('acwrLabel')}</span>
+                          <span 
+                            className="acwr-value" 
+                            style={{ color: aiAdvice.sportsMetrics.trainingStatus.statusColor }}
+                          >
+                            {aiAdvice.sportsMetrics.trainingStatus.acwr}x
+                          </span>
+                        </div>
+                        <div className="acwr-bar-track">
+                          <div 
+                            className="acwr-bar-fill" 
+                            style={{ 
+                              width: `${Math.min(100, Math.max(8, (aiAdvice.sportsMetrics.trainingStatus.acwr / 2.0) * 100))}%`,
+                              background: aiAdvice.sportsMetrics.trainingStatus.statusColor 
+                            }} 
+                          />
+                          <div className="acwr-sweet-spot-zone" title={t('acwrOptimalZone')} />
+                        </div>
+                        <div className="acwr-meter-legend">
+                          <span>0.5x (Recovery)</span>
+                          <span className="legend-sweet-spot">1.0x - 1.35x (Sweet Spot)</span>
+                          <span>1.5x+ (Overreach)</span>
+                        </div>
+                      </div>
+
+                      {/* Race Predictions (VDOT Jack Daniels) */}
+                      {aiAdvice.sportsMetrics.racePredictions?.hasBenchmark && (
+                        <div className="garmin-race-predictions">
+                          <div className="race-pred-title">
+                            <Award size={13} color="#78BE20" />
+                            <span>{t('racePredictorTitle')}</span>
+                            {aiAdvice.sportsMetrics.racePredictions.vdot && (
+                              <span className="vdot-badge">VDOT {aiAdvice.sportsMetrics.racePredictions.vdot}</span>
+                            )}
+                          </div>
+                          <div className="race-pred-grid">
+                            <div className="race-chip">
+                              <span className="race-chip-label">5K</span>
+                              <span className="race-chip-time">{aiAdvice.sportsMetrics.racePredictions.predicted5k}</span>
+                            </div>
+                            <div className="race-chip">
+                              <span className="race-chip-label">10K</span>
+                              <span className="race-chip-time">{aiAdvice.sportsMetrics.racePredictions.predicted10k}</span>
+                            </div>
+                            <div className="race-chip">
+                              <span className="race-chip-label">21.1K (HM)</span>
+                              <span className="race-chip-time">{aiAdvice.sportsMetrics.racePredictions.predicted21k}</span>
+                            </div>
+                          </div>
+                          {aiAdvice.sportsMetrics.racePredictions.trainingPaces?.easyZone2 && (
+                            <div className="easy-pace-hint">
+                              <span className="easy-pace-dot" />
+                              <span>{t('easyZone2Title')}: <strong>{aiAdvice.sportsMetrics.racePredictions.trainingPaces.easyZone2} /km</strong></span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

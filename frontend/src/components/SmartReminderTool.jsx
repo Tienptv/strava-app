@@ -51,6 +51,20 @@ async function sendPushNotification({ targetId, athleteKey, athleteName, title, 
   }
 }
 
+// Helper deduplicate runners by athleteId and cleanKey to prevent duplicate cards
+function getDeduplicatedRunners(rawRunners = []) {
+  const seen = new Set();
+  return (rawRunners || []).filter(r => {
+    const idKey = r.athleteId ? `id_${r.athleteId}` : null;
+    const nameKey = `key_${(r.cleanKey || r.runnerName || '').replace(/_/g, ' ').trim().toLowerCase()}`;
+    if (idKey && seen.has(idKey)) return false;
+    if (seen.has(nameKey)) return false;
+    if (idKey) seen.add(idKey);
+    seen.add(nameKey);
+    return true;
+  });
+}
+
 // ─── Tab 1: Nhắc chạy ────────────────────────────────────────────────────────
 function RunningReminderTab({ data, subscribersStatus, lang, t, onRefresh }) {
   const [copied, setCopied] = useState(false);
@@ -60,7 +74,7 @@ function RunningReminderTab({ data, subscribersStatus, lang, t, onRefresh }) {
   const now = new Date();
   const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
 
-  const runners = data?.shortfallRunners || [];
+  const runners = getDeduplicatedRunners(data?.shortfallRunners);
   const penaltyRunners = runners.filter(r => r.hasPenalty && r.pctMonth < 100);
   const belowTarget = penaltyRunners.filter(r => r.pctMonth < 80);
   const nearTarget = penaltyRunners.filter(r => r.pctMonth >= 80 && r.pctMonth < 100);
@@ -685,8 +699,8 @@ function CustomPushTab({ data, subscribersStatus, lang, t }) {
   const totalSubscribers = subscribersStatus?.totalSubscribers || 0;
   const athleteMap = subscribersStatus?.athleteMap || {};
 
-  // Danh sách runners để chọn
-  const runners = data?.shortfallRunners || [];
+  // Danh sách runners để chọn (đã lọc trùng)
+  const runners = getDeduplicatedRunners(data?.shortfallRunners);
 
   const handleSend = async () => {
     if (!title.trim() || !body.trim()) {

@@ -9,6 +9,19 @@ export const removeVietnameseTones = (str) => {
 
 export const normalize = (n) => removeVietnameseTones(n || '').trim().toLowerCase().replace(/[\.\s_-]/g, '');
 
+export const KNOWN_ATHLETE_ALIASES = {
+  '110041582': 'An_H.',
+  'ha xuan an': 'An_H.',
+  'hà xuân an': 'An_H.',
+  'ha xuan a.': 'An_H.',
+  'hà xuân a.': 'An_H.',
+  'ha xuan_a.': 'An_H.',
+  'hà xuân_a.': 'An_H.',
+  'an ha': 'An_H.',
+  'an h.': 'An_H.',
+  'an_h.': 'An_H.',
+};
+
 /**
  * Tìm matchKey của athlete hiện tại trong danh sách participants
  * @param {Object} athlete - Thông tin athlete đang đăng nhập ({ id, firstname, lastname })
@@ -17,14 +30,29 @@ export const normalize = (n) => removeVietnameseTones(n || '').trim().toLowerCas
  */
 export function getAthleteMatchKey(athlete, participants = {}) {
   if (!athlete) return null;
+  const aid = athlete.id ? String(athlete.id).trim() : '';
+  if (aid && KNOWN_ATHLETE_ALIASES[aid]) {
+    return KNOWN_ATHLETE_ALIASES[aid];
+  }
+
+  const rawFull = `${athlete.firstname || ''} ${athlete.lastname || ''}`.trim().toLowerCase();
+  if (KNOWN_ATHLETE_ALIASES[rawFull]) {
+    return KNOWN_ATHLETE_ALIASES[rawFull];
+  }
+
+  const normCombined = normalize(rawFull);
+  if (normCombined.includes('haxuanan') || normCombined === 'haxuana') {
+    return 'An_H.';
+  }
+
   const normFname = normalize(athlete.firstname);
   const normLname = normalize(athlete.lastname);
 
   // 1. Khớp theo ID nếu có
-  if (athlete.id) {
+  if (aid) {
     const keyById = Object.keys(participants || {}).find(k => {
       const p = participants[k];
-      return (p && p.id && String(p.id) === String(athlete.id)) || (k === String(athlete.id));
+      return (p && (String(p.id) === aid || String(p.athleteId) === aid)) || (k === aid);
     });
     if (keyById) return keyById;
   }
@@ -51,7 +79,13 @@ export function getAthleteMatchKey(athlete, participants = {}) {
 
   // 3. Fallback định dạng chuẩn Strava: Firstname_L. (vd: Tien_P.)
   const lastInitial = athlete.lastname ? (athlete.lastname.trim().charAt(0) + '.') : '';
-  return lastInitial ? `${athlete.firstname}_${lastInitial}` : (athlete.firstname || String(athlete.id || 'runner'));
+  const fallbackKey = lastInitial ? `${athlete.firstname}_${lastInitial}` : (athlete.firstname || String(athlete.id || 'runner'));
+
+  if (KNOWN_ATHLETE_ALIASES[fallbackKey.toLowerCase()] || KNOWN_ATHLETE_ALIASES[fallbackKey.toLowerCase().replace(/_/g, ' ')]) {
+    return KNOWN_ATHLETE_ALIASES[fallbackKey.toLowerCase()] || KNOWN_ATHLETE_ALIASES[fallbackKey.toLowerCase().replace(/_/g, ' ')];
+  }
+
+  return fallbackKey;
 }
 
 // Dữ liệu baseline Total-km trích xuất chính thức từ Strava ngày 02/09/2026

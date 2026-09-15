@@ -68,6 +68,17 @@ export default function ActivityCard({
     return (metersPerSec * 3.6).toFixed(1) + ' km/h';
   };
 
+  const renderMetric = (val, unit) => {
+    if (val === undefined || val === null || val === '–') return '–';
+    if (!unit) return val;
+    return (
+      <>
+        <span>{val}</span>
+        <span className="activity-card__metric-unit">{unit}</span>
+      </>
+    );
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -255,7 +266,7 @@ export default function ActivityCard({
       <div className="activity-card__metrics">
         <div className="activity-card__metric activity-card__metric--distance">
           <div className="activity-card__metric-value activity-card__metric-value--distance">
-            {formatDistance(activity.distance)}
+            {activity.distance ? renderMetric((activity.distance / 1000).toFixed(2), 'km') : '–'}
           </div>
           <div className="activity-card__metric-label">
             <MapPin size={10} style={{ verticalAlign: 'text-bottom' }} /> {t('distance')}
@@ -273,9 +284,15 @@ export default function ActivityCard({
 
         <div className={`activity-card__metric ${paceBadgeClass ? 'activity-card__metric--pace' : ''}`}>
           <div className={`activity-card__metric-value ${paceBadgeClass}`}>
-            {isRunOrWalk
-              ? formatPace(activity.moving_time, activity.distance)
-              : formatSpeed(activity.average_speed)}
+            {isRunOrWalk ? (() => {
+              const paceSec = getPaceSeconds(activity.moving_time, activity.distance);
+              if (!paceSec) return '–';
+              const m = Math.floor(paceSec / 60);
+              const s = Math.round(paceSec % 60);
+              return renderMetric(`${m}:${String(s).padStart(2, '0')}`, '/km');
+            })() : (
+              activity.average_speed ? renderMetric((activity.average_speed * 3.6).toFixed(1), 'km/h') : '–'
+            )}
           </div>
           <div className="activity-card__metric-label">
             <Gauge size={10} style={{ verticalAlign: 'text-bottom' }} />{' '}
@@ -286,7 +303,7 @@ export default function ActivityCard({
         <div className="activity-card__metric">
           <div className="activity-card__metric-value">
             {activity.total_elevation_gain
-              ? Math.round(activity.total_elevation_gain) + ' m'
+              ? renderMetric(Math.round(activity.total_elevation_gain), 'm')
               : '–'}
           </div>
           <div className="activity-card__metric-label">

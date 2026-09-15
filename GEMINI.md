@@ -71,4 +71,25 @@
 - **Tuyệt đối không tự ý viết code trước khi được phê duyệt:**
   - AI tuyệt đối **KHÔNG được tự ý sửa file mã nguồn hay chạy các lệnh thay đổi hệ thống** trước khi người dùng xem xét kế hoạch, bổ sung comment và bấm **Proceed / Approve**.
 
+---
+
+## 6. Quy Tắc Định Danh Thành Viên Bắt Buộc Bằng ID (Athlete ID Mandatory Rule)
+- **Lý do & Bối cảnh cốt lõi:**
+  - Tên thành viên có thể trùng lặp (ví dụ: nhiều người cùng tên Phương, Huy, Sơn...), hoặc thứ tự họ - tên bị đảo lộn giữa Strava và tiếng Việt (`Hà Xuân An` vs `An Ha`), hoặc thành viên có thể tự đổi tên Strava bất kỳ lúc nào.
+  - Strava Athlete ID là duy nhất (Unique Identifier), không bao giờ thay đổi. Do đó ID là căn cứ duy nhất đảm bảo tính chính xác 100% về mặt dữ liệu, thành tích chạy và tài chính/phạt.
+- **Nguyên tắc bắt buộc cho mọi tính năng phát triển sau này:**
+  1. **Athlete ID làm Khóa Chính (Primary Key):**
+     - Mọi hoạt động tính toán: cộng dồn km, theo dõi tiến độ tuần/tháng, ghi nhận mục tiêu cá nhân (personal target), ghi nhận nợ phạt (penalties), lưu vết lịch sử (audit logs), bắn thông báo (web push notifications)... **bắt buộc phải lấy Strava Athlete ID làm khóa định danh chính**.
+     - Cấu trúc lưu trữ dữ liệu (JSON, Map, Object, State) liên quan đến thành viên phải được index theo `athleteId`.
+  2. **Tên chỉ dùng cho mục đích hiển thị (Display Only):**
+     - Tên thành viên (`fullName`, `runnerName`, `displayName`...) **CHỈ ĐƯỢC DÙNG ĐỂ HIỂN THỊ TRÊN GIAO DIỆN (UI)** cho người dùng đọc.
+     - **Tuyệt đối KHÔNG** dùng chuỗi tên làm khóa tìm kiếm, khóa nhóm (group by), khóa so sánh logic nghiệp vụ, hoặc căn cứ phạt/thưởng.
+     - **Nghiêm cấm** các kỹ thuật lọc theo họ/tên cắt cụt như `name.split(' ')[0]`, `name.includes(...)` để gom nhóm bài tập hoặc đối chiếu runner.
+  3. **Xử lý Activity & Đọc Dữ Liệu:**
+     - Mọi bài tập (activity) khi cào về (scrape), import qua file, hoặc nhận từ webhook/API phải trích xuất ngay `act.athlete.id` (hoặc `athleteId`).
+     - Nếu dữ liệu đầu vào là file lịch sử cũ bị khuyết ID, bắt buộc phải tra cứu qua bảng ánh xạ chuẩn (`name_mapping.json` / `challenge_config.json`) để tìm ra đúng `athleteId` trước khi đưa vào luồng tính toán.
+  4. **Kiểm thử logic với Test Case trùng tên:**
+     - Khi viết test case cho các tính năng mới, bắt buộc phải tạo kịch bản giả định có ít nhất 2 thành viên trùng tên (ví dụ: `Phuong N.` ID 12345 và `Phuong T.` ID 67890) để đảm bảo hệ thống phân định độc lập 100% dựa trên ID.
+
+
 
