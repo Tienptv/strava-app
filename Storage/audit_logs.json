@@ -1,5 +1,47 @@
 [
   {
+    "id": "1789438938529",
+    "timestamp": "2026-09-15T02:22:18.529Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (296 mục), targets.json (51 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (8 người đăng ký)"
+  },
+  {
+    "id": "1789438931465",
+    "timestamp": "2026-09-15T02:22:11.465Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (296 mục), targets.json (51 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789438888764",
+    "timestamp": "2026-09-15T02:21:28.764Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (288 mục), targets.json (51 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789438887895",
+    "timestamp": "2026-09-15T02:21:27.895Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (288 mục), targets.json (51 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (8 người đăng ký)"
+  },
+  {
+    "id": "1789438162335",
+    "timestamp": "2026-09-15T02:09:22.335Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (291 mục), targets.json (51 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
+    "id": "1789438161187",
+    "timestamp": "2026-09-15T02:09:21.187Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (291 mục), targets.json (51 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (8 người đăng ký)"
+  },
+  {
     "id": "1789407419816",
     "timestamp": "2026-09-14T17:36:59.816Z",
     "action": "Kéo dữ liệu Cloud",
@@ -1353,48 +1395,6 @@
   {
     "id": "1788712298400",
     "timestamp": "2026-09-06T16:31:38.400Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788712298387",
-    "timestamp": "2026-09-06T16:31:38.387Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2027)"
-  },
-  {
-    "id": "1788712085043",
-    "timestamp": "2026-09-06T16:28:05.043Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788712085027",
-    "timestamp": "2026-09-06T16:28:05.027Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2027)"
-  },
-  {
-    "id": "1788712014635",
-    "timestamp": "2026-09-06T16:26:54.635Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788712014622",
-    "timestamp": "2026-09-06T16:26:54.622Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2027)"
-  },
-  {
-    "id": "1788711784607",
-    "timestamp": "2026-09-06T16:23:04.607Z",
     "action": "Cập nhật Cấu hình thử thách",
     "user": "Tien PhamTV",
     "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
