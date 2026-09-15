@@ -12,7 +12,7 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin, apiFe
     <nav className="navbar">
       <div
         className="navbar__brand"
-        style={{ cursor: 'pointer', gap: '6px' }}
+        style={{ cursor: 'pointer' }}
         onClick={() => navigate('/')}
       >
         <div className="navbar__brand-icon" style={{ background: 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -51,10 +51,12 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin, apiFe
       <div className="navbar__user">
         {/* Language Switcher */}
         <div className="lang-switcher">
+          {/* Desktop view: Giữ nguyên nút EN / VI cho bản Desktop */}
           <button
-            className="lang-switcher__text-toggle"
+            className="lang-switcher__text-toggle lang-switcher__desktop"
             onClick={() => switchLang(lang === 'en' ? 'vi' : 'en')}
             title={lang === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}
+            aria-label={lang === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}
             style={{
               background: 'transparent',
               border: '1px solid rgba(0, 163, 166, 0.3)',
@@ -63,7 +65,6 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin, apiFe
               cursor: 'pointer',
               fontWeight: 800,
               color: 'var(--primary-navy)',
-              display: 'flex',
               alignItems: 'baseline',
               gap: '2px',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -74,6 +75,16 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin, apiFe
             <span style={{ fontSize: lang === 'en' ? '0.62rem' : '0.48rem', opacity: lang === 'en' ? 1 : 0.4, transition: 'all 0.25s ease' }}>EN</span>
             <span style={{ fontSize: '0.52rem', opacity: 0.3, fontWeight: 400 }}>/</span>
             <span style={{ fontSize: lang === 'vi' ? '0.62rem' : '0.48rem', opacity: lang === 'vi' ? 1 : 0.4, transition: 'all 0.25s ease' }}>VI</span>
+          </button>
+
+          {/* Mobile view: Nút đơn gọn gàng, hiển thị VIE khi ở tiếng Anh và ENG khi ở tiếng Việt */}
+          <button
+            className="lang-switcher__single-toggle lang-switcher__mobile"
+            onClick={() => switchLang(lang === 'en' ? 'vi' : 'en')}
+            title={lang === 'en' ? 'Switch to Vietnamese (Chuyển sang tiếng Việt)' : 'Chuyển sang tiếng Anh (Switch to English)'}
+            aria-label={lang === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}
+          >
+            {lang === 'en' ? 'VIE' : 'ENG'}
           </button>
         </div>
 

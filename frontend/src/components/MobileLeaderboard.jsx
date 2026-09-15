@@ -274,11 +274,11 @@ export default function MobileLeaderboard({
         </button>
         <button 
           type="button"
-          className={`mobile-toggle-btn ${viewType === 'table' || isForcedLandscape || isLandscapeMode ? 'active' : ''}`}
+          className={`mobile-toggle-btn mobile-toggle-btn--leaderboard ${viewType === 'table' || isForcedLandscape || isLandscapeMode ? 'active' : ''}`}
           onClick={handleToggleLandscape}
         >
-          <RotateCw size={12} style={{ marginRight: 4, flexShrink: 0 }} />
-          {viewType === 'table' || isForcedLandscape || isLandscapeMode ? t('portraitRotateBtn') : t('landscapeRotateBtn')}
+          <RotateCw size={13} className="mobile-toggle-btn-icon" style={{ marginRight: 4, flexShrink: 0 }} />
+          <span>{viewType === 'table' || isForcedLandscape || isLandscapeMode ? t('portraitRotateBtn') : t('landscapeRotateBtn')}</span>
         </button>
 
         {/* Nút dropdown chọn tháng theo yêu cầu người dùng đặt bên cạnh nút Rotate Landscape */}

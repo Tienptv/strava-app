@@ -1,5 +1,12 @@
 [
   {
+    "id": "1789483782706",
+    "timestamp": "2026-09-15T14:49:42.706Z",
+    "action": "Git Push",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
+  },
+  {
     "id": "1789483756369",
     "timestamp": "2026-09-15T14:49:16.369Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1391,12 +1398,5 @@
     "action": "Cập nhật Cấu hình thử thách",
     "user": "Tien PhamTV",
     "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788712308255",
-    "timestamp": "2026-09-06T16:31:48.255Z",
-    "action": "Cập nhật Mục tiêu nhóm & Giải chạy",
-    "user": "Tien PhamTV",
-    "details": "Đã cập nhật cấu hình Club Goal (2027)"
   }
 ]

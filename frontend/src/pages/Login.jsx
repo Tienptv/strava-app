@@ -10,10 +10,12 @@ export default function Login({ onLogin, onGuestAccess }) {
     <div className="login-page">
       {/* Language switcher on login page */}
       <div className="lang-switcher" style={{ position: 'absolute', top: 16, right: 20, zIndex: 10 }}>
+        {/* Desktop view */}
         <button
-          className="lang-switcher__text-toggle"
+          className="lang-switcher__text-toggle lang-switcher__desktop"
           onClick={() => switchLang(lang === 'en' ? 'vi' : 'en')}
           title={lang === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}
+          aria-label={lang === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}
           style={{
             background: 'rgba(255, 255, 255, 0.85)',
             border: '1px solid rgba(0, 163, 166, 0.22)',
@@ -22,7 +24,6 @@ export default function Login({ onLogin, onGuestAccess }) {
             cursor: 'pointer',
             fontWeight: 800,
             color: 'var(--primary-navy)',
-            display: 'flex',
             alignItems: 'baseline',
             gap: '4px',
             boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
@@ -35,6 +36,16 @@ export default function Login({ onLogin, onGuestAccess }) {
           <span style={{ fontSize: lang === 'en' ? '0.82rem' : '0.68rem', opacity: lang === 'en' ? 1 : 0.45, transition: 'all 0.25s ease' }}>EN</span>
           <span style={{ fontSize: '0.72rem', opacity: 0.3, fontWeight: 400 }}>/</span>
           <span style={{ fontSize: lang === 'vi' ? '0.82rem' : '0.68rem', opacity: lang === 'vi' ? 1 : 0.45, transition: 'all 0.25s ease' }}>VI</span>
+        </button>
+
+        {/* Mobile view */}
+        <button
+          className="lang-switcher__single-toggle lang-switcher__mobile"
+          onClick={() => switchLang(lang === 'en' ? 'vi' : 'en')}
+          title={lang === 'en' ? 'Switch to Vietnamese (Chuyển sang tiếng Việt)' : 'Chuyển sang tiếng Anh (Switch to English)'}
+          aria-label={lang === 'en' ? 'Switch to Vietnamese' : 'Chuyển sang tiếng Anh'}
+        >
+          {lang === 'en' ? 'VIE' : 'ENG'}
         </button>
       </div>
 
