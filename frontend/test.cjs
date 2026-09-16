@@ -1,4 +1,4 @@
-const historical = require('./Storage/historical_activities.json');
+﻿const historical = require('./Storage/historical_activities.json');
 const imported = require('./Storage/imported_activities.json');
 
 const normalize = (str) => {
@@ -7,7 +7,7 @@ const normalize = (str) => {
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/d/g, 'd')
-      .replace(/�/g, 'D')
+      .replace(/Ð/g, 'D')
       .trim()
       .toLowerCase();
 };

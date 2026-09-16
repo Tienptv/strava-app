@@ -61,7 +61,7 @@ async function saveAndCopyToClipboard(blob, fileName, titleText, isEn) {
  * Lấy trực tiếp pixel từ card đồ họa GPU, chuẩn xác 100% như Win + Shift + S
  */
 export async function captureNativeScreen(options = {}) {
-  const isEn = typeof window !== 'undefined' && localStorage.getItem('lang') === 'en';
+  const isEn = typeof window !== 'undefined' ? (localStorage.getItem('lang') || 'en') === 'en' : true;
   const timestamp = new Date().toISOString().slice(0, 10);
   const fileName = options.fileName || `Strava_Screen_${timestamp}_${Date.now().toString().slice(-4)}.png`;
 
@@ -135,7 +135,7 @@ export async function captureNativeScreen(options = {}) {
  * chụp trọn vẹn tất cả các dòng vận động viên với chất lượng Ultra HD.
  */
 export async function captureFullTableChrome(options = {}) {
-  const isEn = typeof window !== 'undefined' && localStorage.getItem('lang') === 'en';
+  const isEn = typeof window !== 'undefined' ? (localStorage.getItem('lang') || 'en') === 'en' : true;
   const currentLang = options.lang || (isEn ? 'en' : 'vi');
   const month = options.month || new Date().getMonth() + 1;
   const year = options.year || new Date().getFullYear();
@@ -208,7 +208,7 @@ export async function captureFullTableChrome(options = {}) {
  * và chân bảng TOTAL, loại trừ phần hành trình năm và quỹ CLB.
  */
 export async function captureLeaderboardOnlyChrome(options = {}) {
-  const isEn = typeof window !== 'undefined' && localStorage.getItem('lang') === 'en';
+  const isEn = typeof window !== 'undefined' ? (localStorage.getItem('lang') || 'en') === 'en' : true;
   const currentLang = options.lang || (isEn ? 'en' : 'vi');
   const month = options.month || new Date().getMonth() + 1;
   const year = options.year || new Date().getFullYear();
@@ -284,7 +284,7 @@ export async function captureLeaderboardOnlyChrome(options = {}) {
  *   - Kèm mẹo phím tắt Win + Shift + S
  */
 export function showScreenshotModal(options = {}) {
-  const isEn = typeof window !== 'undefined' && localStorage.getItem('lang') === 'en';
+  const isEn = typeof window !== 'undefined' ? (localStorage.getItem('lang') || 'en') === 'en' : true;
 
   Swal.fire({
     title: `

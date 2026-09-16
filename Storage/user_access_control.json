@@ -1,0 +1,67 @@
+{
+  "version": 6,
+  "updatedAt": "2026-09-16T16:59:09.163Z",
+  "updatedBy": "Admin (133066813)",
+  "modules": {
+    "aiCoach": {
+      "key": "aiCoach",
+      "group": "ai_advanced",
+      "enabledForMembers": true,
+      "enabledForGuests": false
+    },
+    "runnaRoadmap": {
+      "key": "runnaRoadmap",
+      "group": "ai_advanced",
+      "enabledForMembers": false,
+      "enabledForGuests": false
+    },
+    "garminSync": {
+      "key": "garminSync",
+      "group": "ai_advanced",
+      "enabledForMembers": false,
+      "enabledForGuests": false
+    },
+    "leaderboardPodium": {
+      "key": "leaderboardPodium",
+      "group": "dashboard_activities",
+      "enabledForMembers": true,
+      "enabledForGuests": true
+    },
+    "recentActivities": {
+      "key": "recentActivities",
+      "group": "dashboard_activities",
+      "enabledForMembers": true,
+      "enabledForGuests": false
+    },
+    "shareCard": {
+      "key": "shareCard",
+      "group": "dashboard_activities",
+      "enabledForMembers": true,
+      "enabledForGuests": true
+    },
+    "clubTreasury": {
+      "key": "clubTreasury",
+      "group": "finance_goals",
+      "enabledForMembers": true,
+      "enabledForGuests": false
+    },
+    "editPersonalGoal": {
+      "key": "editPersonalGoal",
+      "group": "finance_goals",
+      "enabledForMembers": true,
+      "enabledForGuests": false
+    },
+    "exportData": {
+      "key": "exportData",
+      "group": "finance_goals",
+      "enabledForMembers": false,
+      "enabledForGuests": false
+    },
+    "guestAccess": {
+      "key": "guestAccess",
+      "group": "guest_mode",
+      "enabledForMembers": true,
+      "enabledForGuests": true
+    }
+  }
+}

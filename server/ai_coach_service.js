@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getSportsScienceMetrics } from './sports_science_service.js';
+import { getGarminHealth } from './garmin_health_service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -220,6 +221,7 @@ export function extractRunnerContext({ athlete, activities = [], goal = 0, curre
   // Trích xuất chỉ số Khoa Học Thể Thao chuẩn Garmin / Firstbeat & Jack Daniels VDOT
   const athleteId = athlete?.id ? String(athlete.id) : null;
   const sportsMetrics = getSportsScienceMetrics(activities, athleteId, latestRun);
+  const garminHealth = athleteId ? getGarminHealth(athleteId) : null;
 
   return {
     athleteName: athlete?.firstname ? `${athlete.firstname} ${athlete.lastname || ''}`.trim() : 'Runner',
@@ -238,14 +240,15 @@ export function extractRunnerContext({ athlete, activities = [], goal = 0, curre
     paceIntensity,
     cardioStrain,
     avgMonthPaceStr,
-    sportsMetrics
+    sportsMetrics,
+    garminHealth
   };
 }
 
 /**
  * Bộ Smart Heuristic Fallback (Khi offline hoặc không có API Key)
  */
-function generateHeuristicAdvice(ctx, lang = 'vi') {
+function generateHeuristicAdvice(ctx, lang = 'en') {
   const isVi = lang === 'vi';
   let title = isVi ? 'Tư vấn & Kế hoạch' : 'Coach Recommendations';
   let type = 'info';
@@ -387,7 +390,7 @@ function generateHeuristicAdvice(ctx, lang = 'vi') {
 /**
  * Gọi Google Gemini API để phân tích chuyên sâu
  */
-async function callGeminiApi(ctx, apiKey, lang = 'vi') {
+async function callGeminiApi(ctx, apiKey, lang = 'en') {
   const isVi = lang === 'vi';
   const prompt = `
 Bạn là một Huấn Luyện Viên Điền Kinh Cá Nhân (Running Coach AI) chuyên nghiệp, tâm huyết và chu đáo.
@@ -410,6 +413,7 @@ Dưới đây là dữ liệu chạy bộ thực tế của học viên:
 - Dải Pace Zone 2 (Easy Aerobic): ${ctx.sportsMetrics?.racePredictions?.trainingPaces?.easyZone2 || '--'} /km
 - Thời gian phục hồi khuyến nghị (Recovery Hours): ${ctx.sportsMetrics?.recovery?.remainingHours || 0} giờ còn lại
 ${ctx.sportsMetrics?.biomechanics?.cadence ? `- Guồng chân (Cadence): ${ctx.sportsMetrics?.biomechanics?.cadence} spm (${isVi ? ctx.sportsMetrics?.biomechanics?.cadenceTipVi : ctx.sportsMetrics?.biomechanics?.cadenceTipEn})` : ''}
+${ctx.garminHealth?.latest ? `- Dữ liệu sinh trắc học Garmin Connect: Giấc ngủ: ${ctx.garminHealth.latest.sleepScore}/100 (${ctx.garminHealth.latest.sleepHours}h), HRV: ${ctx.garminHealth.latest.hrvStatus}, Body Battery: ${ctx.garminHealth.latest.bodyBattery}%, Điểm sẵn sàng: ${ctx.garminHealth.latest.readiness?.readinessScore}/100 (${isVi ? ctx.garminHealth.latest.readiness?.labelVi : ctx.garminHealth.latest.readiness?.labelEn})` : ''}
 
 QUY TẮC CỰC KỲ QUAN TRỌNG:
 1. BẢO MẬT SỨC KHỎE: Tuyệt đối KHÔNG viết số nhịp tim cụ thể (bpm) ra câu trả lời. Chỉ đánh giá định tính thể lực.
@@ -584,11 +588,11 @@ export async function getAiCoachAdvice(inputData, forceRefresh = false) {
   const athleteKey = inputData.athlete?.id ? String(inputData.athlete.id) : (inputData.athlete?.firstname || 'default_user');
   const todayStr = new Date().toISOString().slice(0, 10);
   const cache = readAiCache();
-  const isVi = (inputData.lang || 'vi') === 'vi';
+  const isVi = (inputData.lang || 'en') === 'vi';
 
   const ctx = extractRunnerContext(inputData);
   const latestActId = ctx.latestRun?.id ? String(ctx.latestRun.id) : 'no_act';
-  const cacheKey = `${athleteKey}_${latestActId}_${todayStr}_${inputData.lang || 'vi'}`;
+  const cacheKey = `${athleteKey}_${latestActId}_${todayStr}_${inputData.lang || 'en'}`;
 
   // Kiểm tra cache nếu không ép buộc refresh
   if (!forceRefresh && cache[cacheKey]) {
@@ -601,17 +605,17 @@ export async function getAiCoachAdvice(inputData, forceRefresh = false) {
 
   if (apiKey) {
     try {
-      result = await callGeminiApi(ctx, apiKey, inputData.lang || 'vi');
+      result = await callGeminiApi(ctx, apiKey, inputData.lang || 'en');
       if (!result.provider) {
         result.provider = 'Google Gemini Flash';
       }
     } catch (err) {
       console.warn('[AI Coach] Tự động fallback sang Smart Heuristic:', err.message);
-      result = generateHeuristicAdvice(ctx, inputData.lang || 'vi');
+      result = generateHeuristicAdvice(ctx, inputData.lang || 'en');
       result.provider = 'Smart Heuristic (Fallback)';
     }
   } else {
-    result = generateHeuristicAdvice(ctx, inputData.lang || 'vi');
+    result = generateHeuristicAdvice(ctx, inputData.lang || 'en');
     result.provider = 'Smart Heuristic Engine';
   }
 
@@ -631,7 +635,7 @@ export async function getAiCoachAdvice(inputData, forceRefresh = false) {
  * Sinh Kế hoạch tập luyện 7 ngày trong tuần (Weekly Training Plan)
  */
 export async function getWeeklyTrainingPlan(inputData) {
-  const isVi = (inputData.lang || 'vi') === 'vi';
+  const isVi = (inputData.lang || 'en') === 'vi';
   const ctx = extractRunnerContext(inputData);
   const now = new Date();
   

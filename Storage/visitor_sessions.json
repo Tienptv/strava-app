@@ -2,13 +2,13 @@
   "v_6fe64e0a-f9ba": {
     "visitorId": "v_6fe64e0a-f9ba",
     "firstSeen": "2026-09-14T07:00:00.148Z",
-    "pageViewsCount": 117,
+    "pageViewsCount": 132,
     "pagesHistory": [
       "/",
       "/administer",
       "/callback"
     ],
-    "lastSeen": "2026-09-16T13:38:09.739Z",
+    "lastSeen": "2026-09-16T17:03:39.733Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Chrome PWA)",
@@ -19,18 +19,18 @@
     "screenSize": "2560x1369",
     "athleteId": "133066813",
     "athleteName": "Tien PhamTV",
-    "lastPage": "/administer",
-    "durationMinutes": 3278,
+    "lastPage": "/",
+    "durationMinutes": 3484,
     "avatar": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/medium.jpg"
   },
   "v_379ad7d1-8155": {
     "visitorId": "v_379ad7d1-8155",
     "firstSeen": "2026-09-14T15:21:53.453Z",
-    "pageViewsCount": 2,
+    "pageViewsCount": 5,
     "pagesHistory": [
       "/"
     ],
-    "lastSeen": "2026-09-15T17:13:16.053Z",
+    "lastSeen": "2026-09-16T14:09:25.130Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Edge)",
@@ -38,20 +38,20 @@
     "os": "Windows 10/11",
     "isPwa": false,
     "isGuest": true,
-    "screenSize": "1912x948",
+    "screenSize": "1912x1068",
     "lastPage": "/",
-    "durationMinutes": 1551
+    "durationMinutes": 2808
   },
   "v_50c7e864-c631": {
     "visitorId": "v_50c7e864-c631",
     "firstSeen": "2026-09-14T15:22:22.184Z",
-    "pageViewsCount": 25,
+    "pageViewsCount": 28,
     "pagesHistory": [
       "/callback",
       "/",
       "/administer"
     ],
-    "lastSeen": "2026-09-15T17:13:54.942Z",
+    "lastSeen": "2026-09-16T14:09:58.949Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Edge)",
@@ -59,12 +59,12 @@
     "os": "Windows 10/11",
     "isPwa": false,
     "isGuest": false,
-    "screenSize": "1912x948",
-    "athleteId": "120540594",
-    "athleteName": "pham tien",
+    "screenSize": "1912x1068",
+    "athleteId": "133066813",
+    "athleteName": "Tien PhamTV",
     "lastPage": "/",
-    "durationMinutes": 1552,
-    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c"
+    "durationMinutes": 2808,
+    "avatar": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/medium.jpg"
   },
   "v_f5eaa2fd-f5cf": {
     "visitorId": "v_f5eaa2fd-f5cf",
@@ -1682,12 +1682,12 @@
   "v_017966bb-bab8": {
     "visitorId": "v_017966bb-bab8",
     "firstSeen": "2026-09-15T14:43:28.031Z",
-    "pageViewsCount": 122,
+    "pageViewsCount": 143,
     "pagesHistory": [
       "/callback",
       "/"
     ],
-    "lastSeen": "2026-09-15T17:33:54.078Z",
+    "lastSeen": "2026-09-16T15:37:35.792Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Chrome)",
@@ -1695,11 +1695,11 @@
     "os": "Windows 10/11",
     "isPwa": false,
     "isGuest": false,
-    "screenSize": "2133x1012",
+    "screenSize": "360x780",
     "athleteId": "120540594",
     "athleteName": "pham tien",
     "lastPage": "/",
-    "durationMinutes": 170,
+    "durationMinutes": 1494,
     "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c"
   },
   "v_4ec6b43e-c525": {
@@ -2247,5 +2247,149 @@
     "athleteName": "Admin",
     "lastPage": "/leaderboard",
     "durationMinutes": 1
+  },
+  "v_45d4788c-7d79": {
+    "visitorId": "v_45d4788c-7d79",
+    "firstSeen": "2026-09-16T15:47:07.185Z",
+    "pageViewsCount": 1,
+    "pagesHistory": [
+      "/"
+    ],
+    "lastSeen": "2026-09-16T15:47:07.984Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": true,
+    "screenSize": "1280x900",
+    "lastPage": "/",
+    "durationMinutes": 1
+  },
+  "v_3605a586-08d8": {
+    "visitorId": "v_3605a586-08d8",
+    "firstSeen": "2026-09-16T15:47:45.347Z",
+    "pageViewsCount": 1,
+    "pagesHistory": [
+      "/"
+    ],
+    "lastSeen": "2026-09-16T15:47:45.347Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": true,
+    "screenSize": "1280x950",
+    "lastPage": "/",
+    "durationMinutes": 1
+  },
+  "v_cfb420f4-243b": {
+    "visitorId": "v_cfb420f4-243b",
+    "firstSeen": "2026-09-16T15:49:48.649Z",
+    "pageViewsCount": 1,
+    "pagesHistory": [
+      "/"
+    ],
+    "lastSeen": "2026-09-16T15:49:48.675Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": false,
+    "screenSize": "1280x950",
+    "athleteId": "133066813",
+    "athleteName": "Tien Pham",
+    "lastPage": "/",
+    "durationMinutes": 1
+  },
+  "v_794b94b2-4985": {
+    "visitorId": "v_794b94b2-4985",
+    "firstSeen": "2026-09-16T15:51:01.038Z",
+    "pageViewsCount": 2,
+    "pagesHistory": [
+      "/"
+    ],
+    "lastSeen": "2026-09-16T15:51:06.208Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": false,
+    "screenSize": "1280x950",
+    "lastPage": "/",
+    "durationMinutes": 1,
+    "athleteId": "133066813",
+    "athleteName": "Tien Pham"
+  },
+  "v_c514ac03-9195": {
+    "visitorId": "v_c514ac03-9195",
+    "firstSeen": "2026-09-16T15:53:44.455Z",
+    "pageViewsCount": 2,
+    "pagesHistory": [
+      "/"
+    ],
+    "lastSeen": "2026-09-16T15:53:54.205Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": false,
+    "screenSize": "1280x950",
+    "lastPage": "/",
+    "durationMinutes": 1,
+    "athleteId": "133066813",
+    "athleteName": "Tien Pham"
+  },
+  "v_1188b152-ec0d": {
+    "visitorId": "v_1188b152-ec0d",
+    "firstSeen": "2026-09-16T15:58:16.944Z",
+    "pageViewsCount": 2,
+    "pagesHistory": [
+      "/"
+    ],
+    "lastSeen": "2026-09-16T15:58:25.997Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": false,
+    "screenSize": "1280x950",
+    "lastPage": "/",
+    "durationMinutes": 1,
+    "athleteId": "133066813",
+    "athleteName": "Tien Pham"
+  },
+  "v_3f8b1f16-0c9d": {
+    "visitorId": "v_3f8b1f16-0c9d",
+    "firstSeen": "2026-09-16T16:50:21.625Z",
+    "pageViewsCount": 3,
+    "pagesHistory": [
+      "/",
+      "/administer"
+    ],
+    "lastSeen": "2026-09-16T16:50:31.732Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": false,
+    "screenSize": "1366x900",
+    "lastPage": "/administer",
+    "durationMinutes": 1,
+    "athleteId": "133066813",
+    "athleteName": "Tien Pham"
   }
 }

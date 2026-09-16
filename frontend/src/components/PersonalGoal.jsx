@@ -3,10 +3,12 @@ import { useLang } from '../i18n/LangContext';
 import { 
   Target, Edit2, Check, X, ShieldAlert, ShieldCheck, Info, Sparkles, 
   CheckCircle2, Clock, Activity, Calendar, TrendingUp, BarChart2, RotateCw, 
-  CalendarDays, Wallet, Award, Lock, Eye
+  CalendarDays, Wallet, Award, Lock, Eye, Trophy, HeartPulse
 } from 'lucide-react';
 import { getAthleteMatchKey } from '../utils/challengeStats';
 import TreasuryTransparencyModal from './TreasuryTransparencyModal';
+import GarminSyncModal from './GarminSyncModal';
+import RaceTrainingRoadmapModal from './RaceTrainingRoadmapModal';
 import Swal from 'sweetalert2';
 
 export default function PersonalGoal({ 
@@ -39,6 +41,8 @@ export default function PersonalGoal({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [allTimeFinancial, setAllTimeFinancial] = useState(null);
   const [showTreasuryModal, setShowTreasuryModal] = useState(false);
+  const [isGarminSyncOpen, setIsGarminSyncOpen] = useState(false);
+  const [isRaceRoadmapOpen, setIsRaceRoadmapOpen] = useState(false);
   const [clubMetadata, setClubMetadata] = useState(null);
   const [matchedMemberRecord, setMatchedMemberRecord] = useState(null);
 
@@ -1063,6 +1067,43 @@ export default function PersonalGoal({
                 </div>
               )}
             </div>
+
+            {/* RUNNA RACE TRAINING & GARMIN HEALTH SHORTCUT WIDGET */}
+            <div className="runna-race-widget-card">
+              <div className="runna-widget-header">
+                <div className="runna-widget-title-wrap">
+                  <div className="runna-widget-icon">
+                    <Trophy size={18} color="#ffffff" />
+                  </div>
+                  <div>
+                    <span className="runna-brand-badge">RUNNA EXPERT ENGINE</span>
+                    <h5 className="runna-widget-title">{t('raceRoadmapTitle')}</h5>
+                  </div>
+                </div>
+                <span className="runna-vdot-pill">
+                  {aiAdvice?.sportsMetrics?.racePredictions?.vdot ? `VDOT ${aiAdvice.sportsMetrics.racePredictions.vdot}` : 'DIVIDE & CONQUER'}
+                </span>
+              </div>
+              <p className="runna-widget-subtitle">{t('raceRoadmapSubtitle')}</p>
+              <div className="runna-widget-actions">
+                <button
+                  type="button"
+                  onClick={() => setIsGarminSyncOpen(true)}
+                  className="runna-btn runna-btn--garmin"
+                >
+                  <HeartPulse size={15} />
+                  <span>{t('garminSyncBtn')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsRaceRoadmapOpen(true)}
+                  className="runna-btn runna-btn--roadmap"
+                >
+                  <Trophy size={15} />
+                  <span>{t('raceRoadmapBtn')}</span>
+                </button>
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -1426,6 +1467,35 @@ export default function PersonalGoal({
         apiFetch={apiFetch}
         currentMonth={currentMonth}
         currentYear={currentYear}
+      />
+
+      {/* GARMIN HEALTH BIOMETRIC SYNC MODAL */}
+      <GarminSyncModal
+        isOpen={isGarminSyncOpen}
+        onClose={() => setIsGarminSyncOpen(false)}
+        athlete={athlete}
+        lang={lang}
+        t={t}
+        apiFetch={apiFetch}
+        onSyncSuccess={() => {
+          if (handleFetchAiAdvice) {
+            handleFetchAiAdvice(false);
+          }
+        }}
+      />
+
+      {/* RUNNA RACE TRAINING ROADMAP MODAL */}
+      <RaceTrainingRoadmapModal
+        isOpen={isRaceRoadmapOpen}
+        onClose={() => setIsRaceRoadmapOpen(false)}
+        athlete={athlete}
+        lang={lang}
+        t={t}
+        apiFetch={apiFetch}
+        onOpenGarminSync={() => {
+          setIsRaceRoadmapOpen(false);
+          setIsGarminSyncOpen(true);
+        }}
       />
     </div>
   );

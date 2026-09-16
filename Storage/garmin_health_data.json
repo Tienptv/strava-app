@@ -1,0 +1,206 @@
+{
+  "99905": {
+    "athleteId": "99905",
+    "latest": {
+      "date": "2026-09-16",
+      "sleepHours": 4.8,
+      "sleepScore": 50,
+      "restingHeartRate": 60,
+      "baselineRhr": 52,
+      "hrvStatus": "low",
+      "hrvMs": 60,
+      "bodyBattery": 30,
+      "stressLevel": 25,
+      "source": "manual_entry",
+      "updatedAt": "2026-09-16T15:59:59.223Z",
+      "readiness": {
+        "readinessScore": 15,
+        "status": "poor",
+        "labelVi": "Cảnh báo mệt mỏi / Cần nghỉ ngơi (Fatigue)",
+        "labelEn": "High Fatigue (Rest Advised)",
+        "color": "#ef4444",
+        "shouldDowngrade": true,
+        "downgradeReasonVi": "Giấc ngủ kém (4.8h, điểm 50/100); Nhịp tim nghỉ tăng +8 bpm (dấu hiệu quá tải/viêm cơ); HRV xuống thấp (hệ thần kinh giao cảm căng thẳng); Body Battery cạn kiệt (30%)",
+        "downgradeReasonEn": "Poor sleep (4.8h, score 50/100); Elevated resting HR +8 bpm (signs of fatigue/strain); Low HRV status (sympathetic nervous system stress); Low Body Battery (30%)"
+      }
+    },
+    "history": [
+      {
+        "date": "2026-09-16",
+        "sleepHours": 4.8,
+        "sleepScore": 50,
+        "restingHeartRate": 60,
+        "baselineRhr": 52,
+        "hrvStatus": "low",
+        "hrvMs": 60,
+        "bodyBattery": 30,
+        "stressLevel": 25,
+        "source": "manual_entry",
+        "updatedAt": "2026-09-16T15:59:59.223Z",
+        "readiness": {
+          "readinessScore": 15,
+          "status": "poor",
+          "labelVi": "Cảnh báo mệt mỏi / Cần nghỉ ngơi (Fatigue)",
+          "labelEn": "High Fatigue (Rest Advised)",
+          "color": "#ef4444",
+          "shouldDowngrade": true,
+          "downgradeReasonVi": "Giấc ngủ kém (4.8h, điểm 50/100); Nhịp tim nghỉ tăng +8 bpm (dấu hiệu quá tải/viêm cơ); HRV xuống thấp (hệ thần kinh giao cảm căng thẳng); Body Battery cạn kiệt (30%)",
+          "downgradeReasonEn": "Poor sleep (4.8h, score 50/100); Elevated resting HR +8 bpm (signs of fatigue/strain); Low HRV status (sympathetic nervous system stress); Low Body Battery (30%)"
+        }
+      }
+    ]
+  },
+  "133066813": {
+    "athleteId": "133066813",
+    "latest": {
+      "date": "2026-09-16",
+      "sleepHours": 6,
+      "sleepScore": 84,
+      "restingHeartRate": 70,
+      "baselineRhr": 50,
+      "hrvStatus": "balanced",
+      "hrvMs": 60,
+      "bodyBattery": 88,
+      "stressLevel": 20,
+      "source": "manual_entry",
+      "updatedAt": "2026-09-16T16:30:39.758Z",
+      "readiness": {
+        "readinessScore": 55,
+        "status": "fair",
+        "labelVi": "Cần chú ý thể lực (Fair)",
+        "labelEn": "Moderate Fatigue (Caution)",
+        "color": "#f59e0b",
+        "shouldDowngrade": true,
+        "downgradeReasonVi": "Nhịp tim nghỉ tăng +20 bpm (dấu hiệu quá tải/viêm cơ)",
+        "downgradeReasonEn": "Elevated resting HR +20 bpm (signs of fatigue/strain)"
+      }
+    },
+    "history": [
+      {
+        "date": "2026-09-16",
+        "sleepHours": 6,
+        "sleepScore": 84,
+        "restingHeartRate": 70,
+        "baselineRhr": 50,
+        "hrvStatus": "balanced",
+        "hrvMs": 60,
+        "bodyBattery": 88,
+        "stressLevel": 20,
+        "source": "manual_entry",
+        "updatedAt": "2026-09-16T16:30:39.758Z",
+        "readiness": {
+          "readinessScore": 55,
+          "status": "fair",
+          "labelVi": "Cần chú ý thể lực (Fair)",
+          "labelEn": "Moderate Fatigue (Caution)",
+          "color": "#f59e0b",
+          "shouldDowngrade": true,
+          "downgradeReasonVi": "Nhịp tim nghỉ tăng +20 bpm (dấu hiệu quá tải/viêm cơ)",
+          "downgradeReasonEn": "Elevated resting HR +20 bpm (signs of fatigue/strain)"
+        }
+      }
+    ]
+  },
+  "ath_phuong_01": {
+    "athleteId": "ath_phuong_01",
+    "latest": {
+      "date": "2026-09-16",
+      "sleepHours": 7,
+      "sleepScore": 90,
+      "restingHeartRate": 48,
+      "baselineRhr": 52,
+      "hrvStatus": "balanced",
+      "hrvMs": 60,
+      "bodyBattery": 95,
+      "stressLevel": 25,
+      "source": "manual_entry",
+      "updatedAt": "2026-09-16T15:59:59.230Z",
+      "readiness": {
+        "readinessScore": 90,
+        "status": "optimal",
+        "labelVi": "Thể lực đỉnh cao (Optimal)",
+        "labelEn": "Peak Readiness (Optimal)",
+        "color": "#78BE20",
+        "shouldDowngrade": false,
+        "downgradeReasonVi": "",
+        "downgradeReasonEn": ""
+      }
+    },
+    "history": [
+      {
+        "date": "2026-09-16",
+        "sleepHours": 7,
+        "sleepScore": 90,
+        "restingHeartRate": 48,
+        "baselineRhr": 52,
+        "hrvStatus": "balanced",
+        "hrvMs": 60,
+        "bodyBattery": 95,
+        "stressLevel": 25,
+        "source": "manual_entry",
+        "updatedAt": "2026-09-16T15:59:59.230Z",
+        "readiness": {
+          "readinessScore": 90,
+          "status": "optimal",
+          "labelVi": "Thể lực đỉnh cao (Optimal)",
+          "labelEn": "Peak Readiness (Optimal)",
+          "color": "#78BE20",
+          "shouldDowngrade": false,
+          "downgradeReasonVi": "",
+          "downgradeReasonEn": ""
+        }
+      }
+    ]
+  },
+  "ath_phuong_02": {
+    "athleteId": "ath_phuong_02",
+    "latest": {
+      "date": "2026-09-16",
+      "sleepHours": 7,
+      "sleepScore": 55,
+      "restingHeartRate": 62,
+      "baselineRhr": 52,
+      "hrvStatus": "balanced",
+      "hrvMs": 60,
+      "bodyBattery": 40,
+      "stressLevel": 25,
+      "source": "manual_entry",
+      "updatedAt": "2026-09-16T15:59:59.231Z",
+      "readiness": {
+        "readinessScore": 40,
+        "status": "poor",
+        "labelVi": "Cảnh báo mệt mỏi / Cần nghỉ ngơi (Fatigue)",
+        "labelEn": "High Fatigue (Rest Advised)",
+        "color": "#ef4444",
+        "shouldDowngrade": true,
+        "downgradeReasonVi": "Giấc ngủ kém (7h, điểm 55/100); Nhịp tim nghỉ tăng +10 bpm (dấu hiệu quá tải/viêm cơ)",
+        "downgradeReasonEn": "Poor sleep (7h, score 55/100); Elevated resting HR +10 bpm (signs of fatigue/strain)"
+      }
+    },
+    "history": [
+      {
+        "date": "2026-09-16",
+        "sleepHours": 7,
+        "sleepScore": 55,
+        "restingHeartRate": 62,
+        "baselineRhr": 52,
+        "hrvStatus": "balanced",
+        "hrvMs": 60,
+        "bodyBattery": 40,
+        "stressLevel": 25,
+        "source": "manual_entry",
+        "updatedAt": "2026-09-16T15:59:59.231Z",
+        "readiness": {
+          "readinessScore": 40,
+          "status": "poor",
+          "labelVi": "Cảnh báo mệt mỏi / Cần nghỉ ngơi (Fatigue)",
+          "labelEn": "High Fatigue (Rest Advised)",
+          "color": "#ef4444",
+          "shouldDowngrade": true,
+          "downgradeReasonVi": "Giấc ngủ kém (7h, điểm 55/100); Nhịp tim nghỉ tăng +10 bpm (dấu hiệu quá tải/viêm cơ)",
+          "downgradeReasonEn": "Poor sleep (7h, score 55/100); Elevated resting HR +10 bpm (signs of fatigue/strain)"
+        }
+      }
+    ]
+  }
+}

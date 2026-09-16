@@ -44,7 +44,8 @@ import {
   Eye,
   EyeOff,
   BellRing,
-  Radio
+  Radio,
+  ShieldCheck
 } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { processChallengeData } from '../utils/challengeStats';
@@ -59,10 +60,10 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   const [searchParams, setSearchParams] = useSearchParams();
   const { lang, t } = useLang();
 
-  // Active Tab: 'settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors'
+  // Active Tab: 'settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access'
   const getInitialTab = () => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access'];
     return (tabParam && validTabs.includes(tabParam)) ? tabParam : 'settings';
   };
   const [activeTab, setActiveTab] = useState(getInitialTab);
@@ -70,7 +71,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // Đồng bộ activeTab khi URL query param hoặc location state thay đổi
   useEffect(() => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access'];
     if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
       setActiveTab(tabParam);
     }
@@ -314,6 +315,123 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       loadScripts();
     }
   }, [activeTab]);
+
+  // ==========================================
+  // STATE: 9. USER FEATURE ACCESS CONTROL
+  // ==========================================
+  const [userAccessConfig, setUserAccessConfig] = useState(null);
+  const [loadingUserAccess, setLoadingUserAccess] = useState(false);
+  const [savingUserAccess, setSavingUserAccess] = useState(false);
+
+  const loadUserAccess = () => {
+    setLoadingUserAccess(true);
+    apiFetch('/user-access-control')
+      .then(res => {
+        if (res && res.success && res.config) {
+          setUserAccessConfig(res.config);
+        }
+      })
+      .catch(err => console.error('Lỗi tải user access control:', err))
+      .finally(() => setLoadingUserAccess(false));
+  };
+
+  useEffect(() => {
+    if (activeTab === 'user_access') {
+      loadUserAccess();
+    }
+  }, [activeTab]);
+
+  const handleSaveUserAccess = async () => {
+    if (!userAccessConfig || !userAccessConfig.modules) return;
+    setSavingUserAccess(true);
+    try {
+      const res = await apiFetch('/user-access-control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modules: userAccessConfig.modules })
+      });
+      if (res && res.success) {
+        Swal.fire({
+          icon: 'success',
+          title: t('userAccessSavedSuccess'),
+          text: lang === 'en' 
+            ? 'User feature access permissions have been updated in real-time!' 
+            : 'Đã cập nhật phân quyền truy cập tính năng cho thành viên và khách thành công!',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        setUserAccessConfig(res.config);
+      } else {
+        throw new Error(res.error || 'Failed to save');
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: lang === 'en' ? 'Save Failed' : 'Lưu thất bại',
+        text: err.message
+      });
+    } finally {
+      setSavingUserAccess(false);
+    }
+  };
+
+  const handleToggleUserAccessModule = (moduleKey, target = 'members') => {
+    setUserAccessConfig(prev => {
+      if (!prev || !prev.modules) return prev;
+      const mod = prev.modules[moduleKey] || { key: moduleKey };
+      const field = target === 'members' ? 'enabledForMembers' : 'enabledForGuests';
+      return {
+        ...prev,
+        modules: {
+          ...prev.modules,
+          [moduleKey]: {
+            ...mod,
+            [field]: !mod[field]
+          }
+        }
+      };
+    });
+  };
+
+  const handleResetUserAccessDefaults = () => {
+    Swal.fire({
+      icon: 'question',
+      title: t('resetSafeDefaults'),
+      text: lang === 'en' 
+        ? 'Reset all user module permissions to safe defaults?' 
+        : 'Khôi phục toàn bộ phân quyền module về mặc định an toàn ban đầu?',
+      showCancelButton: true,
+      confirmButtonText: lang === 'en' ? 'Reset' : 'Khôi phục',
+      cancelButtonText: lang === 'en' ? 'Cancel' : 'Hủy',
+      confirmButtonColor: '#00A3A6'
+    }).then(result => {
+      if (result.isConfirmed) {
+        setUserAccessConfig(prev => {
+          if (!prev || !prev.modules) return prev;
+          const updated = { ...prev.modules };
+          Object.keys(updated).forEach(k => {
+            updated[k] = {
+              ...updated[k],
+              enabledForMembers: true,
+              enabledForGuests: ['leaderboardPodium', 'recentActivities', 'shareCard', 'guestAccess'].includes(k)
+            };
+          });
+          return { ...prev, modules: updated };
+        });
+      }
+    });
+  };
+
+  const handleEnableAllMembers = () => {
+    setUserAccessConfig(prev => {
+      if (!prev || !prev.modules) return prev;
+      const updated = { ...prev.modules };
+      Object.keys(updated).forEach(k => {
+        updated[k] = { ...updated[k], enabledForMembers: true };
+      });
+      return { ...prev, modules: updated };
+    });
+  };
 
   const handleExecuteScript = async (scriptPath, scriptName) => {
     try {
@@ -1678,6 +1796,14 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           >
             <Radio size={18} />
             <span style={{ flex: 1 }}>{t('tabVisitorsTitle')}</span>
+          </button>
+
+          <button
+            onClick={() => handleTabClick('user_access')}
+            className={`tab ${activeTab === 'user_access' ? 'tab--active' : ''}`}
+          >
+            <ShieldCheck size={18} />
+            <span style={{ flex: 1 }}>{t('tab9Title')}</span>
           </button>
         </div>
 
@@ -3749,6 +3875,276 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       {activeTab === 'visitors' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <LiveVisitorsTool apiFetch={apiFetch} isSuperAdmin={isSuperAdmin} />
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB CONTENT 9: QUẢN LÝ QUYỀN TRUY CẬP TÍNH NĂNG USER (USER FEATURE ACCESS) */}
+      {/* ========================================================================= */}
+      {activeTab === 'user_access' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Main Card */}
+          <div className="card" style={{ padding: '24px', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            
+            {/* Header Toolbar */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'rgba(0, 163, 166, 0.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary-navy)', margin: 0 }}>
+                    {t('userAccessTitle')}
+                  </h2>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    {t('userAccessSubtitle')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleResetUserAccessDefaults}
+                  className="btn btn--secondary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '0.82rem', fontWeight: 600, borderRadius: '8px' }}
+                >
+                  <RefreshCw size={14} /> {t('resetSafeDefaults')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleEnableAllMembers}
+                  className="btn btn--secondary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '0.82rem', fontWeight: 600, borderRadius: '8px' }}
+                >
+                  <CheckCircle2 size={14} color="#16a34a" /> {t('enableAllMembers')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveUserAccess}
+                  disabled={savingUserAccess}
+                  className="btn btn--primary"
+                  style={{ 
+                    display: 'flex', alignItems: 'center', gap: '6px', 
+                    padding: '8px 18px', fontSize: '0.85rem', fontWeight: 700, 
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #00A3A6 0%, #002D54 100%)' 
+                  }}
+                >
+                  <Save size={15} /> {savingUserAccess ? t('savingUserAccess') : t('saveUserAccessBtn')}
+                </button>
+              </div>
+            </div>
+
+            {loadingUserAccess || !userAccessConfig ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <Loader className="animate-spin" size={24} style={{ margin: '0 auto 10px', display: 'block' }} />
+                <span>{lang === 'en' ? 'Loading user access matrix...' : 'Đang tải ma trận phân quyền người dùng...'}</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                
+                {/* 4 Nhóm Modules */}
+                {[
+                  {
+                    groupKey: 'groupAiAdvanced',
+                    groupTitle: t('groupAiAdvanced'),
+                    groupColor: '#00A3A6',
+                    moduleKeys: ['aiCoach', 'runnaRoadmap', 'garminSync']
+                  },
+                  {
+                    groupKey: 'groupDashboardActivities',
+                    groupTitle: t('groupDashboardActivities'),
+                    groupColor: '#78BE20',
+                    moduleKeys: ['leaderboardPodium', 'recentActivities', 'shareCard']
+                  },
+                  {
+                    groupKey: 'groupFinanceGoals',
+                    groupTitle: t('groupFinanceGoals'),
+                    groupColor: '#002D54',
+                    moduleKeys: ['clubTreasury', 'editPersonalGoal', 'exportData']
+                  },
+                  {
+                    groupKey: 'groupGuestMode',
+                    groupTitle: t('groupGuestMode'),
+                    groupColor: '#0080A0',
+                    moduleKeys: ['guestAccess']
+                  }
+                ].map(group => (
+                  <div key={group.groupKey} style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '16px 18px' }}>
+                    
+                    {/* Group Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '8px', height: '18px', borderRadius: '4px', background: group.groupColor }} />
+                        <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 700, color: 'var(--primary-navy)' }}>
+                          {group.groupTitle}
+                        </h3>
+                      </div>
+                      
+                      {/* Column Legend */}
+                      <div style={{ display: 'flex', gap: '28px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                        <span style={{ width: '90px', textAlign: 'center' }}>👤 {t('memberAccessCol')}</span>
+                        <span style={{ width: '90px', textAlign: 'center' }}>🌐 {t('guestAccessCol')}</span>
+                      </div>
+                    </div>
+
+                    {/* Modules List */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {group.moduleKeys.map(modKey => {
+                        const mod = userAccessConfig?.modules?.[modKey] || { enabledForMembers: true, enabledForGuests: false };
+                        const isMemberOn = mod.enabledForMembers !== false;
+                        const isGuestOn = mod.enabledForGuests === true;
+
+                        return (
+                          <div 
+                            key={modKey}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              background: '#ffffff',
+                              padding: '12px 16px',
+                              borderRadius: '10px',
+                              border: '1px solid #e2e8f0',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                              gap: '16px'
+                            }}
+                          >
+                            {/* Module Info */}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary-navy)' }}>
+                                  {t(`mod_${modKey}_title`)}
+                                </span>
+                                {isMemberOn && isGuestOn ? (
+                                  <span style={{ background: 'rgba(120, 190, 32, 0.12)', color: '#166534', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(120, 190, 32, 0.3)' }}>
+                                    {lang === 'en' ? '🌐 Public Access' : '🌐 Mở Công Khai'}
+                                  </span>
+                                ) : isMemberOn ? (
+                                  <span style={{ background: 'rgba(0, 163, 166, 0.12)', color: '#002D54', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(0, 163, 166, 0.3)' }}>
+                                    {lang === 'en' ? '👤 Members Only' : '👤 Chỉ Thành Viên'}
+                                  </span>
+                                ) : (
+                                  <span style={{ background: '#fef2f2', color: '#dc2626', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', border: '1px solid #fecaca' }}>
+                                    {lang === 'en' ? '🔒 Restricted' : '🔒 Đã Giới Hạn'}
+                                  </span>
+                                )}
+                              </div>
+                              <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+                                {t(`mod_${modKey}_desc`)}
+                              </p>
+                            </div>
+
+                            {/* Toggles Container */}
+                            <div style={{ display: 'flex', gap: '28px', alignItems: 'center', flexShrink: 0 }}>
+                              
+                              {/* Member Toggle */}
+                              <div style={{ width: '90px', display: 'flex', justifyContent: 'center' }}>
+                                <label 
+                                  style={{
+                                    position: 'relative',
+                                    display: 'inline-block',
+                                    width: '46px',
+                                    height: '24px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title={`${t('memberAccessCol')}: ${isMemberOn ? t('accessEnabled') : t('accessDisabled')}`}
+                                >
+                                  <input 
+                                    type="checkbox"
+                                    checked={isMemberOn}
+                                    onChange={() => handleToggleUserAccessModule(modKey, 'members')}
+                                    style={{ opacity: 0, width: 0, height: 0 }}
+                                  />
+                                  <span 
+                                    style={{
+                                      position: 'absolute',
+                                      inset: 0,
+                                      background: isMemberOn ? 'linear-gradient(135deg, #00A3A6 0%, #78BE20 100%)' : '#cbd5e1',
+                                      borderRadius: '24px',
+                                      transition: '0.25s',
+                                      boxShadow: isMemberOn ? '0 2px 6px rgba(0, 163, 166, 0.3)' : 'none'
+                                    }}
+                                  >
+                                    <span 
+                                      style={{
+                                        position: 'absolute',
+                                        content: '""',
+                                        height: '18px',
+                                        width: '18px',
+                                        left: isMemberOn ? '25px' : '3px',
+                                        bottom: '3px',
+                                        background: '#ffffff',
+                                        borderRadius: '50%',
+                                        transition: '0.25s'
+                                      }}
+                                    />
+                                  </span>
+                                </label>
+                              </div>
+
+                              {/* Guest Toggle */}
+                              <div style={{ width: '90px', display: 'flex', justifyContent: 'center' }}>
+                                <label 
+                                  style={{
+                                    position: 'relative',
+                                    display: 'inline-block',
+                                    width: '46px',
+                                    height: '24px',
+                                    cursor: 'pointer'
+                                  }}
+                                  title={`${t('guestAccessCol')}: ${isGuestOn ? t('accessEnabled') : t('accessDisabled')}`}
+                                >
+                                  <input 
+                                    type="checkbox"
+                                    checked={isGuestOn}
+                                    onChange={() => handleToggleUserAccessModule(modKey, 'guests')}
+                                    style={{ opacity: 0, width: 0, height: 0 }}
+                                  />
+                                  <span 
+                                    style={{
+                                      position: 'absolute',
+                                      inset: 0,
+                                      background: isGuestOn ? 'linear-gradient(135deg, #0080A0 0%, #002D54 100%)' : '#cbd5e1',
+                                      borderRadius: '24px',
+                                      transition: '0.25s',
+                                      boxShadow: isGuestOn ? '0 2px 6px rgba(0, 45, 84, 0.3)' : 'none'
+                                    }}
+                                  >
+                                    <span 
+                                      style={{
+                                        position: 'absolute',
+                                        content: '""',
+                                        height: '18px',
+                                        width: '18px',
+                                        left: isGuestOn ? '25px' : '3px',
+                                        bottom: '3px',
+                                        background: '#ffffff',
+                                        borderRadius: '50%',
+                                        transition: '0.25s'
+                                      }}
+                                    />
+                                  </span>
+                                </label>
+                              </div>
+
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                  </div>
+                ))}
+
+              </div>
+            )}
+
+          </div>
+
         </div>
       )}
 

@@ -13,6 +13,9 @@ import webPush from 'web-push';
 import { ZipArchive } from 'archiver';
 import { execSync, spawn } from 'child_process';
 import { getAiCoachAdvice, getWeeklyTrainingPlan } from './ai_coach_service.js';
+import { generateRaceRoadmap, getAthleteTrainingPlan, getUpcomingRaces, calculatePaceModel } from './race_training_service.js';
+import { getGarminHealth, saveGarminHealth } from './garmin_health_service.js';
+import { getUserAccessConfig, saveUserAccessConfig, isFeatureAccessible } from './user_access_service.js';
 import { startCronJobs } from './cron.js';
 
 dotenv.config();
@@ -1016,6 +1019,37 @@ app.post('/api/admin/permissions', (req, res) => {
   saveAdminsData(current);
   addAuditLog('Cập nhật phân quyền Sub-Admin', `Super Admin (${currentAthleteId})`, 'Đã cập nhật bảng giới hạn tính năng cho Sub-Admin');
   res.json({ success: true, message: 'Đã lưu phân quyền Sub-Admin thành công!' });
+});
+
+// =========================================================================
+// TAB 9: QUẢN LÝ QUYỀN TRUY CẬP TÍNH NĂNG CỦA USER (USER ACCESS CONTROL)
+// =========================================================================
+app.get('/api/user-access-control', (req, res) => {
+  const config = getUserAccessConfig();
+  res.json({ success: true, config });
+});
+
+app.post('/api/user-access-control', (req, res) => {
+  const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
+  const subAdmins = loadAdminsList();
+  
+  // Chỉ Super Admin hoặc Sub-Admin mới được lưu quyền người dùng
+  if (currentAthleteId !== SUPER_ADMIN_ID && !isAthleteInSubAdmins(currentAthleteId, subAdmins)) {
+    return res.status(403).json({ error: 'Không có quyền thực hiện thao tác này' });
+  }
+
+  const { modules } = req.body;
+  if (!modules || typeof modules !== 'object') {
+    return res.status(400).json({ error: 'Dữ liệu modules không hợp lệ' });
+  }
+
+  const result = saveUserAccessConfig({ modules }, `Admin (${currentAthleteId || 'Local'})`);
+  if (result.success) {
+    addAuditLog('Cập nhật quyền truy cập User', `Admin (${currentAthleteId || 'Local'})`, 'Đã cập nhật ma trận quyền tính năng cho Thành viên và Khách');
+    res.json({ success: true, message: 'Đã lưu cấu hình quyền truy cập User thành công!', config: result.config });
+  } else {
+    res.status(500).json({ error: result.error || 'Lỗi lưu cấu hình' });
+  }
 });
 
 // Lấy nhật ký hoạt động (Audit Logs)
@@ -4185,7 +4219,7 @@ app.post('/api/screenshot/full-table', async (req, res) => {
     const targetAthId = (athleteId && tokenStore.has(athleteId.toString()))
       ? athleteId.toString()
       : (validTokens[0] || athleteId || '133066813').toString();
-    const targetLang = currentLang || 'vi';
+    const targetLang = currentLang || 'en';
 
     await page.evaluateOnNewDocument((id, lng, isCollapsed) => {
       localStorage.setItem('athleteId', id);
@@ -4955,6 +4989,90 @@ app.get('/api/ai/status', (req, res) => {
     hasGeminiKey: hasKey,
     provider: hasKey ? 'Google Gemini' : 'Smart Heuristic Engine'
   });
+});
+
+// ==========================================
+// RUNNA RACE TRAINING & GARMIN HEALTH ENDPOINTS
+// ==========================================
+// 1. Sinh / cập nhật lộ trình Race theo Hệ chuyên gia Runna (Divide & Conquer)
+app.post('/api/race/training-plan', (req, res) => {
+  try {
+    const { athleteId, raceName, targetDistanceKm, targetTimeSeconds, raceDate, startDate, daysPerWeek, longRunDay, currentWeeklyKm } = req.body || {};
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    const plan = generateRaceRoadmap({
+      athleteId,
+      raceName,
+      targetDistanceKm,
+      targetTimeSeconds,
+      raceDate,
+      startDate,
+      daysPerWeek,
+      longRunDay,
+      currentWeeklyKm
+    });
+    res.json(plan);
+  } catch (err) {
+    console.error('[API /api/race/training-plan] Lỗi:', err);
+    res.status(500).json({ error: err.message || 'Lỗi khi tạo lộ trình race' });
+  }
+});
+
+// 2. Lấy kế hoạch Race hiện tại của athlete
+app.get('/api/race/training-plan', (req, res) => {
+  try {
+    const athleteId = req.query.athleteId;
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    const plan = getAthleteTrainingPlan(athleteId);
+    res.json({ plan });
+  } catch (err) {
+    console.error('[API GET /api/race/training-plan] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Lấy danh sách giải chạy sắp tới từ club_goal.json
+app.get('/api/race/upcoming-events', (req, res) => {
+  try {
+    const events = getUpcomingRaces();
+    res.json({ events });
+  } catch (err) {
+    console.error('[API /api/race/upcoming-events] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Đồng bộ / Lưu dữ liệu sức khỏe Garmin Connect
+app.post('/api/garmin/sync-health', (req, res) => {
+  try {
+    const { athleteId, ...healthData } = req.body || {};
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    const result = saveGarminHealth(athleteId, healthData);
+    res.json({ success: true, health: result });
+  } catch (err) {
+    console.error('[API /api/garmin/sync-health] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 5. Lấy dữ liệu sức khỏe Garmin Connect của athlete
+app.get('/api/garmin/health', (req, res) => {
+  try {
+    const athleteId = req.query.athleteId;
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    const health = getGarminHealth(athleteId);
+    res.json({ health });
+  } catch (err) {
+    console.error('[API GET /api/garmin/health] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ==========================================

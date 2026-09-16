@@ -1,5 +1,26 @@
 [
   {
+    "id": "1789577949164",
+    "timestamp": "2026-09-16T16:59:09.164Z",
+    "action": "Cập nhật quyền truy cập User",
+    "user": "Admin (133066813)",
+    "details": "Đã cập nhật ma trận quyền tính năng cho Thành viên và Khách"
+  },
+  {
+    "id": "1789577279795",
+    "timestamp": "2026-09-16T16:47:59.795Z",
+    "action": "Cập nhật quyền truy cập User",
+    "user": "Admin (133066813)",
+    "details": "Đã cập nhật ma trận quyền tính năng cho Thành viên và Khách"
+  },
+  {
+    "id": "1789571275042",
+    "timestamp": "2026-09-16T15:07:55.042Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (311 mục), targets.json (82 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
     "id": "1789565846011",
     "timestamp": "2026-09-16T13:37:26.011Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1377,26 +1398,5 @@
     "action": "Đẩy dữ liệu lên Cloud",
     "user": "133066813",
     "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (201 mục), targets.json (32 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json"
-  },
-  {
-    "id": "1788769990526",
-    "timestamp": "2026-09-07T08:33:10.526Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788769866535",
-    "timestamp": "2026-09-07T08:31:06.535Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788766467338",
-    "timestamp": "2026-09-07T07:34:27.338Z",
-    "action": "Thu hồi quyền Admin",
-    "user": "Super Admin (133066813)",
-    "details": "Thu hồi quyền admin của: Tien PhamTV (ID: 120540594)"
   }
 ]
