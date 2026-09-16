@@ -8,7 +8,7 @@
       "/administer",
       "/callback"
     ],
-    "lastSeen": "2026-09-16T17:06:46.724Z",
+    "lastSeen": "2026-09-16T17:07:21.648Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Chrome PWA)",
@@ -19,7 +19,7 @@
     "screenSize": "2560x1369",
     "athleteId": "133066813",
     "athleteName": "Tien PhamTV",
-    "lastPage": "/",
+    "lastPage": "/administer",
     "durationMinutes": 3487,
     "avatar": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/medium.jpg"
   },
