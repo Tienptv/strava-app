@@ -369,8 +369,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/50684496/25107406/4/large.jpg",
         "name": "Cuong Nguyen",
         "avatar": "",
-        "athleteId": "50684496",
-        "id": "50684496"
+        "athleteId": 50684496,
+        "id": 50684496,
+        "_fromConfig": true
       },
       "An_H.": {
         "resource_state": 2,
@@ -383,8 +384,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/110041582/26257318/2/large.jpg",
         "name": "An Ha",
         "avatar": "",
-        "athleteId": "110041582",
-        "id": "110041582"
+        "athleteId": 110041582,
+        "id": 110041582,
+        "_fromConfig": true
       },
       "Benjamin_D.": {
         "resource_state": 2,
@@ -396,7 +398,10 @@
         "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/83759389/20099140/3/medium.jpg",
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/83759389/20099140/3/large.jpg",
         "name": "Benjamin Dang",
-        "avatar": ""
+        "avatar": "",
+        "id": 83759389,
+        "athleteId": 83759389,
+        "_fromConfig": true
       },
       "Huy_H.": {
         "resource_state": 2,
@@ -409,8 +414,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/103943712/24787888/3/large.jpg",
         "name": "Huy Hoang",
         "avatar": "",
-        "athleteId": "103943712",
-        "id": "103943712"
+        "athleteId": 103943712,
+        "id": 103943712,
+        "_fromConfig": true
       },
       "Học_P.": {
         "resource_state": 2,
@@ -422,7 +428,10 @@
         "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/99613505/25107998/7/full.jpg",
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/99613505/25107998/7/large.jpg",
         "name": "Học Phạm Thái",
-        "avatar": ""
+        "avatar": "",
+        "id": 99613505,
+        "athleteId": 99613505,
+        "_fromConfig": true
       },
       "Katy_N.": {
         "resource_state": 2,
@@ -435,8 +444,9 @@
         "profile": "https://lh3.googleusercontent.com/a/ACg8ocJ1xI3fV9Uw2gCsd6KfDUSqQ-tn7EjNhP-qZs_hb3IiwqHL-LzX=s96-c",
         "name": "Katy Nguyen",
         "avatar": "",
-        "athleteId": "149162660",
-        "id": "149162660"
+        "athleteId": 149162660,
+        "id": 149162660,
+        "_fromConfig": true
       },
       "Khương_P.": {
         "resource_state": 2,
@@ -448,7 +458,10 @@
         "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/129623990/30312489/1/medium.jpg",
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/129623990/30312489/1/large.jpg",
         "name": "Khương Phạm",
-        "avatar": ""
+        "avatar": "",
+        "id": 129623990,
+        "athleteId": 129623990,
+        "_fromConfig": true
       },
       "Lieu_V.": {
         "resource_state": 2,
@@ -461,8 +474,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/72851794/19316786/7/large.jpg",
         "name": "Lieu Vo",
         "avatar": "",
-        "athleteId": "72851794",
-        "id": "72851794"
+        "athleteId": 72851794,
+        "id": 72851794,
+        "_fromConfig": true
       },
       "Phuong_N.": {
         "resource_state": 2,
@@ -487,8 +501,9 @@
         "profile": "https://d3nn82uaxijpm6.cloudfront.net/assets/avatar/athlete/full-ce13d984537a7f51cd27a09f00a1fac018db4abfc5b6082cf2db04be58a756b3.png",
         "name": "Phuong Tran",
         "avatar": "",
-        "athleteId": "48977253",
-        "id": "48977253"
+        "athleteId": 48977253,
+        "id": 48977253,
+        "_fromConfig": true
       },
       "Quy_T.": {
         "resource_state": 2,
@@ -501,8 +516,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/79037203/19504162/9/large.jpg",
         "name": "Quy Truong",
         "avatar": "",
-        "athleteId": "79037203",
-        "id": "79037203"
+        "athleteId": 79037203,
+        "id": 79037203,
+        "_fromConfig": true
       },
       "Sang_N.": {
         "resource_state": 2,
@@ -515,8 +531,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/125487039/28782819/3/large.jpg",
         "name": "Sang Nguyen",
         "avatar": "",
-        "athleteId": "125487039",
-        "id": "125487039"
+        "athleteId": 125487039,
+        "id": 125487039,
+        "_fromConfig": true
       },
       "Sơn_N.": {
         "resource_state": 2,
@@ -542,7 +559,10 @@
         "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/106178600/25188912/2/medium.jpg",
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/106178600/25188912/2/large.jpg",
         "name": "Tam Nguyen",
-        "avatar": ""
+        "avatar": "",
+        "id": 106178600,
+        "athleteId": 106178600,
+        "_fromConfig": true
       },
       "Thanh_D.": {
         "resource_state": 2,
@@ -569,8 +589,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/106101923/29444974/1/large.jpg",
         "name": "Thanh Xuan",
         "avatar": "",
-        "athleteId": "106101923",
-        "id": "106101923"
+        "athleteId": 106101923,
+        "id": 106101923,
+        "_fromConfig": true
       },
       "Thinh_V.": {
         "resource_state": 2,
@@ -583,8 +604,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/77523597/18746826/28/large.jpg",
         "name": "Thinh Vu",
         "avatar": "",
-        "athleteId": "77523597",
-        "id": "77523597"
+        "athleteId": 77523597,
+        "id": 77523597,
+        "_fromConfig": true
       },
       "Tran_M.": {
         "resource_state": 2,
@@ -608,7 +630,10 @@
         "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/81517643/20064692/3/medium.jpg",
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/81517643/20064692/3/large.jpg",
         "name": "Trong Tran",
-        "avatar": ""
+        "avatar": "",
+        "id": 81517643,
+        "athleteId": 81517643,
+        "_fromConfig": true
       },
       "Đạt_N.": {
         "resource_state": 2,
@@ -715,7 +740,10 @@
         "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/51364143/13720166/9/medium.jpg",
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/51364143/13720166/9/large.jpg",
         "name": "Huy Vu",
-        "avatar": ""
+        "avatar": "",
+        "id": 51364143,
+        "athleteId": 51364143,
+        "_fromConfig": true
       },
       "Huynh_N.": {
         "resource_state": 2,
@@ -764,8 +792,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/79129542/45529890/1/large.jpg",
         "name": "Khoa Le",
         "avatar": "",
-        "athleteId": "79129542",
-        "id": "79129542"
+        "athleteId": 79129542,
+        "id": 79129542,
+        "_fromConfig": true
       },
       "Nam_N.": {
         "resource_state": 2,
@@ -813,7 +842,10 @@
         "profile_medium": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/134088880/30637312/1/medium.jpg",
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/134088880/30637312/1/large.jpg",
         "name": "Pha Vo",
-        "avatar": ""
+        "avatar": "",
+        "id": 134088880,
+        "athleteId": 134088880,
+        "_fromConfig": true
       },
       "pham_T.": {
         "resource_state": 2,
@@ -864,8 +896,9 @@
         "profile": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/large.jpg",
         "name": "Tien PhamTV",
         "avatar": "",
-        "athleteId": "133066813",
-        "id": "133066813"
+        "athleteId": 133066813,
+        "id": 133066813,
+        "_fromConfig": true
       },
       "vu_D.": {
         "resource_state": 2,
@@ -877,7 +910,10 @@
         "profile_medium": "https://www.strava.com/frontend/assets/landing-pages/images/logo-strava-lg.png",
         "profile": "https://www.strava.com/frontend/assets/landing-pages/images/logo-strava-lg.png",
         "name": "vu duong",
-        "avatar": ""
+        "avatar": "",
+        "id": 101067787,
+        "athleteId": 101067787,
+        "_fromConfig": true
       },
       "Vuong_N.": {
         "resource_state": 2,
