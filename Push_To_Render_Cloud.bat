@@ -24,7 +24,8 @@ git push
 
 echo.
 echo ===================================================
-echo     HOAN TAT! Render se tu dong cap nhat trong it phut.
+echo     DONE! Render se tu dong cap nhat trong it phut.
 echo ===================================================
 echo.
 pause
+

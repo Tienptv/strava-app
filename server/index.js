@@ -4200,22 +4200,32 @@ app.post('/api/screenshot/full-table', async (req, res) => {
       }
     }, targetAthId, targetLang, Boolean(chartsCollapsed));
 
-    await page.goto(frontendUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
-    await page.waitForSelector('.challenge-view, .dashboard, table', { timeout: 15000 });
-    await new Promise(r => setTimeout(r, 1200));
+    const targetUrl = targetScope === 'leaderboard' ? `${frontendUrl}/leaderboard` : frontendUrl;
+    await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
+
+    if (targetScope === 'leaderboard') {
+      await page.waitForSelector('.challenge-container', { visible: true, timeout: 20000 });
+      await page.waitForSelector('.challenge-table tbody tr', { visible: true, timeout: 15000 });
+    } else {
+      await page.waitForSelector('.challenge-view, .dashboard, table', { timeout: 15000 });
+    }
+    await new Promise(r => setTimeout(r, 800));
 
     // Hide navbar and expand view for clean full-page screenshot
     await page.evaluate(async (targetMonth, isCollapsed, scope) => {
-      const navbar = document.querySelector('.navbar');
-      if (navbar) navbar.style.display = 'none';
-
-      const sidebar = document.querySelector('.sidebar');
-      if (sidebar) sidebar.style.display = 'none';
+      // 1. Xóa vĩnh viễn các phần tử điều hướng và thanh sidebar khỏi cây DOM
+      document.querySelectorAll('.sidebar, aside, nav.navbar, .navbar, .admin-sidebar, [class*="sidebar"]').forEach(el => {
+        try { el.remove(); } catch (_) { el.style.display = 'none'; }
+      });
 
       // Khi chụp riêng Bảng xếp hạng (Option 3: scope === 'leaderboard'),
-      // ta chụp trực tiếp targetEl (.challenge-container), không cần ẩn banner hay bóp méo view width
-      // để giữ nguyên luồng render tự nhiên của DOM, tránh hiện tượng phủ màu tối.
-      if (scope !== 'leaderboard') {
+      // ta ẩn triệt để các khối phía trên (Banner Quỹ CLB, Biểu đồ, Hành trình năm)
+      // để Bảng xếp hạng nằm ngay đỉnh viewport (top = 0), không bị đẩy ra ngoài vùng nhìn.
+      if (scope === 'leaderboard') {
+        document.querySelectorAll('.club-treasury-banner, .challenge-analytics-card, .annual-timeline-card, .dashboard__header').forEach(el => {
+          try { el.remove(); } catch (_) { el.style.display = 'none'; }
+        });
+      } else {
         if (isCollapsed) {
           const chartCard = document.querySelector('.challenge-analytics-card');
           if (chartCard) chartCard.style.display = 'none';
@@ -4239,9 +4249,11 @@ app.post('/api/screenshot/full-table', async (req, res) => {
             setTimeout(() => {
               const items = document.querySelectorAll('.month-dropdown-item');
               let clicked = false;
+              const enMonths = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+              const targetEn = enMonths[parseInt(targetMonth, 10) - 1] || '';
               items.forEach(item => {
-                const txt = item.textContent || '';
-                if (txt === `T${targetMonth}` || txt.includes(targetMonth.toString())) {
+                const txt = (item.textContent || '').trim().toLowerCase();
+                if (txt === `t${targetMonth}` || txt.includes(targetMonth.toString()) || (targetEn && txt.includes(targetEn))) {
                   item.click();
                   clicked = true;
                 }
@@ -4265,7 +4277,43 @@ app.post('/api/screenshot/full-table', async (req, res) => {
 
       const style = document.createElement('style');
       style.innerHTML = `
-        /* 1. Mở rộng khung chứa để hiển thị trọn vẹn 100% thành viên và dòng TOTAL */
+        /* 0. Triệt tiêu hoàn toàn thanh Sidebar và Navbar khỏi luồng render */
+        .sidebar, aside.sidebar, aside, .admin-sidebar, .navbar, nav.navbar, .app-footer, .view-mode-toggle {
+          display: none !important;
+          visibility: hidden !important;
+          width: 0 !important;
+          height: 0 !important;
+          max-width: 0 !important;
+          position: absolute !important;
+          left: -99999px !important;
+          pointer-events: none !important;
+        }
+
+        /* Ẩn các banner, biểu đồ bên trên bảng khi chụp riêng leaderboard */
+        ${scope === 'leaderboard' ? `
+          .club-treasury-banner,
+          .challenge-analytics-card,
+          .annual-timeline-card,
+          .dashboard__header {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+          }
+        ` : ''}
+
+        /* 1. Mở rộng khung layout không bị co lệch hay dạt lề */
+        .app-layout, .app-main, .dashboard, .challenge-view, .challenge-section-wrapper {
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          max-width: none !important;
+          height: auto !important;
+          min-height: auto !important;
+        }
+
+        /* 2. Mở rộng khung chứa để hiển thị trọn vẹn 100% thành viên và dòng TOTAL */
         .challenge-table-wrapper {
           max-height: none !important;
           height: auto !important;
@@ -4275,7 +4323,7 @@ app.post('/api/screenshot/full-table', async (req, res) => {
           background: #ffffff !important;
         }
 
-        /* 2. Đảm bảo thẻ chứa Leaderboard có nền trắng tinh khiết chuẩn thương hiệu Haskoning */
+        /* 3. Đảm bảo thẻ chứa Leaderboard có nền trắng tinh khiết chuẩn thương hiệu Haskoning */
         .challenge-container {
           height: auto !important;
           max-height: none !important;
@@ -4285,9 +4333,10 @@ app.post('/api/screenshot/full-table', async (req, res) => {
           border-radius: 14px !important;
           box-sizing: border-box !important;
           box-shadow: 0 4px 20px rgba(0, 45, 84, 0.08) !important;
+          margin: 0 auto !important;
         }
 
-        /* 3. Tăng cỡ chữ, độ đậm và độ sắc nét theo chuẩn Haskoning */
+        /* 4. Tăng cỡ chữ, độ đậm và độ sắc nét theo chuẩn Haskoning */
         .runner-name-text {
           font-size: 13px !important;
           font-weight: 700 !important;
@@ -4332,11 +4381,6 @@ app.post('/api/screenshot/full-table', async (req, res) => {
         .challenge-table td {
           border: 1px solid #cbd5e1 !important;
         }
-
-        .challenge-view, .app-main {
-          height: auto !important;
-          min-height: auto !important;
-        }
       `;
       document.head.appendChild(style);
     }, month, Boolean(chartsCollapsed), targetScope);
@@ -4350,15 +4394,23 @@ app.post('/api/screenshot/full-table', async (req, res) => {
       targetEl = await page.$('.challenge-view') || await page.$('.app-main');
     }
 
-    let buffer;
-    if (targetEl) {
-      const elInfo = await targetEl.evaluate(el => ({ tag: el.tagName, class: el.className, w: el.offsetWidth, h: el.offsetHeight }));
-      console.log('📸 [SCREENSHOT] Target element info:', JSON.stringify(elInfo));
-      buffer = await targetEl.screenshot({ type: 'png' });
-    } else {
-      console.log('📸 [SCREENSHOT] Fallback full page screenshot');
-      buffer = await page.screenshot({ fullPage: true, type: 'png' });
+    if (!targetEl) {
+      throw new Error('Không tìm thấy bảng xếp hạng (.challenge-container) để chụp hình.');
     }
+
+    // Tự động điều chỉnh kích thước viewport theo bounding box thực tế của targetEl
+    // đảm bảo 100% diện tích bảng xếp hạng nằm trọn vẹn trong khung đệm GPU của Chrome headless
+    const box = await targetEl.boundingBox();
+    if (box) {
+      const vpWidth = Math.max(2100, Math.ceil(box.x + box.width + 40));
+      const vpHeight = Math.max(1200, Math.ceil(box.y + box.height + 60));
+      await page.setViewport({ width: vpWidth, height: vpHeight, deviceScaleFactor: 2.5 });
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    const elInfo = await targetEl.evaluate(el => ({ tag: el.tagName, class: el.className, w: el.offsetWidth, h: el.offsetHeight }));
+    console.log('📸 [SCREENSHOT] Target element info:', JSON.stringify(elInfo));
+    const buffer = await targetEl.screenshot({ type: 'png' });
 
     const filePrefix = targetScope === 'leaderboard' ? 'Strava_Leaderboard' : 'Strava_Challenge';
     const monthLetter = targetLang === 'en' ? 'M' : 'T';
