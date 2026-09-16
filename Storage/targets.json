@@ -223,5 +223,87 @@
   "Tam_N._2026_1": {
     "target": 51,
     "penalty": true
+  },
+  "Huy_H._2026_4": {
+    "penalty": true,
+    "target": 220
+  },
+  "Thanh_X._2026_4": {
+    "target": 82,
+    "penalty": true
+  },
+  "Khương_P._2026_4": {
+    "target": 100,
+    "penalty": true
+  },
+  "Sang_N._2026_4": {
+    "target": 50
+  },
+  "Tien_P._2026_4": {
+    "target": 0,
+    "penalty": false
+  },
+  "Thinh_V._2026_4": {
+    "target": 28,
+    "penalty": true
+  },
+  "Huy_H._2026_3": {
+    "target": 220,
+    "penalty": true
+  },
+  "Thanh_X._2026_3": {
+    "target": 80,
+    "penalty": true
+  },
+  "Tien_P._2026_3": {
+    "target": 150
+  },
+  "Katy_N._2026_3": {
+    "target": 70,
+    "penalty": true
+  },
+  "Thinh_V._2026_3": {
+    "target": 48,
+    "penalty": true
+  },
+  "Benjamin_D._2026_3": {
+    "target": 49,
+    "penalty": true
+  },
+  "Sang_N._2026_3": {
+    "target": 50
+  },
+  "Cuong_N._2026_3": {
+    "target": ""
+  },
+  "Huy_H._2026_5": {
+    "target": 150,
+    "penalty": true
+  },
+  "Thanh_X._2026_5": {
+    "target": 88,
+    "penalty": true
+  },
+  "Thinh_V._2026_5": {
+    "target": 26,
+    "penalty": true
+  },
+  "Sang_N._2026_5": {
+    "target": 50
+  },
+  "Sơn_N._2026_5": {
+    "target": ""
+  },
+  "Sang_N._2026_7": {
+    "penalty": false,
+    "target": 0
+  },
+  "Thinh_V._2026_7": {
+    "target": 28,
+    "penalty": true
+  },
+  "Tien_P._2026_7": {
+    "target": 120,
+    "penalty": false
   }
 }

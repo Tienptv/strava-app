@@ -29,7 +29,7 @@
         "allTimeKmMoneyFile": 1895.05,
         "kmRankMoneyFile": 14,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 1922.3,
         "allTimeKm": 1922.3,
         "kmRankChallenge": 14,
@@ -285,6 +285,13 @@
           "note": "Chưa đóng theo file theo dõi quỹ",
           "updatedBy": "System Update",
           "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-02": {
+          "status": "paid",
+          "paidAt": "2026-09-16T12:05:11.098Z",
+          "note": "",
+          "updatedBy": "Tien PhamTV",
+          "updatedAt": "2026-09-16T12:05:11.098Z"
         }
       },
       "allTimeKmChallenge": 0
@@ -1556,7 +1563,7 @@
         "allTimeKmMoneyFile": 2438.3,
         "kmRankMoneyFile": 12,
         "targetCompletedMonths": 0,
-        "paymentStatus": "unpaid",
+        "paymentStatus": "paid",
         "allTimeKmChallenge": 2610.6,
         "allTimeKm": 2610.6,
         "kmRankChallenge": 12,
@@ -1744,6 +1751,13 @@
           "note": "Chưa đóng theo file theo dõi quỹ",
           "updatedBy": "System Update",
           "updatedAt": "2026-09-08T16:52:45.786Z"
+        },
+        "2026-04": {
+          "status": "paid",
+          "paidAt": "2026-09-16T12:06:09.678Z",
+          "note": "",
+          "updatedBy": "Tien PhamTV",
+          "updatedAt": "2026-09-16T12:06:09.678Z"
         }
       },
       "allTimeKmChallenge": 2610.6
