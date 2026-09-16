@@ -91,5 +91,22 @@
   4. **Kiểm thử logic với Test Case trùng tên:**
      - Khi viết test case cho các tính năng mới, bắt buộc phải tạo kịch bản giả định có ít nhất 2 thành viên trùng tên (ví dụ: `Phuong N.` ID 12345 và `Phuong T.` ID 67890) để đảm bảo hệ thống phân định độc lập 100% dựa trên ID.
 
+---
+
+## 7. Quy Tắc Căn Hàng Chuẩn Xác & Spacing Đồng Bộ Mức Thẩm Mỹ Cao / OCD (Pixel-Perfect Alignment & Uniform Spacing Rule)
+- **Tôn chỉ thiết kế & Thẩm mỹ kỹ tính (OCD-Level Aesthetics):**
+  - Mọi thành phần giao diện (Card, Tab, Nút bấm, Badge, Input, Icon) trong cùng một khung nhìn/view (đặc biệt là Mobile) **bắt buộc phải dóng thẳng hàng tuyệt đối (Pixel-Perfect Alignment)** theo các trục căn lề chung (chuẩn 16px mép nội dung).
+  - Tuyệt đối không được để các nút/tab bị lệch mép, thò ra thụt vào ngoài phạm vi 2 đường trục dọc của màn hình.
+- **Quy chuẩn căn lề & Khoảng cách (Alignment & Spacing Rules):**
+  1. **Đồng bộ lề 2 bên (Unified Margins):**
+     - Header, Thẻ thông tin chính (Treasury, Goal, Podium), Danh sách hoạt động (Recent Activities), và Thanh điều hướng đáy (Bottom Nav) phải có biên lề thẳng tắp từ trên xuống dưới.
+     - Thanh điều hướng đáy (`MobileBottomNav`) phải co giãn và phân bổ các nút tab nằm gọn gàng bên trong phạm vi 2 đường lề chuẩn của nội dung, không chìa ra ngoài.
+  2. **Hệ số lưới Spacing đồng bộ (Grid Spacing Hierarchy):**
+     - Sử dụng hệ số spacing chuẩn: `4px` (micro), `8px` (compact), `12px` (standard), `16px` (spacious), `20px` / `24px` (section separation).
+     - Khoảng cách giữa các cột trong grid (gap) và padding bên trong các card cùng cấp phải hoàn toàn đồng đều, không được card này lồi, card kia lõm.
+  3. **Chống tràn & Cắt cụt chữ (No Text Clashing / Clipping):**
+     - Mọi văn bản, nhãn chỉ số, huy hiệu trạng thái phải có đủ không gian hiển thị, scale font linh hoạt (`clamp` hoặc media queries theo tier), tuyệt đối không để chữ chồng lấn, đè lên icon/bản đồ hoặc bị cắt cụt vô lý.
+
+
 
 

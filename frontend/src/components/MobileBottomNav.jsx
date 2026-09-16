@@ -26,78 +26,80 @@ export default function MobileBottomNav({
 
   return (
     <nav className="mobile-bottom-nav" aria-label="Mobile Navigation">
-      {/* 1. BXH */}
-      <button 
-        type="button"
-        className={`mobile-nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`}
-        onClick={() => handleTabClick('leaderboard')}
-      >
-        <div className="mobile-nav-icon">
-          <Trophy size={19} />
-        </div>
-        <span className="mobile-nav-label">
-          {t('navLeaderboard')}
-        </span>
-        {activeTab === 'leaderboard' && <span className="mobile-nav-indicator" />}
-      </button>
+      <div className="mobile-bottom-nav__inner">
+        {/* 1. BXH */}
+        <button 
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'leaderboard' ? 'active' : ''}`}
+          onClick={() => handleTabClick('leaderboard')}
+        >
+          <div className="mobile-nav-icon">
+            <Trophy size={19} />
+          </div>
+          <span className="mobile-nav-label">
+            {t('navLeaderboard')}
+          </span>
+          {activeTab === 'leaderboard' && <span className="mobile-nav-indicator" />}
+        </button>
 
-      {/* 2. Mục Tiêu Cá Nhân & AI Coach */}
-      <button 
-        type="button"
-        className={`mobile-nav-item ${activeTab === 'mygoal' ? 'active' : ''}`}
-        onClick={() => handleTabClick('mygoal')}
-      >
-        <div className="mobile-nav-icon">
-          <Target size={19} />
-        </div>
-        <span className="mobile-nav-label">
-          {t('navMyGoal')}
-        </span>
-        {activeTab === 'mygoal' && <span className="mobile-nav-indicator" />}
-      </button>
+        {/* 2. Mục Tiêu Cá Nhân & AI Coach */}
+        <button 
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'mygoal' ? 'active' : ''}`}
+          onClick={() => handleTabClick('mygoal')}
+        >
+          <div className="mobile-nav-icon">
+            <Target size={19} />
+          </div>
+          <span className="mobile-nav-label">
+            {t('navMyGoal')}
+          </span>
+          {activeTab === 'mygoal' && <span className="mobile-nav-indicator" />}
+        </button>
 
-      {/* 3. Hành Trình CLB */}
-      <button 
-        type="button"
-        className={`mobile-nav-item ${activeTab === 'journey' ? 'active' : ''}`}
-        onClick={() => handleTabClick('journey')}
-      >
-        <div className="mobile-nav-icon">
-          <MapPin size={19} />
-        </div>
-        <span className="mobile-nav-label">
-          {t('navJourney')}
-        </span>
-        {activeTab === 'journey' && <span className="mobile-nav-indicator" />}
-      </button>
+        {/* 3. Hành Trình CLB */}
+        <button 
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'journey' ? 'active' : ''}`}
+          onClick={() => handleTabClick('journey')}
+        >
+          <div className="mobile-nav-icon">
+            <MapPin size={19} />
+          </div>
+          <span className="mobile-nav-label">
+            {t('navJourney')}
+          </span>
+          {activeTab === 'journey' && <span className="mobile-nav-indicator" />}
+        </button>
 
-      {/* 4. Quỹ CLB */}
-      <button 
-        type="button"
-        className={`mobile-nav-item ${activeTab === 'treasury' ? 'active' : ''}`}
-        onClick={() => handleTabClick('treasury')}
-      >
-        <div className="mobile-nav-icon">
-          <Coins size={19} />
-        </div>
-        <span className="mobile-nav-label">
-          {t('navTreasury')}
-        </span>
-      </button>
+        {/* 4. Quỹ CLB */}
+        <button 
+          type="button"
+          className={`mobile-nav-item ${activeTab === 'treasury' ? 'active' : ''}`}
+          onClick={() => handleTabClick('treasury')}
+        >
+          <div className="mobile-nav-icon">
+            <Coins size={19} />
+          </div>
+          <span className="mobile-nav-label">
+            {t('navTreasury')}
+          </span>
+        </button>
 
-      {/* 5. Tìm VĐV */}
-      <button 
-        type="button"
-        className="mobile-nav-item"
-        onClick={() => handleTabClick('findme')}
-      >
-        <div className="mobile-nav-icon">
-          <Search size={19} />
-        </div>
-        <span className="mobile-nav-label">
-          {t('navSearch')}
-        </span>
-      </button>
+        {/* 5. Tìm VĐV */}
+        <button 
+          type="button"
+          className="mobile-nav-item"
+          onClick={() => handleTabClick('findme')}
+        >
+          <div className="mobile-nav-icon">
+            <Search size={19} />
+          </div>
+          <span className="mobile-nav-label">
+            {t('navSearch')}
+          </span>
+        </button>
+      </div>
     </nav>
   );
 }

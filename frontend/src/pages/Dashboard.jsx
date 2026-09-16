@@ -527,8 +527,8 @@ export default function Dashboard({
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.7rem', background: 'rgba(255, 255, 255, 0.15)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.25)', fontWeight: 600 }}>
+                <div className="treasury-actions-row">
+                  <span className="treasury-badge-transparency">
                     {lang === 'en' ? '🛡 100% Financial Transparency' : '🛡 Minh bạch tài chính 100%'}
                   </span>
                   <button
@@ -540,18 +540,7 @@ export default function Dashboard({
                         setShowTreasuryModal(true);
                       }
                     }}
-                    className="btn"
-                    style={{
-                      background: '#ffffff',
-                      color: 'var(--primary-navy)',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      border: 'none',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                    }}
+                    className="btn treasury-btn-view"
                   >
                     {lang === 'en' ? 'View Treasury →' : 'Chi Tiết Quỹ →'}
                   </button>

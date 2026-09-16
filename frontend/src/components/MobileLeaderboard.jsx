@@ -217,6 +217,8 @@ export default function MobileLeaderboard({
 
       return {
         ...row,
+        totalMovingTime: row.totalMovingTime || row.totalTime || 0,
+        totalTime: row.totalMovingTime || row.totalTime || 0,
         originalRank: index + 1,
         displayName,
         target,
@@ -585,7 +587,14 @@ export default function MobileLeaderboard({
                       </div>
                       <div className="exp-metric-col">
                         <span className="exp-label"><Clock size={12} /> {lang === 'en' ? 'Total Time' : 'Tổng giờ chạy'}</span>
-                        <span className="exp-val">{runner.totalTimeFormatted || `${Math.floor((runner.totalTime || 0) / 3600)}h ${Math.floor(((runner.totalTime || 0) % 3600) / 60)}m`}</span>
+                        <span className="exp-val">
+                          {(() => {
+                            const sec = runner.totalMovingTime || runner.totalTime || 0;
+                            const h = Math.floor(sec / 3600);
+                            const m = Math.floor((sec % 3600) / 60);
+                            return runner.totalTimeFormatted || `${h}h ${m}m`;
+                          })()}
+                        </span>
                       </div>
                       <div className="exp-metric-col">
                         <span className="exp-label"><Award size={12} /> {lang === 'en' ? 'Best Day' : 'Kỷ lục ngày'}</span>
@@ -602,13 +611,26 @@ export default function MobileLeaderboard({
                         {daysArray.map(day => {
                           const dist = runner.dailyDistances ? runner.dailyDistances[day] : 0;
                           const hasRun = dist > 0;
+                          const dayDate = new Date(year, month - 1, day);
+                          const dayOfWeek = dayDate.getDay();
+                          const isSaturday = dayOfWeek === 6;
+                          const isSunday = dayOfWeek === 0;
+                          const isWeekend = isSaturday || isSunday;
+                          const weekendClass = isSaturday ? 'is-weekend is-saturday' : (isSunday ? 'is-weekend is-sunday' : '');
                           return (
                             <div 
                               key={day} 
-                              className={`exp-day-cell ${hasRun ? 'has-run' : 'rest-day'}`}
+                              className={`exp-day-cell ${hasRun ? 'has-run' : 'rest-day'} ${weekendClass}`}
                               title={hasRun ? t('dayHeatmapRun', { day, km: (dist >= 10 ? Math.round(dist) : dist.toFixed(1)) }) : t('dayHeatmapRest', { day })}
                             >
-                              <span className="exp-day-num">{day}</span>
+                              <div className="exp-day-num-wrap">
+                                <span className="exp-day-num">{day}</span>
+                                {isWeekend && (
+                                  <span className="exp-day-dow-tag">
+                                    {isSaturday ? (lang === 'vi' ? 'T7' : 'Sa') : (lang === 'vi' ? 'CN' : 'Su')}
+                                  </span>
+                                )}
+                              </div>
                               <span className="exp-day-km">{hasRun ? (dist >= 10 ? Math.round(dist) : dist.toFixed(1)) : '·'}</span>
                             </div>
                           );

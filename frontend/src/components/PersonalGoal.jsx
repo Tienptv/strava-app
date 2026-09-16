@@ -712,7 +712,7 @@ export default function PersonalGoal({
             <div className="personal-goal__icon-badge">
               <Target size={20} color="#00A3A6" />
             </div>
-            <div>
+            <div className="personal-goal__title-text">
               <span className="personal-goal__main-title">{t('personalGoalTitle')}</span>
               <span className="personal-goal__month-subtitle"> ({monthName})</span>
             </div>
@@ -726,8 +726,8 @@ export default function PersonalGoal({
               style={isLockedByDate ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               disabled={isLockedByDate}
             >
-              <Edit2 size={16} />
-              <span style={{ fontSize: '0.8rem', marginLeft: '4px', fontWeight: 600 }}>{goal > 0 ? t('editGoal') : t('setGoal')}</span>
+              <Edit2 size={15} />
+              <span className="btn-edit-goal-text">{goal > 0 ? t('editGoal') : t('setGoal')}</span>
             </button>
           )}
         </div>
@@ -780,12 +780,12 @@ export default function PersonalGoal({
           <>
             {/* Goal Progress Section (Tight Grouping) */}
             <div className="pg-goal-progress-wrap">
-              <div className="personal-goal__stats" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <div className="goal-numbers" style={{ display: 'flex', alignItems: 'baseline', gap: '6px', lineHeight: 1 }}>
-                  <span className="current-dist" style={{ lineHeight: 1 }}>{currentDist.toFixed(1)}</span>
-                  <span className="total-goal" style={{ lineHeight: 1 }}>/ {goal > 0 ? `${goal} km` : `${t('noGoalSet')} (0 km)`}</span>
+              <div className="personal-goal__stats">
+                <div className="goal-numbers">
+                  <span className="current-dist">{currentDist.toFixed(1)}</span>
+                  <span className="total-goal">/ {goal > 0 ? `${goal} km` : `${t('noGoalSet')} (0 km)`}</span>
                 </div>
-                <div className={`goal-percent-badge ${isGoalReached ? 'is-complete' : ''}`} style={{ alignSelf: 'flex-end', lineHeight: 1.2, marginBottom: 0 }}>
+                <div className={`goal-percent-badge ${isGoalReached ? 'is-complete' : ''}`}>
                   {goal > 0 ? `${percent}% ${isGoalReached ? '🎯' : ''}` : '--'}
                 </div>
               </div>
@@ -1074,7 +1074,7 @@ export default function PersonalGoal({
             <div className="personal-goal__icon-badge" style={{ background: 'rgba(255, 152, 0, 0.1)' }}>
               <ShieldAlert size={20} color="#FF9800" />
             </div>
-            <div>
+            <div className="personal-goal__title-text">
               <span className="personal-goal__main-title">{t('disciplineAndFund')}</span>
               <span className="personal-goal__month-subtitle"> ({monthName})</span>
             </div>
