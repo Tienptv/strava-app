@@ -851,5 +851,96 @@
       }
     },
     "generatedAt": "2026-09-15T15:47:46.455Z"
+  },
+  "133066813_no_act_2026-09-16_en": {
+    "title": "Coach Recommendations",
+    "type": "info",
+    "badge": "Smart Coach",
+    "message": "Set your monthly goal to unlock intelligent training advice and personalized workouts!",
+    "actionPlan": "Set a realistic target between 50km - 150km.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Set a suitable monthly goal between 50km - 150km.",
+    "recoveryTip": "Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.",
+    "readinessScore": 76,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 0,
+        "acuteLoadKm": 0,
+        "chronicLoadKm": 0,
+        "acuteRunsCount": 0,
+        "statusKey": "no_data",
+        "statusColor": "#94a3b8",
+        "labelVi": "Chưa đủ dữ liệu",
+        "labelEn": "No Data",
+        "descVi": "Hãy ghi nhận thêm các bài chạy để kích hoạt đo lường thể lực.",
+        "descEn": "Log more runs to activate sports science tracking."
+      },
+      "racePredictions": {
+        "hasBenchmark": false,
+        "vdot": null,
+        "predicted5k": null,
+        "predicted10k": null,
+        "predicted21k": null,
+        "trainingPaces": {
+          "easyZone2": "6:30 - 7:15",
+          "tempo": "5:45 - 6:15",
+          "interval": "5:10 - 5:35"
+        }
+      },
+      "recovery": 0,
+      "biomechanics": null
+    },
+    "generatedAt": "2026-09-16T05:09:06.377Z"
+  },
+  "133066813_20184651032_2026-09-16_en": {
+    "title": "Coach Recommendations",
+    "type": "info",
+    "badge": "Smart Coach",
+    "message": "Set your monthly goal to unlock intelligent training advice and personalized workouts!",
+    "actionPlan": "Set a realistic target between 50km - 150km.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Set a suitable monthly goal between 50km - 150km.",
+    "recoveryTip": "Sip 400ml electrolytes post-run, cold compress, and do 10 mins stretching.",
+    "readinessScore": 74,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 2.13,
+        "acuteLoadKm": 28.8,
+        "chronicLoadKm": 54.2,
+        "acuteRunsCount": 6,
+        "statusKey": "overreaching",
+        "statusColor": "#ef4444",
+        "labelVi": "Cảnh báo quá tải (Overreaching)",
+        "labelEn": "Overreaching (Injury Risk)",
+        "descVi": "Tỷ lệ tải tuần đạt 2.13x (vượt ngưỡng 1.5). Nguy cơ chấn thương gân cơ cao do tăng cự ly quá nhanh!",
+        "descEn": "Weekly workload ratio is 2.13x (>1.5 threshold). High injury risk due to sudden volume increase!"
+      },
+      "racePredictions": {
+        "hasBenchmark": true,
+        "benchmarkDistanceKm": 5.1,
+        "benchmarkPaceStr": "5:46",
+        "vdot": 33,
+        "predicted5k": "28:50",
+        "predicted10k": "1:00:06",
+        "predicted21k": "2:12:37",
+        "trainingPaces": {
+          "easyZone2": "6:51 - 7:31",
+          "tempo": "5:46 - 6:06",
+          "interval": "5:28 - 5:41"
+        }
+      },
+      "recovery": {
+        "totalRequiredHours": 20,
+        "remainingHours": 10,
+        "isFullyRecovered": false
+      },
+      "biomechanics": {
+        "heartRate": 131,
+        "cadence": 153,
+        "cadenceTipVi": "Guồng chân 153 spm hơi thấp (sải bước quá dài). Hãy bước ngắn hơn và tăng tần số lên 165-175 spm để giảm áp lực lên đầu gối.",
+        "cadenceTipEn": "Cadence of 153 spm indicates over-striding. Shorten strides and target 165-175 spm to protect knee joints."
+      }
+    },
+    "generatedAt": "2026-09-16T05:11:20.115Z"
   }
 }
