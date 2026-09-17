@@ -13,7 +13,8 @@ export default function RaceTrainingRoadmapModal({
   lang = 'en', 
   t, 
   apiFetch, 
-  onOpenGarminSync 
+  onOpenGarminSync,
+  canAccessGarminSync = true
 }) {
   const athleteId = athlete?.id ? String(athlete.id) : null;
 
@@ -288,26 +289,28 @@ export default function RaceTrainingRoadmapModal({
                   {lang === 'vi' ? 'Thiết Lập Mục Tiêu Giải Chạy (Race Goal)' : 'Target Race Setup'}
                 </strong>
               </div>
-              <button
-                type="button"
-                onClick={onOpenGarminSync}
-                style={{
-                  background: 'rgba(0, 163, 166, 0.12)',
-                  color: '#00A3A6',
-                  border: '1px solid #00A3A6',
-                  borderRadius: '8px',
-                  padding: '5px 12px',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}
-              >
-                <HeartPulse size={14} />
-                {t('garminSyncBtn')}
-              </button>
+              {canAccessGarminSync && onOpenGarminSync && (
+                <button
+                  type="button"
+                  onClick={onOpenGarminSync}
+                  style={{
+                    background: 'rgba(0, 163, 166, 0.12)',
+                    color: '#00A3A6',
+                    border: '1px solid #00A3A6',
+                    borderRadius: '8px',
+                    padding: '5px 12px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                >
+                  <HeartPulse size={14} />
+                  {t('garminSyncBtn')}
+                </button>
+              )}
             </div>
 
             {/* Form Inputs Grid */}

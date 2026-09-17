@@ -24,6 +24,7 @@ function App() {
   const [challengeMonth, setChallengeMonth] = useState(new Date().getMonth() + 1);
   const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
   const [userRoles, setUserRoles] = useState({ isSuperAdmin: false, isSubAdmin: false, isAdmin: false });
+  const [userAccessConfig, setUserAccessConfig] = useState(null);
   const { t, lang } = useLang();
   const { isMobile } = useDeviceScreen();
 
@@ -216,6 +217,22 @@ function App() {
     }
   }, [athleteId, apiFetch]);
 
+  // Tải ma trận phân quyền tính năng người dùng (User Feature Access Control)
+  const refreshUserAccess = useCallback(() => {
+    fetch(`${API_BASE}/user-access-control`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.config) {
+          setUserAccessConfig(data.config);
+        }
+      })
+      .catch(err => console.error('Lỗi nạp user access config:', err));
+  }, []);
+
+  useEffect(() => {
+    refreshUserAccess();
+  }, [refreshUserAccess]);
+
   // Đăng xuất
   const handleLogout = async () => {
     try {
@@ -283,6 +300,7 @@ function App() {
                       challengeYear={challengeYear}
                       setChallengeMonth={setChallengeMonth}
                       setChallengeYear={setChallengeYear}
+                      userAccessConfig={userAccessConfig}
                     />
                   : <Login onLogin={handleLogin} onGuestAccess={handleGuestLogin} />
               }
@@ -299,6 +317,7 @@ function App() {
                   challengeYear={challengeYear}
                   setChallengeMonth={setChallengeMonth}
                   setChallengeYear={setChallengeYear}
+                  userAccessConfig={userAccessConfig}
                 />
               }
             />

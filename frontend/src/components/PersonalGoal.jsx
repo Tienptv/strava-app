@@ -20,7 +20,8 @@ export default function PersonalGoal({
   challengeParticipants = {},
   challengeData = [],
   isAdmin = false,
-  lockTargetsAfterDate = 0
+  lockTargetsAfterDate = 0,
+  userAccessConfig = null
 }) {
   const { t, lang } = useLang();
   
@@ -49,6 +50,38 @@ export default function PersonalGoal({
   const effectiveIsAdmin = Boolean(
     isAdmin || (athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && String(athlete.id) === String(import.meta.env.VITE_ADMIN_STRAVA_ID))
   );
+
+  // Quản lý cấu hình phân quyền người dùng (User Access Control)
+  const [accessConfig, setAccessConfig] = useState(userAccessConfig);
+
+  useEffect(() => {
+    if (userAccessConfig) {
+      setAccessConfig(userAccessConfig);
+    } else if (apiFetch) {
+      apiFetch('/user-access-control')
+        .then(res => {
+          if (res?.config) setAccessConfig(res.config);
+        })
+        .catch(err => console.error('[PersonalGoal] Lỗi tải quyền truy cập:', err));
+    }
+  }, [userAccessConfig, apiFetch]);
+
+  // Kiểm tra quyền truy cập tính năng Runna Roadmap & Garmin Sync
+  const canAccessRunnaRoadmap = useMemo(() => {
+    if (effectiveIsAdmin) return true;
+    if (!accessConfig || !accessConfig.modules) return false;
+    const mod = accessConfig.modules.runnaRoadmap;
+    if (!mod) return true;
+    return athlete?.isGuest ? Boolean(mod.enabledForGuests) : Boolean(mod.enabledForMembers);
+  }, [effectiveIsAdmin, accessConfig, athlete]);
+
+  const canAccessGarminSync = useMemo(() => {
+    if (effectiveIsAdmin) return true;
+    if (!accessConfig || !accessConfig.modules) return false;
+    const mod = accessConfig.modules.garminSync;
+    if (!mod) return true;
+    return athlete?.isGuest ? Boolean(mod.enabledForGuests) : Boolean(mod.enabledForMembers);
+  }, [effectiveIsAdmin, accessConfig, athlete]);
 
   // Calculate if editing is locked by date
   let isLockedByDate = false;
@@ -1069,41 +1102,47 @@ export default function PersonalGoal({
             </div>
 
             {/* RUNNA RACE TRAINING & GARMIN HEALTH SHORTCUT WIDGET */}
-            <div className="runna-race-widget-card">
-              <div className="runna-widget-header">
-                <div className="runna-widget-title-wrap">
-                  <div className="runna-widget-icon">
-                    <Trophy size={18} color="#ffffff" />
+            {(canAccessRunnaRoadmap || canAccessGarminSync) && (
+              <div className="runna-race-widget-card">
+                <div className="runna-widget-header">
+                  <div className="runna-widget-title-wrap">
+                    <div className="runna-widget-icon">
+                      <Trophy size={18} color="#ffffff" />
+                    </div>
+                    <div>
+                      <span className="runna-brand-badge">RUNNA EXPERT ENGINE</span>
+                      <h5 className="runna-widget-title">{t('raceRoadmapTitle')}</h5>
+                    </div>
                   </div>
-                  <div>
-                    <span className="runna-brand-badge">RUNNA EXPERT ENGINE</span>
-                    <h5 className="runna-widget-title">{t('raceRoadmapTitle')}</h5>
-                  </div>
+                  <span className="runna-vdot-pill">
+                    {aiAdvice?.sportsMetrics?.racePredictions?.vdot ? `VDOT ${aiAdvice.sportsMetrics.racePredictions.vdot}` : 'DIVIDE & CONQUER'}
+                  </span>
                 </div>
-                <span className="runna-vdot-pill">
-                  {aiAdvice?.sportsMetrics?.racePredictions?.vdot ? `VDOT ${aiAdvice.sportsMetrics.racePredictions.vdot}` : 'DIVIDE & CONQUER'}
-                </span>
+                <p className="runna-widget-subtitle">{t('raceRoadmapSubtitle')}</p>
+                <div className="runna-widget-actions">
+                  {canAccessGarminSync && (
+                    <button
+                      type="button"
+                      onClick={() => setIsGarminSyncOpen(true)}
+                      className="runna-btn runna-btn--garmin"
+                    >
+                      <HeartPulse size={15} />
+                      <span>{t('garminSyncBtn')}</span>
+                    </button>
+                  )}
+                  {canAccessRunnaRoadmap && (
+                    <button
+                      type="button"
+                      onClick={() => setIsRaceRoadmapOpen(true)}
+                      className="runna-btn runna-btn--roadmap"
+                    >
+                      <Trophy size={15} />
+                      <span>{t('raceRoadmapBtn')}</span>
+                    </button>
+                  )}
+                </div>
               </div>
-              <p className="runna-widget-subtitle">{t('raceRoadmapSubtitle')}</p>
-              <div className="runna-widget-actions">
-                <button
-                  type="button"
-                  onClick={() => setIsGarminSyncOpen(true)}
-                  className="runna-btn runna-btn--garmin"
-                >
-                  <HeartPulse size={15} />
-                  <span>{t('garminSyncBtn')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsRaceRoadmapOpen(true)}
-                  className="runna-btn runna-btn--roadmap"
-                >
-                  <Trophy size={15} />
-                  <span>{t('raceRoadmapBtn')}</span>
-                </button>
-              </div>
-            </div>
+            )}
           </>
         )}
       </div>
@@ -1470,33 +1509,40 @@ export default function PersonalGoal({
       />
 
       {/* GARMIN HEALTH BIOMETRIC SYNC MODAL */}
-      <GarminSyncModal
-        isOpen={isGarminSyncOpen}
-        onClose={() => setIsGarminSyncOpen(false)}
-        athlete={athlete}
-        lang={lang}
-        t={t}
-        apiFetch={apiFetch}
-        onSyncSuccess={() => {
-          if (handleFetchAiAdvice) {
-            handleFetchAiAdvice(false);
-          }
-        }}
-      />
+      {canAccessGarminSync && (
+        <GarminSyncModal
+          isOpen={isGarminSyncOpen}
+          onClose={() => setIsGarminSyncOpen(false)}
+          athlete={athlete}
+          lang={lang}
+          t={t}
+          apiFetch={apiFetch}
+          onSyncSuccess={() => {
+            if (handleFetchAiAdvice) {
+              handleFetchAiAdvice(false);
+            }
+          }}
+        />
+      )}
 
       {/* RUNNA RACE TRAINING ROADMAP MODAL */}
-      <RaceTrainingRoadmapModal
-        isOpen={isRaceRoadmapOpen}
-        onClose={() => setIsRaceRoadmapOpen(false)}
-        athlete={athlete}
-        lang={lang}
-        t={t}
-        apiFetch={apiFetch}
-        onOpenGarminSync={() => {
-          setIsRaceRoadmapOpen(false);
-          setIsGarminSyncOpen(true);
-        }}
-      />
+      {canAccessRunnaRoadmap && (
+        <RaceTrainingRoadmapModal
+          isOpen={isRaceRoadmapOpen}
+          onClose={() => setIsRaceRoadmapOpen(false)}
+          athlete={athlete}
+          lang={lang}
+          t={t}
+          apiFetch={apiFetch}
+          canAccessGarminSync={canAccessGarminSync}
+          onOpenGarminSync={() => {
+            if (canAccessGarminSync) {
+              setIsRaceRoadmapOpen(false);
+              setIsGarminSyncOpen(true);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

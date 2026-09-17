@@ -26,7 +26,8 @@ export default function Dashboard({
   challengeMonth: propMonth, 
   challengeYear: propYear, 
   setChallengeMonth: propSetMonth, 
-  setChallengeYear: propSetYear 
+  setChallengeYear: propSetYear,
+  userAccessConfig = null
 }) {
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
@@ -411,6 +412,7 @@ export default function Dashboard({
                     challengeData={challengeData}
                     isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
                     lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                    userAccessConfig={userAccessConfig}
                   />
 
                   {/* Thống kê cá nhân & Hoạt động gần đây trên Mobile */}
@@ -623,6 +625,7 @@ export default function Dashboard({
             challengeData={challengeData}
             isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
             lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+            userAccessConfig={userAccessConfig}
           />
 
           <div className="dashboard-section-header">

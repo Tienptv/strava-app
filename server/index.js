@@ -833,6 +833,18 @@ function getPermissionsForAthlete(athleteId) {
   return base;
 }
 
+// Xác định vai trò của người dùng (admin, member, guest)
+export function getAthleteRole(rawAthleteId) {
+  if (!rawAthleteId || rawAthleteId === 'guest') return 'guest';
+  const strId = rawAthleteId.toString().trim();
+  const subAdmins = loadAdminsList();
+  const info = getAthleteMatchKeyAndId(strId);
+  const isSuperAdmin = !!strId && (strId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID);
+  const isSubAdmin = !isSuperAdmin && !!strId && isAthleteInSubAdmins(strId, subAdmins);
+  if (isSuperAdmin || isSubAdmin) return 'admin';
+  return 'member';
+}
+
 // Kiểm tra vai trò của người dùng hiện tại
 app.get('/api/auth/roles', (req, res) => {
   const rawAthleteId = (req.headers['x-athlete-id'] || req.query.athleteId || '').toString();
@@ -5001,6 +5013,12 @@ app.post('/api/race/training-plan', (req, res) => {
     if (!athleteId) {
       return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
     }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('runnaRoadmap', role)) {
+      return res.status(403).json({ error: 'Tính năng Lộ trình Huấn luyện Race (Runna) đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
     const plan = generateRaceRoadmap({
       athleteId,
       raceName,
@@ -5026,6 +5044,12 @@ app.get('/api/race/training-plan', (req, res) => {
     if (!athleteId) {
       return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
     }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('runnaRoadmap', role)) {
+      return res.status(403).json({ error: 'Tính năng Lộ trình Huấn luyện Race (Runna) đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
     const plan = getAthleteTrainingPlan(athleteId);
     res.json({ plan });
   } catch (err) {
@@ -5037,6 +5061,12 @@ app.get('/api/race/training-plan', (req, res) => {
 // 3. Lấy danh sách giải chạy sắp tới từ club_goal.json
 app.get('/api/race/upcoming-events', (req, res) => {
   try {
+    const requesterId = (req.headers['x-athlete-id'] || req.query.athleteId || '').toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('runnaRoadmap', role)) {
+      return res.status(403).json({ error: 'Tính năng Lộ trình Huấn luyện Race (Runna) đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
     const events = getUpcomingRaces();
     res.json({ events });
   } catch (err) {
@@ -5052,6 +5082,12 @@ app.post('/api/garmin/sync-health', (req, res) => {
     if (!athleteId) {
       return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
     }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('garminSync', role)) {
+      return res.status(403).json({ error: 'Tính năng Đồng bộ Garmin Connect đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
     const result = saveGarminHealth(athleteId, healthData);
     res.json({ success: true, health: result });
   } catch (err) {
@@ -5067,6 +5103,12 @@ app.get('/api/garmin/health', (req, res) => {
     if (!athleteId) {
       return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
     }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('garminSync', role)) {
+      return res.status(403).json({ error: 'Tính năng Đồng bộ Garmin Connect đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
     const health = getGarminHealth(athleteId);
     res.json({ health });
   } catch (err) {
