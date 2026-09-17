@@ -1140,10 +1140,10 @@
     "title": "Coach Recommendations",
     "type": "success",
     "badge": "Fast Pace ⚡",
-    "message": "Great speed on your 7.9 km run with a fast pace of 7:53. Balance fast tempo runs with steady aerobic volume to meet your 100 km target.",
-    "actionPlan": "Next session: 6 km at conversational pace.",
+    "message": "Great speed on your 7.9 km run with a fast pace of 7:53. Balance fast tempo runs with steady aerobic volume to meet your 150 km target.",
+    "actionPlan": "Next session: 3 km at conversational pace.",
     "provider": "Smart Heuristic Engine",
-    "strategyTip": "Aim for ~4 runs/week (~7.3 km each) to hit your target smoothly.",
+    "strategyTip": "Aim for ~4 runs/week (~6.9 km each) to hit your target smoothly.",
     "recoveryTip": "Sip 400ml electrolytes post-run, cold compress, and do 10 mins stretching.",
     "readinessScore": 92,
     "sportsMetrics": {
@@ -1185,6 +1185,6 @@
         "cadenceTipEn": "Cadence of 153 spm indicates over-striding. Shorten strides and target 165-175 spm to protect knee joints."
       }
     },
-    "generatedAt": "2026-09-17T01:44:13.916Z"
+    "generatedAt": "2026-09-17T04:30:40.362Z"
   }
 }

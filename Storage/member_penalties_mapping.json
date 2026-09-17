@@ -3845,11 +3845,11 @@
     },
     {
       "stt": 5,
-      "rawName": "Duong Vu",
-      "athleteId": "101067787",
-      "fullName": "Vũ Dương",
+      "rawName": "Abba Vũ",
+      "athleteId": "73380484",
+      "fullName": "Abba Vũ",
       "role": "Member",
-      "note": "Tài khoản Vũ Dương (bản ghi 1 trong Money.csv)",
+      "note": "Tài khoản Abba Vũ (Duong Vu)",
       "financialSummary": {
         "totalPenaltyVND": 50000,
         "penaltyRank": 25,
@@ -4070,7 +4070,7 @@
     {
       "stt": 27,
       "rawName": "Thoa Nguyen",
-      "athleteId": null,
+      "athleteId": "149162660",
       "fullName": "Thoa Nguyễn",
       "role": "Former Member",
       "note": "Cựu thành viên giai đoạn 2022",

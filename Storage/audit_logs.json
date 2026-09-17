@@ -1,5 +1,12 @@
 [
   {
+    "id": "1789630026299",
+    "timestamp": "2026-09-17T07:27:06.299Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (315 mục), targets.json (86 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
+  },
+  {
     "id": "1789609113732",
     "timestamp": "2026-09-17T01:38:33.732Z",
     "action": "Cập nhật quyền truy cập User",
@@ -1391,12 +1398,5 @@
     "action": "Git Push",
     "user": "133066813",
     "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1788800658135",
-    "timestamp": "2026-09-07T17:04:18.135Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (216 mục), targets.json (34 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins)"
   }
 ]
