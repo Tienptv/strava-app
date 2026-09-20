@@ -1140,10 +1140,10 @@
     "title": "Coach Recommendations",
     "type": "success",
     "badge": "Fast Pace ⚡",
-    "message": "Great speed on your 7.9 km run with a fast pace of 7:53. Balance fast tempo runs with steady aerobic volume to meet your 150 km target.",
-    "actionPlan": "Next session: 3 km at conversational pace.",
+    "message": "Great speed on your 7.9 km run with a fast pace of 7:53. Balance fast tempo runs with steady aerobic volume to meet your 100 km target.",
+    "actionPlan": "Next session: 6 km at conversational pace.",
     "provider": "Smart Heuristic Engine",
-    "strategyTip": "Aim for ~4 runs/week (~6.9 km each) to hit your target smoothly.",
+    "strategyTip": "Aim for ~4 runs/week (~7.3 km each) to hit your target smoothly.",
     "recoveryTip": "Sip 400ml electrolytes post-run, cold compress, and do 10 mins stretching.",
     "readinessScore": 92,
     "sportsMetrics": {
@@ -1185,6 +1185,108 @@
         "cadenceTipEn": "Cadence of 153 spm indicates over-striding. Shorten strides and target 165-175 spm to protect knee joints."
       }
     },
-    "generatedAt": "2026-09-17T04:30:40.362Z"
+    "generatedAt": "2026-09-17T07:29:27.350Z"
+  },
+  "133066813_20184651032_2026-09-18_en": {
+    "title": "Coach Recommendations",
+    "type": "info",
+    "badge": "Smart Coach",
+    "message": "Set your monthly goal to unlock intelligent training advice and personalized workouts!",
+    "actionPlan": "Set a realistic target between 50km - 150km.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Set a suitable monthly goal between 50km - 150km.",
+    "recoveryTip": "Sip 400ml electrolytes post-run, cold compress, and do 10 mins stretching.",
+    "readinessScore": 82,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 2.12,
+        "acuteLoadKm": 28.7,
+        "chronicLoadKm": 54.2,
+        "acuteRunsCount": 5,
+        "statusKey": "overreaching",
+        "statusColor": "#ef4444",
+        "labelVi": "Cảnh báo quá tải (Overreaching)",
+        "labelEn": "Overreaching (Injury Risk)",
+        "descVi": "Tỷ lệ tải tuần đạt 2.12x (vượt ngưỡng 1.5). Nguy cơ chấn thương gân cơ cao do tăng cự ly quá nhanh!",
+        "descEn": "Weekly workload ratio is 2.12x (>1.5 threshold). High injury risk due to sudden volume increase!"
+      },
+      "racePredictions": {
+        "hasBenchmark": true,
+        "benchmarkDistanceKm": 5.1,
+        "benchmarkPaceStr": "5:46",
+        "vdot": 33,
+        "predicted5k": "28:50",
+        "predicted10k": "1:00:06",
+        "predicted21k": "2:12:37",
+        "trainingPaces": {
+          "easyZone2": "6:51 - 7:31",
+          "tempo": "5:46 - 6:06",
+          "interval": "5:28 - 5:41"
+        }
+      },
+      "recovery": {
+        "totalRequiredHours": 20,
+        "remainingHours": 0,
+        "isFullyRecovered": true
+      },
+      "biomechanics": {
+        "heartRate": 131,
+        "cadence": 153,
+        "cadenceTipVi": "Guồng chân 153 spm hơi thấp (sải bước quá dài). Hãy bước ngắn hơn và tăng tần số lên 165-175 spm để giảm áp lực lên đầu gối.",
+        "cadenceTipEn": "Cadence of 153 spm indicates over-striding. Shorten strides and target 165-175 spm to protect knee joints."
+      }
+    },
+    "generatedAt": "2026-09-18T05:41:24.795Z"
+  },
+  "133066813_20184651032_2026-09-19_en": {
+    "title": "Coach Recommendations",
+    "type": "warning",
+    "badge": "Inactivity Alert ⚠️",
+    "message": "You have been inactive for 4 days. You need 4.9 km/day over the next 12 days to hit your target. Lace up today to keep the momentum going! Keep in mind your potential penalty commitment!",
+    "actionPlan": "Dynamic stretching + easy 3-4km jog.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Aim for ~4 runs/week (~7.3 km each) to hit your target smoothly.",
+    "recoveryTip": "Sip 400ml electrolytes post-run, cold compress, and do 10 mins stretching.",
+    "readinessScore": 82,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 2.45,
+        "acuteLoadKm": 28.7,
+        "chronicLoadKm": 46.9,
+        "acuteRunsCount": 5,
+        "statusKey": "overreaching",
+        "statusColor": "#ef4444",
+        "labelVi": "Cảnh báo quá tải (Overreaching)",
+        "labelEn": "Overreaching (Injury Risk)",
+        "descVi": "Tỷ lệ tải tuần đạt 2.45x (vượt ngưỡng 1.5). Nguy cơ chấn thương gân cơ cao do tăng cự ly quá nhanh!",
+        "descEn": "Weekly workload ratio is 2.45x (>1.5 threshold). High injury risk due to sudden volume increase!"
+      },
+      "racePredictions": {
+        "hasBenchmark": true,
+        "benchmarkDistanceKm": 5.1,
+        "benchmarkPaceStr": "5:46",
+        "vdot": 33,
+        "predicted5k": "28:50",
+        "predicted10k": "1:00:06",
+        "predicted21k": "2:12:37",
+        "trainingPaces": {
+          "easyZone2": "6:51 - 7:31",
+          "tempo": "5:46 - 6:06",
+          "interval": "5:28 - 5:41"
+        }
+      },
+      "recovery": {
+        "totalRequiredHours": 20,
+        "remainingHours": 0,
+        "isFullyRecovered": true
+      },
+      "biomechanics": {
+        "heartRate": 131,
+        "cadence": 153,
+        "cadenceTipVi": "Guồng chân 153 spm hơi thấp (sải bước quá dài). Hãy bước ngắn hơn và tăng tần số lên 165-175 spm để giảm áp lực lên đầu gối.",
+        "cadenceTipEn": "Cadence of 153 spm indicates over-striding. Shorten strides and target 165-175 spm to protect knee joints."
+      }
+    },
+    "generatedAt": "2026-09-19T06:57:06.112Z"
   }
 }

@@ -6112,13 +6112,13 @@
     "createdAt": "2026-09-17T01:30:07.794Z"
   },
   "133066813": {
-    "id": "plan_133066813_1789614574738",
+    "id": "plan_133066813_1789801072808",
     "athleteId": "133066813",
     "raceName": "Salonpas Run 2026",
     "targetDistanceKm": 21.0975,
     "targetTimeSeconds": 6000,
     "raceDate": "2026-11-08",
-    "startDate": "2026-09-17",
+    "startDate": "2026-09-19",
     "daysPerWeek": 4,
     "longRunDay": "sunday",
     "totalWeeks": 8,
@@ -7017,7 +7017,7 @@
       }
     ],
     "garminReadiness": {
-      "readinessScore": 90,
+      "readinessScore": 85,
       "status": "optimal",
       "labelVi": "Thể lực đỉnh cao (Optimal)",
       "labelEn": "Peak Readiness (Optimal)",
@@ -7026,7 +7026,7 @@
       "downgradeReasonVi": "",
       "downgradeReasonEn": ""
     },
-    "createdAt": "2026-09-17T03:09:34.738Z"
+    "createdAt": "2026-09-19T06:57:52.808Z"
   },
   "ath_phuong_01": {
     "id": "plan_ath_phuong_01_1789574399232",
