@@ -1288,5 +1288,56 @@
       }
     },
     "generatedAt": "2026-09-19T06:57:06.112Z"
+  },
+  "133066813_20251822774_2026-09-20_en": {
+    "title": "Coach Recommendations",
+    "type": "success",
+    "badge": "Long Run Done 🏅",
+    "message": "Your recent 10.4 km long run (pace 7:38) was solid and banked valuable mileage. Hydrate well and plan an easy 3-4km shakeout next.",
+    "actionPlan": "Next session: 7 km at conversational pace.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Aim for ~4 runs/week (~6.0 km each) to hit your target smoothly.",
+    "recoveryTip": "Sip 400ml electrolytes post-run, cold compress, and do 10 mins stretching.",
+    "readinessScore": 92,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 1.69,
+        "acuteLoadKm": 24.2,
+        "chronicLoadKm": 57.3,
+        "acuteRunsCount": 3,
+        "statusKey": "overreaching",
+        "statusColor": "#ef4444",
+        "labelVi": "Cảnh báo quá tải (Overreaching)",
+        "labelEn": "Overreaching (Injury Risk)",
+        "descVi": "Tỷ lệ tải tuần đạt 1.69x (vượt ngưỡng 1.5). Nguy cơ chấn thương gân cơ cao do tăng cự ly quá nhanh!",
+        "descEn": "Weekly workload ratio is 1.69x (>1.5 threshold). High injury risk due to sudden volume increase!"
+      },
+      "racePredictions": {
+        "hasBenchmark": true,
+        "benchmarkDistanceKm": 5.1,
+        "benchmarkPaceStr": "5:46",
+        "vdot": 33,
+        "predicted5k": "28:50",
+        "predicted10k": "1:00:06",
+        "predicted21k": "2:12:37",
+        "trainingPaces": {
+          "easyZone2": "6:51 - 7:31",
+          "tempo": "5:46 - 6:06",
+          "interval": "5:28 - 5:41"
+        }
+      },
+      "recovery": {
+        "totalRequiredHours": 32,
+        "remainingHours": 31,
+        "isFullyRecovered": false
+      },
+      "biomechanics": {
+        "heartRate": 136,
+        "cadence": 158,
+        "cadenceTipVi": null,
+        "cadenceTipEn": null
+      }
+    },
+    "generatedAt": "2026-09-20T17:06:00.475Z"
   }
 }
