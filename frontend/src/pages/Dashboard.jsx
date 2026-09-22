@@ -182,8 +182,18 @@ export default function Dashboard({
       checkChallengeData();
     };
 
+    const handleConfigChanged = (e) => {
+      if (e?.detail) {
+        setChallengeConfig(prev => ({ ...prev, ...e.detail }));
+      }
+    };
+
     window.addEventListener('challengeUpdated', handleChallengeUpdated);
-    return () => window.removeEventListener('challengeUpdated', handleChallengeUpdated);
+    window.addEventListener('configChanged', handleConfigChanged);
+    return () => {
+      window.removeEventListener('challengeUpdated', handleChallengeUpdated);
+      window.removeEventListener('configChanged', handleConfigChanged);
+    };
   }, []);
 
   const loadData = async () => {
@@ -568,6 +578,7 @@ export default function Dashboard({
                   isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
                   allowEditOthers={challengeConfig?.allowEditOthers}
                   lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                  showDayAndTimeCols={challengeConfig?.showDayAndTimeCols}
                   onYearChange={setChallengeYear}
                   isForcedLandscape={isForcedLandscape}
                   onToggleForcedLandscape={(val) => setIsForcedLandscape(val)}
@@ -597,11 +608,12 @@ export default function Dashboard({
                       challengeData={challengeData} 
                       year={challengeYear} 
                       month={challengeMonth} 
-                      apiFetch={apiFetch}
+                      apiFetch={apiFetch} 
                       athlete={athlete}
                       isAdmin={isAdmin !== undefined ? isAdmin : Boolean(athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID)}
                       allowEditOthers={challengeConfig?.allowEditOthers}
                       lockTargetsAfterDate={challengeConfig?.lockTargetsAfterDate}
+                      showDayAndTimeCols={challengeConfig?.showDayAndTimeCols}
                       nameMapping={nameMapping}
                       onMonthChange={setChallengeMonth}
                       onYearChange={setChallengeYear}

@@ -6,6 +6,7 @@ import {
   CalendarDays, Wallet, Award, Lock, Eye, Trophy, HeartPulse
 } from 'lucide-react';
 import { getAthleteMatchKey } from '../utils/challengeStats';
+import { roundUpPenaltyK } from '../utils/penaltyUtils';
 import TreasuryTransparencyModal from './TreasuryTransparencyModal';
 import GarminSyncModal from './GarminSyncModal';
 import RaceTrainingRoadmapModal from './RaceTrainingRoadmapModal';
@@ -351,7 +352,7 @@ export default function PersonalGoal({
   if (hasPenalty && goal > 0) {
     if (paceAnalysis.remainingKm > 0) {
       const rawK = 200 * (paceAnalysis.remainingKm / goal);
-      penaltyDue = Math.min(200, Math.ceil(rawK / 10) * 10);
+      penaltyDue = roundUpPenaltyK(rawK, 200);
     }
   }
 

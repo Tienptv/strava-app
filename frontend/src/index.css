@@ -3858,6 +3858,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 }
 
 .totals-row .col-km strong,
+.totals-row .col-remaining strong,
+.totals-row .col-daily-needed strong,
 .totals-row .col-days,
 .totals-row .col-all-time strong {
   color: var(--primary-navy) !important;
@@ -4596,6 +4598,22 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
   border-left: 1px solid var(--border);
 }
 
+.col-daily-needed {
+  right: 60px;
+  width: 55px !important;
+  min-width: 55px !important;
+  max-width: 55px !important;
+  box-sizing: border-box;
+}
+
+.col-remaining {
+  right: 115px;
+  width: 55px !important;
+  min-width: 55px !important;
+  max-width: 55px !important;
+  box-sizing: border-box;
+}
+
 .col-time {
   right: 60px;
   width: 60px !important;
@@ -4618,6 +4636,35 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
   min-width: 50px !important;
   max-width: 50px !important;
   box-sizing: border-box;
+}
+
+/* Khi Admin bật hiển thị cả 2 cột Day & Time (has-day-time-cols) */
+.challenge-table.has-day-time-cols .col-time {
+  right: 60px;
+}
+.challenge-table.has-day-time-cols .col-days {
+  right: 120px;
+}
+.challenge-table.has-day-time-cols .col-daily-needed {
+  right: 170px;
+}
+.challenge-table.has-day-time-cols .col-remaining {
+  right: 225px;
+}
+.challenge-table.has-day-time-cols .col-km {
+  right: 280px;
+}
+.challenge-table.has-day-time-cols .col-progress {
+  right: 330px;
+}
+.challenge-table.has-day-time-cols .col-due {
+  right: 420px;
+}
+.challenge-table.has-day-time-cols .col-penalty {
+  right: 475px;
+}
+.challenge-table.has-day-time-cols .col-target {
+  right: 520px;
 }
 
 /* Cột Track Bar */
@@ -11602,6 +11649,611 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
   .race-roadmap-modal-box,
   .garmin-sync-modal-box {
     width: 96% !important;
+    height: 94vh !important;
+    min-height: 94vh !important;
     max-height: 94vh !important;
   }
+}
+
+/* ==========================================
+   GARMIN MODAL UNIFIED FIXED DIMENSIONS (RULE #3 & #7)
+   ========================================== */
+.garmin-sync-modal-box {
+  width: min(560px, 94vw);
+  max-width: 560px;
+  height: min(730px, 90vh);
+  min-height: min(730px, 90vh);
+  max-height: 90vh;
+  background: var(--card-bg, #ffffff);
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(0, 45, 84, 0.25);
+  border: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.garmin-sync-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================
+   RACE ROADMAP MODAL UNIFIED FIXED DIMENSIONS (RULE #3 & #7)
+   ========================================== */
+.race-roadmap-modal-box {
+  width: min(840px, 95vw);
+  max-width: 840px;
+  height: min(860px, 92vh);
+  min-height: min(860px, 92vh);
+  max-height: 92vh;
+  background: var(--card-bg, #ffffff);
+  border-radius: 14px;
+  box-shadow: 0 25px 50px rgba(0, 45, 84, 0.3);
+  border: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.race-roadmap-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.roadmap-tabs-container {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0 !important;
+  align-items: center;
+  gap: 6px;
+  padding: 5px;
+  background: rgba(0, 45, 84, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 45, 84, 0.08);
+  box-shadow: inset 0 2px 4px rgba(0, 45, 84, 0.03);
+}
+
+.roadmap-phase-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 6px;
+  min-height: 42px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-size: clamp(0.70rem, 0.9vw, 0.79rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--primary-navy, #002D54);
+  background: #ffffff;
+  border: 1px solid rgba(0, 45, 84, 0.1);
+  outline: none !important;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 45, 84, 0.04);
+  overflow: hidden;
+}
+
+.roadmap-phase-tab-btn .phase-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roadmap-phase-tab-btn:hover {
+  color: var(--accent, #00A3A6);
+  border-color: rgba(0, 163, 166, 0.4);
+  background: #ffffff;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(0, 45, 84, 0.08), 0 0 0 1px rgba(0, 163, 166, 0.25);
+}
+
+.roadmap-phase-tab-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 6px rgba(0, 163, 166, 0.25);
+}
+
+.roadmap-phase-tab-btn-active {
+  background: linear-gradient(135deg, #00A3A6 0%, #002D54 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 4px 14px rgba(0, 163, 166, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+.roadmap-phase-tab-btn-active:hover {
+  transform: translateY(-1.5px) !important;
+  box-shadow: 0 6px 18px rgba(0, 163, 166, 0.45) !important;
+}
+
+.roadmap-phase-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 20px;
+  background: rgba(0, 45, 84, 0.06);
+  color: #002D54;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.roadmap-phase-tab-btn-active .roadmap-phase-badge {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 680px) {
+  .roadmap-tabs-container {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  .roadmap-tabs-container::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .roadmap-phase-tab-btn {
+    flex: 0 0 auto;
+    min-width: 125px;
+    width: auto;
+  }
+}
+
+/* ==========================================
+   GARMIN & MODAL TAB NAVIGATION (RULE #3 HASKONING BRANDING)
+   ========================================== */
+.garmin-tabs-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: var(--bg-secondary, #f1f5f9);
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 45, 84, 0.08);
+  box-shadow: inset 0 2px 4px rgba(0, 45, 84, 0.04);
+}
+
+.garmin-tab-btn,
+.adm-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  min-height: 48px;
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--primary-navy, #002D54);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 45, 84, 0.08);
+  outline: none !important;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 45, 84, 0.04);
+  text-align: center;
+  line-height: 1.25;
+  user-select: none;
+}
+
+.garmin-tab-btn:hover,
+.adm-tab-btn:hover {
+  color: var(--accent, #00A3A6);
+  background: #ffffff;
+  border-color: rgba(0, 163, 166, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 45, 84, 0.12), 0 0 0 1px rgba(0, 163, 166, 0.25);
+}
+
+.garmin-tab-btn:active,
+.adm-tab-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 6px rgba(0, 163, 166, 0.25);
+}
+
+.garmin-tab-btn-active,
+.adm-tab-btn-active {
+  background: linear-gradient(135deg, #00A3A6 0%, #002D54 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 4px 16px rgba(0, 163, 166, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+.garmin-tab-btn-active:hover,
+.adm-tab-btn-active:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 163, 166, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+.garmin-tab-btn svg,
+.adm-tab-btn svg {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+  flex-shrink: 0;
+  color: var(--accent, #00A3A6);
+}
+
+.garmin-tab-btn:hover svg,
+.adm-tab-btn:hover svg {
+  transform: scale(1.15) rotate(-3deg);
+  color: var(--accent, #00A3A6);
+}
+
+.garmin-tab-btn-active svg,
+.adm-tab-btn-active svg {
+  color: #78BE20 !important;
+  filter: drop-shadow(0 0 6px rgba(120, 190, 32, 0.6));
+  transform: scale(1.08);
+}
+
+/* ==========================================
+   MODAL FORM INPUTS & RED CLOSE BUTTON (RULE #3 & #7)
+   ========================================== */
+.personal-goal__input {
+  width: 100%;
+  height: 38px;
+  min-height: 38px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-color, #cbd5e1);
+  background: #ffffff;
+  color: var(--primary-navy, #002D54);
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.personal-goal__input:focus {
+  border-color: var(--accent, #00A3A6);
+  box-shadow: 0 0 0 3px rgba(0, 163, 166, 0.18);
+}
+
+.personal-goal__input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.personal-goal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  min-height: 38px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* NÚT CLOSE ĐÁNH DẤU MÀU ĐỎ THỂ THAO CAO CẤP */
+.personal-goal__btn--cancel {
+  background: rgba(239, 68, 68, 0.06);
+  color: #dc2626;
+  border: 1.5px solid #ef4444;
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.08);
+}
+
+.personal-goal__btn--cancel svg {
+  color: #ef4444;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.personal-goal__btn--cancel:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+}
+
+.personal-goal__btn--cancel:hover svg {
+  color: #ffffff;
+  transform: rotate(90deg) scale(1.1);
+}
+
+.personal-goal__btn--cancel:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
+}
+
+/* ========================================================================== */
+/* SỔ NỢ PHẠT CLB (OUTSTANDING ARREARS BANNER & MODAL)                       */
+/* ========================================================================== */
+
+.arrears-alert-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%);
+  border: 1px solid #fed7aa;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.06);
+  flex-wrap: wrap;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.arrears-alert-banner:hover {
+  border-color: #f97316;
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.12);
+  transform: translateY(-1px);
+}
+
+.arrears-alert-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.arrears-alert-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
+  flex-shrink: 0;
+}
+
+.arrears-alert-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary-navy, #002D54);
+}
+
+.arrears-alert-sub {
+  font-size: 0.82rem;
+  color: #c2410c;
+  font-weight: 600;
+}
+
+.arrears-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00A3A6 0%, #002D54 100%);
+  color: #ffffff !important;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 163, 166, 0.28);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.arrears-open-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 163, 166, 0.4);
+}
+
+.arrears-open-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Modal */
+.arrears-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 45, 84, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: arrearsFadeIn 0.2s ease-out;
+}
+
+@keyframes arrearsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.arrears-modal-content {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 24px 48px rgba(0, 45, 84, 0.28);
+  max-width: 820px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: arrearsSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes arrearsSlideUp {
+  from { transform: translateY(20px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.arrears-modal-header {
+  background: linear-gradient(135deg, #002D54 0%, #004b87 100%);
+  color: #ffffff;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid rgba(0, 163, 166, 0.4);
+}
+
+.arrears-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arrears-modal-header p {
+  margin: 4px 0 0 0;
+  font-size: 0.82rem;
+  opacity: 0.85;
+}
+
+.arrears-modal-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.arrears-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.arrears-modal-kpi-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.arrears-kpi-item {
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.arrears-kpi-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.arrears-kpi-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary-navy, #002D54);
+}
+
+.arrears-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  max-height: calc(90vh - 220px);
+}
+
+.arrears-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.arrears-table th {
+  background: #f1f5f9;
+  padding: 10px 12px;
+  font-weight: 700;
+  color: var(--primary-navy, #002D54);
+  text-align: left;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.arrears-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.arrears-table tr:hover td {
+  background: #f8fafc;
+}
+
+.arrears-pay-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00A3A6 0%, #0080A0 100%);
+  color: #ffffff !important;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 163, 166, 0.25);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.arrears-pay-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 163, 166, 0.4);
+}
+
+.arrears-pay-action-btn:active {
+  transform: translateY(0) scale(0.98);
 }

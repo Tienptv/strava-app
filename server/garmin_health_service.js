@@ -215,3 +215,62 @@ export function saveGarminHealth(athleteId, inputData) {
   writeData(store);
   return store[athKey];
 }
+
+/**
+ * Lưu hàng loạt nhiều bản ghi sức khỏe sinh học (Batch Save cho File Import & History)
+ * @param {string|number} athleteId
+ * @param {Array<object>} entries
+ */
+export function saveGarminHealthBatch(athleteId, entries) {
+  if (!athleteId) {
+    throw new Error('Athlete ID is mandatory (Rule #6)');
+  }
+  if (!Array.isArray(entries) || entries.length === 0) {
+    return getGarminHealth(athleteId);
+  }
+
+  const athKey = String(athleteId);
+  const store = readData();
+  const currentRecord = store[athKey] || { history: [] };
+  const history = Array.isArray(currentRecord.history) ? [...currentRecord.history] : [];
+
+  for (const item of entries) {
+    const today = new Date().toISOString().split('T')[0];
+    const entry = {
+      date: item.date || today,
+      sleepHours: Number(item.sleepHours) || 7.0,
+      sleepScore: Number(item.sleepScore) || 75,
+      restingHeartRate: Number(item.restingHeartRate) || 55,
+      baselineRhr: Number(item.baselineRhr) || Number(item.restingHeartRate) || 52,
+      hrvStatus: item.hrvStatus || 'balanced',
+      hrvMs: Number(item.hrvMs) || 60,
+      bodyBattery: Number(item.bodyBattery) || 80,
+      stressLevel: Number(item.stressLevel) || 25,
+      source: item.source || 'garmin_file_import',
+      updatedAt: new Date().toISOString()
+    };
+    entry.readiness = evaluateReadiness(entry);
+
+    const existingIdx = history.findIndex(h => h.date === entry.date);
+    if (existingIdx >= 0) {
+      history[existingIdx] = entry;
+    } else {
+      history.push(entry);
+    }
+  }
+
+  // Sắp xếp lịch sử giảm dần theo ngày (mới nhất lên đầu)
+  history.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const trimmedHistory = history.slice(0, 30);
+  const latestEntry = trimmedHistory[0] || null;
+
+  store[athKey] = {
+    athleteId: athKey,
+    latest: latestEntry,
+    history: trimmedHistory
+  };
+
+  writeData(store);
+  return store[athKey];
+}
+

@@ -202,14 +202,16 @@ export default function RaceTrainingRoadmapModal({
         style={{
           background: 'var(--card-bg, #ffffff)',
           borderRadius: '14px',
-          maxWidth: '820px',
-          width: '95%',
+          maxWidth: '840px',
+          width: 'min(840px, 95vw)',
+          height: 'min(860px, 92vh)',
+          minHeight: 'min(860px, 92vh)',
           maxHeight: '92vh',
-          overflowY: 'auto',
           boxShadow: '0 25px 50px rgba(0, 45, 84, 0.3)',
           border: '1px solid var(--border-color, #e2e8f0)',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          overflow: 'hidden'
         }}
       >
         {/* Modal Header */}
@@ -222,7 +224,8 @@ export default function RaceTrainingRoadmapModal({
             alignItems: 'center',
             justifyContent: 'space-between',
             borderTopLeftRadius: '14px',
-            borderTopRightRadius: '14px'
+            borderTopRightRadius: '14px',
+            flexShrink: 0
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -269,7 +272,18 @@ export default function RaceTrainingRoadmapModal({
         </div>
 
         {/* Modal Body */}
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <div 
+          className="race-roadmap-modal-body"
+          style={{ 
+            padding: '20px', 
+            flex: 1, 
+            overflowY: 'auto',
+            minHeight: 0,
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '18px' 
+          }}
+        >
           {/* Section 1: Cấu hình mục tiêu Race */}
           <div 
             style={{
@@ -393,7 +407,7 @@ export default function RaceTrainingRoadmapModal({
                     onChange={e => setTargetHours(e.target.value)}
                     placeholder="h"
                     className="personal-goal__input" 
-                    style={{ width: '50px', textAlign: 'center' }}
+                    style={{ width: '50px', textAlign: 'center', padding: '6px 4px' }}
                   />
                   <span>:</span>
                   <input 
@@ -402,7 +416,7 @@ export default function RaceTrainingRoadmapModal({
                     onChange={e => setTargetMinutes(e.target.value)}
                     placeholder="m"
                     className="personal-goal__input" 
-                    style={{ width: '55px', textAlign: 'center' }}
+                    style={{ width: '55px', textAlign: 'center', padding: '6px 4px' }}
                   />
                   <span>:</span>
                   <input 
@@ -411,7 +425,7 @@ export default function RaceTrainingRoadmapModal({
                     onChange={e => setTargetSeconds(e.target.value)}
                     placeholder="s"
                     className="personal-goal__input" 
-                    style={{ width: '55px', textAlign: 'center' }}
+                    style={{ width: '55px', textAlign: 'center', padding: '6px 4px' }}
                   />
                 </div>
               </div>
@@ -423,13 +437,18 @@ export default function RaceTrainingRoadmapModal({
                 </label>
                 <div 
                   style={{ 
-                    padding: '8px 12px', 
+                    height: '38px',
+                    minHeight: '38px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0 12px', 
                     background: '#ffffff', 
                     borderRadius: '8px', 
-                    border: '1px solid #cbd5e1',
+                    border: '1.5px solid #cbd5e1',
                     fontSize: '0.9rem',
                     fontWeight: 700,
-                    color: '#00A3A6'
+                    color: '#00A3A6',
+                    boxSizing: 'border-box'
                   }}
                 >
                   {calculatedPaceStr}
@@ -627,31 +646,31 @@ export default function RaceTrainingRoadmapModal({
               )}
 
               {/* Phase Switcher Tabs */}
-              <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+              <div className="roadmap-tabs-container">
                 <button
                   type="button"
                   onClick={() => setSelectedPhase('all')}
-                  className={`adm-tab-btn ${selectedPhase === 'all' ? 'adm-tab-btn-active' : ''}`}
-                  style={{ padding: '6px 14px', fontSize: '0.82rem', whiteSpace: 'nowrap' }}
+                  className={`roadmap-phase-tab-btn ${selectedPhase === 'all' ? 'roadmap-phase-tab-btn-active' : ''}`}
+                  title={lang === 'vi' ? `Toàn bộ lộ trình (${plan.weeks.length} tuần)` : `All Phases (${plan.weeks.length} Weeks)`}
                 >
-                  {lang === 'vi' ? 'Toàn bộ lộ trình' : 'All Phases'} ({plan.weeks.length})
+                  <span className="phase-name">{lang === 'vi' ? 'Toàn bộ' : 'All Phases'}</span>
+                  <span className="roadmap-phase-badge">{plan.weeks.length}</span>
                 </button>
-                {plan.phases?.map(phase => (
-                  <button
-                    key={phase.id}
-                    type="button"
-                    onClick={() => setSelectedPhase(phase.id)}
-                    className={`adm-tab-btn ${selectedPhase === phase.id ? 'adm-tab-btn-active' : ''}`}
-                    style={{ 
-                      padding: '6px 14px', 
-                      fontSize: '0.82rem', 
-                      whiteSpace: 'nowrap',
-                      borderBottomColor: selectedPhase === phase.id ? phase.color : 'transparent'
-                    }}
-                  >
-                    {lang === 'vi' ? phase.nameVi : phase.nameEn} ({phase.weeks} {lang === 'vi' ? 'tuần' : 'w'})
-                  </button>
-                ))}
+                {plan.phases?.map(phase => {
+                  const fullName = lang === 'vi' ? phase.nameVi : phase.nameEn;
+                  return (
+                    <button
+                      key={phase.id}
+                      type="button"
+                      onClick={() => setSelectedPhase(phase.id)}
+                      className={`roadmap-phase-tab-btn ${selectedPhase === phase.id ? 'roadmap-phase-tab-btn-active' : ''}`}
+                      title={`${fullName} (${phase.weeks} ${lang === 'vi' ? 'tuần' : 'w'})`}
+                    >
+                      <span className="phase-name">{fullName}</span>
+                      <span className="roadmap-phase-badge">{phase.weeks} {lang === 'vi' ? 'tuần' : 'w'}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Weekly Accordion List */}
@@ -845,15 +864,18 @@ export default function RaceTrainingRoadmapModal({
             gap: '10px',
             background: 'var(--bg-card-subtle, #f8fafc)',
             borderBottomLeftRadius: '14px',
-            borderBottomRightRadius: '14px'
+            borderBottomRightRadius: '14px',
+            flexShrink: 0,
+            marginTop: 'auto'
           }}
         >
           <button
+            type="button"
             onClick={onClose}
             className="personal-goal__btn personal-goal__btn--cancel"
-            style={{ padding: '8px 18px', fontSize: '0.85rem' }}
           >
-            {lang === 'vi' ? 'Đóng' : 'Close'}
+            <X size={15} />
+            <span>{lang === 'vi' ? 'Đóng' : 'Close'}</span>
           </button>
         </div>
       </div>

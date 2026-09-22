@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { normalize } from '../utils/challengeStats';
+import { roundUpPenaltyK } from '../utils/penaltyUtils';
 import { Save, CheckCircle2, ShieldAlert, ShieldCheck, ChevronDown } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 import { getAthleteAvatar } from '../utils/avatar';
@@ -47,7 +48,7 @@ function isWeekendDay(year, month, day) {
   return d === 0 || d === 6;
 }
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, lockTargetsAfterDate = 0, nameMapping = {}, onMonthChange, onYearChange }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, lockTargetsAfterDate = 0, showDayAndTimeCols = false, nameMapping = {}, onMonthChange, onYearChange }) {
   const { lang, t } = useLang();
   
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
@@ -303,8 +304,19 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
 
   const now = new Date();
   const isCurrentMonth = now.getFullYear() === year && now.getMonth() + 1 === month;
-  const dayOfMonth = isCurrentMonth ? now.getDate() : (now.getFullYear() > year || (now.getFullYear() === year && now.getMonth() + 1 > month) ? daysInMonth : 0);
+  const isPastMonth = year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1);
+  const dayOfMonth = isCurrentMonth ? now.getDate() : (isPastMonth ? daysInMonth : 0);
   const percentTime = Math.min(Math.max(Math.round((dayOfMonth / daysInMonth) * 1000) / 10, 0), 100);
+
+  // Số ngày còn lại trong tháng (bao gồm cả ngày hôm nay để runner hoàn thành bài chạy)
+  let daysLeft = 0;
+  if (isCurrentMonth) {
+    daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
+  } else if (isPastMonth) {
+    daysLeft = 0;
+  } else {
+    daysLeft = daysInMonth;
+  }
 
   return (
     <div className="challenge-container">
@@ -347,9 +359,9 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
           </h2>
         </div>
         
-        {/* Căn lề phải đúng bằng tổng độ rộng các cột sticky bên phải (460px) để mép phải trùng với đường gióng Target */}
+        {/* Căn lề phải đúng bằng tổng độ rộng các cột sticky bên phải: 460px (khi ẩn Days/Time) hoặc 570px (khi hiện Days/Time) */}
         {goalData?.showDistanceProgress !== false && (
-          <div className="club-goal__stats" style={{ position: 'absolute', right: '460px', display: 'flex', alignItems: 'stretch', gap: '8px', height: '36px' }}>
+          <div className="club-goal__stats" style={{ position: 'absolute', right: showDayAndTimeCols ? '570px' : '460px', display: 'flex', alignItems: 'stretch', gap: '8px', height: '36px' }}>
             <div className="timeline-indicators-summary" style={{ display: 'flex', marginBottom: 0 }}>
               <span className="indicator-pill indicator-pill--km" style={{ display: 'flex', alignItems: 'center', height: '100%', padding: '0 16px', borderRadius: '20px', fontSize: '0.85rem', margin: 0, boxSizing: 'border-box' }} title={lang === 'en' ? 'Actual distance progress' : 'Tiến độ cự ly km thực tế'}>
                 🏃‍♂️ {t('distanceIndicator')}: <strong style={{ marginLeft: '4px' }}>{percentDistance}%</strong>
@@ -385,7 +397,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
 
 
       <div className="challenge-table-wrapper">
-        <table className="challenge-table">
+        <table className={`challenge-table ${showDayAndTimeCols ? 'has-day-time-cols' : ''}`}>
           <thead>
             <tr>
               <th className="sticky-col first-col runner-header" style={{ width: '240px', minWidth: '240px', maxWidth: '240px', textAlign: 'center' }}>RUNNER</th>
@@ -403,8 +415,14 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               <th className="sum-col sticky-right col-due" style={{ textAlign: 'center' }}>{t('penaltyDue')}</th>
               <th className="sum-col sticky-right col-progress" style={{ textAlign: 'center' }}>{t('progress')}</th>
               <th className="sum-col sticky-right col-km" style={{ textAlign: 'center' }}>{t('sumKm')}</th>
-              <th className="sum-col sticky-right col-days" style={{ textAlign: 'center' }}>Σ Days</th>
-              <th className="sum-col sticky-right col-time" style={{ textAlign: 'center' }}>Σ Time</th>
+              <th className="sum-col sticky-right col-remaining" style={{ textAlign: 'center' }} title={t('tooltipRemainingKm')}>{t('colRemainingKm')}</th>
+              <th className="sum-col sticky-right col-daily-needed" style={{ textAlign: 'center' }} title={t('tooltipDailyTargetKm')}>{t('colDailyTargetKm')}</th>
+              {showDayAndTimeCols && (
+                <>
+                  <th className="sum-col sticky-right col-days" style={{ textAlign: 'center' }}>Σ Days</th>
+                  <th className="sum-col sticky-right col-time" style={{ textAlign: 'center' }}>Σ Time</th>
+                </>
+              )}
               <th className="sum-col sticky-right col-all-time" style={{ textAlign: 'center' }}>Σ All-km</th>
             </tr>
           </thead>
@@ -441,16 +459,29 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               // Admin can edit all; normal user can edit their own row, unless allowEditOthers is true
               const canEdit = Boolean(isAdmin || (!isLockedByDate && (isMe || allowEditOthers)));
 
+              // Tính số km còn lại và km/ngày cần chạy cho thành viên có đăng ký target
+              const hasTarget = userTarget > 0;
+              const remainingTargetKm = hasTarget ? Math.max(0, userTarget - row.totalDistance) : null;
+              let dailyNeeded = null;
+              if (hasTarget) {
+                if (remainingTargetKm <= 0) {
+                  dailyNeeded = 0;
+                } else if (daysLeft > 0) {
+                  dailyNeeded = remainingTargetKm / daysLeft;
+                } else {
+                  dailyNeeded = null;
+                }
+              }
+
               // Tính tiền phạt phải nộp: Chỉ áp dụng khi có tick checkbox penalty và target > 0
-              // max 200k, tỷ lệ theo số km chưa hoàn thành, làm tròn lên mốc 10k (ví dụ: 64k -> 70k, 86k -> 90k, 106k -> 110k)
+              // Làm tròn theo hàm ROUNDUP(..., -4) của Excel (lên mốc 10k tiếp theo, max 200k)
               let penaltyAmount = null;
               if (hasPenalty && userTarget > 0) {
-                const remainingKm = Math.max(0, userTarget - row.totalDistance);
-                if (remainingKm <= 0) {
+                if (remainingTargetKm <= 0) {
                   penaltyAmount = 0;
                 } else {
-                  const rawK = 200 * (remainingKm / userTarget);
-                  penaltyAmount = Math.min(200, Math.ceil(rawK / 10) * 10);
+                  const rawK = 200 * (remainingTargetKm / userTarget);
+                  penaltyAmount = roundUpPenaltyK(rawK, 200);
                 }
               }
 
@@ -591,8 +622,43 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     )}
                   </td>
                   <td className="sum-cell sticky-right col-km highlight-total" style={{ textAlign: 'center' }}>{row.totalDistance.toFixed(1)}</td>
-                  <td className="sum-cell sticky-right col-days" style={{ textAlign: 'center' }}>{row.totalDays}</td>
-                  <td className="sum-cell sticky-right col-time" style={{ textAlign: 'center' }}>{formatTime(row.totalMovingTime)}</td>
+                  
+                  {/* Cột Số km còn lại */}
+                  <td className="sum-cell sticky-right col-remaining highlight-total" style={{ textAlign: 'center' }}>
+                    {hasTarget ? (
+                      <span title={remainingTargetKm <= 0 ? (lang === 'en' ? 'Target reached!' : 'Đã hoàn thành mục tiêu!') : undefined}>
+                        {remainingTargetKm <= 0 ? '0.0' : remainingTargetKm.toFixed(1)}
+                      </span>
+                    ) : (
+                      <span className="text-muted" style={{ opacity: 0.4 }}>-</span>
+                    )}
+                  </td>
+
+                  {/* Cột Km/ngày các ngày còn lại */}
+                  <td className="sum-cell sticky-right col-daily-needed highlight-total" style={{ textAlign: 'center' }}>
+                    {hasTarget ? (
+                      remainingTargetKm <= 0 ? (
+                        '0.0'
+                      ) : (
+                        daysLeft > 0 ? (
+                          <span title={lang === 'en' ? `${dailyNeeded.toFixed(1)} km/day for ${daysLeft} days left` : `Cần ${dailyNeeded.toFixed(1)} km/ngày trong ${daysLeft} ngày còn lại`}>
+                            {dailyNeeded.toFixed(1)}
+                          </span>
+                        ) : (
+                          <span className="text-muted" style={{ opacity: 0.4 }} title={lang === 'en' ? 'Month has ended' : 'Tháng đã kết thúc'}>-</span>
+                        )
+                      )
+                    ) : (
+                      <span className="text-muted" style={{ opacity: 0.4 }}>-</span>
+                    )}
+                  </td>
+
+                  {showDayAndTimeCols && (
+                    <>
+                      <td className="sum-cell sticky-right col-days" style={{ textAlign: 'center' }}>{row.totalDays}</td>
+                      <td className="sum-cell sticky-right col-time" style={{ textAlign: 'center' }}>{formatTime(row.totalMovingTime)}</td>
+                    </>
+                  )}
                   <td className="sum-cell sticky-right col-all-time" style={{ textAlign: 'center' }}>
                     {row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0 
                       ? row.allTimeDistance.toFixed(1) 
@@ -629,7 +695,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     const rem = Math.max(0, tgt - r.totalDistance);
                     if (rem > 0) {
                       const rawK = 200 * (rem / tgt);
-                      totalPenaltyDue += Math.min(200, Math.ceil(rawK / 10) * 10);
+                      totalPenaltyDue += roundUpPenaltyK(rawK, 200);
                     }
                   }
                 });
@@ -647,10 +713,55 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                   {challengeData.reduce((sum, row) => sum + row.totalDistance, 0).toFixed(1)}
                 </strong>
               </td>
-              <td className="sum-cell sticky-right col-days" style={{ textAlign: 'center' }}>
-                {challengeData.reduce((sum, row) => sum + row.totalDays, 0)}
+
+              {/* Footer col-remaining */}
+              <td className="sum-cell sticky-right col-remaining" style={{ textAlign: 'center' }}>
+                <strong>
+                  {(() => {
+                    let totalRem = 0;
+                    let hasAnyTarget = false;
+                    challengeData.forEach(r => {
+                      const k = `${r.matchKey}_${year}_${month}`;
+                      const tgt = parseFloat(userData[k]?.target !== undefined ? userData[k]?.target : (userData[r.matchKey]?.target || 0));
+                      if (tgt > 0) {
+                        hasAnyTarget = true;
+                        totalRem += Math.max(0, tgt - r.totalDistance);
+                      }
+                    });
+                    return hasAnyTarget ? totalRem.toFixed(1) : '-';
+                  })()}
+                </strong>
               </td>
-              <td className="sum-cell sticky-right col-time" style={{ textAlign: 'center' }}>-</td>
+
+              {/* Footer col-daily-needed */}
+              <td className="sum-cell sticky-right col-daily-needed" style={{ textAlign: 'center' }}>
+                <strong>
+                  {(() => {
+                    let totalRem = 0;
+                    let hasAnyTarget = false;
+                    challengeData.forEach(r => {
+                      const k = `${r.matchKey}_${year}_${month}`;
+                      const tgt = parseFloat(userData[k]?.target !== undefined ? userData[k]?.target : (userData[r.matchKey]?.target || 0));
+                      if (tgt > 0) {
+                        hasAnyTarget = true;
+                        totalRem += Math.max(0, tgt - r.totalDistance);
+                      }
+                    });
+                    if (!hasAnyTarget) return '-';
+                    if (daysLeft <= 0) return '-';
+                    return (totalRem / daysLeft).toFixed(1);
+                  })()}
+                </strong>
+              </td>
+
+              {showDayAndTimeCols && (
+                <>
+                  <td className="sum-cell sticky-right col-days" style={{ textAlign: 'center' }}>
+                    {challengeData.reduce((sum, row) => sum + row.totalDays, 0)}
+                  </td>
+                  <td className="sum-cell sticky-right col-time" style={{ textAlign: 'center' }}>-</td>
+                </>
+              )}
               <td className="sum-cell sticky-right col-all-time" style={{ textAlign: 'center' }}>
                 <strong>
                   {challengeData.some(row => row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0) 

@@ -14,7 +14,9 @@ import { ZipArchive } from 'archiver';
 import { execSync, spawn } from 'child_process';
 import { getAiCoachAdvice, getWeeklyTrainingPlan } from './ai_coach_service.js';
 import { generateRaceRoadmap, getAthleteTrainingPlan, getUpcomingRaces, calculatePaceModel } from './race_training_service.js';
-import { getGarminHealth, saveGarminHealth } from './garmin_health_service.js';
+import { getGarminHealth, saveGarminHealth, saveGarminHealthBatch } from './garmin_health_service.js';
+import { getGarminSessionStatus, loginGarminSession, scrapeGarminBiometrics, disconnectGarminSession } from './garmin_scraper.js';
+import { parseGarminFile } from './garmin_parser.js';
 import { getUserAccessConfig, saveUserAccessConfig, isFeatureAccessible } from './user_access_service.js';
 import { startCronJobs } from './cron.js';
 
@@ -4730,12 +4732,31 @@ app.get('/api/penalties/ledger', (req, res) => {
         ? m.monthlyPaymentStatus[queryMonth]
         : { status: 'unpaid', paidAt: null, note: '' };
 
+      let allTimeUnpaidPenaltyVND = 0;
+      let allTimeTotalPenaltyVND = 0;
+      let unpaidMonthsCount = 0;
+      if (m.monthlyPenaltiesVND) {
+        Object.entries(m.monthlyPenaltiesVND).forEach(([mo, fee]) => {
+          if (fee > 0) {
+            allTimeTotalPenaltyVND += fee;
+            const isPaid = m.monthlyPaymentStatus?.[mo]?.status === 'paid';
+            if (!isPaid) {
+              allTimeUnpaidPenaltyVND += fee;
+              unpaidMonthsCount += 1;
+            }
+          }
+        });
+      }
+
       return {
         ...m,
         currentMonthPenaltyVND: monthPenalty,
         currentMonthPaymentStatus: paymentInfo.status || 'unpaid',
         currentMonthPaidAt: paymentInfo.paidAt || null,
-        currentMonthPaymentNote: paymentInfo.note || ''
+        currentMonthPaymentNote: paymentInfo.note || '',
+        allTimeUnpaidPenaltyVND,
+        allTimeTotalPenaltyVND,
+        unpaidMonthsCount
       };
     });
 
@@ -4762,10 +4783,26 @@ app.post('/api/penalties/payment', (req, res) => {
     const targetIdStr = athleteId ? String(athleteId) : null;
     const targetNameNorm = rawName ? rawName.trim().toLowerCase() : null;
 
+    // Tra cứu alias qua name_mapping nếu có để đảm bảo resolve đúng canonical athlete ID
+    let aliasAthleteId = null;
+    let aliasFullNameNorm = null;
+    try {
+      if (fs.existsSync(NAME_MAPPING_FILE)) {
+        const nm = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8'));
+        if (rawName && nm[rawName]) {
+          aliasAthleteId = nm[rawName].athleteId ? String(nm[rawName].athleteId) : null;
+          aliasFullNameNorm = nm[rawName].fullName ? nm[rawName].fullName.trim().toLowerCase() : null;
+        }
+      }
+    } catch (e) { }
+
     const member = (data.members || []).find(m => {
-      if (targetIdStr && m.athleteId && String(m.athleteId) === targetIdStr) return true;
+      const mIdStr = m.athleteId ? String(m.athleteId) : null;
+      if (targetIdStr && mIdStr && mIdStr === targetIdStr) return true;
+      if (aliasAthleteId && mIdStr && mIdStr === aliasAthleteId) return true;
       if (targetNameNorm && m.rawName && m.rawName.trim().toLowerCase() === targetNameNorm) return true;
       if (targetNameNorm && m.fullName && m.fullName.trim().toLowerCase() === targetNameNorm) return true;
+      if (aliasFullNameNorm && m.fullName && m.fullName.trim().toLowerCase() === aliasFullNameNorm) return true;
       return false;
     });
 
@@ -5116,6 +5153,133 @@ app.get('/api/garmin/health', (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// 6. Kiểm tra trạng thái phiên Garmin Connect (Session Status)
+app.get('/api/garmin/session-status', (req, res) => {
+  try {
+    const athleteId = req.query.athleteId;
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('garminSync', role)) {
+      return res.status(403).json({ error: 'Tính năng Đồng bộ Garmin Connect đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
+    const status = getGarminSessionStatus(athleteId);
+    res.json({ success: true, ...status });
+  } catch (err) {
+    console.error('[API GET /api/garmin/session-status] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. Mở trình duyệt để người dùng đăng nhập Garmin Connect (1 lần duy nhất)
+app.post('/api/garmin/login', async (req, res) => {
+  try {
+    const { athleteId } = req.body || {};
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('garminSync', role)) {
+      return res.status(403).json({ error: 'Tính năng Đồng bộ Garmin Connect đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
+    const result = await loginGarminSession(athleteId);
+    res.json(result);
+  } catch (err) {
+    console.error('[API POST /api/garmin/login] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 8. Tự động cào dữ liệu sinh học từ Garmin Connect ngầm qua Puppeteer
+app.post('/api/garmin/scrape', async (req, res) => {
+  try {
+    const { athleteId, date } = req.body || {};
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('garminSync', role)) {
+      return res.status(403).json({ error: 'Tính năng Đồng bộ Garmin Connect đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
+    const result = await scrapeGarminBiometrics(athleteId, date);
+    res.json(result);
+  } catch (err) {
+    console.error('[API POST /api/garmin/scrape] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 9. Ngắt kết nối / Đăng xuất tài khoản Garmin Connect
+app.post('/api/garmin/disconnect', (req, res) => {
+  try {
+    const { athleteId } = req.body || {};
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('garminSync', role)) {
+      return res.status(403).json({ error: 'Tính năng Đồng bộ Garmin Connect đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
+    const success = disconnectGarminSession(athleteId);
+    res.json({ success, message: 'Đã ngắt kết nối tài khoản Garmin Connect thành công.' });
+  } catch (err) {
+    console.error('[API POST /api/garmin/disconnect] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 10. Phân tích và Import tệp dữ liệu Garmin (JSON / CSV)
+app.post('/api/garmin/import-file', (req, res) => {
+  try {
+    const { athleteId, fileContent, fileName } = req.body || {};
+    if (!athleteId) {
+      return res.status(400).json({ error: 'Athlete ID is mandatory (Rule #6)' });
+    }
+    if (!fileContent) {
+      return res.status(400).json({ error: 'Nội dung tệp rỗng / Empty file content' });
+    }
+    const requesterId = (req.headers['x-athlete-id'] || athleteId).toString();
+    const role = getAthleteRole(requesterId);
+    if (!isFeatureAccessible('garminSync', role)) {
+      return res.status(403).json({ error: 'Tính năng Đồng bộ Garmin Connect đã bị vô hiệu hóa hoặc không khả dụng cho tài khoản của bạn.' });
+    }
+
+    const entries = parseGarminFile(fileContent);
+    if (!entries || entries.length === 0) {
+      return res.status(400).json({ 
+        error: 'Không tìm thấy dữ liệu sinh trắc học hợp lệ trong tệp. Vui lòng kiểm tra lại định dạng JSON/CSV từ Garmin Connect.' 
+      });
+    }
+
+    let savedHealth;
+    if (entries.length === 1) {
+      savedHealth = saveGarminHealth(athleteId, entries[0]);
+    } else {
+      savedHealth = saveGarminHealthBatch(athleteId, entries);
+    }
+
+    res.json({
+      success: true,
+      count: entries.length,
+      health: savedHealth,
+      entries
+    });
+  } catch (err) {
+    console.error('[API POST /api/garmin/import-file] Lỗi:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // ==========================================
 // SERVE STATIC FILES (FOR DEPLOYMENT)

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { getAthleteAvatar } from '../utils/avatar';
+import { roundUpPenaltyK } from '../utils/penaltyUtils';
 import ChallengeTable from './ChallengeTable';
 import { Search, Star, Trophy, ChevronDown, ChevronUp, Calendar, Clock, Award, RotateCw } from 'lucide-react';
 
@@ -20,6 +21,7 @@ export default function MobileLeaderboard({
   isAdmin = false,
   allowEditOthers = false,
   lockTargetsAfterDate = 0,
+  showDayAndTimeCols = false,
   onYearChange,
   isForcedLandscape = false,
   onToggleForcedLandscape
@@ -161,7 +163,7 @@ export default function MobileLeaderboard({
       if (hasPenalty && target > 0 && row.totalDistance < target) {
         const remainingKm = Math.max(0, target - row.totalDistance);
         const rawK = 200 * (remainingKm / target);
-        const pAmount = Math.min(200, Math.ceil(rawK / 10) * 10);
+        const pAmount = roundUpPenaltyK(rawK, 200);
         totalPenaltyDue += pAmount * 1000;
       }
     });
@@ -192,7 +194,7 @@ export default function MobileLeaderboard({
           penaltyAmount = 0;
         } else {
           const rawK = 200 * (remainingKm / target);
-          penaltyAmount = Math.min(200, Math.ceil(rawK / 10) * 10);
+          penaltyAmount = roundUpPenaltyK(rawK, 200);
         }
       }
 
@@ -346,6 +348,7 @@ export default function MobileLeaderboard({
               isAdmin={isAdmin}
               allowEditOthers={allowEditOthers}
               lockTargetsAfterDate={lockTargetsAfterDate}
+              showDayAndTimeCols={showDayAndTimeCols}
               nameMapping={nameMapping}
               onMonthChange={setMonth}
               onYearChange={onYearChange}

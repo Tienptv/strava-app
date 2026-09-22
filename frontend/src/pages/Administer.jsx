@@ -49,6 +49,7 @@ import {
 } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { processChallengeData } from '../utils/challengeStats';
+import { roundUpPenaltyK } from '../utils/penaltyUtils';
 import { loadChallengeData } from '../utils/challengeDataLoader';
 import { APP_VERSION } from '../config/version';
 import SmartReminderTool from '../components/SmartReminderTool';
@@ -251,6 +252,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   const [savingCashFlow, setSavingCashFlow] = useState(false);
   const [allTimeSort, setAllTimeSort] = useState('rank'); // 'rank' | 'km' | 'name'
   const [allTimeSearch, setAllTimeSearch] = useState('');
+  const [showArrearsModal, setShowArrearsModal] = useState(false);
 
   // ==========================================
   // STATE: 6. SYSTEM SCRIPTS
@@ -539,15 +541,21 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   };
 
   // Admin toggle payment status for a runner in a month
-  const handleTogglePayment = async (athleteId, displayName, currentStatus, currentNote = '') => {
-    const monthStr = `${reportYear}-${String(reportMonth).padStart(2, '0')}`;
+  const handleTogglePayment = async (athleteId, displayName, currentStatus, currentNote = '', customMonth = null) => {
+    const monthStr = customMonth || `${reportYear}-${String(reportMonth).padStart(2, '0')}`;
     const nextStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
+
+    let displayMonthText = `${reportMonth}/${reportYear}`;
+    if (customMonth) {
+      const parts = customMonth.split('-');
+      if (parts.length === 2) displayMonthText = `${Number(parts[1])}/${parts[0]}`;
+    }
 
     const result = await Swal.fire({
       title: nextStatus === 'paid' ? (lang === 'en' ? 'Confirm Payment?' : 'Xác nhận Đã Nộp Tiền?') : (lang === 'en' ? 'Revert to Unpaid?' : 'Chuyển về Chưa Nộp?'),
       text: lang === 'en' 
-        ? `Mark penalty payment for ${displayName} (Month ${reportMonth}/${reportYear}) as ${nextStatus.toUpperCase()}?` 
-        : `Xác nhận thành viên ${displayName} (Tháng ${reportMonth}/${reportYear}) ${nextStatus === 'paid' ? 'đã nộp đủ tiền phạt vào quỹ' : 'chưa nộp phạt'}?`,
+        ? `Mark penalty payment for ${displayName} (Month ${displayMonthText}) as ${nextStatus.toUpperCase()}?` 
+        : `Xác nhận thành viên ${displayName} (Tháng ${displayMonthText}) ${nextStatus === 'paid' ? 'đã nộp đủ tiền phạt vào quỹ' : 'chưa nộp phạt'}?`,
       input: 'text',
       inputLabel: lang === 'en' ? 'Payment Note / Receipt (Optional)' : 'Ghi chú nộp tiền / Số chứng từ (Tùy chọn)',
       inputValue: currentNote || '',
@@ -777,25 +785,48 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           penaltyAmountK = 0;
         } else {
           const rawK = (diffKm / targetKm) * 200;
-          penaltyAmountK = Math.min(200, Math.ceil(rawK / 10) * 10);
+          penaltyAmountK = roundUpPenaltyK(rawK, 200);
         }
       }
       const penaltyAmountVnd = penaltyAmountK !== null ? penaltyAmountK * 1000 : 0;
       
+      const rowAthleteId = row.athleteId || row.member?.id || row.member?.athleteId || row.id || '';
       const displayName = row.member?.name || (row.member ? `${row.member.firstname || ''} ${row.member.lastname || ''}`.trim() : (row.name || 'Runner'));
       const avatarUrl = row.member?.profile_medium || row.member?.profile || row.member?.avatar || row.avatar || '';
 
       const matchedTreasury = (treasuryLedger || []).find(m => 
-        (m.athleteId && row.athleteId && String(m.athleteId) === String(row.athleteId)) ||
-        (m.rawName && row.name && m.rawName.toLowerCase() === row.name.toLowerCase()) ||
+        (m.athleteId && rowAthleteId && String(m.athleteId) === String(rowAthleteId)) ||
+        (m.rawName && (row.name || displayName) && m.rawName.toLowerCase() === (row.name || displayName).toLowerCase()) ||
         (m.fullName && displayName && m.fullName.toLowerCase() === displayName.toLowerCase())
       );
       const paymentInfo = matchedTreasury?.monthlyPaymentStatus && matchedTreasury.monthlyPaymentStatus[monthStr]
         ? matchedTreasury.monthlyPaymentStatus[monthStr]
         : { status: matchedTreasury?.currentMonthPaymentStatus || 'unpaid', paidAt: null, note: '' };
 
+      // Tính tổng tiền phạt chưa thanh toán tích lũy All-Time từ 2022 đến nay
+      let allTimeUnpaidVnd = 0;
+      if (matchedTreasury?.monthlyPenaltiesVND) {
+        Object.entries(matchedTreasury.monthlyPenaltiesVND).forEach(([mo, fee]) => {
+          if (mo === monthStr) return; // Tháng đang xem tính riêng theo trạng thái live bên dưới
+          if (fee > 0) {
+            const isPaid = matchedTreasury.monthlyPaymentStatus?.[mo]?.status === 'paid';
+            if (!isPaid) {
+              allTimeUnpaidVnd += fee;
+            }
+          }
+        });
+      }
+      // Khoản phạt của tháng đang xem (phản ứng trực tiếp với thay đổi target / payment status trên UI)
+      const currentMonthPenalty = (hasPenalty && penaltyAmountVnd > 0) 
+        ? penaltyAmountVnd 
+        : (matchedTreasury?.monthlyPenaltiesVND?.[monthStr] || 0);
+      if (currentMonthPenalty > 0 && paymentInfo.status !== 'paid') {
+        allTimeUnpaidVnd += currentMonthPenalty;
+      }
+
       return {
         ...row,
+        athleteId: rowAthleteId,
         displayName,
         avatarUrl,
         index: idx + 1,
@@ -807,6 +838,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
         isReached,
         penaltyAmountK,
         penaltyAmountVnd,
+        allTimeUnpaidVnd,
         paymentStatus: paymentInfo.status || 'unpaid',
         paidAt: paymentInfo.paidAt || null,
         paymentNote: paymentInfo.note || '',
@@ -933,6 +965,47 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
     const list = [...(cashFlowData?.cashFlowLedger || [])];
     return list.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   }, [cashFlowData]);
+
+  // Danh sách các khoản phạt chưa nộp toàn CLB từ 2022 đến nay
+  const arrearsItems = React.useMemo(() => {
+    const list = [];
+    (treasuryLedger || []).forEach(m => {
+      const pVnd = m.monthlyPenaltiesVND || {};
+      const pStatus = m.monthlyPaymentStatus || {};
+      const athId = m.athleteId ? String(m.athleteId) : '';
+      const displayName = m.fullName || m.rawName || 'Runner';
+      const avatarUrl = m.avatar || m.profile_medium || m.profile || '';
+
+      Object.entries(pVnd).forEach(([mo, fee]) => {
+        if (fee > 0) {
+          const statusObj = pStatus[mo];
+          const isPaid = statusObj?.status === 'paid';
+          if (!isPaid) {
+            list.push({
+              athleteId: athId,
+              displayName,
+              rawName: m.rawName,
+              fullName: m.fullName,
+              avatarUrl,
+              month: mo,
+              fee,
+              note: statusObj?.note || ''
+            });
+          }
+        }
+      });
+    });
+    list.sort((a, b) => b.month.localeCompare(a.month) || b.fee - a.fee);
+    return list;
+  }, [treasuryLedger]);
+
+  const totalArrearsAmount = React.useMemo(() => {
+    return arrearsItems.reduce((sum, it) => sum + (it.fee || 0), 0);
+  }, [arrearsItems]);
+
+  const uniqueArrearsAthletesCount = React.useMemo(() => {
+    return new Set(arrearsItems.map(it => it.athleteId || it.displayName)).size;
+  }, [arrearsItems]);
 
   // Initial loads
   useEffect(() => {
@@ -1870,6 +1943,32 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                   </label>
                   <p style={{ margin: '6px 0 0 28px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                     {t('allowEditAthletesDesc')}
+                  </p>
+                </div>
+
+                <div style={{ 
+                  background: 'rgba(0, 163, 166, 0.05)', 
+                  padding: '14px', 
+                  borderRadius: '10px', 
+                  border: '1px dashed var(--accent)',
+                  marginTop: '10px'
+                }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 600, color: 'var(--primary-navy)', fontSize: '0.9rem' }}>
+                    <input 
+                      type="checkbox" 
+                      id="showDayAndTimeCols" 
+                      checked={!!config.showDayAndTimeCols}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setConfig({ ...config, showDayAndTimeCols: checked });
+                        window.dispatchEvent(new CustomEvent('configChanged', { detail: { showDayAndTimeCols: checked } }));
+                      }}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--accent)' }}
+                    />
+                    {t('showDayAndTimeColsLabel')}
+                  </label>
+                  <p style={{ margin: '6px 0 0 28px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    {t('showDayAndTimeColsDesc')}
                   </p>
                 </div>
 
@@ -3268,6 +3367,59 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                 </div>
               </div>
 
+              {/* 2.5 ARREARS ALERT BANNER (SỔ NỢ PHẠT TOÀN CLB) */}
+              {arrearsItems.length > 0 ? (
+                <div className="arrears-alert-banner">
+                  <div className="arrears-alert-left">
+                    <div className="arrears-alert-icon-box">
+                      <AlertTriangle size={20} />
+                    </div>
+                    <div>
+                      <div className="arrears-alert-title">
+                        {t('arrearsBannerTitle').replace('{count}', arrearsItems.length)} ({uniqueArrearsAthletesCount} {lang === 'en' ? 'runners' : 'thành viên'})
+                      </div>
+                      <div className="arrears-alert-sub">
+                        {t('arrearsBannerTotal')}: <strong>{totalArrearsAmount.toLocaleString('vi-VN')} VNĐ</strong> ({(totalArrearsAmount / 1000)}k)
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowArrearsModal(true)}
+                    className="arrears-open-btn"
+                  >
+                    <FileText size={16} />
+                    <span>{t('arrearsOpenModalBtn')}</span>
+                    <span>↗</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="arrears-alert-banner" style={{ background: '#f0fdf4', borderColor: '#bbf7d0' }}>
+                  <div className="arrears-alert-left">
+                    <div className="arrears-alert-icon-box" style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' }}>
+                      <CheckCircle2 size={20} />
+                    </div>
+                    <div>
+                      <div className="arrears-alert-title" style={{ color: '#166534' }}>
+                        {t('arrearsAllSettled')}
+                      </div>
+                      <div className="arrears-alert-sub" style={{ color: '#15803d' }}>
+                        {lang === 'en' ? 'No outstanding penalties recorded from 2022 to present.' : 'Không có khoản nợ phạt nào tồn đọng từ 2022 đến nay.'}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowArrearsModal(true)}
+                    className="btn btn--secondary btn-sm"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '8px', fontSize: '0.8rem' }}
+                  >
+                    <FileText size={15} />
+                    <span>{lang === 'en' ? 'View Ledger' : 'Xem Sổ Nợ'}</span>
+                  </button>
+                </div>
+              )}
+
               {/* 3. Detailed Table with Payment Toggle */}
               <div className="card" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg-card)', overflow: 'hidden' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
@@ -3526,6 +3678,138 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                 )}
               </div>
             </>
+          )}
+
+          {/* MODAL SỔ NỢ PHẠT TOÀN CLB (OUTSTANDING ARREARS MODAL) */}
+          {showArrearsModal && (
+            <div className="arrears-modal-overlay" onClick={() => setShowArrearsModal(false)}>
+              <div className="arrears-modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="arrears-modal-header">
+                  <div>
+                    <h3>
+                      <FileText size={20} />
+                      <span>{t('arrearsModalTitle')}</span>
+                    </h3>
+                    <p>{t('arrearsModalSub')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="arrears-modal-close-btn"
+                    onClick={() => setShowArrearsModal(false)}
+                    title={t('close')}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="arrears-modal-kpi-bar">
+                  <div className="arrears-kpi-item">
+                    <div className="arrears-kpi-label">{t('arrearsMembersCountKpi')}</div>
+                    <div className="arrears-kpi-value">{uniqueArrearsAthletesCount} <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{lang === 'en' ? 'runners' : 'người'}</span></div>
+                  </div>
+                  <div className="arrears-kpi-item">
+                    <div className="arrears-kpi-label">{t('arrearsMonthsCountKpi')}</div>
+                    <div className="arrears-kpi-value">{arrearsItems.length} <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{lang === 'en' ? 'items' : 'tháng'}</span></div>
+                  </div>
+                  <div className="arrears-kpi-item" style={{ borderLeft: '3px solid #ea580c' }}>
+                    <div className="arrears-kpi-label" style={{ color: '#c2410c' }}>{t('arrearsTotalDebtKpi')}</div>
+                    <div className="arrears-kpi-value" style={{ color: '#c2410c' }}>
+                      {totalArrearsAmount.toLocaleString('vi-VN')} <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>VNĐ ({(totalArrearsAmount / 1000)}k)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="arrears-modal-body">
+                  {arrearsItems.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#059669' }}>
+                      <CheckCircle2 size={48} style={{ margin: '0 auto 12px auto', color: '#10b981' }} />
+                      <h4 style={{ margin: '0 0 6px 0', fontSize: '1.1rem', fontWeight: 700 }}>{t('arrearsAllSettled')}</h4>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+                        {lang === 'en' ? 'All historical penalties have been completely settled.' : 'Toàn bộ tiền phạt lịch sử đã được nộp đủ 100% vào quỹ CLB.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table className="arrears-table">
+                        <thead>
+                          <tr>
+                            <th style={{ width: '45px', textAlign: 'center' }}>#</th>
+                            <th>{t('arrearsRunnerCol')}</th>
+                            <th style={{ width: '130px', textAlign: 'center' }}>{t('arrearsMonthCol')}</th>
+                            <th style={{ width: '140px', textAlign: 'right' }}>{t('arrearsAmountCol')}</th>
+                            <th>{t('arrearsNoteCol')}</th>
+                            <th style={{ width: '130px', textAlign: 'center' }}>{lang === 'en' ? 'Action' : 'Thao Tác'}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {arrearsItems.map((item, idx) => {
+                            const [y, m] = item.month.split('-');
+                            const monthDisplay = lang === 'en' ? `Month ${Number(m)}/${y}` : `Tháng ${Number(m)}/${y}`;
+                            return (
+                              <tr key={`${item.athleteId || item.rawName}_${item.month}`}>
+                                <td style={{ textAlign: 'center', color: '#64748b', fontWeight: 600 }}>{idx + 1}</td>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {item.avatarUrl ? (
+                                      <img src={item.avatarUrl} alt={item.displayName} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                                    ) : (
+                                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '11px' }}>
+                                        {(item.displayName || '?').charAt(0)}
+                                      </div>
+                                    )}
+                                    <div>
+                                      <span style={{ fontWeight: 700, color: 'var(--primary-navy)' }}>{item.displayName}</span>
+                                      {item.athleteId && (
+                                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>ID: {item.athleteId}</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <span style={{ padding: '3px 8px', borderRadius: '6px', background: '#eff6ff', color: '#1d4ed8', fontWeight: 700, fontSize: '0.8rem' }}>
+                                    📅 {monthDisplay}
+                                  </span>
+                                </td>
+                                <td style={{ textAlign: 'right' }}>
+                                  <span className="penalty-due-badge is-owing" style={{ fontWeight: 800, padding: '4px 10px', fontSize: '0.85rem' }}>
+                                    {(item.fee / 1000)}k ({item.fee.toLocaleString('vi-VN')} đ)
+                                  </span>
+                                </td>
+                                <td style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                                  {item.note || (lang === 'en' ? 'Unpaid penalty' : 'Chưa nộp tiền phạt')}
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  <button
+                                    type="button"
+                                    className="arrears-pay-action-btn"
+                                    onClick={() => handleTogglePayment(item.athleteId, item.displayName, 'unpaid', item.note, item.month)}
+                                    title={lang === 'en' ? `Click to mark ${item.displayName}'s ${monthDisplay} penalty as paid` : `Bấm để xác nhận ${item.displayName} đã nộp phạt ${monthDisplay}`}
+                                  >
+                                    <CheckCircle2 size={14} />
+                                    <span>{t('arrearsQuickPayBtn')}</span>
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ padding: '14px 24px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                  <button
+                    type="button"
+                    className="btn btn--secondary btn-sm"
+                    onClick={() => setShowArrearsModal(false)}
+                    style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: 600 }}
+                  >
+                    {t('close')}
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* ========================================================================= */}
