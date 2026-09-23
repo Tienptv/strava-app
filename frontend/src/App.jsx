@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ClubView from './pages/ClubView';
 import Administer from './pages/Administer';
+import NextGenDashboard from './pages/NextGenDashboard';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import { useLang } from './i18n/LangContext';
@@ -319,6 +320,24 @@ function App() {
                   setChallengeYear={setChallengeYear}
                   userAccessConfig={userAccessConfig}
                 />
+              }
+            />
+            <Route
+              path="/nextgen"
+              element={
+                athlete
+                  ? <NextGenDashboard 
+                      athlete={athlete} 
+                      isAdmin={isAdmin}
+                      isSuperAdmin={isSuperAdmin}
+                      apiFetch={apiFetch} 
+                      challengeMonth={challengeMonth}
+                      challengeYear={challengeYear}
+                      setChallengeMonth={setChallengeMonth}
+                      setChallengeYear={setChallengeYear}
+                      userAccessConfig={userAccessConfig}
+                    />
+                  : <Navigate to="/" replace />
               }
             />
             <Route

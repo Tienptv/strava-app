@@ -117,3 +117,45 @@ export function formatPenaltyVnd(penaltyVnd) {
   if (isNaN(num) || num === 0) return '0 đ';
   return `${num.toLocaleString('vi-VN')} đ`;
 }
+
+/**
+ * Tạo URL mã QR thanh toán VietQR Napas 247 động
+ * 
+ * @param {Object} params
+ * @param {string} [params.bankId='MBBank'] - Mã định danh ngân hàng (MBBank, VCB, TCB, ACB, ...)
+ * @param {string} [params.accountNo='0909090909'] - Số tài khoản thụ hưởng
+ * @param {string} [params.accountName='HASKONING RUNNING CLUB'] - Tên chủ tài khoản
+ * @param {number} [params.amount=0] - Số tiền thanh toán (VNĐ)
+ * @param {string} [params.addInfo=''] - Nội dung chuyển khoản định danh
+ * @param {string} [params.template='compact2'] - Kiểu mẫu VietQR (compact2, compact, qr_only)
+ * @returns {string} - Link ảnh VietQR trực tiếp
+ */
+export function generateVietQRUrl({
+  bankId = 'MBBank',
+  accountNo = '0333868686',
+  accountName = 'ROYAL HASKONINGDHV RUNNING CLUB',
+  amount = 0,
+  addInfo = '',
+  template = 'compact2'
+} = {}) {
+  const cleanBank = (bankId || 'MBBank').trim();
+  const cleanAcc = (accountNo || '0333868686').trim().replace(/\s+/g, '');
+  const cleanTemplate = (template || 'compact2').trim();
+  const cleanAmount = Math.max(0, Math.round(Number(amount) || 0));
+
+  let url = `https://img.vietqr.io/image/${cleanBank}-${cleanAcc}-${cleanTemplate}.png?`;
+  const params = [];
+
+  if (cleanAmount > 0) {
+    params.push(`amount=${cleanAmount}`);
+  }
+  if (addInfo) {
+    params.push(`addInfo=${encodeURIComponent(addInfo)}`);
+  }
+  if (accountName) {
+    params.push(`accountName=${encodeURIComponent(accountName)}`);
+  }
+
+  return url + params.join('&');
+}
+

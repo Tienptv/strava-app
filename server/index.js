@@ -4774,13 +4774,17 @@ app.get('/api/penalties/ledger', (req, res) => {
 // 3. Admin cập nhật trạng thái nộp phạt của runner (Paid/Unpaid/Waived)
 app.post('/api/penalties/payment', (req, res) => {
   try {
-    const { athleteId, rawName, month, status, paidAt, note, actor } = req.body;
+    const { athleteId, rawName, month, status, paidAt, note, actor, amountVND, lang } = req.body;
     if (!month) {
       return res.status(400).json({ error: 'Thiếu thông tin tháng (month)' });
     }
 
     const data = loadPenaltiesData();
-    const targetIdStr = athleteId ? String(athleteId) : null;
+    if (!data.members) data.members = [];
+    if (!data.cashFlowLedger) data.cashFlowLedger = [];
+    if (!data.metadata) data.metadata = {};
+
+    const targetIdStr = athleteId ? String(athleteId).trim() : null;
     const targetNameNorm = rawName ? rawName.trim().toLowerCase() : null;
 
     // Tra cứu alias qua name_mapping nếu có để đảm bảo resolve đúng canonical athlete ID
@@ -4790,58 +4794,202 @@ app.post('/api/penalties/payment', (req, res) => {
       if (fs.existsSync(NAME_MAPPING_FILE)) {
         const nm = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8'));
         if (rawName && nm[rawName]) {
-          aliasAthleteId = nm[rawName].athleteId ? String(nm[rawName].athleteId) : null;
+          aliasAthleteId = nm[rawName].athleteId ? String(nm[rawName].athleteId).trim() : null;
           aliasFullNameNorm = nm[rawName].fullName ? nm[rawName].fullName.trim().toLowerCase() : null;
         }
       }
     } catch (e) { }
 
-    const member = (data.members || []).find(m => {
-      const mIdStr = m.athleteId ? String(m.athleteId) : null;
-      if (targetIdStr && mIdStr && mIdStr === targetIdStr) return true;
-      if (aliasAthleteId && mIdStr && mIdStr === aliasAthleteId) return true;
-      if (targetNameNorm && m.rawName && m.rawName.trim().toLowerCase() === targetNameNorm) return true;
-      if (targetNameNorm && m.fullName && m.fullName.trim().toLowerCase() === targetNameNorm) return true;
-      if (aliasFullNameNorm && m.fullName && m.fullName.trim().toLowerCase() === aliasFullNameNorm) return true;
+    let member = (data.members || []).find(m => {
+      const mIdStr = m.athleteId ? String(m.athleteId).trim() : null;
+      if (targetIdStr && mIdStr) {
+        if (mIdStr === targetIdStr) return true;
+        if (aliasAthleteId && mIdStr === aliasAthleteId) return true;
+        return false;
+      }
+      if (!targetIdStr) {
+        if (targetNameNorm && m.rawName && m.rawName.trim().toLowerCase() === targetNameNorm) return true;
+        if (targetNameNorm && m.fullName && m.fullName.trim().toLowerCase() === targetNameNorm) return true;
+        if (aliasFullNameNorm && m.fullName && m.fullName.trim().toLowerCase() === aliasFullNameNorm) return true;
+      }
       return false;
     });
 
+    // Nếu runner chưa có trong danh sách gốc (ví dụ thành viên mới sau Money.csv), tự động tạo bản ghi
     if (!member) {
-      return res.status(404).json({ error: 'Không tìm thấy thành viên tương ứng' });
+      member = {
+        stt: (data.members.length || 0) + 1,
+        rawName: rawName || 'Runner',
+        athleteId: targetIdStr || aliasAthleteId || '',
+        fullName: rawName || 'Runner',
+        role: 'Member',
+        note: '',
+        financialSummary: {
+          totalPenaltyVND: 0,
+          penaltyRank: (data.members.length || 0) + 1,
+          allTimeKmMoneyFile: 0,
+          kmRankMoneyFile: (data.members.length || 0) + 1,
+          targetCompletedMonths: 0,
+          paymentStatus: status || 'unpaid',
+          allTimeKmChallenge: 0,
+          allTimeKm: 0,
+          kmRankChallenge: (data.members.length || 0) + 1,
+          kmRank: (data.members.length || 0) + 1
+        },
+        monthlyPenaltiesVND: {},
+        monthlyKm: {},
+        monthlyPaymentStatus: {}
+      };
+      data.members.push(member);
     }
 
-    if (!member.monthlyPaymentStatus) {
-      member.monthlyPaymentStatus = {};
-    }
+    if (!member.monthlyPenaltiesVND) member.monthlyPenaltiesVND = {};
+    if (!member.monthlyPaymentStatus) member.monthlyPaymentStatus = {};
 
     const newStatus = status || 'paid';
-    const finalPaidAt = paidAt || (newStatus === 'paid' ? new Date().toISOString() : null);
+    const nowIso = new Date().toISOString();
+    const finalPaidAt = paidAt || (newStatus === 'paid' ? nowIso : null);
+
+    // Xác định số tiền phạt của tháng
+    let resolvedAmount = 0;
+    if (amountVND !== undefined && amountVND !== null && !isNaN(Number(amountVND))) {
+      resolvedAmount = Math.max(0, Math.round(Number(amountVND)));
+    } else if (member.monthlyPenaltiesVND[month] !== undefined) {
+      resolvedAmount = Math.max(0, Math.round(Number(member.monthlyPenaltiesVND[month])));
+    }
+
+    if (resolvedAmount > 0 || newStatus === 'paid') {
+      member.monthlyPenaltiesVND[month] = resolvedAmount;
+    }
 
     member.monthlyPaymentStatus[month] = {
       status: newStatus,
       paidAt: finalPaidAt,
+      amountVND: resolvedAmount,
       note: note || '',
       updatedBy: actor || 'Admin',
-      updatedAt: new Date().toISOString()
+      updatedAt: nowIso
     };
 
-    // Đồng bộ vào financialSummary
-    if (!member.financialSummary) member.financialSummary = {};
-    member.financialSummary.paymentStatus = newStatus;
+    // Chuẩn bị thông tin hiển thị tháng (ví dụ "8/2026")
+    let displayMonthText = month;
+    const parts = month.split('-');
+    if (parts.length === 2) {
+      displayMonthText = `${Number(parts[1])}/${parts[0]}`;
+    }
+    const runnerName = member.fullName || member.rawName || 'Thành viên';
+    const runnerAthId = member.athleteId ? String(member.athleteId).trim() : (targetIdStr || '');
+
+    // 1. ĐỒNG BỘ SỔ THU CHI QUỸ CLB (CASH FLOW LEDGER)
+    const matchTx = (tx) => {
+      if (tx.category === 'penalty_payment' || (tx.id && String(tx.id).startsWith(`penalty_${runnerAthId}_${month}`))) {
+        if (runnerAthId && tx.athleteId && String(tx.athleteId).trim() === runnerAthId && tx.month === month) return true;
+        if (!tx.athleteId && tx.month === month && tx.description && tx.description.includes(runnerName)) return true;
+      }
+      return false;
+    };
+
+    const existingTxIdx = data.cashFlowLedger.findIndex(matchTx);
+
+    if (newStatus === 'paid') {
+      if (resolvedAmount > 0) {
+        const txDate = finalPaidAt ? finalPaidAt.split('T')[0] : nowIso.split('T')[0];
+        const txDesc = (lang === 'en')
+          ? `${runnerName} penalty payment for month ${displayMonthText}`
+          : `${runnerName} nộp phạt tháng ${displayMonthText}`;
+
+        if (existingTxIdx !== -1) {
+          const oldAmount = Math.abs(Number(data.cashFlowLedger[existingTxIdx].amountVND) || 0);
+          const diff = resolvedAmount - oldAmount;
+          data.cashFlowLedger[existingTxIdx].amountVND = resolvedAmount;
+          data.cashFlowLedger[existingTxIdx].date = txDate;
+          data.cashFlowLedger[existingTxIdx].description = txDesc;
+          data.cashFlowLedger[existingTxIdx].note = note ? note.trim() : (data.cashFlowLedger[existingTxIdx].note || '');
+          data.cashFlowLedger[existingTxIdx].updatedAt = nowIso;
+          data.metadata.currentClubFundBalance = (data.metadata.currentClubFundBalance || 0) + diff;
+        } else {
+          const newTx = {
+            id: `penalty_${runnerAthId || 'mem'}_${month}_${Date.now()}`,
+            date: txDate,
+            description: txDesc,
+            amountVND: resolvedAmount,
+            type: 'income',
+            category: 'penalty_payment',
+            athleteId: runnerAthId,
+            month: month,
+            note: note ? note.trim() : '',
+            createdBy: actor || 'Admin',
+            createdAt: nowIso
+          };
+          data.cashFlowLedger.unshift(newTx);
+          data.metadata.currentClubFundBalance = (data.metadata.currentClubFundBalance || 0) + resolvedAmount;
+        }
+      }
+    } else {
+      // Khi chuyển về unpaid: Tự động gỡ bỏ khoản thu nộp phạt tương ứng khỏi Sổ quỹ và trừ lại số dư quỹ
+      if (existingTxIdx !== -1) {
+        const removedTx = data.cashFlowLedger.splice(existingTxIdx, 1)[0];
+        const removedAmount = Math.abs(Number(removedTx.amountVND) || 0);
+        data.metadata.currentClubFundBalance = (data.metadata.currentClubFundBalance || 0) - removedAmount;
+      }
+    }
+
+    // 2. ĐỒNG BỘ TỔNG TIỀN PHẠT ĐÃ NỘP (TOTAL PENALTIES PAID) & BẢNG XẾP HẠNG ALL-TIME
+    data.members.forEach(m => {
+      let paidTotal = 0;
+      if (m.monthlyPenaltiesVND) {
+        Object.entries(m.monthlyPenaltiesVND).forEach(([mo, fee]) => {
+          const val = Number(fee) || 0;
+          if (val > 0) {
+            // Dữ liệu lịch sử 49 tháng từ Money.csv (<= 2026-06) là gốc tài chính cố định
+            if (mo <= '2026-06') {
+              paidTotal += val;
+            } else {
+              // Các tháng mới phát sinh (> 2026-06): chỉ cộng dồn khi trạng thái là 'paid'
+              const pStatus = m.monthlyPaymentStatus?.[mo]?.status;
+              if (pStatus === 'paid') {
+                paidTotal += val;
+              }
+            }
+          }
+        });
+      }
+      if (!m.financialSummary) m.financialSummary = {};
+      m.financialSummary.totalPenaltyVND = paidTotal;
+      m.financialSummary.paymentStatus = (m.monthlyPaymentStatus && m.monthlyPaymentStatus[month])
+        ? m.monthlyPaymentStatus[month].status
+        : (m.financialSummary.paymentStatus || 'unpaid');
+    });
+
+    // Cập nhật tổng quỹ phạt đã thu toàn CLB (Lũy kế All-Time)
+    data.metadata.totalPenaltyFundCollected = data.members.reduce((sum, m) => sum + (m.financialSummary?.totalPenaltyVND || 0), 0);
+
+    // Tính lại thứ hạng phạt (Penalty Rank)
+    const sortedMembers = [...data.members].sort((a, b) => 
+      (b.financialSummary?.totalPenaltyVND || 0) - (a.financialSummary?.totalPenaltyVND || 0)
+    );
+    sortedMembers.forEach((m, idx) => {
+      if (!m.financialSummary) m.financialSummary = {};
+      m.financialSummary.penaltyRank = idx + 1;
+    });
 
     savePenaltiesData(data);
 
     addAuditLog(
       'Cập nhật trạng thái nộp phạt',
       actor || 'Admin',
-      `${member.fullName || member.rawName} - Tháng ${month}: ${newStatus === 'paid' ? 'Đã nộp' : 'Chưa nộp'}${note ? ` (${note})` : ''}`
+      `${member.fullName || member.rawName} - Tháng ${month}: ${newStatus === 'paid' ? `Đã nộp (${resolvedAmount.toLocaleString('vi-VN')} đ)` : 'Chưa nộp'}${note ? ` (${note})` : ''}`
     );
 
     res.json({
       success: true,
       member,
       queryMonth: month,
-      updatedStatus: member.monthlyPaymentStatus[month]
+      updatedStatus: member.monthlyPaymentStatus[month],
+      totalPenaltyVND: member.financialSummary?.totalPenaltyVND || 0,
+      totalPenaltyFundCollected: data.metadata?.totalPenaltyFundCollected || 0,
+      currentClubFundBalance: data.metadata?.currentClubFundBalance || 0,
+      cashFlowLedger: data.cashFlowLedger
     });
   } catch (err) {
     console.error('Lỗi cập nhật trạng thái payment:', err);
@@ -4917,20 +5065,12 @@ app.post('/api/penalties/cashflow', (req, res) => {
 // 6. Xuất báo cáo CSV đối soát tiền phạt và thành viên
 app.get('/api/penalties/export-csv', (req, res) => {
   try {
-    const csvPath = path.join(__dirname, '../Storage/member_penalties_mapped.csv');
-    if (fs.existsSync(csvPath)) {
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', 'attachment; filename="member_penalties_mapped.csv"');
-      return res.send(fs.readFileSync(csvPath));
-    }
-
-    // Nếu chưa có file csv, tạo từ json
     const data = loadPenaltiesData();
-    let csv = '\uFEFFSTT,Họ và Tên,Strava Athlete ID,Vai Trò,Tổng Tiền Phạt (VNĐ),Xếp Hạng Phạt,Tổng KM Lịch Sử,Xếp Hạng KM\n';
-    (data.members || []).forEach(m => {
+    let csv = '\uFEFFSTT,Họ và Tên,Strava Athlete ID,Vai Trò,Tổng Tiền Phạt Đã Nộp (VNĐ),Xếp Hạng Phạt,Tổng KM Lịch Sử,Xếp Hạng KM\n';
+    (data.members || []).forEach((m, idx) => {
       const allTimeKm = m.financialSummary?.allTimeKmChallenge !== undefined ? m.financialSummary.allTimeKmChallenge : (m.financialSummary?.allTimeKm || m.financialSummary?.allTimeKmMoneyFile || 0);
       const kmRank = m.financialSummary?.kmRankChallenge || m.financialSummary?.kmRank || m.financialSummary?.kmRankMoneyFile || '';
-      csv += `"${m.stt}","${m.fullName}","${m.athleteId || ''}","${m.role}","${m.financialSummary?.totalPenaltyVND || 0}","${m.financialSummary?.penaltyRank || ''}","${allTimeKm}","${kmRank}"\n`;
+      csv += `"${m.stt || (idx + 1)}","${m.fullName || m.rawName || ''}","${m.athleteId || ''}","${m.role || 'Member'}","${m.financialSummary?.totalPenaltyVND || 0}","${m.financialSummary?.penaltyRank || ''}","${allTimeKm}","${kmRank}"\n`;
     });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="member_penalties_mapped.csv"');

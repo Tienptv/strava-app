@@ -541,7 +541,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   };
 
   // Admin toggle payment status for a runner in a month
-  const handleTogglePayment = async (athleteId, displayName, currentStatus, currentNote = '', customMonth = null) => {
+  const handleTogglePayment = async (athleteId, displayName, currentStatus, currentNote = '', customMonth = null, amountVND = null) => {
     const monthStr = customMonth || `${reportYear}-${String(reportMonth).padStart(2, '0')}`;
     const nextStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
 
@@ -551,11 +551,24 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       if (parts.length === 2) displayMonthText = `${Number(parts[1])}/${parts[0]}`;
     }
 
+    const numAmount = amountVND !== null && amountVND !== undefined ? Number(amountVND) : null;
+    const formattedAmount = numAmount && numAmount > 0 ? `${numAmount.toLocaleString('vi-VN')} đ` : '';
+
+    const confirmTitle = nextStatus === 'paid' 
+      ? (lang === 'en' ? 'Confirm Payment?' : 'Xác nhận Đã Nộp Tiền Phạt?') 
+      : (lang === 'en' ? 'Revert to Unpaid?' : 'Chuyển về Chưa Nộp?');
+
+    const confirmText = nextStatus === 'paid'
+      ? (lang === 'en'
+          ? `Confirm penalty payment ${formattedAmount ? `(${formattedAmount}) ` : ''}for ${displayName} (Month ${displayMonthText})? System will automatically sync Total Penalties Paid & record an Income entry in Club Cash Flow Ledger.`
+          : `Xác nhận thành viên ${displayName} (Tháng ${displayMonthText}) đã nộp đủ ${formattedAmount ? `${formattedAmount} ` : ''}tiền phạt? Hệ thống sẽ tự động đồng bộ vào Tổng Phạt Đã Nộp & ghi nhận khoản Thu vào Sổ Quỹ CLB.`)
+      : (lang === 'en'
+          ? `Revert penalty payment for ${displayName} (Month ${displayMonthText}) to UNPAID? Auto-recorded income entry in Cash Flow Ledger will be refunded.`
+          : `Chuyển trạng thái phạt của ${displayName} (Tháng ${displayMonthText}) về CHƯA NỘP? Khoản thu tự động trong Sổ Quỹ CLB sẽ được hoàn lại và trừ khỏi số dư quỹ.`);
+
     const result = await Swal.fire({
-      title: nextStatus === 'paid' ? (lang === 'en' ? 'Confirm Payment?' : 'Xác nhận Đã Nộp Tiền?') : (lang === 'en' ? 'Revert to Unpaid?' : 'Chuyển về Chưa Nộp?'),
-      text: lang === 'en' 
-        ? `Mark penalty payment for ${displayName} (Month ${displayMonthText}) as ${nextStatus.toUpperCase()}?` 
-        : `Xác nhận thành viên ${displayName} (Tháng ${displayMonthText}) ${nextStatus === 'paid' ? 'đã nộp đủ tiền phạt vào quỹ' : 'chưa nộp phạt'}?`,
+      title: confirmTitle,
+      text: confirmText,
       input: 'text',
       inputLabel: lang === 'en' ? 'Payment Note / Receipt (Optional)' : 'Ghi chú nộp tiền / Số chứng từ (Tùy chọn)',
       inputValue: currentNote || '',
@@ -577,8 +590,10 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             rawName: displayName,
             month: monthStr,
             status: nextStatus,
+            amountVND: numAmount,
             note: result.value || '',
-            actor: athlete?.name || (athlete?.firstname ? `${athlete.firstname} ${athlete.lastname || ''}`.trim() : 'Admin')
+            actor: athlete?.name || (athlete?.firstname ? `${athlete.firstname} ${athlete.lastname || ''}`.trim() : 'Admin'),
+            lang: lang
           })
         });
 
@@ -586,12 +601,13 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           Swal.fire({
             icon: nextStatus === 'paid' ? 'success' : 'info',
             title: nextStatus === 'paid' ? (lang === 'en' ? 'Payment Recorded!' : 'Đã Ghi Nhận Nộp Phạt!') : (lang === 'en' ? 'Updated Status' : 'Đã Cập Nhật Trạng Thái'),
-            text: `${displayName} (${monthStr}): ${nextStatus === 'paid' ? (lang === 'en' ? 'Paid' : 'Đã nộp') : (lang === 'en' ? 'Unpaid' : 'Chưa nộp')}`,
+            text: `${displayName} (${monthStr}): ${nextStatus === 'paid' ? (lang === 'en' ? 'Paid' : 'Đã nộp') : (lang === 'en' ? 'Unpaid' : 'Chưa nộp')}${formattedAmount && nextStatus === 'paid' ? ` (${formattedAmount})` : ''}`,
             timer: 2000,
             showConfirmButton: false
           });
           loadTreasuryData(reportMonth, reportYear);
           window.dispatchEvent(new CustomEvent('penaltiesUpdated'));
+          window.dispatchEvent(new CustomEvent('challengeTargetsUpdated', { detail: { refresh: true } }));
         }
       } catch (err) {
         Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', err.message, 'error');
@@ -3537,7 +3553,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                           {r.hasPenalty && r.penaltyAmountK > 0 ? (
                             <button
                               type="button"
-                              onClick={() => handleTogglePayment(r.athleteId, r.displayName, r.paymentStatus, r.paymentNote)}
+                              onClick={() => handleTogglePayment(r.athleteId, r.displayName, r.paymentStatus, r.paymentNote, null, r.penaltyAmountVnd)}
                               className={`admin-pcard-pay-btn ${r.paymentStatus === 'paid' ? 'btn-paid' : 'btn-unpaid'}`}
                             >
                               {r.paymentStatus === 'paid' ? (
@@ -3650,7 +3666,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                               {r.hasPenalty && r.penaltyAmountK > 0 ? (
                                 <button
                                   type="button"
-                                  onClick={() => handleTogglePayment(r.athleteId, r.displayName, r.paymentStatus, r.paymentNote)}
+                                  onClick={() => handleTogglePayment(r.athleteId, r.displayName, r.paymentStatus, r.paymentNote, null, r.penaltyAmountVnd)}
                                   className={`payment-status-badge ${r.paymentStatus === 'paid' ? 'paid' : 'unpaid'}`}
                                   title={r.paymentStatus === 'paid' ? `${lang === 'en' ? 'Paid on' : 'Đã nộp ngày'}: ${r.paidAt ? new Date(r.paidAt).toLocaleDateString('vi-VN') : ''} ${r.paymentNote ? `(${r.paymentNote})` : ''}` : (lang === 'en' ? 'Click to mark as paid' : 'Bấm để đánh dấu đã nộp')}
                                 >
@@ -3782,7 +3798,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                                   <button
                                     type="button"
                                     className="arrears-pay-action-btn"
-                                    onClick={() => handleTogglePayment(item.athleteId, item.displayName, 'unpaid', item.note, item.month)}
+                                    onClick={() => handleTogglePayment(item.athleteId, item.displayName, 'unpaid', item.note, item.month, item.fee)}
                                     title={lang === 'en' ? `Click to mark ${item.displayName}'s ${monthDisplay} penalty as paid` : `Bấm để xác nhận ${item.displayName} đã nộp phạt ${monthDisplay}`}
                                   >
                                     <CheckCircle2 size={14} />

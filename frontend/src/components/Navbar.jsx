@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, LogOut, Shield, Sparkles } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import NotificationBell from './NotificationBell';
 
@@ -46,6 +46,31 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin, apiFe
             <Shield size={16} /> Administrator
           </button>
         )}
+
+        {/* Nút chuyển đổi độc lập sang Next-Gen PC UI/UX Lab */}
+        <button
+          type="button"
+          className={`navbar__link navbar__link--nextgen ${location.pathname === '/nextgen' ? 'navbar__link--active' : ''}`}
+          onClick={() => navigate(location.pathname === '/nextgen' ? '/' : '/nextgen')}
+          title={location.pathname === '/nextgen' ? t('backToStableBtn') : 'Thử nghiệm giao diện độc lập Next-Gen PC Suite v2.0'}
+          style={{
+            background: location.pathname === '/nextgen' 
+              ? 'linear-gradient(135deg, rgba(0, 163, 166, 0.22) 0%, rgba(120, 190, 32, 0.18) 100%)' 
+              : 'rgba(0, 163, 166, 0.08)',
+            border: '1px solid rgba(0, 163, 166, 0.35)',
+            color: 'var(--accent)',
+            fontWeight: 700,
+            borderRadius: '10px',
+            padding: '4px 10px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        >
+          <Sparkles size={15} color="#00A3A6" />
+          <span>{location.pathname === '/nextgen' ? t('backToStableBtn') : t('nextGenNavBtn')}</span>
+        </button>
       </div>
 
       <div className="navbar__user">

@@ -16,3 +16,5 @@ Thư mục này dùng để lưu trữ toàn bộ các kế hoạch thiết kế
 | 6 | **Danh sách các thay đổi UI tạm hoãn** | [HELD_UI_CHANGES.md](./HELD_UI_CHANGES.md) | ⏸️ Tạm hoãn (Hold) | Ghi nhận các đề xuất UI tạm dừng: Căn lề phải km, tăng min-width ô ngày 34px |
 | 7 | **Kế hoạch nâng cấp AI Coach chuẩn Garmin & Sports Science** | [PLAN_NANG_CAP_AI_COACH_SPORTS_SCIENCE_GARMIN.md](./PLAN_NANG_CAP_AI_COACH_SPORTS_SCIENCE_GARMIN.md) | ✅ Đã áp dụng | Tích hợp thuật toán ACWR Training Status, Jack Daniels VDOT, Race Predictor 5K/10K/21K, Recovery Advisor |
 | 8 | **Báo cáo hoàn thành tích hợp Khoa học Thể thao vào AI Coach** | [REPORT_NANG_CAP_AI_COACH_SPORTS_SCIENCE_GARMIN_THANH_CONG.md](./REPORT_NANG_CAP_AI_COACH_SPORTS_SCIENCE_GARMIN_THANH_CONG.md) | ✅ Đã hoàn thành | Kiểm thử 22/22 PASS: ACWR Sweet Spot, VDOT 38, Race Predictions, Cadence, giao diện Widget Garmin UI |
+| 9 | **Kế hoạch chiến lược toàn diện 4 trụ cột nâng cấp nền tảng** | [PLAN_CHIEN_LUOC_NANG_CAP_4_TRU_COT_TOAN_DIEN.md](./PLAN_CHIEN_LUOC_NANG_CAP_4_TRU_COT_TOAN_DIEN.md) | 📋 Đã phê duyệt | Quy hoạch Gamification 16 Huy Hiệu, VietQR Phạt Napas 247, Push Cron, Hiệu Suất Hiếu Khí & PWA |
+

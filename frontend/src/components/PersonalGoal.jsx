@@ -489,7 +489,9 @@ export default function PersonalGoal({
             rawName: matchedMemberRecord?.rawName || matchedMemberRecord?.fullName || userMatchKey,
             month: item.monthKey,
             status: nextStatus,
-            actor: 'Admin'
+            amountVND: item.penaltyAmount || 0,
+            actor: 'Admin',
+            lang: lang
           })
         });
 
@@ -500,6 +502,7 @@ export default function PersonalGoal({
           newPaymentStatus[item.monthKey] = {
             status: nextStatus,
             paidAt: nextStatus === 'paid' ? new Date().toISOString() : null,
+            amountVND: item.penaltyAmount || 0,
             updatedBy: 'Admin',
             updatedAt: new Date().toISOString()
           };
@@ -507,6 +510,7 @@ export default function PersonalGoal({
         });
 
         window.dispatchEvent(new CustomEvent('challengeTargetsUpdated', { detail: { refresh: true } }));
+        window.dispatchEvent(new CustomEvent('penaltiesUpdated'));
 
         Swal.fire({
           title: t('updatePenaltySuccess'),

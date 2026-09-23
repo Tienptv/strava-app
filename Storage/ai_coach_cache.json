@@ -1339,5 +1339,136 @@
       }
     },
     "generatedAt": "2026-09-20T17:06:00.475Z"
+  },
+  "133066813_no_act_2026-09-23_en": {
+    "title": "Coach Recommendations",
+    "type": "info",
+    "badge": "Smart Coach",
+    "message": "Set your monthly goal to unlock intelligent training advice and personalized workouts!",
+    "actionPlan": "Set a realistic target between 50km - 150km.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Set a suitable monthly goal between 50km - 150km.",
+    "recoveryTip": "Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.",
+    "readinessScore": 76,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 0,
+        "acuteLoadKm": 0,
+        "chronicLoadKm": 0,
+        "acuteRunsCount": 0,
+        "statusKey": "no_data",
+        "statusColor": "#94a3b8",
+        "labelVi": "Chưa đủ dữ liệu",
+        "labelEn": "No Data",
+        "descVi": "Hãy ghi nhận thêm các bài chạy để kích hoạt đo lường thể lực.",
+        "descEn": "Log more runs to activate sports science tracking."
+      },
+      "racePredictions": {
+        "hasBenchmark": false,
+        "vdot": null,
+        "predicted5k": null,
+        "predicted10k": null,
+        "predicted21k": null,
+        "trainingPaces": {
+          "easyZone2": "6:30 - 7:15",
+          "tempo": "5:45 - 6:15",
+          "interval": "5:10 - 5:35"
+        }
+      },
+      "recovery": 0,
+      "biomechanics": null
+    },
+    "generatedAt": "2026-09-23T13:12:48.976Z"
+  },
+  "133066813_no_act_2026-09-23_vi": {
+    "title": "Tư vấn & Kế hoạch",
+    "type": "warning",
+    "badge": "Inactivity Alert ⚠️",
+    "message": "Đã 999 ngày rồi bạn chưa xỏ giày! Cơ bắp đang dần nguội và mục tiêu tháng còn thiếu 42.9 km (5.4 km/ngày). Tuyệt đối không chạy gấp đôi để \"bù\" ngày nghỉ; hãy khởi động thật kỹ và bắt đầu lại bằng bài chạy nhẹ 3-4km hôm nay! Lưu ý áp lực cam kết quỹ 90k đang tăng dần!",
+    "actionPlan": "Khởi động khớp cổ chân/gối, chạy nhẹ 3-4km pace thoải mái.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Duy trì ~4 buổi/tuần, mỗi buổi ~5.4 km để về đích bền bỉ.",
+    "recoveryTip": "Uống đủ 2-2.5L nước/ngày, nạp đủ protein sau chạy và ngủ đủ 7-8 tiếng.",
+    "readinessScore": 76,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 0,
+        "acuteLoadKm": 0,
+        "chronicLoadKm": 0,
+        "acuteRunsCount": 0,
+        "statusKey": "no_data",
+        "statusColor": "#94a3b8",
+        "labelVi": "Chưa đủ dữ liệu",
+        "labelEn": "No Data",
+        "descVi": "Hãy ghi nhận thêm các bài chạy để kích hoạt đo lường thể lực.",
+        "descEn": "Log more runs to activate sports science tracking."
+      },
+      "racePredictions": {
+        "hasBenchmark": false,
+        "vdot": null,
+        "predicted5k": null,
+        "predicted10k": null,
+        "predicted21k": null,
+        "trainingPaces": {
+          "easyZone2": "6:30 - 7:15",
+          "tempo": "5:45 - 6:15",
+          "interval": "5:10 - 5:35"
+        }
+      },
+      "recovery": 0,
+      "biomechanics": null
+    },
+    "generatedAt": "2026-09-23T13:25:40.802Z"
+  },
+  "120540594_20184641550_2026-09-23_vi": {
+    "title": "Tư vấn & Kế hoạch",
+    "type": "info",
+    "badge": "Smart Coach",
+    "message": "Hãy thiết lập mục tiêu tháng để nhận phân tích chi tiết và kế hoạch chạy bộ khoa học!",
+    "actionPlan": "Đặt mục tiêu từ 50km - 150km phù hợp với thể lực.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Hãy chọn mục tiêu tháng từ 50km - 150km phù hợp với thể lực.",
+    "recoveryTip": "Uống đủ 2-2.5L nước/ngày, nạp đủ protein sau chạy và ngủ đủ 7-8 tiếng.",
+    "readinessScore": 76,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 0,
+        "acuteLoadKm": 0,
+        "chronicLoadKm": 5.3,
+        "acuteRunsCount": 0,
+        "statusKey": "recovery",
+        "statusColor": "#38bdf8",
+        "labelVi": "Phục hồi (Recovery)",
+        "labelEn": "Recovery",
+        "descVi": "Khối lượng chạy nhẹ nhàng, cơ thể đang phục hồi và tái tạo các sợi cơ.",
+        "descEn": "Low intensity workload. Muscles and joints are in an active recovery phase."
+      },
+      "racePredictions": {
+        "hasBenchmark": true,
+        "benchmarkDistanceKm": 4.5,
+        "benchmarkPaceStr": "6:60",
+        "vdot": 27,
+        "predicted5k": "35:13",
+        "predicted10k": "1:13:25",
+        "predicted21k": "2:41:59",
+        "trainingPaces": {
+          "easyZone2": "8:08 - 8:48",
+          "tempo": "7:05 - 7:25",
+          "interval": "6:45 - 6:58"
+        }
+      },
+      "recovery": {
+        "totalRequiredHours": 12,
+        "remainingHours": 0,
+        "isFullyRecovered": true
+      },
+      "biomechanics": {
+        "heartRate": null,
+        "cadence": null,
+        "cadenceTipVi": null,
+        "cadenceTipEn": null
+      }
+    },
+    "generatedAt": "2026-09-23T13:25:55.031Z"
   }
 }

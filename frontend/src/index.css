@@ -12257,3 +12257,1252 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
 .arrears-pay-action-btn:active {
   transform: translateY(0) scale(0.98);
 }
+
+/* ==========================================================================
+   NEXT-GEN PC SUITE & UI/UX LAB (v2.0) - HASKONING BRANDED STYLES
+   ========================================================================== */
+
+/* 1. Next-Gen Container & Testing Dock */
+.nextgen-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+
+.nextgen-dock {
+  position: sticky;
+  top: 72px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 163, 166, 0.25);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: 0 8px 24px rgba(0, 45, 84, 0.08);
+}
+
+.nextgen-dock__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nextgen-dock__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(0, 163, 166, 0.12);
+  color: #002D54;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+.nextgen-dock__desc {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.nextgen-dock__controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nextgen-persona-select-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nextgen-dock-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+}
+
+.nextgen-select {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 45, 84, 0.18);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--primary-navy);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.nextgen-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 163, 166, 0.15);
+}
+
+.nextgen-dock-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-return-stable {
+  border-color: rgba(0, 45, 84, 0.2) !important;
+  color: var(--primary-navy) !important;
+}
+
+.btn-return-stable:hover {
+  background: rgba(0, 45, 84, 0.06) !important;
+  border-color: var(--primary-navy) !important;
+}
+
+/* 2. Welcome Banner */
+.nextgen-welcome-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 24px 28px;
+  border-radius: var(--radius-md, 12px);
+  background: linear-gradient(135deg, rgba(0, 45, 84, 0.05) 0%, rgba(0, 163, 166, 0.08) 100%);
+  border: 1px solid rgba(0, 163, 166, 0.2);
+}
+
+.nextgen-welcome-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.nextgen-welcome-title {
+  margin: 0 0 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+}
+
+.nextgen-welcome-title span {
+  color: var(--accent);
+}
+
+.nextgen-welcome-sub {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.nextgen-quick-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nextgen-stat-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 18px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 45, 84, 0.05);
+  border: 1px solid rgba(0, 45, 84, 0.08);
+}
+
+.nextgen-stat-num {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.nextgen-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.nextgen-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 3. 3D Glassmorphism Trophy Cabinet */
+.trophy-cabinet {
+  background: #ffffff;
+  border-radius: var(--radius-md, 12px);
+  padding: 24px;
+  border: 1px solid rgba(0, 45, 84, 0.1);
+  box-shadow: var(--shadow-sm);
+}
+
+.trophy-cabinet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.trophy-cabinet__title-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.trophy-cabinet__icon-glow {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(0, 163, 166, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trophy-cabinet__title {
+  margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+}
+
+.trophy-cabinet__subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.trophy-progress-banner {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(0, 45, 84, 0.03) 0%, rgba(0, 163, 166, 0.06) 100%);
+  border: 1px solid rgba(0, 163, 166, 0.15);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.trophy-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.88rem;
+}
+
+.trophy-progress-label {
+  font-weight: 600;
+  color: var(--primary-navy);
+}
+
+.trophy-progress-tier {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+.trophy-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 45, 84, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.trophy-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #78BE20 0%, #00A3A6 100%);
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trophy-categories {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.trophy-cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #f8fafc;
+  border: 1px solid rgba(0, 45, 84, 0.1);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trophy-cat-pill:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  color: var(--primary-navy);
+}
+
+.trophy-cat-pill--active {
+  background: linear-gradient(135deg, #00A3A6 0%, #002D54 100%);
+  color: #ffffff !important;
+  border-color: transparent;
+  box-shadow: 0 3px 10px rgba(0, 163, 166, 0.3);
+}
+
+.trophy-cat-badge {
+  font-size: 0.72rem;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.trophy-cat-pill--active .trophy-cat-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.trophy-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 45, 84, 0.1);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trophy-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 45, 84, 0.08);
+}
+
+.trophy-card--unlocked {
+  border-color: rgba(0, 163, 166, 0.35);
+  background: linear-gradient(180deg, #ffffff 0%, rgba(0, 163, 166, 0.03) 100%);
+}
+
+.trophy-card--locked {
+  opacity: 0.72;
+  filter: grayscale(0.5);
+  background: #fbfcfd;
+}
+
+.trophy-card--locked:hover {
+  opacity: 0.95;
+  filter: grayscale(0.2);
+}
+
+.trophy-tier--diamond.trophy-card--unlocked {
+  border-color: #00A3A6;
+  box-shadow: 0 4px 14px rgba(0, 163, 166, 0.18);
+}
+
+.trophy-tier--gold.trophy-card--unlocked {
+  border-color: #F59E0B;
+}
+
+.trophy-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.trophy-card__tier-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.trophy-card__status-unlocked {
+  color: #78BE20;
+}
+
+.trophy-card__status-locked {
+  color: var(--text-muted);
+}
+
+.trophy-card__icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(0, 45, 84, 0.04);
+  margin-bottom: 14px;
+}
+
+.trophy-card__icon {
+  font-size: 28px;
+}
+
+.trophy-card__title {
+  margin: 0 0 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.trophy-card__desc {
+  margin: 0 0 16px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.trophy-card__progress-wrap {
+  margin-top: auto;
+}
+
+.trophy-card__progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 45, 84, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.trophy-card__progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.trophy-card__progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   SHARED MODAL CONTAINER & CLOSE BUTTON
+   ========================================================================== */
+.modal-container {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(0, 45, 84, 0.12) !important;
+  box-shadow: 0 25px 60px -10px rgba(0, 45, 84, 0.45), 0 0 0 1px rgba(0, 163, 166, 0.25) !important;
+  padding: 28px !important;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 10000;
+  animation: modalScaleUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 45, 84, 0.06);
+  border: 1px solid rgba(0, 45, 84, 0.12);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 20;
+}
+
+.modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.35);
+  transform: rotate(90deg) scale(1.06);
+}
+
+.modal-close-btn:active {
+  transform: rotate(90deg) scale(0.92);
+}
+
+/* Trophy Detail Modal */
+.trophy-modal {
+  max-width: 480px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(0, 45, 84, 0.15) !important;
+  box-shadow: 0 25px 60px -10px rgba(0, 45, 84, 0.45) !important;
+}
+
+.trophy-modal__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px 24px;
+  color: #ffffff;
+}
+
+.trophy-modal__big-icon {
+  font-size: 64px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
+}
+
+.trophy-modal__tier-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.trophy-modal__body {
+  padding: 24px;
+}
+
+.trophy-modal__title {
+  margin: 0 0 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  text-align: center;
+}
+
+.trophy-modal__status-box {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.trophy-modal__unlocked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(120, 190, 32, 0.15);
+  color: #4D7C0F;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.trophy-modal__locked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(0, 45, 84, 0.08);
+  color: var(--text-muted);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.trophy-modal__section {
+  margin-bottom: 16px;
+}
+
+.trophy-modal__section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.trophy-modal__desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.trophy-modal__quote-box {
+  padding: 14px 18px;
+  border-left: 3px solid var(--accent);
+  background: rgba(0, 163, 166, 0.05);
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 20px;
+}
+
+.trophy-modal__quote {
+  margin: 0;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--primary-navy);
+  line-height: 1.5;
+}
+
+.trophy-modal__date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.trophy-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 4. Social Share Modal */
+.social-share-modal {
+  max-width: 720px !important;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  padding: 28px 32px !important;
+  border: 1.5px solid rgba(0, 163, 166, 0.3) !important;
+  box-shadow: 0 30px 70px -10px rgba(0, 45, 84, 0.5) !important;
+}
+
+.social-share-modal__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-right: 48px;
+}
+
+.social-share-modal__title-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.social-share-modal__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0, 163, 166, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-share-modal__title {
+  margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+}
+
+.social-share-modal__desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.social-share-formats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.share-format-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid rgba(0, 45, 84, 0.15);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.share-format-btn:hover {
+  border-color: var(--accent);
+  color: var(--primary-navy);
+}
+
+.share-format-btn--active {
+  background: rgba(0, 163, 166, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.social-share-preview-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #0f172a;
+  border-radius: 12px;
+  max-height: 480px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.social-share-canvas {
+  max-height: 440px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.social-share-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 5. VietQR Modal */
+.vietqr-modal {
+  max-width: 760px !important;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  border: 1.5px solid rgba(0, 163, 166, 0.35) !important;
+  box-shadow: 0 30px 70px -10px rgba(0, 45, 84, 0.55), 0 0 0 1px rgba(0, 163, 166, 0.25) !important;
+  padding: 30px 32px !important;
+}
+
+.vietqr-modal__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding-right: 48px;
+}
+
+.vietqr-modal__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0, 163, 166, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vietqr-modal__title {
+  margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+}
+
+.vietqr-modal__sub {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.vietqr-body {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.vietqr-qr-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 45, 84, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 45, 84, 0.05);
+}
+
+.vietqr-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vietqr-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.vietqr-brand-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.vietqr-download-btn {
+  width: 100%;
+}
+
+.vietqr-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vietqr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid rgba(0, 45, 84, 0.08);
+}
+
+.vietqr-field--copyable {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vietqr-field--highlight {
+  background: rgba(0, 163, 166, 0.08);
+  border-color: rgba(0, 163, 166, 0.3);
+}
+
+.vietqr-label {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.vietqr-value {
+  font-size: 0.95rem;
+  color: var(--primary-navy);
+  font-weight: 700;
+}
+
+.vietqr-amount-value {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.vietqr-remark-text {
+  color: #D97706;
+}
+
+.btn-copy {
+  flex-shrink: 0;
+}
+
+.vietqr-alert-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #B45309;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.vietqr-zero-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.vietqr-zero-title {
+  margin: 16px 0 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+}
+
+.vietqr-zero-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  max-width: 440px;
+}
+
+/* 6. Aerobic Efficiency & Sports Science */
+.aerobic-card {
+  background: #ffffff;
+  border-radius: var(--radius-md, 12px);
+  padding: 24px;
+  border: 1px solid rgba(0, 45, 84, 0.1);
+  box-shadow: var(--shadow-sm);
+}
+
+.aerobic-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.aerobic-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aerobic-card__title {
+  margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+}
+
+.aerobic-card__sub {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.aerobic-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.aerobic-metric-box {
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid rgba(0, 45, 84, 0.08);
+  border-radius: 10px;
+}
+
+.aerobic-metric-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.aerobic-metric-value {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.aerobic-metric-value small {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.aerobic-metric-hint {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.badge-optimal {
+  color: #15803D;
+  font-weight: 700;
+}
+
+.badge-good {
+  color: #00A3A6;
+  font-weight: 700;
+}
+
+.adaptive-plan-section {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(0, 45, 84, 0.03) 0%, rgba(0, 163, 166, 0.06) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 163, 166, 0.15);
+}
+
+.adaptive-plan-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.adaptive-plan-title {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: var(--primary-navy);
+}
+
+.adaptive-plan-sub {
+  margin: 0 0 16px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.adaptive-plan-days {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.adaptive-day-card {
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 45, 84, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 45, 84, 0.04);
+}
+
+.adaptive-day-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.adaptive-day-name {
+  font-size: 0.85rem;
+  color: var(--primary-navy);
+}
+
+.adaptive-day-type {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.adaptive-day-dist {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.adaptive-day-pace {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+/* 7. Monthly Report Export Modal */
+.monthly-report-modal {
+  max-width: 680px !important;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  padding: 28px 32px !important;
+  border: 1.5px solid rgba(0, 163, 166, 0.3) !important;
+  box-shadow: 0 30px 70px -10px rgba(0, 45, 84, 0.5) !important;
+}
+
+.monthly-report-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding-right: 48px;
+}
+
+.monthly-report-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0, 163, 166, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monthly-report-title {
+  margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+}
+
+.monthly-report-sub {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.monthly-report-preview-box {
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 45, 84, 0.1);
+  margin-bottom: 20px;
+}
+
+.report-preview-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.report-stat-pill {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 45, 84, 0.08);
+  text-align: center;
+}
+
+.report-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.report-stat-val {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.report-podium-box {
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 45, 84, 0.08);
+}
+
+.report-podium-title {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  text-align: center;
+}
+
+.report-podium-cards {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+}
+
+.podium-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #f8fafc;
+  width: 140px;
+  text-align: center;
+}
+
+.podium-gold {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1.5px solid #F59E0B;
+  transform: translateY(-8px);
+}
+
+.podium-silver {
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid #94A3B8;
+}
+
+.podium-bronze {
+  background: rgba(205, 127, 50, 0.1);
+  border: 1px solid #CD7F32;
+}
+
+.podium-medal {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.podium-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.podium-km {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.podium-badge {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.monthly-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .vietqr-body {
+    grid-template-columns: 1fr;
+  }
+  .report-podium-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+}

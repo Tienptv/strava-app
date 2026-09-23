@@ -53,19 +53,19 @@
   "133066813": {
     "athleteId": "133066813",
     "latest": {
-      "date": "2026-09-20",
-      "sleepHours": 6.55,
-      "sleepScore": 79,
-      "restingHeartRate": 50,
+      "date": "2026-09-23",
+      "sleepHours": 7,
+      "sleepScore": 75,
+      "restingHeartRate": 52,
       "baselineRhr": 52,
       "hrvStatus": "balanced",
-      "hrvMs": 64,
-      "bodyBattery": 90,
-      "stressLevel": 20,
-      "source": "garmin_connect_app",
-      "updatedAt": "2026-09-20T17:05:04.912Z",
+      "hrvMs": 60,
+      "bodyBattery": 80,
+      "stressLevel": 25,
+      "source": "garmin_auto_scrape",
+      "updatedAt": "2026-09-23T13:17:42.956Z",
       "readiness": {
-        "readinessScore": 90,
+        "readinessScore": 85,
         "status": "optimal",
         "labelVi": "Thể lực đỉnh cao (Optimal)",
         "labelEn": "Peak Readiness (Optimal)",
@@ -76,6 +76,29 @@
       }
     },
     "history": [
+      {
+        "date": "2026-09-23",
+        "sleepHours": 7,
+        "sleepScore": 75,
+        "restingHeartRate": 52,
+        "baselineRhr": 52,
+        "hrvStatus": "balanced",
+        "hrvMs": 60,
+        "bodyBattery": 80,
+        "stressLevel": 25,
+        "source": "garmin_auto_scrape",
+        "updatedAt": "2026-09-23T13:17:42.956Z",
+        "readiness": {
+          "readinessScore": 85,
+          "status": "optimal",
+          "labelVi": "Thể lực đỉnh cao (Optimal)",
+          "labelEn": "Peak Readiness (Optimal)",
+          "color": "#78BE20",
+          "shouldDowngrade": false,
+          "downgradeReasonVi": "",
+          "downgradeReasonEn": ""
+        }
+      },
       {
         "date": "2026-09-20",
         "sleepHours": 6.55,
