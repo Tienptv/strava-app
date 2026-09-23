@@ -131,6 +131,8 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // STATE: 2. ROLES & PERMISSIONS
   // ==========================================
   const [subAdmins, setSubAdmins] = useState([]);
+  const [superAdmins, setSuperAdmins] = useState([]);
+  const [selectedRoleToGrant, setSelectedRoleToGrant] = useState('sub_admin');
   const [clubs, setClubs] = useState([]);
   const [selectedClubId, setSelectedClubId] = useState('');
   const [members, setMembers] = useState([]);
@@ -210,6 +212,24 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
     return Array.from(map.values());
   }, [subAdmins, members]);
 
+  // Chuẩn hóa danh sách Super Admins
+  const normalizedSuperAdmins = useMemo(() => {
+    const list = Array.isArray(superAdmins) && superAdmins.length > 0 ? [...superAdmins] : [];
+    const primaryId = '133066813';
+    // Đảm bảo luôn có ít nhất Root Super Admin hiển thị
+    if (list.length === 0) {
+      list.push({
+        id: primaryId,
+        athleteId: primaryId,
+        matchKey: 'tien_p.',
+        name: athlete ? `${athlete.firstname} ${athlete.lastname}` : 'Tien PhamTV',
+        avatarUrl: athlete?.profile_medium || athlete?.profile || '',
+        isPrimary: true
+      });
+    }
+    return list;
+  }, [superAdmins, athlete]);
+
   // ==========================================
   // STATE: 3. AUDIT LOGS
   // ==========================================
@@ -278,11 +298,14 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       .finally(() => setLoadingConfig(false));
   };
 
-  // Load Sub-Admins
+  // Load Admins & Super Admins
   const loadAdmins = () => {
     apiFetch('/admins')
       .then(data => setSubAdmins(data || []))
       .catch(err => console.error('Lỗi tải admins:', err));
+    apiFetch('/super-admins')
+      .then(data => setSuperAdmins(data || []))
+      .catch(err => console.error('Lỗi tải super admins:', err));
   };
 
   // Load Audit Logs
@@ -1221,9 +1244,45 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // ==========================================
   // HANDLERS: ROLES
   // ==========================================
-  const handleAddAdmin = async (member) => {
+  const handleAddAdmin = async (member, role = selectedRoleToGrant) => {
     const uniqueId = member.id ? member.id.toString() : `${member.firstname}_${member.lastname}`;
-    const memberName = `${member.firstname} ${member.lastname}`;
+    const memberName = `${member.firstname || ''} ${member.lastname || ''}`.trim() || 'Thành viên';
+    
+    if (role === 'super_admin') {
+      const confirm = await Swal.fire({
+        title: t('confirmPromoteSuperAdminTitle'),
+        text: (t('confirmPromoteSuperAdminText') || '').replace('{name}', memberName),
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: lang === 'en' ? 'Yes, Appoint Super Admin 👑' : 'Đồng ý, Bổ nhiệm Super Admin 👑',
+        cancelButtonText: t('cancel'),
+        confirmButtonColor: 'var(--primary-navy)'
+      });
+      if (!confirm.isConfirmed) return;
+
+      try {
+        const res = await apiFetch('/super-admins', {
+          method: 'POST',
+          body: JSON.stringify({ adminId: uniqueId, name: memberName })
+        });
+        if (res.success) {
+          Swal.fire(
+            lang === 'en' ? 'Success' : 'Thành công',
+            lang === 'en' ? `Appointed ${memberName} as Super Admin 👑` : `Đã bổ nhiệm ${memberName} làm Super Admin 👑`,
+            'success'
+          );
+          if (res.superAdmins) setSuperAdmins(res.superAdmins);
+          if (res.admins) setSubAdmins(res.admins);
+          loadLogs();
+          loadStorageStats();
+        }
+      } catch (e) {
+        Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', e.message || 'Không thể bổ nhiệm Super Admin', 'error');
+      }
+      return;
+    }
+
+    // Default: Sub-Admin
     try {
       const res = await apiFetch('/admins', {
         method: 'POST',
@@ -1232,7 +1291,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       if (res.success) {
         Swal.fire(
           lang === 'en' ? 'Success' : 'Thành công',
-          lang === 'en' ? `Granted Admin role to ${memberName}` : `Đã cấp quyền Admin cho ${memberName}`,
+          lang === 'en' ? `Granted Sub-Admin role to ${memberName}` : `Đã cấp quyền Sub-Admin cho ${memberName}`,
           'success'
         );
         setSubAdmins(res.admins);
@@ -1241,6 +1300,105 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       }
     } catch (e) {
       Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', e.message || (lang === 'en' ? 'Cannot grant admin role' : 'Không thể cấp quyền admin'), 'error');
+    }
+  };
+
+  const handlePromoteToSuperAdmin = async (adminInput) => {
+    const adminObj = typeof adminInput === 'object' && adminInput !== null ? adminInput : { id: adminInput, name: adminInput };
+    const targetId = adminObj.athleteId || adminObj.id || adminObj.matchKey;
+    const targetName = adminObj.name || targetId;
+
+    const confirm = await Swal.fire({
+      title: t('confirmPromoteSuperAdminTitle'),
+      text: (t('confirmPromoteSuperAdminText') || '').replace('{name}', targetName),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: lang === 'en' ? 'Promote to Super Admin 👑' : 'Nâng lên Super Admin 👑',
+      cancelButtonText: t('cancel'),
+      confirmButtonColor: 'var(--primary-navy)'
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        const res = await apiFetch('/super-admins', {
+          method: 'POST',
+          body: JSON.stringify({ adminId: targetId, name: targetName })
+        });
+        if (res.success) {
+          Swal.fire(
+            lang === 'en' ? 'Promoted' : 'Đã nâng cấp',
+            lang === 'en' ? `${targetName} is now a Super Admin 👑!` : `${targetName} hiện đã là Super Admin 👑!`,
+            'success'
+          );
+          if (res.superAdmins) setSuperAdmins(res.superAdmins);
+          if (res.admins) setSubAdmins(res.admins);
+          loadLogs();
+          loadStorageStats();
+        }
+      } catch (e) {
+        Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', e.message || 'Không thể nâng cấp Super Admin', 'error');
+      }
+    }
+  };
+
+  const handleDemoteSuperAdmin = async (adminInput) => {
+    const adminObj = typeof adminInput === 'object' && adminInput !== null ? adminInput : { id: adminInput, name: adminInput };
+    const targetId = adminObj.athleteId || adminObj.id || adminObj.matchKey;
+    const targetName = adminObj.name || targetId;
+
+    const choice = await Swal.fire({
+      title: t('confirmDemoteSuperAdminTitle'),
+      text: (t('confirmDemoteSuperAdminText') || '').replace('{name}', targetName),
+      icon: 'question',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: `🛡️ ${t('demoteToSubAdminAction')}`,
+      denyButtonText: `❌ ${t('revokeAllAction')}`,
+      cancelButtonText: t('cancel'),
+      confirmButtonColor: 'var(--accent)',
+      denyButtonColor: '#dc2626'
+    });
+
+    if (choice.isConfirmed) {
+      // Hạ xuống Sub-Admin
+      try {
+        const res = await apiFetch(`/super-admins/${targetId}?downgrade=true`, {
+          method: 'DELETE'
+        });
+        if (res.success) {
+          Swal.fire(
+            lang === 'en' ? 'Demoted' : 'Đã hạ cấp',
+            lang === 'en' ? `Moved ${targetName} to Sub-Admin.` : `Đã chuyển ${targetName} xuống Sub-Admin.`,
+            'success'
+          );
+          if (res.superAdmins) setSuperAdmins(res.superAdmins);
+          if (res.admins) setSubAdmins(res.admins);
+          loadLogs();
+          loadStorageStats();
+        }
+      } catch (e) {
+        Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', e.message || 'Lỗi hạ cấp Super Admin', 'error');
+      }
+    } else if (choice.isDenied) {
+      // Thu hồi hoàn toàn
+      try {
+        const res = await apiFetch(`/super-admins/${targetId}`, {
+          method: 'DELETE'
+        });
+        if (res.success) {
+          Swal.fire(
+            lang === 'en' ? 'Revoked' : 'Đã thu hồi',
+            lang === 'en' ? `Revoked admin role for ${targetName}.` : `Đã thu hồi toàn bộ quyền admin của ${targetName}.`,
+            'success'
+          );
+          if (res.superAdmins) setSuperAdmins(res.superAdmins);
+          if (res.admins) setSubAdmins(res.admins);
+          loadLogs();
+          loadStorageStats();
+        }
+      } catch (e) {
+        Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', e.message || 'Lỗi thu hồi Super Admin', 'error');
+      }
     }
   };
 
@@ -2391,43 +2549,85 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                 </h2>
               </div>
               <span style={{ fontSize: '0.8rem', background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '12px', fontWeight: 700 }}>
-                {1 + normalizedAdmins.length} Admins
+                {normalizedSuperAdmins.length + normalizedAdmins.length} Admins
               </span>
             </div>
 
-            {/* Super Admin Item */}
-            <div style={{ marginBottom: '16px' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                {t('superAdminPrimary')}
+            {/* Danh sách Super Admins */}
+            <div style={{ marginBottom: '22px' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--primary-navy)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>👑</span> {t('superAdminsTitle')} ({normalizedSuperAdmins.length})
               </div>
-              <div style={{ 
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-                padding: '14px', background: 'rgba(0, 45, 84, 0.04)', borderRadius: '10px',
-                border: '1px solid rgba(0, 45, 84, 0.1)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary-navy)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                    👑
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 700, color: 'var(--primary-navy)' }}>
-                      {athlete ? `${athlete.firstname} ${athlete.lastname}` : 'Super Admin'}
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {normalizedSuperAdmins.map((sAdmin) => {
+                  const sKey = sAdmin.athleteId || sAdmin.id || sAdmin.matchKey || sAdmin.name;
+                  const isPrimary = Boolean(sAdmin.isPrimary || sAdmin.athleteId === '133066813');
+                  return (
+                    <div 
+                      key={sKey}
+                      style={{ 
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+                        padding: '12px 14px', background: isPrimary ? 'rgba(0, 45, 84, 0.04)' : '#ffffff', 
+                        borderRadius: '10px',
+                        border: isPrimary ? '1px solid rgba(0, 45, 84, 0.14)' : '1px solid #e2e8f0',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {sAdmin.avatarUrl ? (
+                          <img src={sAdmin.avatarUrl} alt="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent)' }} />
+                        ) : (
+                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary-navy)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.1rem' }}>
+                            👑
+                          </div>
+                        )}
+                        <div>
+                          <div style={{ fontWeight: 700, color: 'var(--primary-navy)', fontSize: '0.95rem' }}>
+                            {sAdmin.name}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            Strava ID: <b>{sAdmin.athleteId || sAdmin.id}</b>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {isPrimary ? (
+                          <span style={{ fontSize: '0.75rem', background: '#ecfdf5', color: '#059669', padding: '4px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                            {t('superAdminPrimary')} • {t('permanent')}
+                          </span>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: '0.72rem', background: 'rgba(0, 163, 166, 0.1)', color: 'var(--accent)', padding: '4px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                              {t('coSuperAdminBadge')}
+                            </span>
+                            {isSuperAdmin && (
+                              <button
+                                onClick={() => handleDemoteSuperAdmin(sAdmin)}
+                                className="btn btn--secondary"
+                                title={t('demoteToSubAdmin')}
+                                style={{
+                                  color: '#b45309', borderColor: '#fde68a', background: '#fffbeb',
+                                  padding: '5px 10px', fontSize: '0.75rem', fontWeight: 600
+                                }}
+                              >
+                                {t('demoteToSubAdmin')}
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      Strava ID: <b>{import.meta.env.VITE_ADMIN_STRAVA_ID || '133066813'}</b>
-                    </div>
-                  </div>
-                </div>
-                <span style={{ fontSize: '0.75rem', background: '#ecfdf5', color: '#059669', padding: '4px 8px', borderRadius: '6px', fontWeight: 700 }}>
-                  {t('permanent')}
-                </span>
+                  );
+                })}
               </div>
             </div>
 
             {/* Sub-Admins List */}
             <div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                Sub-Admins ({normalizedAdmins.length})
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>🛡️</span> Sub-Admins ({normalizedAdmins.length})
               </div>
 
               {normalizedAdmins.length === 0 ? (
@@ -2463,16 +2663,29 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                         </div>
 
                         {isSuperAdmin && (
-                          <button 
-                            onClick={() => handleRemoveAdmin(admin)}
-                            className="btn btn--secondary"
-                            style={{ 
-                              color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2',
-                              padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px'
-                            }}
-                          >
-                            <UserX size={14} /> {lang === 'en' ? 'Revoke' : 'Thu hồi'}
-                          </button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              onClick={() => handlePromoteToSuperAdmin(admin)}
+                              className="btn btn--secondary"
+                              title={t('promoteToSuperAdmin')}
+                              style={{ 
+                                color: 'var(--primary-navy)', borderColor: 'rgba(0, 45, 84, 0.2)', background: 'rgba(0, 45, 84, 0.05)',
+                                padding: '6px 10px', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px'
+                              }}
+                            >
+                              👑 {lang === 'en' ? 'Promote' : 'Lên Super Admin'}
+                            </button>
+                            <button 
+                              onClick={() => handleRemoveAdmin(admin)}
+                              className="btn btn--secondary"
+                              style={{ 
+                                color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2',
+                                padding: '6px 10px', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px'
+                              }}
+                            >
+                              <UserX size={14} /> {lang === 'en' ? 'Revoke' : 'Thu hồi'}
+                            </button>
+                          </div>
                         )}
                       </div>
                     );
@@ -2497,6 +2710,35 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
               </div>
             ) : (
               <div>
+                {/* Chọn vai trò cần cấp */}
+                <div style={{ marginBottom: '14px', background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary-navy)' }}>
+                    {t('roleToGrantLabel')}
+                  </label>
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: selectedRoleToGrant === 'sub_admin' ? 700 : 500, color: selectedRoleToGrant === 'sub_admin' ? 'var(--accent)' : 'inherit' }}>
+                      <input 
+                        type="radio" 
+                        name="roleToGrant" 
+                        value="sub_admin" 
+                        checked={selectedRoleToGrant === 'sub_admin'} 
+                        onChange={() => setSelectedRoleToGrant('sub_admin')} 
+                      />
+                      🛡️ {t('roleSubAdminOption')}
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: selectedRoleToGrant === 'super_admin' ? 700 : 500, color: selectedRoleToGrant === 'super_admin' ? 'var(--primary-navy)' : 'inherit' }}>
+                      <input 
+                        type="radio" 
+                        name="roleToGrant" 
+                        value="super_admin" 
+                        checked={selectedRoleToGrant === 'super_admin'} 
+                        onChange={() => setSelectedRoleToGrant('super_admin')} 
+                      />
+                      👑 {t('roleSuperAdminOption')}
+                    </label>
+                  </div>
+                </div>
+
                 <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', marginBottom: '6px', fontWeight: 600, fontSize: '0.85rem', color: 'var(--primary-navy)' }}>
                     {lang === 'en' ? '1. Select Club' : '1. Chọn Câu Lạc Bộ (Club)'}
@@ -2545,7 +2787,12 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                           const uniqueId = (member.id || `${member.firstname || ''}_${member.lastname || ''}`).toString();
                           const memberName = `${member.firstname || ''} ${member.lastname || ''}`.trim() || 'Thành viên';
                           const memberMatchKey = `${member.firstname || ''}_${member.lastname || ''}`.toLowerCase();
-                          const isAlreadyAdmin = normalizedAdmins.some(a => 
+                          
+                          const isAlreadySuperAdmin = normalizedSuperAdmins.some(sa => 
+                            (member.id && sa.athleteId === member.id.toString()) ||
+                            (sa.matchKey && sa.matchKey.toLowerCase() === memberMatchKey)
+                          );
+                          const isAlreadySubAdmin = normalizedAdmins.some(a => 
                             (member.id && (a.athleteId === member.id.toString() || a.id === member.id.toString())) || 
                             (a.matchKey && a.matchKey.toLowerCase() === memberMatchKey) ||
                             (a.name && a.name.toLowerCase() === memberName.toLowerCase()) ||
@@ -2555,7 +2802,8 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                             return (sa?.athleteId && sa.athleteId.toString() === uniqueId) || 
                                    (sa?.id && sa.id.toString() === uniqueId) || 
                                    (sa?.matchKey && sa.matchKey.toLowerCase() === memberMatchKey);
-                          }) || uniqueId === (import.meta.env.VITE_ADMIN_STRAVA_ID || '133066813');
+                          });
+                          const isAlreadyAdmin = isAlreadySuperAdmin || isAlreadySubAdmin;
                           
                           return (
                             <div 
@@ -2585,16 +2833,19 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                               </div>
                               
                               {isAlreadyAdmin ? (
-                                <span style={{ color: '#059669', background: '#ecfdf5', padding: '4px 8px', borderRadius: '6px', fontWeight: 700, fontSize: '0.75rem' }}>
-                                  {lang === 'en' ? '✓ Already Admin' : '✓ Đã là Admin'}
+                                <span style={{ color: isAlreadySuperAdmin ? 'var(--primary-navy)' : '#059669', background: isAlreadySuperAdmin ? 'rgba(0, 45, 84, 0.08)' : '#ecfdf5', padding: '4px 8px', borderRadius: '6px', fontWeight: 700, fontSize: '0.75rem' }}>
+                                  {isAlreadySuperAdmin ? '👑 Super Admin' : '🛡️ Sub-Admin'}
                                 </span>
                               ) : (
                                 <button 
                                   className="btn btn--primary" 
-                                  style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: '6px', fontWeight: 600 }}
-                                  onClick={() => handleAddAdmin(member)}
+                                  style={{ 
+                                    padding: '6px 12px', fontSize: '0.8rem', borderRadius: '6px', fontWeight: 600,
+                                    background: selectedRoleToGrant === 'super_admin' ? 'linear-gradient(135deg, #002D54 0%, #00A3A6 100%)' : undefined
+                                  }}
+                                  onClick={() => handleAddAdmin(member, selectedRoleToGrant)}
                                 >
-                                  {lang === 'en' ? 'Grant Admin' : 'Cấp quyền'}
+                                  {selectedRoleToGrant === 'super_admin' ? (lang === 'en' ? '👑 Grant Super Admin' : '👑 Bổ nhiệm Super Admin') : (lang === 'en' ? 'Grant Sub-Admin' : 'Cấp Sub-Admin')}
                                 </button>
                               )}
                             </div>

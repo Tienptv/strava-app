@@ -1,5 +1,75 @@
 [
   {
+    "id": "1790172801623",
+    "timestamp": "2026-09-23T14:13:21.623Z",
+    "action": "Execute Script",
+    "user": "System Admin",
+    "details": "Ran Push_To_Render_Cloud.bat"
+  },
+  {
+    "id": "1790172655894",
+    "timestamp": "2026-09-23T14:10:55.894Z",
+    "action": "Cập nhật trạng thái nộp phạt",
+    "user": "Tien PhamTV",
+    "details": "Sang Nguyen - Tháng 2026-08: Đã nộp (50.000 đ)"
+  },
+  {
+    "id": "1790172454492",
+    "timestamp": "2026-09-23T14:07:34.492Z",
+    "action": "Cập nhật phân quyền Sub-Admin",
+    "user": "Super Admin (133066813)",
+    "details": "Đã cập nhật bảng giới hạn tính năng cho Sub-Admin"
+  },
+  {
+    "id": "1790172340723",
+    "timestamp": "2026-09-23T14:05:40.723Z",
+    "action": "Thu hồi quyền Admin",
+    "user": "Super Admin (133066813)",
+    "details": "Thu hồi quyền admin của: pham tien (ID: 120540594)"
+  },
+  {
+    "id": "1790172330616",
+    "timestamp": "2026-09-23T14:05:30.616Z",
+    "action": "Cấp quyền Admin",
+    "user": "Super Admin (133066813)",
+    "details": "Cấp quyền admin cho: pham tien (ID: 120540594, Key: pham_T.)"
+  },
+  {
+    "id": "1790172084976",
+    "timestamp": "2026-09-23T14:01:24.976Z",
+    "action": "Thu hồi quyền Admin",
+    "user": "Super Admin (133066813)",
+    "details": "Thu hồi quyền admin của: 888777666 (ID: 888777666)"
+  },
+  {
+    "id": "1790172084968",
+    "timestamp": "2026-09-23T14:01:24.968Z",
+    "action": "Thu hồi quyền Admin",
+    "user": "Super Admin (133066813)",
+    "details": "Thu hồi quyền admin của: 999000111 (ID: 999000111)"
+  },
+  {
+    "id": "1790172084953",
+    "timestamp": "2026-09-23T14:01:24.953Z",
+    "action": "Hạ cấp Super Admin về Sub-Admin",
+    "user": "Super Admin (133066813)",
+    "details": "Hạ cấp Super Admin của: 999000111 (ID: 999000111)"
+  },
+  {
+    "id": "1790172084943",
+    "timestamp": "2026-09-23T14:01:24.943Z",
+    "action": "Cấp quyền Admin",
+    "user": "Super Admin (999000111)",
+    "details": "Cấp quyền admin cho: Sub Admin Do Co-Super Cap (ID: 888777666, Key: 888777666)"
+  },
+  {
+    "id": "1790172084932",
+    "timestamp": "2026-09-23T14:01:24.932Z",
+    "action": "Bổ nhiệm Super Admin",
+    "user": "Super Admin (133066813)",
+    "details": "Bổ nhiệm Super Admin cho: Nguyen Van Test (ID: 999000111)"
+  },
+  {
     "id": "1790168998970",
     "timestamp": "2026-09-23T13:09:58.970Z",
     "action": "Đẩy dữ liệu lên Cloud",
@@ -1328,75 +1398,5 @@
     "action": "Đẩy dữ liệu lên Cloud",
     "user": "133066813",
     "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (241 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1788920532657",
-    "timestamp": "2026-09-09T02:22:12.657Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (241 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
-  },
-  {
-    "id": "1788890269574",
-    "timestamp": "2026-09-08T17:57:49.574Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (237 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1788890042937",
-    "timestamp": "2026-09-08T17:54:02.937Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (238 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1788890019266",
-    "timestamp": "2026-09-08T17:53:39.266Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (238 mục), targets.json (47 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1788890018452",
-    "timestamp": "2026-09-08T17:53:38.452Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (238 mục), targets.json (47 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
-  },
-  {
-    "id": "1788886817228",
-    "timestamp": "2026-09-08T17:00:17.228Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788882542899",
-    "timestamp": "2026-09-08T15:49:02.899Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (226 mục), targets.json (38 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1788882504878",
-    "timestamp": "2026-09-08T15:48:24.878Z",
-    "action": "Cập nhật Cấu hình thử thách",
-    "user": "Tien PhamTV",
-    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
-  },
-  {
-    "id": "1788881754949",
-    "timestamp": "2026-09-08T15:35:54.949Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (215 mục), targets.json (38 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1788881751438",
-    "timestamp": "2026-09-08T15:35:51.438Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (215 mục), targets.json (38 mục tiêu/phạt), challenge_config.json, admins.json (1 sub-admins), member_penalties_mapping.json"
   }
 ]

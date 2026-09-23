@@ -268,8 +268,13 @@ function App() {
     );
   }
 
-  const isSuperAdmin = userRoles.isSuperAdmin || (athlete && import.meta.env.VITE_ADMIN_STRAVA_ID && athlete.id.toString() === import.meta.env.VITE_ADMIN_STRAVA_ID);
-  const isAdmin = userRoles.isAdmin || isSuperAdmin;
+  const envSuperAdminIds = (import.meta.env.VITE_ADMIN_STRAVA_ID || '133066813')
+    .toString()
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const isSuperAdmin = Boolean(userRoles.isSuperAdmin || (athlete && envSuperAdminIds.includes(athlete.id.toString())));
+  const isAdmin = Boolean(userRoles.isAdmin || isSuperAdmin);
 
   return (
     <BrowserRouter>

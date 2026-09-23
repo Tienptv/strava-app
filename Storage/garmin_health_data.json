@@ -63,7 +63,7 @@
       "bodyBattery": 80,
       "stressLevel": 25,
       "source": "garmin_auto_scrape",
-      "updatedAt": "2026-09-23T13:17:42.956Z",
+      "updatedAt": "2026-09-23T14:09:05.893Z",
       "readiness": {
         "readinessScore": 85,
         "status": "optimal",
@@ -87,7 +87,7 @@
         "bodyBattery": 80,
         "stressLevel": 25,
         "source": "garmin_auto_scrape",
-        "updatedAt": "2026-09-23T13:17:42.956Z",
+        "updatedAt": "2026-09-23T14:09:05.893Z",
         "readiness": {
           "readinessScore": 85,
           "status": "optimal",

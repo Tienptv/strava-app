@@ -1470,5 +1470,56 @@
       }
     },
     "generatedAt": "2026-09-23T13:25:55.031Z"
+  },
+  "133066813_20289850848_2026-09-23_en": {
+    "title": "Coach Recommendations",
+    "type": "info",
+    "badge": "Smart Coach",
+    "message": "Set your monthly goal to unlock intelligent training advice and personalized workouts!",
+    "actionPlan": "Set a realistic target between 50km - 150km.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Set a suitable monthly goal between 50km - 150km.",
+    "recoveryTip": "Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.",
+    "readinessScore": 92,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 1.05,
+        "acuteLoadKm": 15,
+        "chronicLoadKm": 57.4,
+        "acuteRunsCount": 2,
+        "statusKey": "productive",
+        "statusColor": "#78BE20",
+        "labelVi": "Tập luyện hiệu quả (Productive)",
+        "labelEn": "Productive (Sweet Spot)",
+        "descVi": "Tỷ lệ tải đạt 1.05x nằm trong vùng tối ưu (Sweet Spot 1.0 - 1.3). Thể lực đang phát triển rất tốt.",
+        "descEn": "Workload ratio is 1.05x in the optimal Sweet Spot (1.0 - 1.35). Aerobic fitness is progressing well."
+      },
+      "racePredictions": {
+        "hasBenchmark": true,
+        "benchmarkDistanceKm": 5.1,
+        "benchmarkPaceStr": "5:46",
+        "vdot": 33,
+        "predicted5k": "28:50",
+        "predicted10k": "1:00:06",
+        "predicted21k": "2:12:37",
+        "trainingPaces": {
+          "easyZone2": "6:51 - 7:31",
+          "tempo": "5:46 - 6:06",
+          "interval": "5:28 - 5:41"
+        }
+      },
+      "recovery": {
+        "totalRequiredHours": 12,
+        "remainingHours": 5,
+        "isFullyRecovered": false
+      },
+      "biomechanics": {
+        "heartRate": 116,
+        "cadence": 143,
+        "cadenceTipVi": "Guồng chân 143 spm hơi thấp (sải bước quá dài). Hãy bước ngắn hơn và tăng tần số lên 165-175 spm để giảm áp lực lên đầu gối.",
+        "cadenceTipEn": "Cadence of 143 spm indicates over-striding. Shorten strides and target 165-175 spm to protect knee joints."
+      }
+    },
+    "generatedAt": "2026-09-23T14:08:32.069Z"
   }
 }

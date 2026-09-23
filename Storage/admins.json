@@ -1,3 +1,18 @@
-[
-  "125487039"
-]
+{
+  "superAdminIds": [
+    "133066813"
+  ],
+  "adminIds": [
+    "125487039"
+  ],
+  "defaultPermissions": {
+    "generalSettings": true,
+    "manageRoles": false,
+    "activityLogs": true,
+    "dataManagement": false,
+    "penaltiesTargets": true,
+    "syncStrava": true,
+    "importActivities": true
+  },
+  "customPermissions": {}
+}

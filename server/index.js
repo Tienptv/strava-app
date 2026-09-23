@@ -39,7 +39,8 @@ const NAME_MAPPING_FILE = path.join(__dirname, '../Storage/name_mapping.json');
 const ADMINS_FILE = path.join(__dirname, '../Storage/admins.json');
 const AUDIT_LOGS_FILE = path.join(__dirname, '../Storage/audit_logs.json');
 const PENALTIES_FILE = path.join(__dirname, '../Storage/member_penalties_mapping.json');
-const SUPER_ADMIN_ID = (process.env.VITE_ADMIN_STRAVA_ID || '133066813').toString();
+const ROOT_SUPER_ADMIN_ID = '133066813';
+const SUPER_ADMIN_ID = (process.env.VITE_ADMIN_STRAVA_ID || ROOT_SUPER_ADMIN_ID).split(',')[0].trim();
 const BANK_CONFIG_FILE = path.join(__dirname, '../Storage/bank_config.json');
 const WPN_SUBS_FILE = path.join(__dirname, '../Storage/wpn_subscriptions.json');
 const VISITOR_SESSIONS_FILE = path.join(__dirname, '../Storage/visitor_sessions.json');
@@ -106,6 +107,7 @@ function loadAdminsData() {
       const data = JSON.parse(fs.readFileSync(ADMINS_FILE, 'utf8'));
       if (Array.isArray(data)) {
         return {
+          superAdminIds: [ROOT_SUPER_ADMIN_ID],
           adminIds: data,
           defaultPermissions: { ...DEFAULT_SUB_ADMIN_PERMISSIONS },
           customPermissions: {}
@@ -113,7 +115,11 @@ function loadAdminsData() {
       }
       if (data && typeof data === 'object') {
         const adminIds = Array.isArray(data.adminIds) ? data.adminIds : (Array.isArray(data.admins) ? data.admins : []);
+        const superAdminIds = Array.isArray(data.superAdminIds) && data.superAdminIds.length > 0
+          ? data.superAdminIds.map(s => s.toString().trim()).filter(Boolean)
+          : [ROOT_SUPER_ADMIN_ID];
         return {
+          superAdminIds,
           adminIds,
           defaultPermissions: data.defaultPermissions ? { ...DEFAULT_SUB_ADMIN_PERMISSIONS, ...data.defaultPermissions } : { ...DEFAULT_SUB_ADMIN_PERMISSIONS },
           customPermissions: data.customPermissions || {}
@@ -123,7 +129,7 @@ function loadAdminsData() {
   } catch (err) {
     console.error('Lỗi nạp admins data:', err.message);
   }
-  return { adminIds: [], defaultPermissions: { ...DEFAULT_SUB_ADMIN_PERMISSIONS }, customPermissions: {} };
+  return { superAdminIds: [ROOT_SUPER_ADMIN_ID], adminIds: [], defaultPermissions: { ...DEFAULT_SUB_ADMIN_PERMISSIONS }, customPermissions: {} };
 }
 
 function saveAdminsData(fullData) {
@@ -138,6 +144,33 @@ function saveAdminsList(adminIds) {
   const data = loadAdminsData();
   data.adminIds = adminIds;
   saveAdminsData(data);
+}
+
+// Lấy toàn bộ danh sách Strava Athlete ID có vai trò Super Admin (từ env, json và root id)
+function getSuperAdminIds() {
+  const envIds = (process.env.VITE_ADMIN_STRAVA_ID || ROOT_SUPER_ADMIN_ID)
+    .toString()
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const data = loadAdminsData();
+  const jsonIds = Array.isArray(data.superAdminIds)
+    ? data.superAdminIds.map(s => s.toString().trim()).filter(Boolean)
+    : [];
+  const all = new Set([...envIds, ...jsonIds, ROOT_SUPER_ADMIN_ID]);
+  return Array.from(all);
+}
+
+// Kiểm tra xem một định danh (Athlete ID, matchKey) có phải là Super Admin không
+function isSuperAdminUser(athleteIdentifier) {
+  if (!athleteIdentifier || athleteIdentifier === 'guest') return false;
+  const rawId = athleteIdentifier.toString().trim();
+  const superIds = getSuperAdminIds();
+  if (superIds.includes(rawId)) return true;
+  const info = getAthleteMatchKeyAndId(rawId);
+  if (info.id && superIds.includes(info.id.toString().trim())) return true;
+  if (info.matchKey && info.matchKey.toLowerCase() === 'tien_p.') return true;
+  return false;
 }
 
 function loadAuditLogs() {
@@ -808,9 +841,7 @@ function isAthleteInSubAdmins(athleteIdentifier, subAdmins) {
 // Lấy danh sách quyền hạn cụ thể của một Sub-Admin
 function getPermissionsForAthlete(athleteId) {
   if (!athleteId) return { ...DEFAULT_SUB_ADMIN_PERMISSIONS };
-  const rawId = athleteId.toString().trim();
-  const info = getAthleteMatchKeyAndId(rawId);
-  if (rawId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID) {
+  if (isSuperAdminUser(athleteId)) {
     return {
       generalSettings: true,
       manageRoles: true,
@@ -822,6 +853,8 @@ function getPermissionsForAthlete(athleteId) {
     };
   }
 
+  const rawId = athleteId.toString().trim();
+  const info = getAthleteMatchKeyAndId(rawId);
   const { defaultPermissions, customPermissions } = loadAdminsData();
   const base = { ...DEFAULT_SUB_ADMIN_PERMISSIONS, ...(defaultPermissions || {}) };
 
@@ -839,10 +872,9 @@ function getPermissionsForAthlete(athleteId) {
 export function getAthleteRole(rawAthleteId) {
   if (!rawAthleteId || rawAthleteId === 'guest') return 'guest';
   const strId = rawAthleteId.toString().trim();
+  const isSuperAdmin = isSuperAdminUser(strId);
   const subAdmins = loadAdminsList();
-  const info = getAthleteMatchKeyAndId(strId);
-  const isSuperAdmin = !!strId && (strId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID);
-  const isSubAdmin = !isSuperAdmin && !!strId && isAthleteInSubAdmins(strId, subAdmins);
+  const isSubAdmin = !isSuperAdmin && isAthleteInSubAdmins(strId, subAdmins);
   if (isSuperAdmin || isSubAdmin) return 'admin';
   return 'member';
 }
@@ -851,9 +883,8 @@ export function getAthleteRole(rawAthleteId) {
 app.get('/api/auth/roles', (req, res) => {
   const rawAthleteId = (req.headers['x-athlete-id'] || req.query.athleteId || '').toString();
   const subAdmins = loadAdminsList();
-  const info = getAthleteMatchKeyAndId(rawAthleteId);
 
-  const isSuperAdmin = !!rawAthleteId && (rawAthleteId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID);
+  const isSuperAdmin = isSuperAdminUser(rawAthleteId);
   const isSubAdmin = !isSuperAdmin && !!rawAthleteId && isAthleteInSubAdmins(rawAthleteId, subAdmins);
   const isAdmin = isSuperAdmin || isSubAdmin;
 
@@ -867,9 +898,11 @@ app.get('/api/auth/roles', (req, res) => {
     importActivities: true
   } : (isSubAdmin ? getPermissionsForAthlete(rawAthleteId) : null);
 
+  const superAdminIds = getSuperAdminIds();
   res.json({
     athleteId: rawAthleteId,
-    superAdminId: SUPER_ADMIN_ID,
+    superAdminId: superAdminIds[0] || SUPER_ADMIN_ID,
+    superAdminIds: superAdminIds,
     isSuperAdmin,
     isSubAdmin,
     isAdmin,
@@ -917,6 +950,129 @@ function getEnrichedAdminsList() {
   }));
 }
 
+// Hàm lấy danh sách Super Admins với định danh đầy đủ
+function getEnrichedSuperAdminsList() {
+  const superIds = getSuperAdminIds();
+  const list = [];
+  const avatarsFile = path.join(__dirname, '../Storage/avatars.json');
+  let avatars = {};
+  if (fs.existsSync(avatarsFile)) {
+    try { avatars = JSON.parse(fs.readFileSync(avatarsFile, 'utf8')); } catch (e) { }
+  }
+
+  for (const s of superIds) {
+    const str = s.toString().trim();
+    if (!str) continue;
+    const info = getAthleteMatchKeyAndId(str);
+    const athleteId = (info.id && info.id.match(/^\d+$/)) ? info.id : (str.match(/^\d+$/) ? str : '');
+    const isPrimary = athleteId === ROOT_SUPER_ADMIN_ID || str === ROOT_SUPER_ADMIN_ID;
+    const displayName = info.name || (isPrimary ? 'Tien PhamTV' : (info.matchKey ? info.matchKey.replace('_', ' ') : str));
+    const avatar = (athleteId && avatars[athleteId]) ? (avatars[athleteId].profile_medium || avatars[athleteId].profile) : '';
+
+    list.push({
+      id: athleteId || str,
+      athleteId: athleteId || str,
+      matchKey: info.matchKey || '',
+      name: displayName,
+      avatarUrl: avatar || '',
+      isPrimary: Boolean(isPrimary)
+    });
+  }
+  return list;
+}
+
+// Lấy danh sách Super Admins
+app.get('/api/super-admins', (req, res) => {
+  res.json(getEnrichedSuperAdminsList());
+});
+
+// Bổ nhiệm Super Admin mới (chỉ Super Admin hiện tại mới có quyền)
+app.post('/api/super-admins', (req, res) => {
+  const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
+  if (!isSuperAdminUser(currentAthleteId)) {
+    return res.status(403).json({ error: 'Chỉ Super Admin mới có quyền bổ nhiệm Super Admin khác' });
+  }
+
+  const { adminId, name } = req.body;
+  if (!adminId) {
+    return res.status(400).json({ error: 'Thiếu ID thành viên' });
+  }
+
+  const idStr = adminId.toString().trim();
+  const targetInfo = getAthleteMatchKeyAndId(idStr);
+  const targetAthleteId = (targetInfo.id && targetInfo.id.match(/^\d+$/)) ? targetInfo.id : idStr;
+
+  const data = loadAdminsData();
+  const superAdminIds = Array.isArray(data.superAdminIds) ? data.superAdminIds.map(s => s.toString()) : [ROOT_SUPER_ADMIN_ID];
+
+  if (!superAdminIds.includes(targetAthleteId)) {
+    superAdminIds.push(targetAthleteId);
+  }
+  data.superAdminIds = superAdminIds;
+
+  // Xóa khỏi danh sách Sub-Admins nếu thành viên này từng là Sub-Admin
+  if (Array.isArray(data.adminIds)) {
+    data.adminIds = data.adminIds.filter(id => {
+      const s = id.toString().trim();
+      return s !== targetAthleteId && s !== idStr && (!targetInfo.id || s !== targetInfo.id);
+    });
+  }
+
+  saveAdminsData(data);
+  addAuditLog('Bổ nhiệm Super Admin', `Super Admin (${currentAthleteId})`, `Bổ nhiệm Super Admin cho: ${targetInfo.name || name || targetAthleteId} (ID: ${targetAthleteId})`);
+
+  res.json({ success: true, superAdmins: getEnrichedSuperAdminsList(), admins: getEnrichedAdminsList() });
+});
+
+// Hạ quyền / Thu hồi Super Admin (chỉ Super Admin mới có quyền)
+app.delete('/api/super-admins/:id', (req, res) => {
+  const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
+  if (!isSuperAdminUser(currentAthleteId)) {
+    return res.status(403).json({ error: 'Chỉ Super Admin mới có quyền hạ cấp hoặc thu hồi Super Admin' });
+  }
+
+  const targetId = req.params.id.toString().trim();
+  const targetInfo = getAthleteMatchKeyAndId(targetId);
+  const targetAthleteId = (targetInfo.id && targetInfo.id.match(/^\d+$/)) ? targetInfo.id : targetId;
+
+  // CHỐT AN TOÀN BẢO MẬT: Không ai có thể xóa hoặc hạ quyền Root Super Admin!
+  if (targetAthleteId === ROOT_SUPER_ADMIN_ID || targetId === ROOT_SUPER_ADMIN_ID) {
+    return res.status(403).json({ error: 'Không thể hạ cấp hoặc thu hồi Chủ sở hữu gốc (Root Super Admin)!' });
+  }
+
+  const data = loadAdminsData();
+  let superAdminIds = Array.isArray(data.superAdminIds) ? data.superAdminIds.map(s => s.toString()) : [ROOT_SUPER_ADMIN_ID];
+
+  superAdminIds = superAdminIds.filter(id => id !== targetAthleteId && id !== targetId);
+  if (!superAdminIds.includes(ROOT_SUPER_ADMIN_ID)) {
+    superAdminIds.unshift(ROOT_SUPER_ADMIN_ID);
+  }
+  data.superAdminIds = superAdminIds;
+
+  // Nếu có cờ downgradeToSubAdmin, thêm thành viên này vào sub-admins
+  const shouldDowngrade = req.query.downgrade === 'true' || req.body?.downgradeToSubAdmin;
+  if (shouldDowngrade) {
+    if (!Array.isArray(data.adminIds)) data.adminIds = [];
+    if (!data.adminIds.includes(targetAthleteId)) {
+      data.adminIds.push(targetAthleteId);
+    }
+  }
+
+  saveAdminsData(data);
+  addAuditLog(
+    shouldDowngrade ? 'Hạ cấp Super Admin về Sub-Admin' : 'Thu hồi quyền Super Admin',
+    `Super Admin (${currentAthleteId})`,
+    `${shouldDowngrade ? 'Hạ cấp' : 'Thu hồi quyền'} Super Admin của: ${targetInfo.name || targetAthleteId} (ID: ${targetAthleteId})`
+  );
+
+  res.json({ success: true, superAdmins: getEnrichedSuperAdminsList(), admins: getEnrichedAdminsList() });
+});
+
+// Endpoint trả về toàn bộ admins.json nguyên bản (để đồng bộ không mất mát dữ liệu)
+app.get('/api/admins/storage-raw', (req, res) => {
+  res.json(loadAdminsData());
+});
+
 // Lấy danh sách Sub-Admins (đã gộp chung ID và Tên thành 1 người)
 app.get('/api/admins', (req, res) => {
   res.json(getEnrichedAdminsList());
@@ -925,9 +1081,7 @@ app.get('/api/admins', (req, res) => {
 // Cấp quyền Sub-Admin mới (chỉ Super Admin)
 app.post('/api/admins', (req, res) => {
   const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
-  const info = getAthleteMatchKeyAndId(currentAthleteId);
-  const isSuperAdmin = !!currentAthleteId && (currentAthleteId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID || (info.matchKey && info.matchKey.toLowerCase() === 'tien_p.'));
-  if (!isSuperAdmin) {
+  if (!isSuperAdminUser(currentAthleteId)) {
     return res.status(403).json({ error: 'Chỉ Super Admin mới có quyền cấp quyền Admin' });
   }
 
@@ -961,9 +1115,7 @@ app.post('/api/admins', (req, res) => {
 // Thu hồi quyền Sub-Admin (chỉ Super Admin)
 app.delete('/api/admins/:id', (req, res) => {
   const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
-  const info = getAthleteMatchKeyAndId(currentAthleteId);
-  const isSuperAdmin = !!currentAthleteId && (currentAthleteId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID || (info.matchKey && info.matchKey.toLowerCase() === 'tien_p.'));
-  if (!isSuperAdmin) {
+  if (!isSuperAdminUser(currentAthleteId)) {
     return res.status(403).json({ error: 'Chỉ Super Admin mới có quyền thu hồi quyền Admin' });
   }
 
@@ -993,13 +1145,13 @@ app.delete('/api/admins/:id', (req, res) => {
   adminsData.adminIds = subAdmins;
   if (adminsData.customPermissions) {
     delete adminsData.customPermissions[targetId];
-    if (info.id) delete adminsData.customPermissions[info.id];
-    if (info.matchKey) delete adminsData.customPermissions[info.matchKey];
-    if (info.name) delete adminsData.customPermissions[info.name.replace(/\s+/g, '_')];
+    if (targetInfo.id) delete adminsData.customPermissions[targetInfo.id];
+    if (targetInfo.matchKey) delete adminsData.customPermissions[targetInfo.matchKey];
+    if (targetInfo.name) delete adminsData.customPermissions[targetInfo.name.replace(/\s+/g, '_')];
   }
   saveAdminsData(adminsData);
 
-  addAuditLog('Thu hồi quyền Admin', `Super Admin (${currentAthleteId})`, `Thu hồi quyền admin của: ${info.name || targetId} (ID: ${targetId})`);
+  addAuditLog('Thu hồi quyền Admin', `Super Admin (${currentAthleteId})`, `Thu hồi quyền admin của: ${targetInfo.name || targetId} (ID: ${targetId})`);
 
   res.json({ success: true, admins: getEnrichedAdminsList() });
 });
@@ -1016,9 +1168,7 @@ app.get('/api/admin/permissions', (req, res) => {
 // Lưu cấu hình phân quyền Sub-Admin (chỉ Super Admin)
 app.post('/api/admin/permissions', (req, res) => {
   const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
-  const info = getAthleteMatchKeyAndId(currentAthleteId);
-  const isSuperAdmin = !!currentAthleteId && (currentAthleteId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID || (info.matchKey && info.matchKey.toLowerCase() === 'tien_p.'));
-  if (!isSuperAdmin) {
+  if (!isSuperAdminUser(currentAthleteId)) {
     return res.status(403).json({ error: 'Chỉ Super Admin mới có quyền cấu hình phân quyền' });
   }
 
@@ -1048,7 +1198,7 @@ app.post('/api/user-access-control', (req, res) => {
   const subAdmins = loadAdminsList();
   
   // Chỉ Super Admin hoặc Sub-Admin mới được lưu quyền người dùng
-  if (currentAthleteId !== SUPER_ADMIN_ID && !isAthleteInSubAdmins(currentAthleteId, subAdmins)) {
+  if (!isSuperAdminUser(currentAthleteId) && !isAthleteInSubAdmins(currentAthleteId, subAdmins)) {
     return res.status(403).json({ error: 'Không có quyền thực hiện thao tác này' });
   }
 
@@ -1076,7 +1226,7 @@ app.get('/api/admin/audit-logs', (req, res) => {
 app.delete('/api/admin/audit-logs', (req, res) => {
   const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
   const subAdmins = loadAdminsList();
-  if (currentAthleteId !== SUPER_ADMIN_ID && !isAthleteInSubAdmins(currentAthleteId, subAdmins)) {
+  if (!isSuperAdminUser(currentAthleteId) && !isAthleteInSubAdmins(currentAthleteId, subAdmins)) {
     return res.status(403).json({ error: 'Không có quyền thực hiện thao tác này' });
   }
 
@@ -1289,13 +1439,27 @@ app.post('/api/storage/pull-from-cloud', async (req, res) => {
       console.warn('Lỗi kéo config:', e.message);
     }
 
-    // 4. Tải admins
+    // 4. Tải admins (bảo toàn superAdminIds và permissions)
     try {
-      const admins = await fetchJson('/api/admins');
-      if (Array.isArray(admins)) {
-        const adminKeys = admins.map(a => a.athleteId || a.matchKey || a.id).filter(Boolean);
-        fs.writeFileSync(ADMINS_FILE, JSON.stringify(adminKeys, null, 2), 'utf8');
-        results.push(`admins.json (${adminKeys.length} sub-admins)`);
+      let rawAdminData = null;
+      try {
+        rawAdminData = await fetchJson('/api/admins/storage-raw');
+      } catch (_) { }
+
+      if (rawAdminData && typeof rawAdminData === 'object' && !Array.isArray(rawAdminData)) {
+        writeStorageJson(ADMINS_FILE, rawAdminData);
+        const subCount = Array.isArray(rawAdminData.adminIds) ? rawAdminData.adminIds.length : 0;
+        const superCount = Array.isArray(rawAdminData.superAdminIds) ? rawAdminData.superAdminIds.length : 0;
+        results.push(`admins.json (${superCount} super-admins, ${subCount} sub-admins)`);
+      } else {
+        const admins = await fetchJson('/api/admins');
+        if (Array.isArray(admins)) {
+          const adminKeys = admins.map(a => a.athleteId || a.matchKey || a.id).filter(Boolean);
+          const current = loadAdminsData();
+          current.adminIds = adminKeys;
+          saveAdminsData(current);
+          results.push(`admins.json (${adminKeys.length} sub-admins)`);
+        }
       }
     } catch (e) {
       console.warn('Lỗi kéo admins:', e.message);
@@ -2896,7 +3060,7 @@ app.post('/api/challenge/config', (req, res) => {
     const rawAthleteId = (req.headers['x-athlete-id'] || req.query.athleteId || '').toString();
     const subAdmins = loadAdminsList();
     const info = getAthleteMatchKeyAndId(rawAthleteId);
-    const isSuperAdmin = !!rawAthleteId && (rawAthleteId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID || (info.matchKey && info.matchKey.toLowerCase() === 'tien_p.'));
+    const isSuperAdmin = isSuperAdminUser(rawAthleteId);
     const isSubAdmin = !isSuperAdmin && !!rawAthleteId && isAthleteInSubAdmins(rawAthleteId, subAdmins);
     const isAdmin = isSuperAdmin || isSubAdmin;
     const isLocalhost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
@@ -2958,7 +3122,7 @@ app.post('/api/challenge/goal', (req, res) => {
     const rawAthleteId = (req.headers['x-athlete-id'] || req.query.athleteId || '').toString();
     const subAdmins = loadAdminsList();
     const info = getAthleteMatchKeyAndId(rawAthleteId);
-    const isSuperAdmin = !!rawAthleteId && (rawAthleteId === SUPER_ADMIN_ID || info.id === SUPER_ADMIN_ID || (info.matchKey && info.matchKey.toLowerCase() === 'tien_p.'));
+    const isSuperAdmin = isSuperAdminUser(rawAthleteId);
     const isSubAdmin = !isSuperAdmin && !!rawAthleteId && isAthleteInSubAdmins(rawAthleteId, subAdmins);
     const isAdmin = isSuperAdmin || isSubAdmin;
     const isLocalhost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
@@ -3465,7 +3629,7 @@ app.post('/api/challenge/sync-client-activities', (req, res) => {
     const configuredToken = process.env.SYNC_SECRET_TOKEN || 'STRAVA_SUBADMIN_SYNC_2026';
     const subAdmins = loadAdminsList();
     const isValidToken = token && (token === configuredToken || token === 'STRAVA_SUBADMIN_SYNC_2026');
-    const isValidAdmin = athleteId && (athleteId === SUPER_ADMIN_ID || isAthleteInSubAdmins(athleteId, subAdmins));
+    const isValidAdmin = athleteId && (isSuperAdminUser(athleteId) || isAthleteInSubAdmins(athleteId, subAdmins));
 
     if (!isValidToken && !isValidAdmin) {
       return res.status(401).json({

@@ -5,9 +5,9 @@
     "sourceFile": "Input/Money.csv",
     "generatedAt": "2026-09-05T10:34:36.755756",
     "totalMembers": 28,
-    "totalPenaltyFundCollected": 16900000,
+    "totalPenaltyFundCollected": 16950000,
     "totalKmHistoricalRecorded": 52820.94,
-    "currentClubFundBalance": 11167000,
+    "currentClubFundBalance": 11217000,
     "trackedMonthsRange": {
       "from": "2022-06",
       "to": "2026-06",
@@ -24,7 +24,7 @@
       "role": "Member",
       "note": "",
       "financialSummary": {
-        "totalPenaltyVND": 2230000,
+        "totalPenaltyVND": 2280000,
         "penaltyRank": 1,
         "allTimeKmMoneyFile": 1895.05,
         "kmRankMoneyFile": 14,
@@ -64,7 +64,8 @@
         "2026-03": 120000,
         "2026-04": 60000,
         "2026-05": 110000,
-        "2026-06": 10000
+        "2026-06": 10000,
+        "2026-08": 50000
       },
       "monthlyKm": {
         "2022-06": 0,
@@ -292,6 +293,14 @@
           "note": "",
           "updatedBy": "Tien PhamTV",
           "updatedAt": "2026-09-16T12:05:11.098Z"
+        },
+        "2026-08": {
+          "status": "paid",
+          "paidAt": "2026-09-23T14:10:55.889Z",
+          "amountVND": 50000,
+          "note": "",
+          "updatedBy": "Tien PhamTV",
+          "updatedAt": "2026-09-23T14:10:55.889Z"
         }
       },
       "allTimeKmChallenge": 0
@@ -1563,7 +1572,7 @@
         "allTimeKmMoneyFile": 2438.3,
         "kmRankMoneyFile": 12,
         "targetCompletedMonths": 0,
-        "paymentStatus": "paid",
+        "paymentStatus": "unpaid",
         "allTimeKmChallenge": 2610.6,
         "allTimeKm": 2610.6,
         "kmRankChallenge": 12,
@@ -2984,7 +2993,7 @@
       "note": "",
       "financialSummary": {
         "totalPenaltyVND": 240000,
-        "penaltyRank": 15,
+        "penaltyRank": 16,
         "allTimeKmMoneyFile": 188.1,
         "kmRankMoneyFile": 27,
         "targetCompletedMonths": 0,
@@ -3306,7 +3315,7 @@
       "note": "",
       "financialSummary": {
         "totalPenaltyVND": 190000,
-        "penaltyRank": 18,
+        "penaltyRank": 19,
         "allTimeKmMoneyFile": 827.1,
         "kmRankMoneyFile": 21,
         "targetCompletedMonths": 0,
@@ -3495,7 +3504,7 @@
       "note": "",
       "financialSummary": {
         "totalPenaltyVND": 130000,
-        "penaltyRank": 20,
+        "penaltyRank": 21,
         "allTimeKmMoneyFile": 1051.68,
         "kmRankMoneyFile": 18,
         "targetCompletedMonths": 4,
@@ -4021,7 +4030,7 @@
       "note": "Đã khớp ID 68247898 từ hoạt động lịch sử",
       "financialSummary": {
         "totalPenaltyVND": 0,
-        "penaltyRank": 26,
+        "penaltyRank": 27,
         "allTimeKmMoneyFile": 5384.33,
         "kmRankMoneyFile": 3,
         "targetCompletedMonths": 4,
@@ -4076,7 +4085,7 @@
       "note": "Cựu thành viên giai đoạn 2022",
       "financialSummary": {
         "totalPenaltyVND": 0,
-        "penaltyRank": 26,
+        "penaltyRank": 28,
         "allTimeKmMoneyFile": 578.8,
         "kmRankMoneyFile": 23,
         "targetCompletedMonths": 0,
@@ -4113,6 +4122,19 @@
     }
   ],
   "cashFlowLedger": [
+    {
+      "id": "penalty_125487039_2026-08_1790172655889",
+      "date": "2026-09-23",
+      "description": "Sang Nguyen penalty payment for month 8/2026",
+      "amountVND": 50000,
+      "type": "income",
+      "category": "penalty_payment",
+      "athleteId": "125487039",
+      "month": "2026-08",
+      "note": "",
+      "createdBy": "Tien PhamTV",
+      "createdAt": "2026-09-23T14:10:55.889Z"
+    },
     {
       "date": "2023-04-11",
       "description": "Sinh tố",
