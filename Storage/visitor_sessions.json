@@ -2,14 +2,14 @@
   "v_6fe64e0a-f9ba": {
     "visitorId": "v_6fe64e0a-f9ba",
     "firstSeen": "2026-09-14T07:00:00.148Z",
-    "pageViewsCount": 257,
+    "pageViewsCount": 266,
     "pagesHistory": [
       "/",
       "/administer",
       "/callback",
       "/nextgen"
     ],
-    "lastSeen": "2026-09-23T14:12:59.760Z",
+    "lastSeen": "2026-09-24T14:48:47.342Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Chrome PWA)",
@@ -20,8 +20,8 @@
     "screenSize": "2560x1369",
     "athleteId": "133066813",
     "athleteName": "Tien PhamTV",
-    "lastPage": "/administer",
-    "durationMinutes": 13393,
+    "lastPage": "/",
+    "durationMinutes": 14869,
     "avatar": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/medium.jpg"
   },
   "v_379ad7d1-8155": {
@@ -46,14 +46,14 @@
   "v_50c7e864-c631": {
     "visitorId": "v_50c7e864-c631",
     "firstSeen": "2026-09-14T15:22:22.184Z",
-    "pageViewsCount": 51,
+    "pageViewsCount": 53,
     "pagesHistory": [
       "/callback",
       "/",
       "/administer",
       "/nextgen"
     ],
-    "lastSeen": "2026-09-23T13:41:54.864Z",
+    "lastSeen": "2026-09-23T15:33:30.361Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Edge)",
@@ -65,7 +65,7 @@
     "athleteId": "120540594",
     "athleteName": "pham tien",
     "lastPage": "/",
-    "durationMinutes": 12860,
+    "durationMinutes": 12971,
     "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c"
   },
   "v_f5eaa2fd-f5cf": {
@@ -2549,6 +2549,48 @@
       "/leaderboard"
     ],
     "lastSeen": "2026-09-23T09:58:47.914Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": false,
+    "screenSize": "2139x1200",
+    "athleteId": "133066813",
+    "athleteName": "Admin",
+    "lastPage": "/leaderboard",
+    "durationMinutes": 1
+  },
+  "v_7c91081e-a745": {
+    "visitorId": "v_7c91081e-a745",
+    "firstSeen": "2026-09-24T02:16:07.577Z",
+    "pageViewsCount": 1,
+    "pagesHistory": [
+      "/leaderboard"
+    ],
+    "lastSeen": "2026-09-24T02:16:12.375Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": false,
+    "isGuest": false,
+    "screenSize": "2139x1200",
+    "athleteId": "133066813",
+    "athleteName": "Admin",
+    "lastPage": "/leaderboard",
+    "durationMinutes": 1
+  },
+  "v_5ef9a495-9d67": {
+    "visitorId": "v_5ef9a495-9d67",
+    "firstSeen": "2026-09-24T02:16:51.711Z",
+    "pageViewsCount": 1,
+    "pagesHistory": [
+      "/leaderboard"
+    ],
+    "lastSeen": "2026-09-24T02:16:57.032Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Chrome)",
