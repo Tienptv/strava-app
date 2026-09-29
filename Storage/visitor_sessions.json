@@ -2,14 +2,14 @@
   "v_6fe64e0a-f9ba": {
     "visitorId": "v_6fe64e0a-f9ba",
     "firstSeen": "2026-09-14T07:00:00.148Z",
-    "pageViewsCount": 287,
+    "pageViewsCount": 294,
     "pagesHistory": [
       "/",
       "/administer",
       "/callback",
       "/nextgen"
     ],
-    "lastSeen": "2026-09-28T09:42:43.942Z",
+    "lastSeen": "2026-09-29T15:31:26.154Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Chrome PWA)",
@@ -17,11 +17,11 @@
     "os": "Windows 10/11",
     "isPwa": true,
     "isGuest": false,
-    "screenSize": "1920x1009",
+    "screenSize": "1920x1129",
     "athleteId": "133066813",
     "athleteName": "Tien PhamTV",
     "lastPage": "/",
-    "durationMinutes": 20323,
+    "durationMinutes": 22111,
     "avatar": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/medium.jpg"
   },
   "v_379ad7d1-8155": {
