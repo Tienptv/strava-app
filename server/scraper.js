@@ -66,6 +66,65 @@ export function getAllSavedCookies() {
 }
 
 /**
+ * Cào danh sách toàn bộ thành viên của Strava Club bằng session cookie
+ * Trả về mảng [{ id, name, avatar }]
+ */
+export async function scrapeClubMembersWithCookie(clubId = '878992', sessionCookie = null) {
+  const cookie = sessionCookie || getSavedCookie();
+  if (!cookie) return [];
+
+  const headers = {
+    'Cookie': `_strava4_session=${cookie}`,
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+  };
+
+  const members = [];
+  const seenIds = new Set();
+
+  for (let page = 1; page <= 10; page++) {
+    try {
+      const res = await fetch(`https://www.strava.com/clubs/${clubId}/members?page=${page}`, { headers });
+      if (!res.ok) break;
+      const html = await res.text();
+      const liRegex = /<li[\s\S]*?<\/li>/g;
+      let m;
+      let count = 0;
+
+      while ((m = liRegex.exec(html)) !== null) {
+        const block = m[0];
+        const idMatch = block.match(/\/athletes\/(\d+)/);
+        const nameMatch = block.match(/class=['"]text-headline['"][^>]*><a[^>]*>([\s\S]*?)<\/a>/);
+        if (idMatch && nameMatch) {
+          const id = idMatch[1];
+          if (seenIds.has(id)) continue;
+          seenIds.add(id);
+
+          const name = nameMatch[1].replace(/<[^>]*>/g, '').trim();
+          let avatar = '';
+          const avMatch = block.match(/data-react-props=['"]([\s\S]*?)['"]/);
+          if (avMatch) {
+            try {
+              const unescaped = avMatch[1].replace(/&quot;/g, '"');
+              const props = JSON.parse(unescaped);
+              if (props.src) avatar = props.src;
+            } catch (_) {}
+          }
+          members.push({ id, name, avatar });
+          count++;
+        }
+      }
+
+      if (count === 0 || !html.includes('rel="next"')) break;
+    } catch (err) {
+      console.warn(`Lỗi scrape club members trang ${page}:`, err.message);
+      break;
+    }
+  }
+
+  return members;
+}
+
+/**
  * Trích xuất cookie trực tiếp từ cửa sổ Chrome chính đang chạy qua CDP port 9222
  */
 export async function extractCookiesFromActiveBrowser(cdpPort = 9222) {
@@ -500,6 +559,8 @@ export async function scrapeClubActivities(clubId, sessionCookie, limit = 50) {
         allActivities.set(activityId, {
           id: activityId,
           athleteName: athleteName,
+          athleteId: act.athlete?.athleteId || act.athlete?.id || '',
+          athleteAvatar: act.athlete?.avatarUrl || act.athlete?.profileImage || '',
           date: dateText,
           title: title,
           distance: distance,

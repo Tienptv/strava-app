@@ -60,6 +60,43 @@ const translations = {
     switchAccountRedirecting: 'Đang làm mới phiên và mở trang đăng nhập Strava...',
     switchAccountFallbackNote: 'Mẹo: Trên trang Strava, bạn cũng có thể bấm "Log in as someone else" để đổi tài khoản.',
     loginNote: 'Ứng dụng sẽ yêu cầu quyền đọc dữ liệu hoạt động từ Strava.',
+    preLoginTitle: 'Hướng Dẫn Đăng Nhập Strava',
+    preLoginDesc: 'Vui lòng mở và đăng nhập sẵn tài khoản vào ứng dụng Strava (hoặc trên trình duyệt thiết bị này) trước khi kết nối vào ứng dụng.',
+    preLoginGuestHint: 'Gợi ý: Bạn cũng có thể bấm "Xem Bảng Xếp Hạng CLB (Khách)" ở màn hình chính để vào xem ngay kết quả chạy mà không cần đăng nhập.',
+    preLoginContinueBtn: 'Tiếp tục đăng nhập Strava',
+    preLoginCancelBtn: 'Hủy / Đóng',
+
+    // Member Access (Option 3: Dropdown + Passcode)
+    memberLoginHeading: 'Đăng nhập Thành viên CLB',
+    memberSelectLabel: '1. Chọn tên thành viên của bạn:',
+    searchMemberPlaceholder: 'Gõ để tìm kiếm tên thành viên...',
+    memberSelectPlaceholder: '-- Chọn tên của bạn trong CLB --',
+    memberPassLabel: '2. Mật khẩu CLB được cấp:',
+    memberPassPlaceholder: 'Nhập mật khẩu (mặc định: 200k)',
+    memberLoginBtn: 'Vào Bảng Xếp Hạng CLB',
+    memberLoginVerifying: 'Đang kiểm tra mật khẩu...',
+    memberSelectRequired: 'Vui lòng chọn tên của bạn trong danh sách thành viên.',
+    memberPassRequired: 'Vui lòng nhập mật khẩu được cấp.',
+    memberLoginSuccess: 'Xác thực thành công! Đang vào ứng dụng...',
+    memberLoginFailed: 'Mật khẩu không đúng. Vui lòng thử lại!',
+    adminLoginSection: 'Dành cho Quản trị viên (OAuth Strava)',
+    adminLoginNote: 'Admin đăng nhập Strava để cấp quyền cào dữ liệu và quản trị.',
+
+    // Sidebar Reload Group Members
+    reloadClubMembers: 'Đồng bộ & cập nhật thành viên mới từ Strava',
+    syncingClubMembers: 'Đang đồng bộ thành viên mới từ Strava...',
+    syncClubMembersSuccess: 'Đồng bộ thành viên thành công!',
+    syncClubMembersNewFound: 'Đã tìm thấy và thêm {count} thành viên mới vào danh sách.',
+    syncClubMembersUpToDate: 'Danh sách thành viên đã là mới nhất.',
+
+    // Admin Passcode Management
+    clubPasscodeCardTitle: 'Mật Khẩu Truy Cập Thành Viên CLB',
+    clubPasscodeCardDesc: 'Mật khẩu chung cấp cho các thành viên trong nhóm để truy cập ứng dụng (mặc định là "200k", không phân biệt hoa thường).',
+    currentPasscodeLabel: 'Mật khẩu hiện tại:',
+    newPasscodeLabel: 'Mật khẩu mới:',
+    newPasscodePlaceholder: 'Nhập mật khẩu mới (ví dụ: 200k)',
+    changePasscodeBtn: 'Đổi Mật Khẩu',
+    passcodeChangedSuccess: 'Đã đổi mật khẩu truy cập CLB thành công!',
 
     // Dashboard
     greeting: 'Sẵn sàng chinh phục mục tiêu cùng CLB,',
@@ -895,6 +932,43 @@ const translations = {
     switchAccountRedirecting: 'Refreshing Strava session & opening login page...',
     switchAccountFallbackNote: 'Tip: On the Strava page, you can also click "Log in as someone else" to switch accounts.',
     loginNote: 'The app will request read access to your Strava activity data.',
+    preLoginTitle: 'Strava Login Instructions',
+    preLoginDesc: 'Please open and log in to the Strava app (or Strava in your browser) on this device before connecting to the application.',
+    preLoginGuestHint: 'Tip: You can also click "View Club Leaderboard (Guest)" on the main screen to view running results immediately without logging in.',
+    preLoginContinueBtn: 'Continue to Strava',
+    preLoginCancelBtn: 'Cancel / Close',
+
+    // Member Access (Option 3: Dropdown + Passcode)
+    memberLoginHeading: 'Club Member Access',
+    memberSelectLabel: '1. Select your member name:',
+    searchMemberPlaceholder: 'Type to search member name...',
+    memberSelectPlaceholder: '-- Select your name in the club --',
+    memberPassLabel: '2. Club Access Passcode:',
+    memberPassPlaceholder: 'Enter passcode (default: 200k)',
+    memberLoginBtn: 'Enter Club Dashboard',
+    memberLoginVerifying: 'Verifying passcode...',
+    memberSelectRequired: 'Please select your name from the member list.',
+    memberPassRequired: 'Please enter the access passcode.',
+    memberLoginSuccess: 'Verified successfully! Entering app...',
+    memberLoginFailed: 'Incorrect passcode. Please try again!',
+    adminLoginSection: 'For Administrators (Strava OAuth)',
+    adminLoginNote: 'Admins sign in with Strava to renew scraping tokens & settings.',
+
+    // Sidebar Reload Group Members
+    reloadClubMembers: 'Sync & update new members from Strava',
+    syncingClubMembers: 'Syncing new members from Strava...',
+    syncClubMembersSuccess: 'Club members synced successfully!',
+    syncClubMembersNewFound: 'Found and added {count} new members to the roster.',
+    syncClubMembersUpToDate: 'Club member roster is already up to date.',
+
+    // Admin Passcode Management
+    clubPasscodeCardTitle: 'Club Member Access Passcode',
+    clubPasscodeCardDesc: 'The shared passcode given to club members to access the app (default: "200k", case-insensitive).',
+    currentPasscodeLabel: 'Current passcode:',
+    newPasscodeLabel: 'New passcode:',
+    newPasscodePlaceholder: 'Enter new passcode (e.g. 200k)',
+    changePasscodeBtn: 'Change Passcode',
+    passcodeChangedSuccess: 'Club passcode updated successfully!',
 
     // Dashboard
     greeting: 'Ready to crush some goals,',

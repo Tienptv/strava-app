@@ -237,6 +237,54 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
     }
   }, [selectedClubId, apiFetch]);
 
+  // Đồng bộ thành viên mới từ Strava Club (Nút Reload cạnh SELECT GROUP)
+  const [syncingRoster, setSyncingRoster] = useState(false);
+  const handleReloadGroupMembers = async () => {
+    const clubId = selectedClubId || '878992';
+    setSyncingRoster(true);
+    try {
+      const res = await apiFetch(`/clubs/${clubId}/sync-roster`, {
+        method: 'POST'
+      });
+      if (res && res.success) {
+        if (Array.isArray(res.members) && res.members.length > 0) {
+          setMembers(res.members);
+        }
+        window.dispatchEvent(new CustomEvent('clubMembersUpdated', { detail: { clubId } }));
+
+        const count = res.addedCount || 0;
+        if (count > 0) {
+          const names = (res.newMembers || []).map(m => m.name || m.id).join(', ');
+          Swal.fire({
+            title: t('syncClubMembersSuccess'),
+            html: `
+              <div style="font-size: 0.90rem; color: #334155; line-height: 1.5;">
+                <p style="margin-bottom: 8px;"><b>${t('syncClubMembersNewFound').replace('{count}', count)}</b></p>
+                ${names ? `<div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 6px; font-size: 0.82rem; color: #00A3A6; font-weight: 600;">${names}</div>` : ''}
+              </div>
+            `,
+            icon: 'success',
+            confirmButtonColor: 'var(--accent)'
+          });
+        } else {
+          Swal.fire({
+            title: t('syncClubMembersSuccess'),
+            text: t('syncClubMembersUpToDate'),
+            icon: 'info',
+            confirmButtonColor: 'var(--accent)'
+          });
+        }
+      } else {
+        throw new Error(res?.error || 'Sync failed');
+      }
+    } catch (err) {
+      console.error('Lỗi sync roster:', err);
+      Swal.fire(lang === 'en' ? 'Sync Error' : 'Lỗi đồng bộ', err.message, 'error');
+    } finally {
+      setSyncingRoster(false);
+    }
+  };
+
   // Toggle thành viên
   const toggleParticipant = (athleteId, memberData) => {
     setParticipants(prev => {
@@ -564,10 +612,47 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
 
       <div className="sidebar__content">
         <div className="sidebar__section">
-          <label className="sidebar__label">
-            <Users size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-            {t('selectGroup')}
-          </label>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+            <label className="sidebar__label" style={{ marginBottom: 0 }}>
+              <Users size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+              {t('selectGroup')}
+            </label>
+            <button
+              type="button"
+              onClick={handleReloadGroupMembers}
+              disabled={syncingRoster}
+              title={t('reloadClubMembers')}
+              style={{
+                background: 'rgba(0, 163, 166, 0.08)',
+                border: '1px solid rgba(0, 163, 166, 0.25)',
+                borderRadius: '6px',
+                padding: '3px 8px',
+                cursor: syncingRoster ? 'not-allowed' : 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                color: 'var(--accent)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!syncingRoster) {
+                  e.currentTarget.style.background = 'rgba(0, 163, 166, 0.16)';
+                  e.currentTarget.style.borderColor = 'var(--accent)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!syncingRoster) {
+                  e.currentTarget.style.background = 'rgba(0, 163, 166, 0.08)';
+                  e.currentTarget.style.borderColor = 'rgba(0, 163, 166, 0.25)';
+                }
+              }}
+            >
+              <RefreshCw size={12} className={syncingRoster ? 'spin' : ''} />
+              <span>{lang === 'en' ? 'Sync' : 'Đồng bộ'}</span>
+            </button>
+          </div>
           <select 
             className="sidebar__select"
             value={selectedClubId}
@@ -867,10 +952,10 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
 
                         const finalCloudSynced = pushSuccess;
 
-                        if (data.scraped_count === 0) {
+                        if (data.scraped_count === 0 && (!data.new_members_count || data.new_members_count === 0)) {
                           await Swal.fire({
                             title: lang === 'en' ? 'No New Activities' : 'Không có hoạt động mới',
-                            text: lang === 'en' ? 'No new running activities found on Strava.' : 'Không tìm thấy hoạt động chạy bộ mới nào trên Strava.',
+                            text: lang === 'en' ? 'No new running activities or new club members found on Strava.' : 'Không tìm thấy hoạt động chạy bộ hoặc thành viên mới nào trên Strava.',
                             icon: 'info',
                             confirmButtonColor: '#0284c7',
                             confirmButtonText: lang === 'en' ? 'OK' : 'Đã hiểu'
@@ -887,6 +972,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                                 <div style="padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 10px;">
                                   <p style="color: #16a34a; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '✅ 1. Strava Data (Local Machine):' : '✅ 1. Dữ liệu Strava (Máy tính Local):'}</p>
                                   <p style="margin: 0;">• ${lang === 'en' ? `Successfully scraped <b>${data.scraped_count}</b> new run activities.` : `Cào thành công <b>${data.scraped_count}</b> hoạt động chạy bộ mới.`}</p>
+                                  ${data.new_members_count > 0 ? `<p style="margin: 4px 0 0; color: #059669; font-weight: 700;">• ${lang === 'en' ? `✨ Discovered <b>${data.new_members_count}</b> new club member(s) added to Sidebar roster (pending Admin check)!` : `✨ Đã nạp <b>${data.new_members_count}</b> thành viên mới vào danh sách nhóm trên Sidebar (chờ Admin chọn)!`}</p>` : ''}
                                   <p style="margin: 0;">• ${lang === 'en' ? `Total local activities: <b>${data.count}</b> items.` : `Tổng hoạt động trong máy: <b>${data.count}</b> mục.`}</p>
                                   ${data.filename ? `<p style="margin: 0; font-size: 0.78rem; color: #64748b;">• ${lang === 'en' ? 'File saved:' : 'Tệp lưu:'} <code>${data.filename}</code></p>` : ''}
                                 </div>

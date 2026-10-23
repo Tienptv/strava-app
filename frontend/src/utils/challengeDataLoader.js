@@ -42,11 +42,16 @@ export async function loadChallengeData(apiFetch, athlete, participants) {
       if (act.athlete?.id) {
         const actFname = normalize(act.athlete.firstname);
         const actLname = normalize(act.athlete.lastname);
+        const actFull = normalize(`${act.athlete.firstname || ''} ${act.athlete.lastname || ''}`);
         const foundKey = Object.keys(participants).find(k => {
           const p = participants[k];
           const pFname = normalize(p.firstname);
           const pLname = normalize(p.lastname);
-          return pFname === actFname && (pLname === actLname || pLname.startsWith(actLname) || actLname.startsWith(pLname));
+          const pFull = normalize(`${p.firstname || ''} ${p.lastname || ''}`);
+          const pName = normalize(p.name || '');
+          return (pFull && pFull === actFull) || 
+                 (pName && pName === actFull) ||
+                 (pFname === actFname && (pLname === actLname || pLname.startsWith(actLname) || actLname.startsWith(pLname)));
         });
         if (foundKey && !participants[foundKey].id) {
           participants[foundKey].id = act.athlete.id;
@@ -58,12 +63,17 @@ export async function loadChallengeData(apiFetch, athlete, participants) {
     if (athlete && athlete.id) {
       const myFnameNorm = normalize(myFname);
       const myLnameNorm = normalize(myLname);
+      const myFullNorm = normalize(`${myFname} ${myLname}`);
       
       const meKey = Object.keys(participants).find(k => {
         const p = participants[k];
         const pFnameNorm = normalize(p.firstname);
         const pLnameNorm = normalize(p.lastname);
-        return pFnameNorm === myFnameNorm && (pLnameNorm === myLnameNorm || pLnameNorm.startsWith(myLnameNorm) || myLnameNorm.startsWith(pLnameNorm));
+        const pFullNorm = normalize(`${p.firstname || ''} ${p.lastname || ''}`);
+        const pNameNorm = normalize(p.name || '');
+        return (pFullNorm && pFullNorm === myFullNorm) ||
+               (pNameNorm && pNameNorm === myFullNorm) ||
+               (pFnameNorm === myFnameNorm && (pLnameNorm === myLnameNorm || pLnameNorm.startsWith(myLnameNorm) || myLnameNorm.startsWith(pLnameNorm)));
       });
       if (meKey) {
         participants[meKey].id = athlete.id;

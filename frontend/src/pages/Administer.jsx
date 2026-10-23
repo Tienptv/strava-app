@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { 
@@ -45,7 +45,8 @@ import {
   EyeOff,
   BellRing,
   Radio,
-  ShieldCheck
+  ShieldCheck,
+  Key
 } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { processChallengeData } from '../utils/challengeStats';
@@ -94,6 +95,60 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   const [config, setConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
+
+  // ==========================================
+  // STATE: 1.2 CLUB ACCESS PASSCODE (PHƯƠNG ÁN 3)
+  // ==========================================
+  const [currentClubPass, setCurrentClubPass] = useState('200k');
+  const [newClubPass, setNewClubPass] = useState('');
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [savingClubPass, setSavingClubPass] = useState(false);
+
+  const loadClubPass = () => {
+    apiFetch('/admin/club-pass')
+      .then(res => {
+        if (res && res.success && res.passcode) {
+          setCurrentClubPass(res.passcode);
+        }
+      })
+      .catch(err => console.warn('Lỗi tải mật khẩu CLB:', err));
+  };
+
+  useEffect(() => {
+    loadClubPass();
+  }, []);
+
+  const handleChangeClubPass = async (e) => {
+    e?.preventDefault();
+    if (!newClubPass || !newClubPass.trim()) {
+      Swal.fire(lang === 'en' ? 'Warning' : 'Cảnh báo', lang === 'en' ? 'Please enter a new passcode' : 'Vui lòng nhập mật khẩu mới', 'warning');
+      return;
+    }
+
+    setSavingClubPass(true);
+    try {
+      const res = await apiFetch('/admin/club-pass', {
+        method: 'POST',
+        body: JSON.stringify({ passcode: newClubPass.trim() })
+      });
+      if (res && res.success) {
+        setCurrentClubPass(res.passcode);
+        setNewClubPass('');
+        Swal.fire({
+          title: lang === 'en' ? 'Success' : 'Thành công',
+          text: t('passcodeChangedSuccess'),
+          icon: 'success',
+          confirmButtonColor: 'var(--accent)'
+        });
+      } else {
+        throw new Error(res?.error || 'Update failed');
+      }
+    } catch (err) {
+      Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', err.message, 'error');
+    } finally {
+      setSavingClubPass(false);
+    }
+  };
 
   // ==========================================
   // STATE: 1.1 ANNUAL TIMELINE & RACES
@@ -2187,6 +2242,105 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             ) : (
               <p>{lang === 'en' ? 'No configuration available' : 'Không có cấu hình'}</p>
             )}
+          </div>
+
+          {/* CARD: MẬT KHẨU TRUY CẬP THÀNH VIÊN CLB (PHƯƠNG ÁN 3) */}
+          <div className="fluent-card">
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Key size={22} color="var(--accent)" />
+              {t('clubPasscodeCardTitle')}
+            </h2>
+            <p style={{ margin: '4px 0 16px', fontSize: '0.86rem', color: 'var(--text-secondary)' }}>
+              {t('clubPasscodeCardDesc')}
+            </p>
+
+            <div style={{
+              background: 'rgba(0, 163, 166, 0.05)',
+              border: '1.5px solid rgba(0, 163, 166, 0.25)',
+              borderRadius: '12px',
+              padding: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px'
+            }}>
+              {/* Mật khẩu hiện tại */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                <span style={{ fontSize: '0.90rem', fontWeight: 600, color: 'var(--primary-navy)' }}>
+                  {t('currentPasscodeLabel')}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '1rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.05em',
+                    color: 'var(--accent)',
+                    fontFamily: 'monospace'
+                  }}>
+                    {showCurrentPass ? currentClubPass : '••••••••'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPass(!showCurrentPass)}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '8px',
+                      padding: '7px 10px',
+                      cursor: 'pointer',
+                      color: '#475569',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title={showCurrentPass ? (lang === 'en' ? 'Hide' : 'Ẩn') : (lang === 'en' ? 'Show' : 'Hiện')}
+                  >
+                    {showCurrentPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Form đổi mật khẩu mới */}
+              <form onSubmit={handleChangeClubPass} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginTop: '6px' }}>
+                <div style={{ flex: '1', minWidth: '220px' }}>
+                  <input
+                    type="text"
+                    value={newClubPass}
+                    onChange={(e) => setNewClubPass(e.target.value)}
+                    placeholder={t('newPasscodePlaceholder')}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      border: '1.5px solid #cbd5e1',
+                      fontSize: '0.92rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={savingClubPass || !newClubPass.trim()}
+                  className="btn btn--primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '10px 18px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    cursor: savingClubPass || !newClubPass.trim() ? 'not-allowed' : 'pointer',
+                    opacity: savingClubPass || !newClubPass.trim() ? 0.6 : 1
+                  }}
+                >
+                  <Save size={16} />
+                  <span>{savingClubPass ? (lang === 'en' ? 'Saving...' : 'Đang lưu...') : t('changePasscodeBtn')}</span>
+                </button>
+              </form>
+            </div>
           </div>
 
           {/* Quick Help & Status */}

@@ -447,7 +447,21 @@ export function processChallengeData(activities, participantsMap, year, month, t
       }
     } 
     
-    // 2. Fallback match bằng tên
+    // 2. Fallback match bằng Full Name kết hợp (giải quyết tên tiếng Việt đa âm tiết)
+    if (!matchKey) {
+      const actFull = normalize(`${act.athlete?.firstname || ''} ${act.athlete?.lastname || ''}`);
+      if (actFull) {
+        const foundFullKey = Object.keys(runnerStats).find(k => {
+          const mem = runnerStats[k].member;
+          const memFull = normalize(`${mem.firstname || ''} ${mem.lastname || ''}`);
+          const memName = normalize(mem.name || '');
+          return (memFull && memFull === actFull) || (memName && memName === actFull);
+        });
+        if (foundFullKey) matchKey = foundFullKey;
+      }
+    }
+
+    // 3. Fallback match bằng tên từng phần
     if (!matchKey) {
       const fname = normalize(act.athlete?.firstname);
       const lname = normalize(act.athlete?.lastname);
@@ -456,8 +470,8 @@ export function processChallengeData(activities, participantsMap, year, month, t
         const mem = runnerStats[k].member;
         const memFname = normalize(mem.firstname);
         const memLname = normalize(mem.lastname);
-        return memFname === fname && 
-               (memLname === lname || memLname.startsWith(lname) || lname.startsWith(memLname));
+        return (memFname === fname && (memLname === lname || memLname.startsWith(lname) || lname.startsWith(memLname))) ||
+               (memFname === lname && memLname === fname);
       });
 
       if (foundKey) {
@@ -680,7 +694,21 @@ export function getCombinedDistance(activities, participantsMap, year) {
       if (foundIdKey) matchKey = foundIdKey;
     } 
     
-    // 2. Fallback match bằng tên
+    // 2. Fallback match bằng Full Name kết hợp
+    if (!matchKey) {
+      const actFull = normalize(`${act.athlete?.firstname || ''} ${act.athlete?.lastname || ''}`);
+      if (actFull) {
+        const foundFullKey = Object.keys(runnerStats).find(k => {
+          const mem = runnerStats[k].member;
+          const memFull = normalize(`${mem.firstname || ''} ${mem.lastname || ''}`);
+          const memName = normalize(mem.name || '');
+          return (memFull && memFull === actFull) || (memName && memName === actFull);
+        });
+        if (foundFullKey) matchKey = foundFullKey;
+      }
+    }
+
+    // 3. Fallback match bằng tên từng phần
     if (!matchKey) {
       const fname = normalize(act.athlete?.firstname);
       const lname = normalize(act.athlete?.lastname);
@@ -689,8 +717,8 @@ export function getCombinedDistance(activities, participantsMap, year) {
         const mem = runnerStats[k].member;
         const memFname = normalize(mem.firstname);
         const memLname = normalize(mem.lastname);
-        return memFname === fname && 
-               (memLname === lname || memLname.startsWith(lname) || lname.startsWith(memLname));
+        return (memFname === fname && (memLname === lname || memLname.startsWith(lname) || lname.startsWith(memLname))) ||
+               (memFname === lname && memLname === fname);
       });
 
       if (foundKey) matchKey = foundKey;

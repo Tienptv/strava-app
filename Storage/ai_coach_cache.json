@@ -1776,5 +1776,45 @@
       }
     },
     "generatedAt": "2026-10-23T10:09:55.627Z"
+  },
+  "133066813_no_act_2026-10-23_en": {
+    "title": "Coach Recommendations",
+    "type": "warning",
+    "badge": "Inactivity Alert ⚠️",
+    "message": "It's been 999 days without running! Muscle readiness is fading and you still need 53.7 km. Do not overcompensate with double mileage; warm up thoroughly and ease back in with a gentle 3-4km run today! Keep in mind your potential penalty commitment!",
+    "actionPlan": "Dynamic stretching + easy 3-4km jog.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Aim for ~4 runs/week (~6.7 km each) to hit your target smoothly.",
+    "recoveryTip": "Hydrate 2-2.5L daily, refuel with protein, and sleep 7-8h for recovery.",
+    "readinessScore": 76,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 0,
+        "acuteLoadKm": 0,
+        "chronicLoadKm": 0,
+        "acuteRunsCount": 0,
+        "statusKey": "no_data",
+        "statusColor": "#94a3b8",
+        "labelVi": "Chưa đủ dữ liệu",
+        "labelEn": "No Data",
+        "descVi": "Hãy ghi nhận thêm các bài chạy để kích hoạt đo lường thể lực.",
+        "descEn": "Log more runs to activate sports science tracking."
+      },
+      "racePredictions": {
+        "hasBenchmark": false,
+        "vdot": null,
+        "predicted5k": null,
+        "predicted10k": null,
+        "predicted21k": null,
+        "trainingPaces": {
+          "easyZone2": "6:30 - 7:15",
+          "tempo": "5:45 - 6:15",
+          "interval": "5:10 - 5:35"
+        }
+      },
+      "recovery": 0,
+      "biomechanics": null
+    },
+    "generatedAt": "2026-10-23T11:18:04.730Z"
   }
 }

@@ -7,7 +7,7 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import puppeteer from 'puppeteer-core';
 import { StravaAPI } from './strava.js';
-import { scrapeClubActivities, loginAndGetCookie, getSavedCookie, extractCookiesFromActiveBrowser, clearCookiesFromActiveBrowser, getBrowserExecutable } from './scraper.js';
+import { scrapeClubActivities, scrapeClubMembersWithCookie, loginAndGetCookie, getSavedCookie, extractCookiesFromActiveBrowser, clearCookiesFromActiveBrowser, getBrowserExecutable } from './scraper.js';
 import https from 'https';
 import webPush from 'web-push';
 import { ZipArchive } from 'archiver';
@@ -44,6 +44,10 @@ const SUPER_ADMIN_ID = (process.env.VITE_ADMIN_STRAVA_ID || ROOT_SUPER_ADMIN_ID)
 const BANK_CONFIG_FILE = path.join(__dirname, '../Storage/bank_config.json');
 const WPN_SUBS_FILE = path.join(__dirname, '../Storage/wpn_subscriptions.json');
 const VISITOR_SESSIONS_FILE = path.join(__dirname, '../Storage/visitor_sessions.json');
+const CLUB_ROSTER_FILE = path.join(__dirname, '../Storage/club_roster.json');
+const ATHLETE_NAMES_FILE = path.join(__dirname, '../Storage/AthleteID_Name.csv');
+const AVATARS_FILE = path.join(__dirname, '../Storage/avatars.json');
+const CLUB_ACCESS_FILE = path.join(__dirname, '../Storage/club_access_config.json');
 
 // ==========================================
 // TỰ ĐỘNG ĐỒNG BỘ 2 CHIỀU GIỮA GIT ROOT & DESKTOP APP STORAGE
@@ -89,6 +93,25 @@ function readStorageJson(filePath, defaultValue = {}) {
     console.warn(`Lỗi đọc Storage JSON (${path.basename(filePath)}):`, err.message);
   }
   return defaultValue;
+}
+
+function getClubAccessPasscode() {
+  const config = readStorageJson(CLUB_ACCESS_FILE, null);
+  if (config && typeof config.passcode === 'string' && config.passcode.trim()) {
+    return config.passcode.trim();
+  }
+  return '200k';
+}
+
+function setClubAccessPasscode(newPass, updatedBy = 'Admin') {
+  const passcode = (newPass || '200k').trim();
+  const payload = {
+    passcode,
+    updatedAt: new Date().toISOString(),
+    updatedBy: (updatedBy || 'Admin').toString()
+  };
+  writeStorageJson(CLUB_ACCESS_FILE, payload);
+  return payload;
 }
 
 const DEFAULT_SUB_ADMIN_PERMISSIONS = {
@@ -161,17 +184,14 @@ function getSuperAdminIds() {
   return Array.from(all);
 }
 
-// Kiểm tra xem một định danh (Athlete ID, matchKey) có phải là Super Admin không
+// Kiểm tra xem một Strava Athlete ID có phải là Super Admin không (Chỉ sử dụng ID, tuyệt đối không dùng tên hay matchKey)
 function isSuperAdminUser(athleteIdentifier) {
   if (!athleteIdentifier || athleteIdentifier === 'guest') return false;
   const rawId = athleteIdentifier.toString().trim();
   const superIds = getSuperAdminIds();
-  if (superIds.includes(rawId)) return true;
-  const info = getAthleteMatchKeyAndId(rawId);
-  if (info.id && superIds.includes(info.id.toString().trim())) return true;
-  if (info.matchKey && info.matchKey.toLowerCase() === 'tien_p.') return true;
-  return false;
+  return superIds.includes(rawId);
 }
+
 
 function loadAuditLogs() {
   try {
@@ -338,8 +358,11 @@ function parseStorageCSV(content) {
     let athleteId = null;
     let athleteName = row.Name || row.Athlete || '';
     if (row.Athlete && String(row.Athlete).includes('/athletes/')) {
-      athleteId = parseInt(String(row.Athlete).replace('/athletes/', ''), 10);
+      const matchAth = String(row.Athlete).match(/\/athletes\/(\d+)/);
+      if (matchAth) athleteId = matchAth[1];
       athleteName = row.Name || '';
+    } else if (row['Athlete ID'] || row.athleteId || row.athlete_id) {
+      athleteId = String(row['Athlete ID'] || row.athleteId || row.athlete_id).trim();
     }
 
     let activityId = null;
@@ -409,6 +432,12 @@ function isBetterRecord(a, b) {
   if (!b) return true;
   if (a.start_date_local && !b.start_date_local) return true;
   if (!a.start_date_local && b.start_date_local) return false;
+
+  // Ưu tiên bản ghi đã có Athlete ID xác thực theo Rule #6
+  const aHasId = !!(a.athlete?.id || a.athleteId || a.athlete_id);
+  const bHasId = !!(b.athlete?.id || b.athleteId || b.athlete_id);
+  if (aHasId && !bHasId) return true;
+  if (!aHasId && bHasId) return false;
 
   if (a.start_date_local && b.start_date_local) {
     const dateA = new Date(a.start_date_local);
@@ -796,46 +825,12 @@ function getAthleteMatchKeyAndId(identifier) {
   return { id: rawStr, matchKey: rawStr, name: null };
 }
 
-// Kiểm tra xem một Athlete ID hoặc định danh bất kỳ có nằm trong danh sách Sub-Admin không
+// Kiểm tra xem một Strava Athlete ID có nằm trong danh sách Sub-Admin không (Chỉ sử dụng ID, tuyệt đối không dùng tên hay matchKey)
 function isAthleteInSubAdmins(athleteIdentifier, subAdmins) {
   if (!athleteIdentifier || !Array.isArray(subAdmins) || subAdmins.length === 0) return false;
-  const userStr = athleteIdentifier.toString().trim().toLowerCase();
-  const userInfo = getAthleteMatchKeyAndId(athleteIdentifier);
-
-  const userCandidates = new Set([
-    userStr,
-    userStr.replace(/_/g, ' '),
-    userStr.replace(/\s+/g, '_'),
-    removeDiacritics(userStr),
-    removeDiacritics(userStr.replace(/_/g, ' '))
-  ]);
-  if (userInfo.id) {
-    userCandidates.add(userInfo.id.toString().toLowerCase());
-  }
-  if (userInfo.matchKey) {
-    userCandidates.add(userInfo.matchKey.toLowerCase());
-    userCandidates.add(userInfo.matchKey.replace('.', '').toLowerCase());
-  }
-  if (userInfo.name) {
-    userCandidates.add(userInfo.name.toLowerCase());
-    userCandidates.add(userInfo.name.replace(/\s+/g, '_').toLowerCase());
-    userCandidates.add(removeDiacritics(userInfo.name.toLowerCase()));
-  }
-
-  return subAdmins.some(admin => {
-    if (!admin) return false;
-    const adminStr = admin.toString().trim().toLowerCase();
-    if (userCandidates.has(adminStr)) return true;
-    if (userCandidates.has(adminStr.replace(/_/g, ' '))) return true;
-    if (userCandidates.has(adminStr.replace(/\s+/g, '_'))) return true;
-    if (userCandidates.has(removeDiacritics(adminStr))) return true;
-
-    const adminInfo = getAthleteMatchKeyAndId(admin);
-    if (adminInfo.id && userInfo.id && adminInfo.id.toString() === userInfo.id.toString()) return true;
-    if (adminInfo.matchKey && userInfo.matchKey && adminInfo.matchKey.toLowerCase() === userInfo.matchKey.toLowerCase()) return true;
-    if (adminInfo.name && userInfo.name && adminInfo.name.toLowerCase() === userInfo.name.toLowerCase()) return true;
-    return false;
-  });
+  const rawId = athleteIdentifier.toString().trim();
+  const subAdminIds = subAdmins.map(a => a.toString().trim());
+  return subAdminIds.includes(rawId);
 }
 
 // Lấy danh sách quyền hạn cụ thể của một Sub-Admin
@@ -854,16 +849,11 @@ function getPermissionsForAthlete(athleteId) {
   }
 
   const rawId = athleteId.toString().trim();
-  const info = getAthleteMatchKeyAndId(rawId);
   const { defaultPermissions, customPermissions } = loadAdminsData();
   const base = { ...DEFAULT_SUB_ADMIN_PERMISSIONS, ...(defaultPermissions || {}) };
 
   if (customPermissions && typeof customPermissions === 'object') {
     if (customPermissions[rawId]) return { ...base, ...customPermissions[rawId] };
-    if (info.id && customPermissions[info.id]) return { ...base, ...customPermissions[info.id] };
-    if (info.matchKey && customPermissions[info.matchKey]) return { ...base, ...customPermissions[info.matchKey] };
-    const slug = (info.name || '').replace(/\s+/g, '_');
-    if (slug && customPermissions[slug]) return { ...base, ...customPermissions[slug] };
   }
   return base;
 }
@@ -908,6 +898,177 @@ app.get('/api/auth/roles', (req, res) => {
     isAdmin,
     permissions
   });
+});
+
+// ==========================================
+// THÀNH VIÊN CLB: XÁC THỰC BẰNG DROPDOWN TÊN + PASSCODE CLB (PHƯƠNG ÁN 3)
+// ==========================================
+
+// Lấy danh sách thành viên công khai cho màn hình Đăng nhập (không cần token OAuth)
+app.get('/api/auth/club-members', (req, res) => {
+  try {
+    const roster = getAllClubMembersRoster();
+    const members = (roster || []).map(m => {
+      const id = (m.id || m.athleteId || '').toString();
+      const fn = (m.firstname || '').trim();
+      const ln = (m.lastname || '').trim();
+      const name = m.name || `${fn} ${ln}`.trim() || id;
+      return {
+        id,
+        athleteId: id,
+        name,
+        firstname: fn,
+        lastname: ln,
+        profile_medium: m.profile_medium || m.profile || ''
+      };
+    }).filter(m => m.id);
+
+    // Sắp xếp theo tên A-Z (tiếng Việt)
+    members.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi'));
+    res.json(members);
+  } catch (err) {
+    console.error('Lỗi lấy club-members:', err.message);
+    res.status(500).json({ error: 'Không thể tải danh sách thành viên' });
+  }
+});
+
+// Xác thực thành viên bằng passcode CLB (mặc định "200k", không phân biệt hoa thường)
+app.post('/api/auth/verify-member', (req, res) => {
+  try {
+    const { athleteId, passcode } = req.body || {};
+    if (!athleteId) {
+      return res.status(400).json({ success: false, error: 'Vui lòng chọn thành viên' });
+    }
+    if (!passcode) {
+      return res.status(400).json({ success: false, error: 'Vui lòng nhập mật khẩu CLB' });
+    }
+
+    const currentPass = getClubAccessPasscode();
+    if (String(passcode).trim().toLowerCase() !== currentPass.toLowerCase()) {
+      return res.status(401).json({ success: false, error: 'Mật khẩu truy cập CLB không đúng' });
+    }
+
+    const roster = getAllClubMembersRoster();
+    const idStr = String(athleteId).trim();
+    let found = roster.find(m => String(m.id || m.athleteId) === idStr);
+
+    if (!found) {
+      // Tìm trong challenge_config participants
+      if (fs.existsSync(CONFIG_FILE)) {
+        try {
+          const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+          const parts = cfg.participants || {};
+          for (const key of Object.keys(parts)) {
+            const p = parts[key];
+            if (String(p.athleteId || p.id) === idStr) {
+              found = {
+                id: idStr,
+                athleteId: idStr,
+                firstname: p.firstname || '',
+                lastname: p.lastname || '',
+                name: p.name || `${p.firstname || ''} ${p.lastname || ''}`.trim() || idStr,
+                profile_medium: p.profile_medium || ''
+              };
+              break;
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    const athleteData = found ? {
+      id: String(found.id || found.athleteId),
+      athleteId: String(found.id || found.athleteId),
+      firstname: found.firstname || '',
+      lastname: found.lastname || '',
+      name: found.name || `${found.firstname || ''} ${found.lastname || ''}`.trim() || idStr,
+      profile_medium: found.profile_medium || found.profile || null,
+      isMemberVerified: true
+    } : {
+      id: idStr,
+      athleteId: idStr,
+      firstname: '',
+      lastname: '',
+      name: `Athlete #${idStr}`,
+      profile_medium: null,
+      isMemberVerified: true
+    };
+
+    res.json({
+      success: true,
+      athlete: athleteData
+    });
+  } catch (err) {
+    console.error('Lỗi verify-member:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Lấy mật khẩu CLB hiện tại (chỉ dành cho Admin / Super Admin)
+app.get('/api/admin/club-pass', (req, res) => {
+  const rawAthleteId = (req.headers['x-athlete-id'] || '').toString();
+  const subAdmins = loadAdminsList();
+  const isSuperAdmin = isSuperAdminUser(rawAthleteId);
+  const isSubAdmin = !isSuperAdmin && !!rawAthleteId && isAthleteInSubAdmins(rawAthleteId, subAdmins);
+  if (!isSuperAdmin && !isSubAdmin) {
+    return res.status(403).json({ success: false, error: 'Chỉ Quản trị viên mới được xem mật khẩu CLB' });
+  }
+
+  res.json({
+    success: true,
+    passcode: getClubAccessPasscode()
+  });
+});
+
+// Endpoint trả về config thô cho Render Cloud đồng bộ
+app.get('/api/admin/club-pass-raw', (req, res) => {
+  res.json(readStorageJson(CLUB_ACCESS_FILE, { passcode: '200k' }));
+});
+
+// Cập nhật mật khẩu CLB (chỉ dành cho Admin / Super Admin)
+app.post('/api/admin/club-pass', (req, res) => {
+  const rawAthleteId = (req.headers['x-athlete-id'] || '').toString();
+  const subAdmins = loadAdminsList();
+  const isSuperAdmin = isSuperAdminUser(rawAthleteId);
+  const isSubAdmin = !isSuperAdmin && !!rawAthleteId && isAthleteInSubAdmins(rawAthleteId, subAdmins);
+  if (!isSuperAdmin && !isSubAdmin) {
+    return res.status(403).json({ success: false, error: 'Chỉ Quản trị viên mới có quyền đổi mật khẩu CLB' });
+  }
+
+  const { passcode } = req.body || {};
+  if (!passcode || !String(passcode).trim()) {
+    return res.status(400).json({ success: false, error: 'Mật khẩu mới không được để trống' });
+  }
+
+  const updated = setClubAccessPasscode(passcode, rawAthleteId || 'Admin');
+  addAuditLog('Đổi mật khẩu CLB', `Admin (${rawAthleteId || 'Local'})`, `Cập nhật mật khẩu truy cập thành viên CLB thành: ${passcode.trim()}`);
+
+  res.json({
+    success: true,
+    passcode: updated.passcode,
+    updatedAt: updated.updatedAt
+  });
+});
+
+// Đồng bộ danh sách thành viên nhóm từ Strava Club (Nút Reload cạnh SELECT GROUP)
+app.post('/api/clubs/:id/sync-roster', async (req, res) => {
+  try {
+    const clubId = (req.params.id || '878992').toString().trim();
+    const result = await syncClubMembersRoster(clubId);
+    
+    // Đọc danh sách thành viên mới nhất
+    const roster = getAllClubMembersRoster();
+
+    res.json({
+      success: true,
+      addedCount: result.addedCount || 0,
+      newMembers: result.newMembers || [],
+      members: roster
+    });
+  } catch (err) {
+    console.error('Lỗi sync-roster:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // Hàm lấy danh sách Sub-Admins đã gộp định danh (gộp ID số và MatchKey thành 1 người)
@@ -1090,24 +1251,18 @@ app.post('/api/admins', (req, res) => {
     return res.status(400).json({ error: 'Thiếu ID thành viên' });
   }
 
-  const subAdmins = loadAdminsList();
-  const idStr = adminId.toString();
-  let targetInfo = getAthleteMatchKeyAndId(idStr);
-  if ((!targetInfo.id || !targetInfo.id.match(/^\d+$/)) && name) {
-    const nameInfo = getAthleteMatchKeyAndId(name);
-    if (nameInfo.id && nameInfo.id.match(/^\d+$/)) targetInfo = nameInfo;
-  }
+  const idStr = adminId.toString().trim();
+  const targetInfo = getAthleteMatchKeyAndId(idStr);
+  const targetAthleteId = (targetInfo.id && targetInfo.id.match(/^\d+$/)) ? targetInfo.id : idStr;
 
-  if (!subAdmins.includes(idStr)) subAdmins.push(idStr);
-  if (targetInfo.id && !subAdmins.includes(targetInfo.id)) subAdmins.push(targetInfo.id);
-  if (targetInfo.matchKey && !subAdmins.includes(targetInfo.matchKey)) subAdmins.push(targetInfo.matchKey);
-  if (name) {
-    const slug = name.trim().replace(/\s+/g, '_');
-    if (!subAdmins.includes(slug)) subAdmins.push(slug);
+  const subAdmins = loadAdminsList().map(a => a.toString().trim());
+
+  if (!subAdmins.includes(targetAthleteId)) {
+    subAdmins.push(targetAthleteId);
   }
 
   saveAdminsList(subAdmins);
-  addAuditLog('Cấp quyền Admin', `Super Admin (${currentAthleteId})`, `Cấp quyền admin cho: ${targetInfo.name || name || idStr} (ID: ${targetInfo.id || idStr}, Key: ${targetInfo.matchKey || idStr})`);
+  addAuditLog('Cấp quyền Admin', `Super Admin (${currentAthleteId})`, `Cấp quyền admin cho: ${targetInfo.name || name || targetAthleteId} (ID: ${targetAthleteId})`);
 
   res.json({ success: true, admins: getEnrichedAdminsList() });
 });
@@ -1119,39 +1274,23 @@ app.delete('/api/admins/:id', (req, res) => {
     return res.status(403).json({ error: 'Chỉ Super Admin mới có quyền thu hồi quyền Admin' });
   }
 
-  const targetId = req.params.id.toString();
+  const targetId = req.params.id.toString().trim();
   const targetInfo = getAthleteMatchKeyAndId(targetId);
-  const targetLower = targetId.toLowerCase();
-  const targetNoUnder = targetLower.replace(/_/g, ' ');
-  const targetSlug = targetLower.replace(/\s+/g, '_');
+  const targetAthleteId = (targetInfo.id && targetInfo.id.match(/^\d+$/)) ? targetInfo.id : targetId;
 
-  let subAdmins = loadAdminsList();
-  subAdmins = subAdmins.filter(id => {
-    const s = id.toString().trim();
-    const sLower = s.toLowerCase();
-    if (s === targetId || sLower === targetLower) return false;
-    if (sLower === targetNoUnder || sLower === targetSlug) return false;
-    if (targetInfo.id && (s === targetInfo.id || sLower === targetInfo.id.toLowerCase())) return false;
-    if (targetInfo.matchKey && (sLower === targetInfo.matchKey.toLowerCase() || sLower.replace('.', '') === targetInfo.matchKey.toLowerCase().replace('.', ''))) return false;
-    if (targetInfo.name && (sLower === targetInfo.name.toLowerCase() || sLower === targetInfo.name.replace(/\s+/g, '_').toLowerCase())) return false;
-
-    const itemInfo = getAthleteMatchKeyAndId(s);
-    if (itemInfo.id && targetInfo.id && itemInfo.id.toString() === targetInfo.id.toString()) return false;
-    return true;
-  });
+  let subAdmins = loadAdminsList().map(a => a.toString().trim());
+  subAdmins = subAdmins.filter(id => id !== targetAthleteId && id !== targetId);
 
   // Xóa quyền tùy chỉnh nếu có khi thu hồi quyền admin
-  const adminsData = loadAdminsData();
-  adminsData.adminIds = subAdmins;
-  if (adminsData.customPermissions) {
-    delete adminsData.customPermissions[targetId];
-    if (targetInfo.id) delete adminsData.customPermissions[targetInfo.id];
-    if (targetInfo.matchKey) delete adminsData.customPermissions[targetInfo.matchKey];
-    if (targetInfo.name) delete adminsData.customPermissions[targetInfo.name.replace(/\s+/g, '_')];
+  const data = loadAdminsData();
+  data.adminIds = subAdmins;
+  if (data.customPermissions && typeof data.customPermissions === 'object') {
+    delete data.customPermissions[targetAthleteId];
+    delete data.customPermissions[targetId];
   }
-  saveAdminsData(adminsData);
+  saveAdminsData(data);
 
-  addAuditLog('Thu hồi quyền Admin', `Super Admin (${currentAthleteId})`, `Thu hồi quyền admin của: ${targetInfo.name || targetId} (ID: ${targetId})`);
+  addAuditLog('Thu hồi quyền Admin', `Super Admin (${currentAthleteId})`, `Thu hồi quyền admin của: ${targetInfo.name || targetAthleteId} (ID: ${targetAthleteId})`);
 
   res.json({ success: true, admins: getEnrichedAdminsList() });
 });
@@ -1406,12 +1545,21 @@ app.post('/api/storage/pull-from-cloud', async (req, res) => {
       return await resp.json();
     };
 
-    // 1. Tải imported activities
+    // 1. Tải imported activities (Smart Merge & ID Protection)
     try {
       const imported = await fetchJson('/api/challenge/imported');
       if (Array.isArray(imported)) {
-        fs.writeFileSync(IMPORTED_FILE, JSON.stringify(imported, null, 2), 'utf8');
-        results.push(`imported_activities.json (${imported.length} mục)`);
+        let existing = [];
+        if (fs.existsSync(IMPORTED_FILE)) {
+          try {
+            existing = JSON.parse(fs.readFileSync(IMPORTED_FILE, 'utf8'));
+            if (!Array.isArray(existing)) existing = [];
+          } catch (_) { existing = []; }
+        }
+        let merged = mergeActivitiesList(existing, imported);
+        merged = mapAthleteNamesUsingCSV(merged);
+        fs.writeFileSync(IMPORTED_FILE, JSON.stringify(merged, null, 2), 'utf8');
+        results.push(`imported_activities.json (${merged.length} mục)`);
       }
     } catch (e) {
       console.warn('Lỗi kéo imported:', e.message);
@@ -1487,6 +1635,45 @@ app.post('/api/storage/pull-from-cloud', async (req, res) => {
       console.warn('Lỗi kéo wpn_subscriptions:', e.message);
     }
 
+    // 7. Tải club roster (danh sách thành viên club)
+    try {
+      const roster = await fetchJson('/api/clubs/878992/roster-raw');
+      if (Array.isArray(roster) && roster.length > 0) {
+        writeStorageJson(CLUB_ROSTER_FILE, roster);
+        results.push(`club_roster.json (${roster.length} thành viên)`);
+      }
+    } catch (e) {
+      console.warn('Lỗi kéo club_roster:', e.message);
+    }
+
+    // 8. Tải tokens_v2 (giữ lại quyền kết nối OAuth của các user)
+    try {
+      const cloudTokens = await fetchJson('/api/storage/tokens-raw');
+      if (cloudTokens && typeof cloudTokens === 'object' && Object.keys(cloudTokens).length > 0) {
+        let localTokens = {};
+        if (fs.existsSync(TOKENS_FILE)) {
+          try { localTokens = JSON.parse(fs.readFileSync(TOKENS_FILE, 'utf8')); } catch (e) { }
+        }
+        const mergedTokens = { ...localTokens, ...cloudTokens };
+        writeStorageJson(TOKENS_FILE, mergedTokens);
+        Object.keys(mergedTokens).forEach(id => tokenStore.set(id, mergedTokens[id]));
+        results.push(`tokens_v2.json (${Object.keys(mergedTokens).length} tokens)`);
+      }
+    } catch (e) {
+      console.warn('Lỗi kéo tokens:', e.message);
+    }
+
+    // 9. Tải club access passcode
+    try {
+      const passConfig = await fetchJson('/api/admin/club-pass-raw');
+      if (passConfig && passConfig.passcode) {
+        writeStorageJson(CLUB_ACCESS_FILE, passConfig);
+        results.push('club_access_config.json');
+      }
+    } catch (e) {
+      console.warn('Lỗi kéo club_access_config:', e.message);
+    }
+
     addAuditLog('Kéo dữ liệu Cloud', currentAthleteId || 'Super Admin', `Đã kéo từ ${cloudUrl}: ${results.join(', ')}`);
 
     res.json({
@@ -1543,6 +1730,30 @@ app.post('/api/storage/sync-bundle', (req, res) => {
       updated.push(`member_penalties_mapping.json`);
     }
 
+    const { clubRoster } = req.body;
+    if (clubRoster && Array.isArray(clubRoster)) {
+      writeStorageJson(CLUB_ROSTER_FILE, clubRoster);
+      updated.push(`club_roster.json (${clubRoster.length} thành viên)`);
+    }
+
+    const { tokens } = req.body;
+    if (tokens && typeof tokens === 'object') {
+      let existingTokens = {};
+      if (fs.existsSync(TOKENS_FILE)) {
+        try { existingTokens = JSON.parse(fs.readFileSync(TOKENS_FILE, 'utf8')); } catch (e) { }
+      }
+      const mergedTokens = { ...existingTokens, ...tokens };
+      writeStorageJson(TOKENS_FILE, mergedTokens);
+      Object.keys(mergedTokens).forEach(id => tokenStore.set(id, mergedTokens[id]));
+      updated.push(`tokens_v2.json (${Object.keys(mergedTokens).length} tokens)`);
+    }
+
+    const { clubAccess } = req.body;
+    if (clubAccess && typeof clubAccess === 'object' && clubAccess.passcode) {
+      writeStorageJson(CLUB_ACCESS_FILE, clubAccess);
+      updated.push(`club_access_config.json`);
+    }
+
     addAuditLog('Nhận dữ liệu đồng bộ', 'Hệ thống', `Cập nhật bundle: ${updated.join(', ')}`);
 
     res.json({ success: true, updated, message: `Đã cập nhật ${updated.length} tệp dữ liệu thành công!` });
@@ -1550,6 +1761,30 @@ app.post('/api/storage/sync-bundle', (req, res) => {
     console.error('Lỗi sync-bundle:', err);
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// Endpoint trả về tokens_v2.json raw để sao lưu và đồng bộ 2 chiều
+app.get('/api/storage/tokens-raw', (req, res) => {
+  try {
+    if (fs.existsSync(TOKENS_FILE)) {
+      const tokens = JSON.parse(fs.readFileSync(TOKENS_FILE, 'utf8'));
+      return res.json(tokens);
+    }
+    res.json({});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint trả về club_roster.json raw
+app.get('/api/clubs/:id/roster-raw', (req, res) => {
+  try {
+    if (fs.existsSync(CLUB_ROSTER_FILE)) {
+      const roster = JSON.parse(fs.readFileSync(CLUB_ROSTER_FILE, 'utf8'));
+      if (Array.isArray(roster) && roster.length > 0) return res.json(roster);
+    }
+  } catch (_) {}
+  res.json(getAllClubMembersRoster());
 });
 
 // [GIẢI PHÁP 3] Đẩy toàn bộ dữ liệu từ máy Local lên Cloud Render
@@ -1579,6 +1814,15 @@ app.post('/api/storage/push-to-cloud', async (req, res) => {
     }
     if (fs.existsSync(PENALTIES_FILE)) {
       try { bundle.penalties = JSON.parse(fs.readFileSync(PENALTIES_FILE, 'utf8')); } catch (e) { }
+    }
+    if (fs.existsSync(CLUB_ROSTER_FILE)) {
+      try { bundle.clubRoster = JSON.parse(fs.readFileSync(CLUB_ROSTER_FILE, 'utf8')); } catch (e) { }
+    }
+    if (fs.existsSync(TOKENS_FILE)) {
+      try { bundle.tokens = JSON.parse(fs.readFileSync(TOKENS_FILE, 'utf8')); } catch (e) { }
+    }
+    if (fs.existsSync(CLUB_ACCESS_FILE)) {
+      try { bundle.clubAccess = JSON.parse(fs.readFileSync(CLUB_ACCESS_FILE, 'utf8')); } catch (e) { }
     }
 
     const targetEndpoint = `${cloudUrl}/api/storage/sync-bundle`;
@@ -2233,9 +2477,179 @@ function deduplicateMembers(list) {
   });
 }
 
-// Hàm tập hợp toàn bộ 46+ thành viên của câu lạc bộ từ các nguồn đầy đủ nhất
+// Hàm tự động đồng bộ danh sách thành viên từ Strava Club vào danh sách Roster trên Sidebar
+// TUYỆT ĐỐI KHÔNG tự động thêm vào challenge_config (monthlyParticipants/participants)
+// việc thêm vào bảng Challenge sẽ do Admin tự tick chọn trên Sidebar và bấm Lưu.
+async function syncClubMembersRoster(clubId = '878992') {
+  try {
+    let scrapedMembers = [];
+    const cookie = getSavedCookie();
+    if (cookie) {
+      scrapedMembers = await scrapeClubMembersWithCookie(clubId, cookie);
+    }
+
+    // Fallback qua API nếu có token và cookie chưa trả về kết quả
+    if (!scrapedMembers || scrapedMembers.length === 0) {
+      const anyToken = await getAnyValidAccessToken();
+      if (anyToken) {
+        try {
+          const apiMembers = await strava.getClubMembers(anyToken, clubId, { page: 1, per_page: 200 });
+          if (Array.isArray(apiMembers) && apiMembers.length > 0) {
+            scrapedMembers = apiMembers.map(m => ({
+              id: (m.id || '').toString(),
+              name: m.name || `${m.firstname || ''} ${m.lastname || ''}`.trim(),
+              avatar: m.profile_medium || m.profile || ''
+            }));
+          }
+        } catch (_) {}
+      }
+    }
+
+    if (!scrapedMembers || scrapedMembers.length === 0) {
+      return { success: false, reason: 'Không lấy được danh sách từ Strava', addedCount: 0, newMembers: [] };
+    }
+
+    // 1. Nạp roster hiện có từ Storage/club_roster.json
+    let existingRoster = [];
+    if (fs.existsSync(CLUB_ROSTER_FILE)) {
+      try {
+        existingRoster = JSON.parse(fs.readFileSync(CLUB_ROSTER_FILE, 'utf8'));
+        if (!Array.isArray(existingRoster)) existingRoster = [];
+      } catch (_) { existingRoster = []; }
+    }
+    const rosterMap = new Map();
+    existingRoster.forEach(m => {
+      const id = (m.id || m.athleteId || '').toString();
+      if (id) rosterMap.set(id, m);
+    });
+
+    // 2. Nạp ID từ AthleteID_Name.csv
+    let existingCsvIds = new Set();
+    if (fs.existsSync(ATHLETE_NAMES_FILE)) {
+      try {
+        const lines = fs.readFileSync(ATHLETE_NAMES_FILE, 'utf8').split(/\r?\n/);
+        lines.forEach(l => {
+          const parts = l.split(',');
+          if (parts[0] && parts[0].trim() && parts[0].trim() !== 'Athlete ID' && parts[0].trim() !== 'Name') {
+            existingCsvIds.add(parts[0].trim());
+          }
+        });
+      } catch (_) {}
+    }
+
+    // 3. Nạp avatars.json
+    let avatarsMap = {};
+    if (fs.existsSync(AVATARS_FILE)) {
+      try { avatarsMap = JSON.parse(fs.readFileSync(AVATARS_FILE, 'utf8')); } catch (_) {}
+    }
+
+    let addedCount = 0;
+    const newMembers = [];
+
+    scrapedMembers.forEach(sm => {
+      if (!sm.id || !sm.name) return;
+      const idStr = sm.id.toString();
+      const fullName = sm.name.trim();
+      const avatarUrl = sm.avatar || '';
+
+      const nameParts = fullName.split(/\s+/);
+      const fn = nameParts[0] || '';
+      const ln = nameParts.slice(1).join(' ') || '';
+      const initial = ln ? ln.charAt(0).toUpperCase() + '.' : '';
+      const matchKey = initial ? `${fn}_${initial}` : fn;
+
+      const isNewToRoster = !rosterMap.has(idStr);
+      const isNewToCsv = !existingCsvIds.has(idStr);
+
+      if (isNewToRoster || isNewToCsv) {
+        addedCount++;
+        newMembers.push({ id: idStr, name: fullName, avatar: avatarUrl });
+        console.log(`✨ [Auto-Sync Member] Phát hiện thành viên mới trong Club: ${fullName} (ID: ${idStr})`);
+      }
+
+      // Đăng ký vào AthleteID_Name.csv và name_mapping.json (KHÔNG add vào participants của Challenge)
+      registerAthleteToCsvAndMapping({
+        athleteId: idStr,
+        fullName: fullName,
+        avatarUrl: avatarUrl
+      });
+      existingCsvIds.add(idStr);
+
+      // Cập nhật avatars.json
+      if (avatarUrl && (!avatarsMap[idStr] || !avatarsMap[matchKey])) {
+        avatarsMap[idStr] = avatarUrl;
+        avatarsMap[matchKey] = avatarUrl;
+      }
+
+      // Cập nhật rosterMap
+      rosterMap.set(idStr, {
+        id: idStr,
+        athleteId: idStr,
+        matchKey: matchKey,
+        firstname: fn,
+        lastname: ln,
+        name: fullName,
+        profile_medium: avatarUrl,
+        profile: avatarUrl,
+        membership: 'member',
+        admin: false,
+        owner: false,
+        resource_state: 2,
+        _fromClub: true
+      });
+    });
+
+    // Lưu lại club_roster.json
+    const updatedRoster = Array.from(rosterMap.values());
+    writeStorageJson(CLUB_ROSTER_FILE, updatedRoster);
+
+    // Lưu lại avatars.json
+    writeStorageJson(AVATARS_FILE, avatarsMap);
+
+    return {
+      success: true,
+      total: scrapedMembers.length,
+      addedCount,
+      newMembers
+    };
+  } catch (err) {
+    console.error('Lỗi syncClubMembersRoster:', err);
+    return { success: false, error: err.message, addedCount: 0, newMembers: [] };
+  }
+}
+
+// Hàm tập hợp toàn bộ thành viên của câu lạc bộ từ các nguồn đầy đủ nhất
 function getAllClubMembersRoster() {
   const map = new Map();
+
+  // 0. Nạp từ Storage/club_roster.json (toàn bộ thành viên quét từ Strava Club)
+  if (fs.existsSync(CLUB_ROSTER_FILE)) {
+    try {
+      const roster = JSON.parse(fs.readFileSync(CLUB_ROSTER_FILE, 'utf8'));
+      if (Array.isArray(roster)) {
+        roster.forEach(m => {
+          const k = m.matchKey || (m.firstname ? `${m.firstname}_${(m.lastname || '').charAt(0)}.` : m.id);
+          if (k) {
+            map.set(k, {
+              matchKey: k,
+              id: m.id || m.athleteId || null,
+              athleteId: m.id || m.athleteId || null,
+              firstname: m.firstname || '',
+              lastname: m.lastname || '',
+              name: m.name || `${m.firstname || ''} ${m.lastname || ''}`.trim(),
+              profile_medium: m.profile_medium || m.profile || '',
+              profile: m.profile || m.profile_medium || '',
+              membership: m.membership || 'member',
+              admin: m.admin || false,
+              owner: m.owner || false,
+              resource_state: 2,
+              _fromClub: true
+            });
+          }
+        });
+      }
+    } catch (e) { }
+  }
 
   // 1. Nạp từ monthlyParticipants của challenge_config.json
   if (fs.existsSync(CONFIG_FILE)) {
@@ -3248,9 +3662,11 @@ app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
 
     // 3. Format as CSV
     // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
-    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
+    let csvContent = "Name,Athlete ID,Athlete,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
     runActivities.forEach(act => {
       const name = act.athlete ? `${act.athlete.firstname || ''} ${act.athlete.lastname || ''}`.trim() : 'Unknown Athlete';
+      const athId = (act.athlete?.id || act.athleteId || '') ? `"${act.athlete?.id || act.athleteId}"` : '""';
+      const athUrl = (act.athlete?.id || act.athleteId || '') ? `"/athletes/${act.athlete?.id || act.athleteId}"` : '""';
       const id = act.id || '';
       const date = act.start_date_local || act.start_date || '';
       const title = `"${(act.name || '').replace(/"/g, '""')}"`;
@@ -3269,7 +3685,7 @@ app.post('/api/clubs/:id/auto-sync', getToken, async (req, res) => {
       else if (lowerType.includes('virtual')) type = 'VirtualRun';
       else if (lowerType.includes('run')) type = 'Run';
 
-      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
+      csvContent += `${name},${athId},${athUrl},${id},${date},${title},${distance},${calories},${time},${type}\n`;
     });
 
     // 4. Save to Storage
@@ -3451,6 +3867,17 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Thiếu Strava Session Cookie. Vui lòng đăng nhập trước.' });
     }
 
+    // Option A: Tự động quét và nạp thành viên mới từ Strava Club vào danh sách Sidebar (Roster)
+    let memberSyncResult = { addedCount: 0, newMembers: [] };
+    try {
+      memberSyncResult = await syncClubMembersRoster(clubId);
+      if (memberSyncResult.addedCount > 0) {
+        console.log(`✨ [Auto-Sync Strava] Đã phát hiện và nạp ${memberSyncResult.addedCount} thành viên mới vào Sidebar Roster:`, memberSyncResult.newMembers.map(m => m.name));
+      }
+    } catch (mErr) {
+      console.warn('⚠️ Lỗi đồng bộ danh sách thành viên trong auto-sync (vẫn tiếp tục):', mErr.message);
+    }
+
     // 1. Scrape activities using Puppeteer
     const scrapedActivities = await scrapeClubActivities(clubId, cookie, limit);
 
@@ -3460,11 +3887,28 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
       return ['run', 'virtualrun', 'trailrun', 'trail run'].includes(t) || t.includes('run') || t.includes('trail');
     }).slice(0, limit);
 
+    // Option B: Activity Auto-Discovery (phát hiện runner mới từ bài chạy cào về nếu chưa có trong roster)
+    let autoDiscoveredCount = 0;
+    runActivities.forEach(act => {
+      if (act.athleteId && act.athleteName && act.athleteName !== 'Unknown Athlete') {
+        try {
+          const registered = registerAthleteToCsvAndMapping({
+            athleteId: act.athleteId,
+            fullName: act.athleteName,
+            avatarUrl: act.athleteAvatar || ''
+          });
+          if (registered) autoDiscoveredCount++;
+        } catch (_) {}
+      }
+    });
+
     // 3. Format as CSV
-    // Header: Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
-    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
+    // Header: Name,Athlete ID,Athlete,Activity ID,Date,Title,Distance,Calories,Time,Activity Type
+    let csvContent = "Name,Athlete ID,Athlete,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
     runActivities.forEach(act => {
       const name = `"${(act.athleteName || 'Unknown Athlete').replace(/"/g, '""')}"`;
+      const athId = (act.athleteId || act.athlete?.id || '') ? `"${act.athleteId || act.athlete?.id}"` : '""';
+      const athUrl = (act.athleteId || act.athlete?.id || '') ? `"/athletes/${act.athleteId || act.athlete?.id}"` : '""';
       const id = act.id || '';
       const date = act.date || '';
       const title = `"${(act.title || '').replace(/"/g, '""')}"`;
@@ -3489,7 +3933,7 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
       else if (lowerType.includes('virtual')) type = 'VirtualRun';
       else if (lowerType.includes('run')) type = 'Run';
 
-      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
+      csvContent += `${name},${athId},${athUrl},${id},${date},${title},${distance},${calories},${time},${type}\n`;
     });
 
     // 4. Save to Storage
@@ -3561,18 +4005,32 @@ app.post('/api/clubs/:id/auto-sync-scrape', async (req, res) => {
         }
       }
 
+      const totalNewMembers = (memberSyncResult.addedCount || 0) + autoDiscoveredCount;
+
       res.json({
         success: true,
         count: mergedData.length,
         activities: mergedData,
         scraped_count: runActivities.length,
+        new_members_count: totalNewMembers,
+        new_members: memberSyncResult.newMembers || [],
         filename,
         cloudSynced: cloudSyncInfo ? cloudSyncInfo.success : true,
         cloudError: cloudSyncInfo?.error || null,
         cloudResult: cloudSyncInfo?.result || null
       });
     } else {
-      res.json({ success: true, count: 0, activities: [], scraped_count: 0, filename: null, cloudSynced: true });
+      const totalNewMembers = (memberSyncResult.addedCount || 0);
+      res.json({ 
+        success: true, 
+        count: 0, 
+        activities: [], 
+        scraped_count: 0, 
+        new_members_count: totalNewMembers,
+        new_members: memberSyncResult.newMembers || [],
+        filename: null, 
+        cloudSynced: true 
+      });
     }
   } catch (error) {
     console.error('Lỗi auto-sync-scrape:', error.message);
@@ -3663,9 +4121,11 @@ app.post('/api/challenge/sync-client-activities', (req, res) => {
     }
 
     // 3. Tạo file CSV backup trong Storage
-    let csvContent = "Name,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
+    let csvContent = "Name,Athlete ID,Athlete,Activity ID,Date,Title,Distance,Calories,Time,Activity Type\n";
     runActivities.forEach(act => {
       const name = `"${(act.athleteName || 'Unknown Athlete').replace(/"/g, '""')}"`;
+      const athId = (act.athleteId || act.athlete?.id || act.athlete?.athleteId || '') ? `"${act.athleteId || act.athlete?.id || act.athlete?.athleteId}"` : '""';
+      const athUrl = (act.athleteId || act.athlete?.id || act.athlete?.athleteId || '') ? `"/athletes/${act.athleteId || act.athlete?.id || act.athlete?.athleteId}"` : '""';
       const id = act.id || '';
       const date = act.date || '';
       const title = `"${(act.title || '').replace(/"/g, '""')}"`;
@@ -3694,7 +4154,7 @@ app.post('/api/challenge/sync-client-activities', (req, res) => {
       else if (lowerType.includes('virtual')) type = 'VirtualRun';
       else if (lowerType.includes('run')) type = 'Run';
 
-      csvContent += `${name},${id},${date},${title},${distance},${calories},${time},${type}\n`;
+      csvContent += `${name},${athId},${athUrl},${id},${date},${title},${distance},${calories},${time},${type}\n`;
     });
 
     const storageDir = path.join(__dirname, '../Storage');
@@ -3770,65 +4230,138 @@ app.post('/api/challenge/sync-client-activities', (req, res) => {
 });
 
 
-// Hàm hỗ trợ map tên dựa trên AthleteID_Name.csv
+// Hàm hỗ trợ map tên dựa trên AthleteID_Name.csv và name_mapping.json
 function mapAthleteNamesUsingCSV(activities) {
   const mappingFile = path.join(__dirname, '../Storage/AthleteID_Name.csv');
   const mappingById = {};
   const mappingByName = {};
 
+  const registerEntry = (id, fullName, fn, ln) => {
+    if (!fullName || fullName === 'Name') return;
+    const cleanId = (id && id !== 'Athlete ID') ? id.toString().trim() : null;
+    const cleanName = fullName.trim();
+    const nameParts = cleanName.split(/\s+/);
+    const resolvedFn = fn || nameParts[0] || '';
+    const resolvedLn = ln !== undefined ? ln : nameParts.slice(1).join(' ');
+    const initial = resolvedLn ? resolvedLn.charAt(0).toUpperCase() + '.' : '';
+    const matchKey = initial ? `${resolvedFn}_${initial}` : resolvedFn;
+
+    const entry = {
+      id: cleanId,
+      firstname: resolvedFn,
+      lastname: resolvedLn,
+      fullName: cleanName,
+      matchKey
+    };
+
+    if (cleanId) {
+      mappingById[cleanId] = entry;
+    }
+
+    const nameLower = cleanName.toLowerCase();
+    const nameClean = removeDiacritics(nameLower);
+    mappingByName[nameLower] = entry;
+    mappingByName[nameClean] = entry;
+
+    const mkLower = matchKey.toLowerCase();
+    const mkClean = removeDiacritics(mkLower);
+    mappingByName[mkLower] = entry;
+    mappingByName[mkClean] = entry;
+    mappingByName[mkLower.replace(/\./g, '')] = entry;
+    mappingByName[mkClean.replace(/\./g, '')] = entry;
+
+    const fullSlug = `${resolvedFn}_${resolvedLn}`.toLowerCase();
+    mappingByName[fullSlug] = entry;
+    mappingByName[removeDiacritics(fullSlug)] = entry;
+  };
+
   if (fs.existsSync(mappingFile)) {
-    const lines = fs.readFileSync(mappingFile, 'utf8').split('\n');
+    const lines = fs.readFileSync(mappingFile, 'utf8').split(/\r?\n/);
     lines.forEach(line => {
       const parts = line.trim().split(',');
       if (parts.length >= 2) {
         const id = parts[0].trim();
         const fullName = parts.slice(1).join(',').trim();
-
-        if (fullName && fullName !== 'Name') {
-          const nameParts = fullName.split(' ');
-          const fn = nameParts[0];
-          const ln = nameParts.slice(1).join(' ');
-          const mappedName = { firstname: fn, lastname: ln };
-
-          if (id && id !== 'Athlete ID') {
-            mappingById[id] = mappedName;
-          }
-
-          if (ln) {
-            const initial = ln.charAt(0).toUpperCase() + '.';
-            const matchKey = `${fn}_${initial}`.toLowerCase();
-            mappingByName[matchKey] = mappedName;
-          }
-        }
+        registerEntry(id, fullName);
       }
     });
   }
 
+  // Bổ sung thêm từ name_mapping.json
+  if (fs.existsSync(NAME_MAPPING_FILE)) {
+    try {
+      const nm = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8'));
+      Object.keys(nm).forEach(k => {
+        const item = nm[k];
+        if (item && item.fullName) {
+          registerEntry(item.athleteId || item.id, item.fullName);
+        }
+      });
+    } catch (_) {}
+  }
+
+  // Bổ sung thêm từ challenge_config.json
+  if (fs.existsSync(CONFIG_FILE)) {
+    try {
+      const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+      const allParts = [
+        ...(Object.values(cfg.participants || {})),
+        ...(Object.values(cfg.monthlyParticipants || {}).flatMap(m => Object.values(m || {})))
+      ];
+      allParts.forEach(p => {
+        if (p && (p.id || p.athleteId)) {
+          const pName = p.name || `${p.firstname || ''} ${p.lastname || ''}`.trim();
+          registerEntry(p.id || p.athleteId, pName, p.firstname, p.lastname);
+        }
+      });
+    } catch (_) {}
+  }
+
   return activities.map(act => {
     if (act.athlete) {
-      let newName = null;
-      // 1. Try mapping by ID
-      if (act.athlete.id && mappingById[act.athlete.id]) {
-        newName = mappingById[act.athlete.id];
-      }
-      // 2. Try mapping by Match Key
-      else if (act.athlete.firstname) {
-        const fn = act.athlete.firstname;
-        const ln = act.athlete.lastname || '';
-        const initial = ln ? ln.charAt(0).toUpperCase() + '.' : '';
-        const matchKey = `${fn}_${initial}`.toLowerCase();
-        if (mappingByName[matchKey]) {
-          newName = mappingByName[matchKey];
-        }
+      let matchedEntry = null;
+
+      // 1. Khớp theo ID nếu có
+      const athId = (act.athlete.id || act.athleteId || act.athlete_id || '').toString().trim();
+      if (athId && mappingById[athId]) {
+        matchedEntry = mappingById[athId];
       }
 
-      if (newName) {
+      // 2. Khớp theo Full Name kết hợp (VD: "Thức Tạ Ngọc Trí")
+      if (!matchedEntry) {
+        const fn = (act.athlete.firstname || '').trim();
+        const ln = (act.athlete.lastname || '').trim();
+        const combined = `${fn} ${ln}`.trim().toLowerCase();
+        const combinedClean = removeDiacritics(combined);
+        const combinedSlug = `${fn}_${ln}`.trim().toLowerCase();
+        const combinedSlugClean = removeDiacritics(combinedSlug);
+
+        matchedEntry = mappingByName[combined] ||
+                       mappingByName[combinedClean] ||
+                       mappingByName[combinedSlug] ||
+                       mappingByName[combinedSlugClean];
+      }
+
+      // 3. Khớp theo Match Key (VD: "Thức_T." hoặc "Thức_T")
+      if (!matchedEntry && act.athlete.firstname) {
+        const fn = act.athlete.firstname.trim();
+        const ln = (act.athlete.lastname || '').trim();
+        const initial = ln ? ln.charAt(0).toUpperCase() + '.' : '';
+        const matchKey = `${fn}_${initial}`.toLowerCase();
+        matchedEntry = mappingByName[matchKey] ||
+                       mappingByName[removeDiacritics(matchKey)] ||
+                       mappingByName[matchKey.replace(/\./g, '')] ||
+                       mappingByName[removeDiacritics(matchKey).replace(/\./g, '')];
+      }
+
+      if (matchedEntry) {
         return {
           ...act,
           athlete: {
             ...act.athlete,
-            firstname: newName.firstname,
-            lastname: newName.lastname
+            id: matchedEntry.id || act.athlete.id || null,
+            firstname: matchedEntry.firstname,
+            lastname: matchedEntry.lastname
           }
         };
       }
@@ -3868,6 +4401,18 @@ async function getValidAccessToken(athleteId) {
     }
   }
   return tokenData.access_token;
+}
+
+// Helper: Lấy bất kỳ access_token hợp lệ nào từ tokenStore
+async function getAnyValidAccessToken() {
+  loadTokens();
+  for (const athId of tokenStore.keys()) {
+    try {
+      const token = await getValidAccessToken(athId);
+      if (token) return token;
+    } catch (_) {}
+  }
+  return null;
 }
 
 // 1. Xác thực Handshake khi đăng ký Webhook với Strava
@@ -6595,8 +7140,21 @@ if (fs.existsSync(path.join(__dirname, '../dist'))) {
   });
 }
 
-// Khởi chạy các Cron jobs cho Notification
-startCronJobs();
+// Khởi chạy các Cron jobs (Push Notification & Auto-Sync Thành viên Club định kỳ - Option C)
+startCronJobs({
+  onSyncClubMembers: () => syncClubMembersRoster('878992')
+});
+
+// Quét danh sách thành viên Club 1 lần trong nền sau khi khởi động server 10s
+setTimeout(() => {
+  syncClubMembersRoster('878992')
+    .then(res => {
+      if (res && res.addedCount > 0) {
+        console.log(`✨ [Startup Sync] Đã cập nhật ${res.addedCount} thành viên mới vào danh sách Sidebar:`, res.newMembers?.map(m => m.name));
+      }
+    })
+    .catch(e => console.warn('⚠️ [Startup Sync] Lỗi quét thành viên Club:', e.message));
+}, 10000);
 
 // Start Server (Listen on 0.0.0.0 for seamless 127.0.0.1 and localhost compatibility)
 const server = app.listen(PORT, '0.0.0.0', () => {

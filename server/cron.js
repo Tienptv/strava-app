@@ -7,8 +7,23 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export function startCronJobs() {
-  console.log('⏰ Bắt đầu các tác vụ Cron cho Push Notifications...');
+export function startCronJobs({ onSyncClubMembers } = {}) {
+  console.log('⏰ Bắt đầu các tác vụ Cron cho Push Notifications & Club Sync...');
+
+  // Tự động quét và cập nhật danh sách thành viên Club vào 06:00 và 18:00 hàng ngày (Option C)
+  if (typeof onSyncClubMembers === 'function') {
+    cron.schedule('0 6,18 * * *', async () => {
+      console.log('⏰ [Cron] Đang quét tự động danh sách thành viên Strava Club...');
+      try {
+        const res = await onSyncClubMembers();
+        if (res && res.addedCount > 0) {
+          console.log(`✨ [Cron] Đã phát hiện và nạp ${res.addedCount} thành viên mới vào danh sách Sidebar:`, res.newMembers?.map(m => m.name));
+        }
+      } catch (err) {
+        console.warn('⚠️ [Cron] Lỗi quét thành viên Club:', err.message);
+      }
+    });
+  }
 
   // Gửi thông báo nhắc nhở chạy bộ hàng ngày vào 17:00
   cron.schedule('0 17 * * *', () => {

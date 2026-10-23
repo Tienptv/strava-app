@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { Settings as SettingsIcon } from 'lucide-react';
 import NotificationPermissionBanner from './components/NotificationPermissionBanner';
+import ErrorBoundary from './components/ErrorBoundary';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ClubView from './pages/ClubView';
@@ -67,6 +68,18 @@ function App() {
     setAthleteId('guest');
     setAthlete(guestAthlete);
     localStorage.setItem('isGuest', 'true');
+  };
+
+  // Đăng nhập dành cho Thành viên (Phương án 3: Dropdown tên + Passcode CLB)
+  const handleMemberLogin = (athleteData) => {
+    if (!athleteData || !athleteData.id) return;
+    const id = String(athleteData.id);
+    setAthleteId(id);
+    setAthlete(athleteData);
+    localStorage.removeItem('isGuest');
+    localStorage.setItem('athleteId', id);
+    localStorage.setItem('athlete', JSON.stringify(athleteData));
+    localStorage.setItem('isMemberVerified', 'true');
   };
 
   // Hàm gọi API có kèm athlete ID
@@ -155,6 +168,34 @@ function App() {
       }
 
       // Đăng nhập thông thường (không ép đổi tài khoản)
+      // Hiển thị hộp thoại hướng dẫn đăng nhập Strava App chính giữa màn hình
+      const confirmResult = await Swal.fire({
+        title: `<span style="color: var(--primary-navy, #002D54); font-weight: 800; font-size: 1.25rem;">${t('preLoginTitle')}</span>`,
+        html: `
+          <div style="font-size: 0.95rem; color: #334155; line-height: 1.6; text-align: center; padding: 4px 0;">
+            <p style="margin-bottom: 14px; font-weight: 500;">
+              ${t('preLoginDesc')}
+            </p>
+            <div style="background: rgba(0, 163, 166, 0.08); border-left: 4px solid var(--accent, #00A3A6); padding: 10px 14px; border-radius: 8px; font-size: 0.86rem; color: var(--primary-navy, #002D54); text-align: left; line-height: 1.5;">
+              ${t('preLoginGuestHint')}
+            </div>
+          </div>
+        `,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: t('preLoginContinueBtn'),
+        cancelButtonText: t('preLoginCancelBtn'),
+        confirmButtonColor: '#00A3A6',
+        cancelButtonColor: '#64748b',
+        focusConfirm: true,
+        reverseButtons: true,
+        position: 'center'
+      });
+
+      if (!confirmResult.isConfirmed) {
+        return;
+      }
+
       const res = await fetch(`${API_BASE}/auth/url?origin=${encodeURIComponent(clientOrigin)}&prompt=auto`);
       const data = await res.json();
       if (data.url) {
@@ -256,6 +297,7 @@ function App() {
     localStorage.removeItem('athleteId');
     localStorage.removeItem('athlete');
     localStorage.removeItem('isGuest');
+    localStorage.removeItem('isMemberVerified');
     sessionStorage.removeItem('stravaCookie');
   };
 
@@ -292,87 +334,89 @@ function App() {
         )}
         <main className={athlete ? "app-main" : ""}>
           {athlete && <NotificationPermissionBanner apiFetch={apiFetch} athleteId={athleteId} athlete={athlete} />}
-          <Routes>
-            <Route
-              path="/"
-              element={
-                athlete
-                  ? <Dashboard 
-                      athlete={athlete} 
-                      isAdmin={isAdmin}
-                      isSuperAdmin={isSuperAdmin}
-                      apiFetch={apiFetch} 
-                      challengeMonth={challengeMonth}
-                      challengeYear={challengeYear}
-                      setChallengeMonth={setChallengeMonth}
-                      setChallengeYear={setChallengeYear}
-                      userAccessConfig={userAccessConfig}
-                    />
-                  : <Login onLogin={handleLogin} onGuestAccess={handleGuestLogin} />
-              }
-            />
-            <Route
-              path="/leaderboard"
-              element={
-                <Dashboard 
-                  athlete={athlete || { id: 'guest', firstname: 'Khách', lastname: 'Xem', isGuest: true, profile_medium: null }} 
-                  isAdmin={false}
-                  isSuperAdmin={false}
-                  apiFetch={apiFetch} 
-                  challengeMonth={challengeMonth}
-                  challengeYear={challengeYear}
-                  setChallengeMonth={setChallengeMonth}
-                  setChallengeYear={setChallengeYear}
-                  userAccessConfig={userAccessConfig}
-                />
-              }
-            />
-            <Route
-              path="/nextgen"
-              element={
-                athlete
-                  ? <NextGenDashboard 
-                      athlete={athlete} 
-                      isAdmin={isAdmin}
-                      isSuperAdmin={isSuperAdmin}
-                      apiFetch={apiFetch} 
-                      challengeMonth={challengeMonth}
-                      challengeYear={challengeYear}
-                      setChallengeMonth={setChallengeMonth}
-                      setChallengeYear={setChallengeYear}
-                      userAccessConfig={userAccessConfig}
-                    />
-                  : <Navigate to="/" replace />
-              }
-            />
-            <Route
-              path="/administer"
-              element={
-                athlete && isAdmin
-                  ? <Administer 
-                      apiFetch={apiFetch} 
-                      athlete={athlete} 
-                      isSuperAdmin={isSuperAdmin}
-                      isAdmin={isAdmin}
-                      permissions={userRoles.permissions}
-                    />
-                  : <Navigate to="/" replace />
-              }
-            />
-            <Route
-              path="/callback"
-              element={<CallbackHandler onCallback={handleCallback} />}
-            />
-            <Route
-              path="/clubs/:clubId"
-              element={
-                athlete
-                  ? <ClubView apiFetch={apiFetch} />
-                  : <Navigate to="/" replace />
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  athlete
+                    ? <Dashboard 
+                        athlete={athlete} 
+                        isAdmin={isAdmin}
+                        isSuperAdmin={isSuperAdmin}
+                        apiFetch={apiFetch} 
+                        challengeMonth={challengeMonth}
+                        challengeYear={challengeYear}
+                        setChallengeMonth={setChallengeMonth}
+                        setChallengeYear={setChallengeYear}
+                        userAccessConfig={userAccessConfig}
+                      />
+                    : <Login onLogin={handleLogin} onGuestAccess={handleGuestLogin} onMemberLogin={handleMemberLogin} />
+                }
+              />
+              <Route
+                path="/leaderboard"
+                element={
+                  <Dashboard 
+                    athlete={athlete || { id: 'guest', firstname: 'Khách', lastname: 'Xem', isGuest: true, profile_medium: null }} 
+                    isAdmin={false}
+                    isSuperAdmin={false}
+                    apiFetch={apiFetch} 
+                    challengeMonth={challengeMonth}
+                    challengeYear={challengeYear}
+                    setChallengeMonth={setChallengeMonth}
+                    setChallengeYear={setChallengeYear}
+                    userAccessConfig={userAccessConfig}
+                  />
+                }
+              />
+              <Route
+                path="/nextgen"
+                element={
+                  athlete
+                    ? <NextGenDashboard 
+                        athlete={athlete} 
+                        isAdmin={isAdmin}
+                        isSuperAdmin={isSuperAdmin}
+                        apiFetch={apiFetch} 
+                        challengeMonth={challengeMonth}
+                        challengeYear={challengeYear}
+                        setChallengeMonth={setChallengeMonth}
+                        setChallengeYear={setChallengeYear}
+                        userAccessConfig={userAccessConfig}
+                      />
+                    : <Navigate to="/" replace />
+                }
+              />
+              <Route
+                path="/administer"
+                element={
+                  athlete && isAdmin
+                    ? <Administer 
+                        apiFetch={apiFetch} 
+                        athlete={athlete} 
+                        isSuperAdmin={isSuperAdmin}
+                        isAdmin={isAdmin}
+                        permissions={userRoles.permissions}
+                      />
+                    : <Navigate to="/" replace />
+                }
+              />
+              <Route
+                path="/callback"
+                element={<CallbackHandler onCallback={handleCallback} />}
+              />
+              <Route
+                path="/clubs/:clubId"
+                element={
+                  athlete
+                    ? <ClubView apiFetch={apiFetch} />
+                    : <Navigate to="/" replace />
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
       </div>
 
