@@ -321,11 +321,39 @@
     "penalty": false
   },
   "Tien_P._2026_10": {
-    "target": 0,
-    "penalty": false
+    "target": 100,
+    "penalty": true
   },
   "Sang_N._2026_10": {
-    "target": "",
-    "penalty": false
+    "target": 30,
+    "penalty": true
+  },
+  "Cuong_N._2026_10": {
+    "target": 70,
+    "penalty": true
+  },
+  "Linh_T._2026_10": {
+    "target": 60,
+    "penalty": true
+  },
+  "Lieu_V._2026_10": {
+    "target": 33,
+    "penalty": true
+  },
+  "Tam_N._2026_10": {
+    "target": 30,
+    "penalty": true
+  },
+  "Thinh_V._2026_10": {
+    "target": 18,
+    "penalty": true
+  },
+  "Thanh_D._2026_10": {
+    "target": 21,
+    "penalty": true
+  },
+  "An_H._2026_10": {
+    "target": 21,
+    "penalty": true
   }
 }
