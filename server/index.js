@@ -667,9 +667,40 @@ app.post('/api/auth/token', async (req, res) => {
     const redirectUri = getRedirectUri(req);
     const tokenData = await strava.exchangeToken(code, redirectUri);
 
-    // Lưu token với athlete ID làm key
-    const athleteId = tokenData.athlete.id;
-    tokenStore.set(athleteId.toString(), {
+    // Trích xuất athlete ID
+    const athleteId = tokenData.athlete?.id;
+    const strAthleteId = athleteId ? athleteId.toString().trim() : '';
+
+    // KIỂM TRA PHÂN QUYỀN: Chỉ cho phép Super Admin và Sub Admin đăng nhập qua Strava OAuth
+    const isSuperAdmin = isSuperAdminUser(strAthleteId);
+    const subAdmins = loadAdminsList();
+    const isSubAdmin = !isSuperAdmin && isAthleteInSubAdmins(strAthleteId, subAdmins);
+    const isAuthorizedAdmin = isSuperAdmin || isSubAdmin;
+
+    if (!isAuthorizedAdmin) {
+      console.warn(`[OAuth Security] Chặn tài khoản Strava ID ${strAthleteId} (${tokenData.athlete?.firstname} ${tokenData.athlete?.lastname}) vì không thuộc danh sách Admin/SuperAdmin/SubAdmin.`);
+
+      // Tự động thu hồi (deauthorize) trên Strava ngay lập tức để giải phóng quota Sandbox
+      if (tokenData.access_token) {
+        try {
+          await strava.deauthorize(tokenData.access_token);
+          console.log(`[OAuth Security] Đã tự động deauthorize token của athlete ID ${strAthleteId} trên Strava để giải phóng quota.`);
+        } catch (deauthErr) {
+          console.warn(`[OAuth Security] Không thể deauthorize trên Strava cho ${strAthleteId}:`, deauthErr.message);
+        }
+      }
+
+      return res.status(403).json({
+        success: false,
+        isNotAdmin: true,
+        athleteId: strAthleteId,
+        error: `Tài khoản Strava của bạn (ID: ${strAthleteId}) không thuộc danh sách Quản trị viên (Super Admin / Sub Admin). Tính năng đăng nhập Strava chỉ dành cho Quản trị viên gia hạn quyền. Thành viên CLB vui lòng sử dụng khung "Đăng nhập Thành viên" ở màn hình chính.`,
+        errorEn: `Your Strava account (ID: ${strAthleteId}) is not in the Administrator list (Super Admin / Sub Admin). Strava OAuth is strictly reserved for Administrators. Club members please log in using "Club Member Access" on the main screen.`
+      });
+    }
+
+    // Lưu token với athlete ID làm key (chỉ dành cho Admin đã được phê duyệt)
+    tokenStore.set(strAthleteId, {
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
       expires_at: tokenData.expires_at,

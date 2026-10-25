@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, ShieldAlert, Users } from 'lucide-react';
 import NotificationPermissionBanner from './components/NotificationPermissionBanner';
 import ErrorBoundary from './components/ErrorBoundary';
 import Login from './pages/Login';
@@ -219,7 +219,7 @@ function App() {
       });
       const data = await res.json();
 
-      if (data.athlete) {
+      if (res.ok && data.athlete) {
         setAthlete(data.athlete);
         setAthleteId(data.athleteId.toString());
         localStorage.setItem('athleteId', data.athleteId.toString());
@@ -237,12 +237,18 @@ function App() {
             });
           } catch (_) {}
         }
-        return true;
+        return { success: true };
       }
-      return false;
+
+      return {
+        success: false,
+        isNotAdmin: !!data.isNotAdmin,
+        athleteId: data.athleteId || '',
+        error: lang === 'en' ? (data.errorEn || data.error) : data.error
+      };
     } catch (error) {
       console.error('Callback error:', error);
-      return false;
+      return { success: false, error: error.message };
     }
   };
 
@@ -434,27 +440,129 @@ function App() {
 // Component xử lý OAuth callback
 function CallbackHandler({ onCallback }) {
   const [status, setStatus] = useState('processing');
-  const { t } = useLang();
+  const [errorDetails, setErrorDetails] = useState(null);
+  const { t, lang } = useLang();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
     if (code) {
-      onCallback(code).then((success) => {
-        if (success) {
+      onCallback(code).then((result) => {
+        if (result && result.success) {
           setStatus('success');
           setTimeout(() => {
             window.location.href = '/';
           }, 1000);
         } else {
           setStatus('error');
+          setErrorDetails(result || null);
         }
       });
     } else {
       setStatus('error');
     }
   }, []);
+
+  if (status === 'error' && errorDetails?.isNotAdmin) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        background: 'var(--bg-main, #f8fafc)',
+        fontFamily: "'Inter', sans-serif"
+      }}>
+        <div style={{
+          maxWidth: '480px',
+          width: '100%',
+          background: '#ffffff',
+          borderRadius: '16px',
+          border: '1.5px solid rgba(239, 68, 68, 0.35)',
+          padding: '32px 24px',
+          boxShadow: '0 10px 30px rgba(0, 45, 84, 0.12)',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            background: '#fef2f2',
+            color: '#dc2626',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 16px',
+            border: '2px solid rgba(220, 38, 38, 0.2)'
+          }}>
+            <ShieldAlert size={34} />
+          </div>
+
+          <h2 style={{
+            fontSize: '1.30rem',
+            fontWeight: 800,
+            color: 'var(--primary-navy, #002D54)',
+            margin: '0 0 10px',
+            fontFamily: "'Plus Jakarta Sans', sans-serif"
+          }}>
+            {t('oauthNotAdminTitle')}
+          </h2>
+
+          <p style={{
+            fontSize: '0.90rem',
+            color: '#475569',
+            lineHeight: 1.55,
+            margin: '0 0 16px'
+          }}>
+            {t('oauthNotAdminDesc').replace('{id}', errorDetails.athleteId || '')}
+          </p>
+
+          <div style={{
+            background: '#fffbeb',
+            border: '1px solid #fde68a',
+            borderRadius: '10px',
+            padding: '12px 14px',
+            marginBottom: '24px',
+            textAlign: 'left',
+            fontSize: '0.82rem',
+            color: '#92400e',
+            lineHeight: 1.5
+          }}>
+            {lang === 'en'
+              ? '🔒 To protect Strava developer limits, your Strava connection was safely revoked. Please return to the login screen and select your name under "Club Member Access".'
+              : '🔒 Để bảo vệ hạn mức ứng dụng Strava, quyền kết nối vừa rồi đã được hệ thống tự động hủy an toàn. Bạn chỉ cần quay lại và chọn tên của mình ở mục "Đăng nhập Thành viên CLB".'}
+          </div>
+
+          <a
+            href="/"
+            className="btn btn--primary"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '12px 22px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #00A3A6 0%, #002D54 100%)',
+              color: '#ffffff',
+              fontWeight: 700,
+              fontSize: '0.92rem',
+              textDecoration: 'none',
+              boxShadow: '0 4px 14px rgba(0, 163, 166, 0.35)',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          >
+            <Users size={18} />
+            <span>{t('oauthNotAdminAction')}</span>
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="loading" style={{ minHeight: '100vh' }}>
@@ -473,7 +581,7 @@ function CallbackHandler({ onCallback }) {
       {status === 'error' && (
         <>
           <div style={{ fontSize: '2.5rem' }}>❌</div>
-          <div className="loading__text">{t('authFailed')}</div>
+          <div className="loading__text">{errorDetails?.error || t('authFailed')}</div>
           <a href="/" className="btn btn--secondary" style={{ marginTop: 16 }}>{t('backHome')}</a>
         </>
       )}

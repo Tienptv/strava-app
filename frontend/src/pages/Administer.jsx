@@ -62,10 +62,10 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   const [searchParams, setSearchParams] = useSearchParams();
   const { lang, t } = useLang();
 
-  // Active Tab: 'settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access'
+  // Active Tab: 'settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access', 'themes'
   const getInitialTab = () => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access', 'themes'];
     return (tabParam && validTabs.includes(tabParam)) ? tabParam : 'settings';
   };
   const [activeTab, setActiveTab] = useState(getInitialTab);
@@ -73,7 +73,7 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   // Đồng bộ activeTab khi URL query param hoặc location state thay đổi
   useEffect(() => {
     const tabParam = searchParams.get('tab') || location.state?.tab;
-    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access'];
+    const validTabs = ['settings', 'roles', 'logs', 'data', 'penalties', 'scripts', 'reminders', 'visitors', 'user_access', 'themes'];
     if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
       setActiveTab(tabParam);
     }
@@ -95,6 +95,50 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
   const [config, setConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
+
+  // ==========================================
+  // STATE: 10. SEASONAL THEMES
+  // ==========================================
+  const [seasonalTheme, setSeasonalTheme] = useState(() => {
+    return localStorage.getItem('strava_seasonal_theme') || 'default';
+  });
+  const [savingTheme, setSavingTheme] = useState(false);
+
+  useEffect(() => {
+    apiFetch('/challenge/config')
+      .then(cfg => {
+        if (cfg && cfg.seasonalTheme) {
+          setSeasonalTheme(cfg.seasonalTheme);
+          localStorage.setItem('strava_seasonal_theme', cfg.seasonalTheme);
+        }
+      })
+      .catch(() => {});
+  }, [apiFetch]);
+
+  const handleToggleTheme = async (themeName) => {
+    const nextTheme = seasonalTheme === themeName ? 'default' : themeName;
+    setSeasonalTheme(nextTheme);
+    localStorage.setItem('strava_seasonal_theme', nextTheme);
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: nextTheme } }));
+
+    try {
+      setSavingTheme(true);
+      await apiFetch('/challenge/config', {
+        method: 'POST',
+        body: JSON.stringify({ seasonalTheme: nextTheme })
+      });
+      Swal.fire({
+        icon: 'success',
+        title: t('saveThemeSuccess') || 'Saved!',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (e) {
+      console.error('Failed to save seasonal theme:', e);
+    } finally {
+      setSavingTheme(false);
+    }
+  };
 
   // ==========================================
   // STATE: 1.2 CLUB ACCESS PASSCODE (PHƯƠNG ÁN 3)
@@ -2106,6 +2150,24 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
           >
             <ShieldCheck size={18} />
             <span style={{ flex: 1 }}>{t('tab9Title')}</span>
+          </button>
+
+          <button
+            onClick={() => handleTabClick('themes')}
+            className={`tab ${activeTab === 'themes' ? 'tab--active' : ''}`}
+          >
+            <Sparkles size={18} color={activeTab === 'themes' ? '#ff7518' : 'var(--accent)'} />
+            <span style={{ flex: 1 }}>{t('tab10Title')}</span>
+            <span style={{ 
+              fontSize: '0.65rem', 
+              padding: '2px 6px', 
+              borderRadius: '6px', 
+              background: seasonalTheme === 'halloween' ? 'linear-gradient(135deg, #ff7518, #d84315)' : '#e2e8f0', 
+              color: seasonalTheme === 'halloween' ? '#fff' : '#64748b',
+              fontWeight: 700 
+            }}>
+              {seasonalTheme === 'halloween' ? '🎃 ON' : 'OFF'}
+            </span>
           </button>
         </div>
 
@@ -4847,6 +4909,225 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
 
               </div>
             )}
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB CONTENT 10: QUẢN LÝ CHỦ ĐỀ & SỰ KIỆN THEO THÁNG (SEASONAL THEMES)     */}
+      {/* ========================================================================= */}
+      {activeTab === 'themes' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Main Card */}
+          <div className="card" style={{ padding: '24px', background: '#fff', borderRadius: '16px', border: '1px solid var(--border)' }}>
+            
+            {/* Header Toolbar */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'rgba(255, 117, 24, 0.12)', color: '#ff7518', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Sparkles size={24} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary-navy)', margin: 0 }}>
+                    {t('seasonalThemesTitle')}
+                  </h2>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    {t('seasonalThemesSubtitle')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  background: seasonalTheme === 'halloween' ? 'rgba(255, 117, 24, 0.15)' : '#f1f5f9',
+                  color: seasonalTheme === 'halloween' ? '#d84315' : '#64748b',
+                  border: seasonalTheme === 'halloween' ? '1px solid rgba(255, 117, 24, 0.35)' : '1px solid #e2e8f0'
+                }}>
+                  {seasonalTheme === 'halloween' ? `🎃 ${t('halloweenThemeTitle')} - ${t('activeThemeBadge')}` : `🏢 ${t('defaultThemeTitle')}`}
+                </span>
+              </div>
+            </div>
+
+            {/* THEME CARDS GRID */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+              
+              {/* 1. HALLOWEEN THEME CARD (ACTIVE TOGGLE) */}
+              <div style={{
+                borderRadius: '14px',
+                padding: '20px',
+                background: seasonalTheme === 'halloween' ? 'linear-gradient(135deg, rgba(255, 117, 24, 0.08) 0%, rgba(13, 20, 36, 0.04) 100%)' : '#f8fafc',
+                border: seasonalTheme === 'halloween' ? '2px solid #ff7518' : '1px solid #e2e8f0',
+                boxShadow: seasonalTheme === 'halloween' ? '0 8px 24px rgba(255, 117, 24, 0.18)' : 'none',
+                transition: 'all 0.25s ease'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.8rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}>🎃</span>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-navy)' }}>
+                        {t('halloweenThemeTitle')}
+                      </h3>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ff7518' }}>
+                        {lang === 'en' ? 'October Festive Special' : 'Lễ hội Tháng 10'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Toggle Switch */}
+                  <label 
+                    style={{ position: 'relative', display: 'inline-block', width: '52px', height: '28px', cursor: 'pointer' }}
+                    title={seasonalTheme === 'halloween' ? t('activeThemeBadge') : t('inactiveThemeBadge')}
+                  >
+                    <input 
+                      type="checkbox"
+                      checked={seasonalTheme === 'halloween'}
+                      onChange={() => handleToggleTheme('halloween')}
+                      disabled={savingTheme}
+                      style={{ opacity: 0, width: 0, height: 0 }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: seasonalTheme === 'halloween' ? 'linear-gradient(135deg, #ff7518 0%, #e65100 100%)' : '#cbd5e1',
+                      borderRadius: '28px',
+                      transition: '0.25s',
+                      boxShadow: seasonalTheme === 'halloween' ? '0 0 12px rgba(255, 117, 24, 0.6)' : 'none'
+                    }}>
+                      <span style={{
+                        position: 'absolute',
+                        height: '22px',
+                        width: '22px',
+                        left: seasonalTheme === 'halloween' ? '26px' : '3px',
+                        bottom: '3px',
+                        background: '#ffffff',
+                        borderRadius: '50%',
+                        transition: '0.25s',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }} />
+                    </span>
+                  </label>
+                </div>
+
+                <p style={{ margin: '0 0 16px 0', fontSize: '0.86rem', color: '#64748b', lineHeight: 1.5 }}>
+                  {t('halloweenThemeDesc')}
+                </p>
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(255, 117, 24, 0.1)', color: '#d84315', fontWeight: 600 }}>
+                    ✨ {lang === 'en' ? 'Frosted Glass 3D' : 'Lớp phủ kính mờ 3D'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(0, 163, 166, 0.1)', color: 'var(--accent)', fontWeight: 600 }}>
+                    🎯 {lang === 'en' ? 'Leaderboard Only' : 'Chỉ áp dụng Bảng Leaderboard'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(120, 190, 32, 0.1)', color: '#4d7c0f', fontWeight: 600 }}>
+                    🛡️ {lang === 'en' ? 'Zero Layout Shift' : 'Không đổi bố cục'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 2. CHRISTMAS THEME CARD (COMING SOON) */}
+              <div style={{
+                borderRadius: '14px',
+                padding: '20px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                opacity: 0.85
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.8rem' }}>🎄</span>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-navy)' }}>
+                        {t('christmasThemeTitle')}
+                      </h3>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0284c7' }}>
+                        {t('comingSoonBadge')}
+                      </span>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', background: '#e2e8f0', color: '#64748b', fontWeight: 600 }}>
+                    ❄️ Dec 2026
+                  </span>
+                </div>
+                <p style={{ margin: '0 0 16px 0', fontSize: '0.86rem', color: '#64748b', lineHeight: 1.5 }}>
+                  {t('christmasThemeDesc')}
+                </p>
+              </div>
+
+              {/* 3. TET THEME CARD (COMING SOON) */}
+              <div style={{
+                borderRadius: '14px',
+                padding: '20px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                opacity: 0.85
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.8rem' }}>🌸</span>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-navy)' }}>
+                        {t('tetThemeTitle')}
+                      </h3>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e11d48' }}>
+                        {t('comingSoonBadge')}
+                      </span>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', background: '#e2e8f0', color: '#64748b', fontWeight: 600 }}>
+                    🧧 Jan-Feb 2027
+                  </span>
+                </div>
+                <p style={{ margin: '0 0 16px 0', fontSize: '0.86rem', color: '#64748b', lineHeight: 1.5 }}>
+                  {t('tetThemeDesc')}
+                </p>
+              </div>
+
+              {/* 4. DEFAULT THEME (RESET BUTTON) */}
+              <div style={{
+                borderRadius: '14px',
+                padding: '20px',
+                background: seasonalTheme === 'default' ? 'linear-gradient(135deg, rgba(0, 163, 166, 0.08) 0%, rgba(0, 45, 84, 0.04) 100%)' : '#f8fafc',
+                border: seasonalTheme === 'default' ? '2px solid var(--accent)' : '1px solid #e2e8f0',
+                transition: 'all 0.25s ease'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '1.8rem' }}>🏢</span>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-navy)' }}>
+                        {t('defaultThemeTitle')}
+                      </h3>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent)' }}>
+                        {lang === 'en' ? 'Standard Brand UI' : 'Giao diện Chuẩn Doanh Nghiệp'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleTheme('default')}
+                    disabled={savingTheme || seasonalTheme === 'default'}
+                    className={`btn ${seasonalTheme === 'default' ? 'btn--secondary' : 'btn--primary'}`}
+                    style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: '8px' }}
+                  >
+                    {seasonalTheme === 'default' ? t('appliedThemeBtn') : t('applyThemeBtn')}
+                  </button>
+                </div>
+                <p style={{ margin: '0', fontSize: '0.86rem', color: '#64748b', lineHeight: 1.5 }}>
+                  {t('defaultThemeDesc')}
+                </p>
+              </div>
+
+            </div>
 
           </div>
 

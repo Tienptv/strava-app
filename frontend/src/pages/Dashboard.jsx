@@ -617,6 +617,7 @@ export default function Dashboard({
                       nameMapping={nameMapping}
                       onMonthChange={setChallengeMonth}
                       onYearChange={setChallengeYear}
+                      seasonalTheme={challengeConfig?.seasonalTheme}
                     />
                   </>
                 )}

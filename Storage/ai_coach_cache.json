@@ -1816,5 +1816,56 @@
       "biomechanics": null
     },
     "generatedAt": "2026-10-23T11:18:04.730Z"
+  },
+  "133066813_20700671457_2026-10-23_en": {
+    "title": "Coach Recommendations",
+    "type": "info",
+    "badge": "Streak 3 Days 🔥",
+    "message": "Superb discipline with a 3-day streak at controlled effort. Consider keeping tomorrow short and easy (2-3km) to allow active recovery.",
+    "actionPlan": "2-3km recovery run or rest day.",
+    "provider": "Smart Heuristic Engine",
+    "strategyTip": "Aim for ~4 runs/week (~5.5 km each) to hit your target smoothly.",
+    "recoveryTip": "Sip 400ml electrolytes post-run, cold compress, and do 10 mins stretching.",
+    "readinessScore": 85,
+    "sportsMetrics": {
+      "trainingStatus": {
+        "acwr": 2.56,
+        "acuteLoadKm": 46.7,
+        "chronicLoadKm": 72.8,
+        "acuteRunsCount": 6,
+        "statusKey": "overreaching",
+        "statusColor": "#ef4444",
+        "labelVi": "Cảnh báo quá tải (Overreaching)",
+        "labelEn": "Overreaching (Injury Risk)",
+        "descVi": "Tỷ lệ tải tuần đạt 2.56x (vượt ngưỡng 1.5). Nguy cơ chấn thương gân cơ cao do tăng cự ly quá nhanh!",
+        "descEn": "Weekly workload ratio is 2.56x (>1.5 threshold). High injury risk due to sudden volume increase!"
+      },
+      "racePredictions": {
+        "hasBenchmark": true,
+        "benchmarkDistanceKm": 21.2,
+        "benchmarkPaceStr": "6:50",
+        "vdot": 31,
+        "predicted5k": "31:20",
+        "predicted10k": "1:05:20",
+        "predicted21k": "2:24:09",
+        "trainingPaces": {
+          "easyZone2": "7:21 - 8:01",
+          "tempo": "6:17 - 6:37",
+          "interval": "5:58 - 6:11"
+        }
+      },
+      "recovery": {
+        "totalRequiredHours": 16,
+        "remainingHours": 16,
+        "isFullyRecovered": false
+      },
+      "biomechanics": {
+        "heartRate": 108,
+        "cadence": 113,
+        "cadenceTipVi": "Guồng chân 113 spm hơi thấp (sải bước quá dài). Hãy bước ngắn hơn và tăng tần số lên 165-175 spm để giảm áp lực lên đầu gối.",
+        "cadenceTipEn": "Cadence of 113 spm indicates over-striding. Shorten strides and target 165-175 spm to protect knee joints."
+      }
+    },
+    "generatedAt": "2026-10-23T16:33:08.867Z"
   }
 }

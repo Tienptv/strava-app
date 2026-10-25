@@ -365,7 +365,7 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
               )}
             </div>
 
-            {/* DÒNG 2: KHUNG NHẬP PASS ĐƯỢC CẤP (MẶC ĐỊNH: 200k, KHÔNG PHÂN BIỆT HOA THƯỜNG) */}
+            {/* DÒNG 2: KHUNG NHẬP PASS ĐƯỢC CẤP (KHÔNG PHÂN BIỆT HOA THƯỜNG) */}
             <div>
               <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>
                 <Lock size={14} style={{ marginRight: 6, verticalAlign: 'middle', color: 'var(--accent)' }} />
@@ -540,17 +540,60 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
 
             {showAdminLogin && (
               <div style={{
-                background: '#f1f5f9',
-                borderRadius: '10px',
-                padding: '12px',
+                background: '#f8fafc',
+                border: '1.5px solid #cbd5e1',
+                borderRadius: '12px',
+                padding: '14px',
                 marginTop: '6px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px'
+                gap: '10px',
+                boxShadow: '0 4px 12px rgba(0, 45, 84, 0.05)'
               }}>
-                <p style={{ margin: '0 0 6px', fontSize: '0.74rem', color: '#475569', textAlign: 'left' }}>
-                  {t('adminLoginNote')}
-                </p>
+                {/* Huy hiệu cảnh báo chỉ dành cho Admin */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderBottom: '1px solid #e2e8f0',
+                  paddingBottom: '8px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.80rem', color: 'var(--primary-navy)' }}>
+                    <ShieldCheck size={16} color="var(--accent)" />
+                    <span>{t('adminLoginSection')}</span>
+                  </div>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    color: '#dc2626',
+                    border: '1px solid rgba(239, 68, 68, 0.25)'
+                  }}>
+                    {t('adminOnlyNoticeBadge')}
+                  </span>
+                </div>
+
+                {/* Hộp thông báo cảnh báo ID */}
+                <div style={{
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'flex-start',
+                  background: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  borderRadius: '8px',
+                  padding: '9px 10px',
+                  fontSize: '0.74rem',
+                  lineHeight: 1.45,
+                  color: '#92400e',
+                  textAlign: 'left'
+                }}>
+                  <AlertTriangle size={15} style={{ flexShrink: 0, marginTop: '2px', color: '#d97706' }} />
+                  <div>
+                    {t('adminLoginNote')}
+                  </div>
+                </div>
 
                 <button 
                   type="button" 

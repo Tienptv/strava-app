@@ -5,6 +5,9 @@ import { roundUpPenaltyK } from '../utils/penaltyUtils';
 import { Save, CheckCircle2, ShieldAlert, ShieldCheck, ChevronDown } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 import { getAthleteAvatar } from '../utils/avatar';
+import HalloweenHeaderBar from './HalloweenHeaderBar';
+import pumpkin3dImg from '../assets/halloween/pumpkin_3d.png';
+import { HalloweenCandyWrapped, HalloweenCandyCorn, HalloweenCandySwirl, HalloweenGoldenLeaf, HalloweenTableMist } from './HalloweenDecorations';
 
 const MONTH_NAMES_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -48,9 +51,34 @@ function isWeekendDay(year, month, day) {
   return d === 0 || d === 6;
 }
 
-export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, lockTargetsAfterDate = 0, showDayAndTimeCols = false, nameMapping = {}, onMonthChange, onYearChange }) {
+export default function ChallengeTable({ challengeData, year, month, apiFetch, athlete, isAdmin = false, allowEditOthers = false, lockTargetsAfterDate = 0, showDayAndTimeCols = false, nameMapping = {}, onMonthChange, onYearChange, seasonalTheme: propTheme }) {
   const { lang, t } = useLang();
-  
+
+  const [seasonalTheme, setSeasonalTheme] = useState(() => {
+    return localStorage.getItem('strava_seasonal_theme') || propTheme || 'default';
+  });
+
+  useEffect(() => {
+    const local = localStorage.getItem('strava_seasonal_theme');
+    if (local) {
+      setSeasonalTheme(local);
+    } else if (propTheme) {
+      setSeasonalTheme(propTheme);
+    }
+  }, [propTheme]);
+
+  useEffect(() => {
+    const handleThemeChange = (e) => {
+      if (e?.detail?.theme) {
+        setSeasonalTheme(e.detail.theme);
+      }
+    };
+    window.addEventListener('themeChanged', handleThemeChange);
+    return () => window.removeEventListener('themeChanged', handleThemeChange);
+  }, []);
+
+  const isHalloween = seasonalTheme === 'halloween';
+
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -73,7 +101,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     if (onYearChange) onYearChange(new Date().getFullYear());
     setIsMonthDropdownOpen(false);
   };
-  
+
   const [userData, setUserData] = useState({});
   const [editingTargets, setEditingTargets] = useState({});
 
@@ -134,7 +162,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
             setPenaltiesLedger(res.members);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [apiFetch, year, month]);
 
@@ -205,7 +233,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
       [key]: { ...prev[key], [field]: value }
     }));
     saveToApi({ matchKey: key, [field]: value });
-    
+
     // Broadcast change so PersonalGoal and other views update immediately
     window.dispatchEvent(new CustomEvent('challengeTargetsUpdated', {
       detail: { matchKey, year, month, [field]: value }
@@ -226,10 +254,10 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     const key = `${matchKey}_${year}_${month}`;
     // Lấy giá trị đang edit (nếu có), fallback về val
     const currentVal = editingTargets[key] !== undefined ? editingTargets[key] : val;
-    
+
     // Clear editing state
     setEditingTargets(prev => {
-      const next = {...prev};
+      const next = { ...prev };
       delete next[key];
       return next;
     });
@@ -320,91 +348,115 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
 
   return (
     <div className="challenge-container">
-      <div className="challenge-header" style={{ position: 'relative' }}>
-        <div className="challenge-title-group">
-          <h2 className="challenge-title-main">
-            <span className="challenge-title-text">{t('challengeMonth')}</span>
-            <span className="challenge-title-dot">•</span>
-            <div className="month-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
-              <button 
-                className="challenge-title-date month-dropdown-trigger"
-                onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
-              >
-                {lang === 'en' ? `${MONTH_NAMES_EN[month - 1]} ${year}` : `Tháng ${month}, ${year}`}
-                <ChevronDown size={18} strokeWidth={2.5} />
-              </button>
-              
-              {isMonthDropdownOpen && (
-                <div className="month-dropdown-menu">
-                  <div className="month-dropdown-grid">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => {
-                      const monthLabel = lang === 'en' 
-                        ? `${MONTH_NAMES_EN[m - 1].slice(0,3)}`
-                        : `T${m}`;
-                      const isActive = month === m;
-                      return (
-                        <button
-                          key={m}
-                          className={`month-dropdown-item ${isActive ? 'is-active' : ''}`}
-                          onClick={() => handleMonthSelect(m)}
-                        >
-                          {monthLabel}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </h2>
-        </div>
-        
-        {/* Căn lề phải đúng bằng tổng độ rộng các cột sticky bên phải: 460px (khi ẩn Days/Time) hoặc 570px (khi hiện Days/Time) */}
-        {goalData?.showDistanceProgress !== false && (
-          <div className="club-goal__stats" style={{ position: 'absolute', right: showDayAndTimeCols ? '570px' : '460px', display: 'flex', alignItems: 'stretch', gap: '8px', height: '36px' }}>
-            <div className="timeline-indicators-summary" style={{ display: 'flex', marginBottom: 0 }}>
-              <span className="indicator-pill indicator-pill--km" style={{ display: 'flex', alignItems: 'center', height: '100%', padding: '0 16px', borderRadius: '20px', fontSize: '0.85rem', margin: 0, boxSizing: 'border-box' }} title={lang === 'en' ? 'Actual distance progress' : 'Tiến độ cự ly km thực tế'}>
-                🏃‍♂️ {t('distanceIndicator')}: <strong style={{ marginLeft: '4px' }}>{percentDistance}%</strong>
-              </span>
-            </div>
+      {isHalloween ? (
+        <HalloweenHeaderBar
+          month={month}
+          year={year}
+          lang={lang}
+          isMonthDropdownOpen={isMonthDropdownOpen}
+          setIsMonthDropdownOpen={setIsMonthDropdownOpen}
+          dropdownRef={dropdownRef}
+          handleMonthSelect={handleMonthSelect}
+          MONTH_NAMES_EN={MONTH_NAMES_EN}
+          topRunner={challengeData.length > 0 && challengeData[0].totalDistance > 0 ? challengeData[0] : null}
+          getAvatar={getAvatar}
+          nameMapping={nameMapping}
+          percentDistance={percentDistance}
+          totalMonthlyDistance={totalMonthlyDistance}
+          targetKm={targetKm}
+          goalData={goalData}
+          showDayAndTimeCols={showDayAndTimeCols}
+          t={t}
+        />
+      ) : (
+        <div className="challenge-header" style={{ position: 'relative' }}>
+          <div className="challenge-title-group">
+            <h2 className="challenge-title-main">
+              <span className="challenge-title-text">{t('challengeMonth')}</span>
+              <span className="challenge-title-dot">•</span>
+              <div className="month-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
+                <button
+                  className="challenge-title-date month-dropdown-trigger"
+                  onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
+                >
+                  {lang === 'en' ? `${MONTH_NAMES_EN[month - 1]} ${year}` : `Tháng ${month}, ${year}`}
+                  <ChevronDown size={18} strokeWidth={2.5} />
+                </button>
 
-            <div className="club-goal__km-display" style={{ background: '#f8fafc', padding: '0 16px', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: 0, height: '100%', boxSizing: 'border-box' }}>
-              <span className="current-dist" style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '1.1rem' }}>{totalMonthlyDistance.toFixed(1)}</span>
-              <div className="target-display" style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: '4px' }}>
-                <span className="total-goal" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>/ {targetKm} km</span>
+                {isMonthDropdownOpen && (
+                  <div className="month-dropdown-menu">
+                    <div className="month-dropdown-grid">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(m => {
+                        const monthLabel = lang === 'en'
+                          ? `${MONTH_NAMES_EN[m - 1].slice(0, 3)}`
+                          : `T${m}`;
+                        const isActive = month === m;
+                        return (
+                          <button
+                            key={m}
+                            className={`month-dropdown-item ${isActive ? 'is-active' : ''}`}
+                            onClick={() => handleMonthSelect(m)}
+                          >
+                            {monthLabel}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </h2>
+          </div>
+
+          {/* Căn lề phải đúng bằng tổng độ rộng các cột sticky bên phải: 460px (khi ẩn Days/Time) hoặc 570px (khi hiện Days/Time) */}
+          {goalData?.showDistanceProgress !== false && (
+            <div className="club-goal__stats" style={{ position: 'absolute', right: showDayAndTimeCols ? '570px' : '460px', display: 'flex', alignItems: 'stretch', gap: '8px', height: '36px' }}>
+              <div className="timeline-indicators-summary" style={{ display: 'flex', marginBottom: 0 }}>
+                <span className="indicator-pill indicator-pill--km" style={{ display: 'flex', alignItems: 'center', height: '100%', padding: '0 16px', borderRadius: '20px', fontSize: '0.85rem', margin: 0, boxSizing: 'border-box' }} title={lang === 'en' ? 'Actual distance progress' : 'Tiến độ cự ly km thực tế'}>
+                  🏃‍♂️ {t('distanceIndicator')}: <strong style={{ marginLeft: '4px' }}>{percentDistance}%</strong>
+                </span>
+              </div>
+
+              <div className="club-goal__km-display" style={{ background: '#f8fafc', padding: '0 16px', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: 0, height: '100%', boxSizing: 'border-box' }}>
+                <span className="current-dist" style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '1.1rem' }}>{totalMonthlyDistance.toFixed(1)}</span>
+                <div className="target-display" style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: '4px' }}>
+                  <span className="total-goal" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>/ {targetKm} km</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        
-        {challengeData.length > 0 && challengeData[0].totalDistance > 0 && (
-          <div className="runner-of-the-month" title="Runner of the Month">
-             <span className="rotm-icon">🏆</span>
-             <img 
-                src={getAvatar(challengeData[0].member, 24)} 
-                alt="avatar" 
-                className="runner-avatar" 
+          {challengeData.length > 0 && challengeData[0].totalDistance > 0 && (
+            <div className="runner-of-the-month" title="Runner of the Month">
+              <span className="rotm-icon">🏆</span>
+              <img
+                src={getAvatar(challengeData[0].member, 24)}
+                alt="avatar"
+                className="runner-avatar"
               />
-             <span className="rotm-name">
+              <span className="rotm-name">
                 {nameMapping[`${challengeData[0].member.firstname} ${challengeData[0].member.lastname}`]?.fullName || `${challengeData[0].member.firstname} ${challengeData[0].member.lastname}`}
-             </span>
-             <span className="rotm-dist">{challengeData[0].totalDistance.toFixed(1)} km</span>
-          </div>
-        )}
-      </div>
+              </span>
+              <span className="rotm-dist">{challengeData[0].totalDistance.toFixed(1)} km</span>
+            </div>
+          )}
+        </div>
+      )}
 
 
 
-      <div className="challenge-table-wrapper">
-        <table className={`challenge-table ${showDayAndTimeCols ? 'has-day-time-cols' : ''}`}>
+      <div className="challenge-table-stage">
+        <div className="challenge-table-wrapper">
+          <table className={`challenge-table ${showDayAndTimeCols ? 'has-day-time-cols' : ''}`}>
           <thead>
             <tr>
-              <th className="sticky-col first-col runner-header" style={{ width: '240px', minWidth: '240px', maxWidth: '240px', textAlign: 'center' }}>RUNNER</th>
+              <th className="sticky-col first-col runner-header" style={{ width: '240px', minWidth: '240px', maxWidth: '240px', textAlign: 'center' }}>
+                RUNNER
+              </th>
               {daysArray.map(day => (
-                <th 
-                  key={day} 
-                  className={`day-col ${isWeekendDay(year, month, day) ? 'weekend-col' : ''}`} 
+                <th
+                  key={day}
+                  className={`day-col ${isWeekendDay(year, month, day) ? 'weekend-col' : ''}`}
                   style={{ background: getDayHeaderStarColor(day, daysArray.length) }}
                 >
                   {day}
@@ -445,10 +497,10 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                 const currentDate = new Date();
                 const currentMonthIndex = currentDate.getMonth() + 1;
                 const currentYear = currentDate.getFullYear();
-                
+
                 const isPastMonth = year < currentYear || (year === currentYear && month < currentMonthIndex);
                 const isCurrentMonth = year === currentYear && month === currentMonthIndex;
-                
+
                 if (isPastMonth) {
                   isLockedByDate = true;
                 } else if (isCurrentMonth && currentDate.getDate() > lockTargetsAfterDate) {
@@ -488,14 +540,14 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               return (
                 <tr key={index} className={`runner-row rank-${index + 1} ${isMe ? 'runner-row--me' : ''}`}>
                   <td className="sticky-col first-col" style={{ width: '240px', minWidth: '240px', maxWidth: '240px' }}>
-                  <div className="runner-info">
-                    <span className="runner-rank">{index + 1}</span>
-                    <img 
-                      src={getAvatar(row.member, 20)} 
-                      alt="avatar" 
-                      className="runner-avatar" 
-                    />
-                    <div className="runner-name-container">
+                    <div className="runner-info">
+                      <span className="runner-rank">{index + 1}</span>
+                      <img
+                        src={getAvatar(row.member, 20)}
+                        alt="avatar"
+                        className="runner-avatar"
+                      />
+                      <div className="runner-name-container">
                         <span className="runner-name-text" title={nameMapping[`${row.member.firstname} ${row.member.lastname}`]?.fullName || `${row.member.firstname} ${row.member.lastname}`}>
                           {nameMapping[`${row.member.firstname} ${row.member.lastname}`]?.fullName || `${row.member.firstname} ${row.member.lastname}`}
                         </span>
@@ -507,18 +559,18 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                           {row.maxStreak >= 3 && <span title={`Streak ${row.maxStreak}!`} className={row.maxStreak >= 5 ? 'streak-fire-blue' : ''}>🔥</span>}
                           {row.isTurtle && <span title="Turtle">🐌</span>}
                         </span>
+                      </div>
                     </div>
-                  </div>
                   </td>
-                  
+
                   {daysArray.map(day => {
                     const dist = row.dailyDistances[day];
                     const hasRun = dist > 0;
                     const displayDist = hasRun ? (Math.round(dist * 10) / 10).toFixed(1) : '';
                     const bgColor = hasRun ? getHeatmapColor(dist) : '';
                     return (
-                      <td 
-                        key={day} 
+                      <td
+                        key={day}
                         className={`day-cell ${hasRun ? 'has-run' : ''} ${isWeekendDay(year, month, day) ? 'weekend-col' : ''}`}
                         title={hasRun ? `${displayDist} km` : ''}
                         style={{ backgroundColor: bgColor }}
@@ -533,16 +585,16 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                       const userKey = `${row.matchKey}_${year}_${month}`;
                       const rawTarget = editingTargets[userKey] !== undefined
                         ? editingTargets[userKey]
-                        : (userData[userKey]?.target !== undefined 
-                           ? userData[userKey]?.target 
-                           : userData[row.matchKey]?.target);
+                        : (userData[userKey]?.target !== undefined
+                          ? userData[userKey]?.target
+                          : userData[row.matchKey]?.target);
                       const displayTarget = rawTarget !== undefined && rawTarget !== 0 && rawTarget !== '0' ? rawTarget : '';
                       const isZeroVal = rawTarget === 0 || rawTarget === '0' || rawTarget === undefined || rawTarget === '';
 
                       return (
-                        <input 
-                          type="number" 
-                          placeholder="0" 
+                        <input
+                          type="number"
+                          placeholder="0"
                           value={displayTarget}
                           onChange={(e) => handleTargetChange(row.matchKey, e.target.value)}
                           onBlur={(e) => handleTargetBlur(row.matchKey, e.target.value)}
@@ -555,13 +607,13 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     })()}
                   </td>
                   <td className="sum-cell sticky-right col-penalty" style={{ textAlign: 'center' }}>
-                    <label 
+                    <label
                       className={`custom-switch ${!canEdit ? 'disabled' : ''}`}
                       title={!canEdit ? (isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('noEditPermission')) : t('checkPenaltyCommitment')}
                       style={{ cursor: canEdit ? 'pointer' : 'default' }}
                     >
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={hasPenalty}
                         onChange={(e) => handlePenaltyChange(row.matchKey, e.target.checked)}
                         disabled={!canEdit}
@@ -579,7 +631,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                         {penaltyAmount > 0 && (() => {
                           const athId = row.member?.id ? String(row.member.id) : null;
                           const normRowName = (row.name || `${row.member?.firstname || ''} ${row.member?.lastname || ''}`).trim().toLowerCase();
-                          const matchedMember = penaltiesLedger.find(m => 
+                          const matchedMember = penaltiesLedger.find(m =>
                             (athId && m.athleteId && String(m.athleteId) === athId) ||
                             (m.rawName && m.rawName.trim().toLowerCase() === normRowName) ||
                             (m.fullName && m.fullName.trim().toLowerCase() === normRowName)
@@ -587,7 +639,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                           const isPaid = matchedMember?.currentMonthPaymentStatus === 'paid';
                           if (!isPaid) return null; // Bỏ unpaid không thể hiện trên bảng này
                           return (
-                            <span 
+                            <span
                               style={{
                                 fontSize: '0.68rem',
                                 padding: '1px 5px',
@@ -611,7 +663,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                   </td>
                   <td className="sum-cell sticky-right col-progress" style={{ textAlign: 'center' }}>
                     {showTrackBar ? (
-                      <ProgressBar 
+                      <ProgressBar
                         current={row.totalDistance}
                         target={userTarget}
                         isCompleted={isCompleted}
@@ -622,7 +674,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     )}
                   </td>
                   <td className="sum-cell sticky-right col-km highlight-total" style={{ textAlign: 'center' }}>{row.totalDistance.toFixed(1)}</td>
-                  
+
                   {/* Cột Số km còn lại */}
                   <td className="sum-cell sticky-right col-remaining highlight-total" style={{ textAlign: 'center' }}>
                     {hasTarget ? (
@@ -660,15 +712,15 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                     </>
                   )}
                   <td className="sum-cell sticky-right col-all-time" style={{ textAlign: 'center' }}>
-                    {row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0 
-                      ? row.allTimeDistance.toFixed(1) 
+                    {row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0
+                      ? row.allTimeDistance.toFixed(1)
                       : (row.allTimeDistance === 0 ? '0.0' : '-')}
                   </td>
                 </tr>
               );
             })}
           </tbody>
-          
+
           {/* Footer with totals (optional, but good for summary) */}
           <tfoot>
             <tr className="totals-row">
@@ -764,7 +816,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               )}
               <td className="sum-cell sticky-right col-all-time" style={{ textAlign: 'center' }}>
                 <strong>
-                  {challengeData.some(row => row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0) 
+                  {challengeData.some(row => row.allTimeDistance !== null && row.allTimeDistance !== undefined && row.allTimeDistance > 0)
                     ? challengeData.reduce((sum, row) => sum + (row.allTimeDistance || 0), 0).toFixed(1)
                     : '-'}
                 </strong>
@@ -772,6 +824,108 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
             </tr>
           </tfoot>
         </table>
+        </div>
+
+        {isHalloween && (
+          <div className="halloween-glass-overlay">
+            {/* 2 Góc Bo Cong Màu Tím Than Neon (SVG Curved Strokes - Zero Background) */}
+            <svg width="120" height="90" viewBox="0 0 120 90" fill="none" className="halloween-neon-corner-svg corner-bl">
+              <defs>
+                <linearGradient id="neonCornerGradBL" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#A855F7" stopOpacity="0" />
+                  <stop offset="30%" stopColor="#C084FC" stopOpacity="0.95" />
+                  <stop offset="70%" stopColor="#A855F7" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#7E22CE" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 2.5,0 L 2.5,68 A 16,16 0 0,0 18.5,86.5 L 120,86.5"
+                stroke="url(#neonCornerGradBL)"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            <svg width="120" height="90" viewBox="0 0 120 90" fill="none" className="halloween-neon-corner-svg corner-br">
+              <defs>
+                <linearGradient id="neonCornerGradBR" x1="100%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#A855F7" stopOpacity="0" />
+                  <stop offset="30%" stopColor="#C084FC" stopOpacity="0.95" />
+                  <stop offset="70%" stopColor="#A855F7" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#7E22CE" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 117.5,0 L 117.5,68 A 16,16 0 0,1 101.5,86.5 L 0,86.5"
+                stroke="url(#neonCornerGradBR)"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            {/* Màn sương trắng mờ ảo đáy bảng (Khung đỏ hàng TOTAL) */}
+            <HalloweenTableMist />
+
+            {/* Các khung màu vàng: Bí ngô & Kẹo Halloween */}
+            {/* 1. Mép trái hàng 6-7: Kẹo bọc nơ tím/cam */}
+            <div style={{ position: 'absolute', top: '182px', left: '-12px', transform: 'rotate(-12deg)', zIndex: 30, pointerEvents: 'none' }} title="Halloween Sweet Candy">
+              <HalloweenCandyWrapped size={26} />
+            </div>
+
+            {/* 2. Mép trái hàng 8-9: Quả bí ngô Halloween 3D */}
+            <div 
+              className="halloween-decor-item"
+              style={{ 
+                position: 'absolute', 
+                top: '240px', 
+                left: '-16px', 
+                width: '36px', 
+                height: '35px', 
+                transform: 'rotate(8deg)', 
+                zIndex: 30, 
+                pointerEvents: 'none',
+                filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.45)) drop-shadow(0 0 8px rgba(255, 117, 24, 0.65))'
+              }}
+              title="Spooky Pumpkin"
+            >
+              <img src={pumpkin3dImg} alt="Pumpkin" />
+            </div>
+
+            {/* 3. Mép trái hàng 13: Kẹo Candy Corn */}
+            <div style={{ position: 'absolute', top: '375px', left: '-8px', transform: 'rotate(10deg)', zIndex: 30, pointerEvents: 'none' }} title="Candy Corn">
+              <HalloweenCandyCorn size={22} />
+            </div>
+
+            {/* 4. Mép phải hàng 3-4: Quả bí ngô 3D phát sáng */}
+            <div 
+              className="halloween-decor-item"
+              style={{ 
+                position: 'absolute', 
+                top: '102px', 
+                right: '-16px', 
+                width: '40px', 
+                height: '39px', 
+                transform: 'rotate(-6deg)', 
+                zIndex: 30, 
+                pointerEvents: 'none',
+                filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.45)) drop-shadow(0 0 10px rgba(255, 117, 24, 0.7))'
+              }}
+              title="Glowing Pumpkin"
+            >
+              <img src={pumpkin3dImg} alt="Pumpkin" />
+            </div>
+
+            {/* 5. Mép phải hàng 8-9: Kẹo mút xoắn Halloween (Khung đỏ trên đã căn chỉnh) */}
+            <div style={{ position: 'absolute', top: '254px', right: '-4px', transform: 'rotate(16deg)', zIndex: 30, pointerEvents: 'none' }} title="Halloween Swirl Candy">
+              <HalloweenCandySwirl size={36} />
+            </div>
+
+            {/* 6. Mép phải hàng 14: Chiếc lá vàng mùa thu (Khung đỏ dưới) */}
+            <div style={{ position: 'absolute', top: '414px', right: '-6px', zIndex: 30, pointerEvents: 'none' }} title="Halloween Golden Autumn Leaf">
+              <HalloweenGoldenLeaf size={30} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

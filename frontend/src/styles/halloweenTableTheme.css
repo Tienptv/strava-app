@@ -1,0 +1,242 @@
+/* =========================================================================
+   HALLOWEEN HEADER BAR THEME & KEYFRAME ANIMATIONS
+   Exclusively focused on the Header Bar. Table remains 100% default.
+   ========================================================================= */
+
+/* --- Month Dropdown Menu inside Halloween Header --- */
+.halloween-header-bar {
+  z-index: 60 !important;
+}
+
+.halloween-header-bar .month-dropdown-container {
+  z-index: 100 !important;
+}
+
+.halloween-header-bar .month-dropdown-menu {
+  background: rgba(20, 16, 32, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1.5px solid #D98850 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75), 0 0 16px rgba(217, 136, 80, 0.25) !important;
+  z-index: 999 !important;
+}
+
+.halloween-header-bar .month-dropdown-item {
+  color: #cbd5e1 !important;
+}
+
+.halloween-header-bar .month-dropdown-item:hover,
+.halloween-header-bar .month-dropdown-item.is-active {
+  background: linear-gradient(135deg, #FF7A00 0%, #9D4EDD 100%) !important;
+  color: #ffffff !important;
+}
+
+/* =========================================================================
+   KEYFRAME ANIMATIONS FOR BESPOKE VECTOR DECORATIONS
+   ========================================================================= */
+
+@keyframes pumpkinNeonPulse {
+  0% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 10px rgba(255, 117, 24, 0.85)) drop-shadow(0 0 20px rgba(255, 117, 24, 0.4));
+  }
+  50% {
+    transform: translateY(-2px) scale(1.05);
+    filter: drop-shadow(0 0 16px rgba(255, 117, 24, 1)) drop-shadow(0 0 28px rgba(255, 117, 24, 0.65));
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 10px rgba(255, 117, 24, 0.85)) drop-shadow(0 0 20px rgba(255, 117, 24, 0.4));
+  }
+}
+
+@keyframes ghostFloatMini {
+  0%, 100% {
+    transform: translateY(0) rotate(-3deg);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.85)) drop-shadow(0 0 16px rgba(168, 85, 247, 0.45));
+  }
+  50% {
+    transform: translateY(-5px) rotate(4deg);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) drop-shadow(0 0 22px rgba(168, 85, 247, 0.65));
+  }
+}
+
+@keyframes sparkleTwinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 6px #fef08a);
+  }
+}
+
+@keyframes batFlap {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(0.96, 1.08); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes moonGlowPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(254, 240, 138, 0.85), 0 0 30px rgba(250, 204, 21, 0.5), 0 0 50px rgba(250, 204, 21, 0.25);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 22px rgba(254, 240, 138, 1), 0 0 42px rgba(250, 204, 21, 0.7), 0 0 70px rgba(250, 204, 21, 0.35);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(254, 240, 138, 0.85), 0 0 30px rgba(250, 204, 21, 0.5), 0 0 50px rgba(250, 204, 21, 0.25);
+  }
+}
+
+/* =========================================================================
+   HALLOWEEN TABLE GLASS OVERLAY & NEON PURPLE CORNERS
+   A transparent glass canvas over the table, with deep neon purple corners
+   ========================================================================= */
+
+.challenge-table-stage {
+  position: relative;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.challenge-table-stage > .challenge-table-wrapper {
+  margin-top: 0 !important;
+}
+
+/* --- Transparent Glass Overlay Layer (Pointer Events None) --- */
+.halloween-glass-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0%, rgba(147, 51, 234, 0.012) 40%, rgba(75, 0, 130, 0.02) 100%);
+  box-shadow: inset 0 0 24px rgba(75, 0, 130, 0.1), 0 6px 20px rgba(10, 5, 25, 0.08);
+  overflow: visible;
+}
+
+/* --- Subtle Glass Reflection Sheen on Top --- */
+.halloween-glass-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(192, 132, 252, 0.6) 20%, rgba(255, 255, 255, 0.8) 50%, rgba(192, 132, 252, 0.6) 80%, transparent 100%);
+  opacity: 0.65;
+}
+
+/* --- Curved Neon Purple Corner Strokes (SVG, Zero Background Fill) --- */
+.halloween-neon-corner-svg {
+  position: absolute;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px #C084FC) drop-shadow(0 0 12px #9333EA) drop-shadow(0 0 22px rgba(126, 34, 206, 0.7));
+  animation: neonPurplePulse 3.5s infinite ease-in-out;
+}
+
+/* Corner Bottom-Left (Góc dưới bên trái) */
+.halloween-neon-corner-svg.corner-bl {
+  bottom: 0px;
+  left: 0px;
+}
+
+/* Corner Bottom-Right (Góc dưới bên phải) */
+.halloween-neon-corner-svg.corner-br {
+  bottom: 0px;
+  right: 0px;
+  animation-delay: 0.6s;
+}
+
+/* Keyframe Pulsing for Neon Purple Glow */
+@keyframes neonPurplePulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px #C084FC) drop-shadow(0 0 10px #9333EA) drop-shadow(0 0 18px rgba(126, 34, 206, 0.6));
+    opacity: 0.88;
+  }
+  50% {
+    filter: drop-shadow(0 0 8px #E9D5FF) drop-shadow(0 0 18px #A855F7) drop-shadow(0 0 28px rgba(147, 51, 234, 0.95));
+    opacity: 1;
+  }
+}
+
+/* =========================================================================
+   MYSTICAL HEADERBAR MIST LAYER (HÀNG TOTAL - ĐỒNG BỘ 100% HEADERBAR)
+   ========================================================================= */
+
+.halloween-table-mist-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  pointer-events: none;
+  overflow: hidden;
+  border-bottom-left-radius: var(--radius-sm, 8px);
+  border-bottom-right-radius: var(--radius-sm, 8px);
+  z-index: 10;
+}
+
+.halloween-table-mist-ambient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(23, 17, 38, 0.42) 0%, rgba(58, 45, 82, 0.16) 60%, transparent 100%);
+  box-shadow: inset 0 -4px 14px rgba(23, 17, 38, 0.25);
+}
+
+.halloween-mist-wave {
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  left: -200px;
+  width: calc(100% + 400px);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.halloween-mist-wave.wave-1 {
+  opacity: 0.88;
+  animation: headerbarMistDrift 18s infinite ease-in-out alternate;
+}
+
+.halloween-mist-wave.wave-2 {
+  opacity: 0.55;
+  filter: blur(1.5px);
+  transform: scaleX(-1);
+  animation: headerbarMistDrift 24s infinite ease-in-out alternate-reverse;
+}
+
+@keyframes headerbarMistDrift {
+  0% { transform: translateX(0) scaleY(1); }
+  50% { transform: translateX(35px) scaleY(1.08); }
+  100% { transform: translateX(-25px) scaleY(0.96); }
+}
+
+/* =========================================================================
+   HALLOWEEN DECOR ITEMS (PUMPKINS & CANDIES ON GLASS OVERLAY)
+   ========================================================================= */
+
+.halloween-decor-item {
+  position: absolute;
+  pointer-events: none;
+  z-index: 30;
+  transition: transform 0.3s ease;
+}
+
+.halloween-decor-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.halloween-decor-item:hover {
+  transform: scale(1.1) rotate(5deg);
+}
