@@ -121,7 +121,8 @@ export default function Dashboard({
   }, []);
 
   // Challenge States
-  const [viewMode, setViewMode] = useState(isMobile || athlete?.isGuest ? 'challenge' : 'overview'); // 'overview' | 'challenge'
+  const isMemberSession = Boolean(athlete?.isMemberVerified || localStorage.getItem('isMemberVerified') === 'true');
+  const [viewMode, setViewMode] = useState(isMobile || athlete?.isGuest || isMemberSession ? 'challenge' : 'overview'); // 'overview' | 'challenge'
   const [internalMonth, setInternalMonth] = useState(new Date().getMonth() + 1);
   const [internalYear, setInternalYear] = useState(new Date().getFullYear());
 
@@ -197,7 +198,8 @@ export default function Dashboard({
   }, []);
 
   const loadData = async () => {
-    if (athlete?.isGuest) {
+    const isMember = Boolean(athlete?.isMemberVerified || localStorage.getItem('isMemberVerified') === 'true');
+    if (athlete?.isGuest || isMember) {
       setLoading(false);
       return;
     }

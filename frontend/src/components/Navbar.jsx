@@ -1,12 +1,15 @@
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, LogOut, Shield, Sparkles } from 'lucide-react';
+import { LayoutDashboard, LogOut, Shield, Sparkles, KeyRound } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import NotificationBell from './NotificationBell';
+import ChangePinModal from './ChangePinModal';
 
 export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin, apiFetch }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { lang, switchLang, t } = useLang();
+  const [isChangePinOpen, setIsChangePinOpen] = useState(false);
 
   return (
     <nav className="navbar">
@@ -178,12 +181,42 @@ export default function Navbar({ athlete, onLogout, isAdmin, isSuperAdmin, apiFe
               {athlete.firstname}
             </span>
             <NotificationBell apiFetch={apiFetch} athlete={athlete} />
+            <button
+              className="navbar__change-pin"
+              onClick={() => setIsChangePinOpen(true)}
+              title={t('changePinBtn')}
+              style={{
+                background: 'rgba(0, 163, 166, 0.08)',
+                border: '1px solid rgba(0, 163, 166, 0.28)',
+                color: 'var(--accent, #00A3A6)',
+                padding: '4px 9px',
+                borderRadius: '8px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 163, 166, 0.25)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              <KeyRound size={13} />
+              <span className="navbar__change-pin-text">{t('changePinBtn')}</span>
+            </button>
             <button className="navbar__logout" onClick={onLogout} title={t('logout')}>
               <LogOut size={14} style={{ verticalAlign: 'text-bottom' }} /> <span className="navbar__logout-text">{t('logout')}</span>
             </button>
           </>
         )}
       </div>
+      <ChangePinModal
+        isOpen={isChangePinOpen}
+        onClose={() => setIsChangePinOpen(false)}
+        athlete={athlete}
+        apiFetch={apiFetch}
+      />
     </nav>
   );
 }

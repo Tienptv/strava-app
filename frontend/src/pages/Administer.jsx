@@ -1537,6 +1537,65 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
     }
   };
 
+  const handleResetMemberPin = async (member) => {
+    const athleteId = member.id || member.athleteId;
+    if (!athleteId) {
+      Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', lang === 'en' ? 'Cannot determine Athlete ID for this member.' : 'Không xác định được ID Strava của thành viên này.', 'error');
+      return;
+    }
+    const memberName = `${member.firstname || ''} ${member.lastname || ''}`.trim() || member.name || 'Thành viên';
+    const defaultPin = String(athleteId).slice(-4).padStart(4, '0');
+
+    const confirm = await Swal.fire({
+      title: t('resetPinConfirmTitle') || (lang === 'en' ? 'Reset Member PIN?' : 'Khôi phục mã PIN thành viên?'),
+      html: `
+        <div style="text-align: left; font-size: 0.9rem; line-height: 1.6; color: #334155;">
+          <p><b>${lang === 'en' ? 'Member:' : 'Thành viên:'}</b> <span style="color: #002D54; font-weight: 700;">${memberName}</span> (ID: <code>${athleteId}</code>)</p>
+          <p>${lang === 'en' ? "Are you sure you want to reset this member's custom PIN back to the default PIN?" : 'Bạn có chắc chắn muốn xóa mã PIN riêng và khôi phục mã PIN của thành viên này về mặc định ban đầu?'}</p>
+          <div style="background: rgba(0, 163, 166, 0.08); border-left: 4px solid #00A3A6; padding: 10px 14px; border-radius: 6px; margin-top: 10px;">
+            <b>${lang === 'en' ? 'New Default PIN:' : 'Mã PIN mặc định sau khôi phục:'}</b> <code style="font-size: 1.1rem; color: #00A3A6; font-weight: 800;">${defaultPin}</code>
+            <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">
+              ${lang === 'en' ? '(Last 4 digits of Athlete ID)' : '(4 chữ số cuối của Strava ID)'}
+            </div>
+          </div>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: lang === 'en' ? 'Yes, Reset PIN 🔑' : 'Đồng ý, Khôi phục PIN 🔑',
+      cancelButtonText: t('cancel'),
+      confirmButtonColor: '#00A3A6'
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const res = await apiFetch('/admin/reset-member-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetAthleteId: athleteId })
+      });
+
+      if (res && res.success) {
+        Swal.fire({
+          icon: 'success',
+          title: t('resetPinSuccess') || (lang === 'en' ? 'PIN Reset Successfully' : 'Khôi phục PIN thành công'),
+          html: `
+            <p>${lang === 'en' ? 'Member PIN has been reset to default:' : 'Mã PIN của thành viên đã được khôi phục về mặc định:'}</p>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #00A3A6; margin: 10px 0;">${defaultPin}</div>
+            <p style="font-size: 0.85rem; color: #64748b;">${lang === 'en' ? 'Member can now log in using this 4-digit PIN.' : 'Thành viên hiện có thể đăng nhập bằng 4 chữ số này.'}</p>
+          `,
+          confirmButtonColor: '#00A3A6'
+        });
+        loadLogs();
+      } else {
+        throw new Error(res.error || 'Failed to reset PIN');
+      }
+    } catch (e) {
+      Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', e.message || (lang === 'en' ? 'Cannot reset PIN' : 'Không thể khôi phục PIN'), 'error');
+    }
+  };
+
   // Tải cấu hình phân quyền Sub-Admin từ server
   const loadAdminPermissions = async () => {
     try {
@@ -2880,6 +2939,19 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
 
                         {isSuperAdmin && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {admin.athleteId && (
+                              <button
+                                onClick={() => handleResetMemberPin(admin)}
+                                className="btn btn--secondary"
+                                title={t('resetPinBtn')}
+                                style={{ 
+                                  color: 'var(--accent, #00A3A6)', borderColor: 'rgba(0, 163, 166, 0.3)', background: 'rgba(0, 163, 166, 0.06)',
+                                  padding: '6px 10px', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px'
+                                }}
+                              >
+                                <Key size={13} /> {t('resetPinBtn')}
+                              </button>
+                            )}
                             <button
                               onClick={() => handlePromoteToSuperAdmin(admin)}
                               className="btn btn--secondary"
@@ -3048,22 +3120,46 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                                 </div>
                               </div>
                               
-                              {isAlreadyAdmin ? (
-                                <span style={{ color: isAlreadySuperAdmin ? 'var(--primary-navy)' : '#059669', background: isAlreadySuperAdmin ? 'rgba(0, 45, 84, 0.08)' : '#ecfdf5', padding: '4px 8px', borderRadius: '6px', fontWeight: 700, fontSize: '0.75rem' }}>
-                                  {isAlreadySuperAdmin ? '👑 Super Admin' : '🛡️ Sub-Admin'}
-                                </span>
-                              ) : (
-                                <button 
-                                  className="btn btn--primary" 
-                                  style={{ 
-                                    padding: '6px 12px', fontSize: '0.8rem', borderRadius: '6px', fontWeight: 600,
-                                    background: selectedRoleToGrant === 'super_admin' ? 'linear-gradient(135deg, #002D54 0%, #00A3A6 100%)' : undefined
-                                  }}
-                                  onClick={() => handleAddAdmin(member, selectedRoleToGrant)}
-                                >
-                                  {selectedRoleToGrant === 'super_admin' ? (lang === 'en' ? '👑 Grant Super Admin' : '👑 Bổ nhiệm Super Admin') : (lang === 'en' ? 'Grant Sub-Admin' : 'Cấp Sub-Admin')}
-                                </button>
-                              )}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {member.id && (
+                                  <button
+                                    className="btn btn--secondary"
+                                    onClick={() => handleResetMemberPin(member)}
+                                    title={t('resetPinBtn')}
+                                    style={{
+                                      padding: '5px 10px',
+                                      fontSize: '0.75rem',
+                                      borderRadius: '6px',
+                                      fontWeight: 600,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
+                                      borderColor: 'rgba(0, 163, 166, 0.35)',
+                                      color: 'var(--accent, #00A3A6)',
+                                      background: 'rgba(0, 163, 166, 0.06)'
+                                    }}
+                                  >
+                                    <Key size={13} />
+                                    <span>{t('resetPinBtn')}</span>
+                                  </button>
+                                )}
+                                {isAlreadyAdmin ? (
+                                  <span style={{ color: isAlreadySuperAdmin ? 'var(--primary-navy)' : '#059669', background: isAlreadySuperAdmin ? 'rgba(0, 45, 84, 0.08)' : '#ecfdf5', padding: '4px 8px', borderRadius: '6px', fontWeight: 700, fontSize: '0.75rem' }}>
+                                    {isAlreadySuperAdmin ? '👑 Super Admin' : '🛡️ Sub-Admin'}
+                                  </span>
+                                ) : (
+                                  <button 
+                                    className="btn btn--primary" 
+                                    style={{ 
+                                      padding: '6px 12px', fontSize: '0.8rem', borderRadius: '6px', fontWeight: 600,
+                                      background: selectedRoleToGrant === 'super_admin' ? 'linear-gradient(135deg, #002D54 0%, #00A3A6 100%)' : undefined
+                                    }}
+                                    onClick={() => handleAddAdmin(member, selectedRoleToGrant)}
+                                  >
+                                    {selectedRoleToGrant === 'super_admin' ? (lang === 'en' ? '👑 Grant Super Admin' : '👑 Bổ nhiệm Super Admin') : (lang === 'en' ? 'Grant Sub-Admin' : 'Cấp Sub-Admin')}
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           );
                         })

@@ -31,7 +31,7 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // State: Passcode & Xác thực
+  // State: PIN cá nhân & Xác thực
   const [passcode, setPasscode] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -83,7 +83,7 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
     });
   }, [members, searchQuery]);
 
-  // Xử lý xác thực thành viên (Phương án 3)
+  // Xử lý xác thực thành viên (Mã PIN cá nhân 4 số)
   const handleVerifyMember = async (e) => {
     e?.preventDefault();
     setErrorMsg('');
@@ -93,7 +93,7 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
       return;
     }
     if (!passcode || !passcode.trim()) {
-      setErrorMsg(t('memberPassRequired'));
+      setErrorMsg(t('memberPinRequired'));
       return;
     }
 
@@ -104,6 +104,7 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           athleteId: selectedMember.id,
+          pin: passcode.trim(),
           passcode: passcode.trim()
         })
       });
@@ -365,22 +366,23 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
               )}
             </div>
 
-            {/* DÒNG 2: KHUNG NHẬP PASS ĐƯỢC CẤP (KHÔNG PHÂN BIỆT HOA THƯỜNG) */}
+            {/* DÒNG 2: KHUNG NHẬP MÃ PIN CÁ NHÂN 4 SỐ (MẶC ĐỊNH LÀ 4 SỐ CUỐI ID) */}
             <div>
               <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>
                 <Lock size={14} style={{ marginRight: 6, verticalAlign: 'middle', color: 'var(--accent)' }} />
-                {t('memberPassLabel')}
+                {t('memberPinLabel')}
               </label>
               <div style={{ position: 'relative' }}>
                 <Key size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
                 <input
                   type={showPass ? 'text' : 'password'}
                   value={passcode}
+                  maxLength={10}
                   onChange={(e) => {
                     setPasscode(e.target.value);
                     setErrorMsg('');
                   }}
-                  placeholder={t('memberPassPlaceholder')}
+                  placeholder={t('memberPinPlaceholder')}
                   style={{
                     width: '100%',
                     padding: '11px 40px 11px 36px',
@@ -409,7 +411,7 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
                     alignItems: 'center'
                   }}
                   onClick={() => setShowPass(!showPass)}
-                  title={showPass ? (lang === 'en' ? 'Hide passcode' : 'Ẩn mật khẩu') : (lang === 'en' ? 'Show passcode' : 'Hiện mật khẩu')}
+                  title={showPass ? (lang === 'en' ? 'Hide PIN' : 'Ẩn mã PIN') : (lang === 'en' ? 'Show PIN' : 'Hiện mã PIN')}
                 >
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>

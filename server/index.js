@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import puppeteer from 'puppeteer-core';
 import { StravaAPI } from './strava.js';
@@ -48,6 +49,7 @@ const CLUB_ROSTER_FILE = path.join(__dirname, '../Storage/club_roster.json');
 const ATHLETE_NAMES_FILE = path.join(__dirname, '../Storage/AthleteID_Name.csv');
 const AVATARS_FILE = path.join(__dirname, '../Storage/avatars.json');
 const CLUB_ACCESS_FILE = path.join(__dirname, '../Storage/club_access_config.json');
+const MEMBER_PINS_FILE = path.join(__dirname, '../Storage/member_pins.json');
 
 // ==========================================
 // TỰ ĐỘNG ĐỒNG BỘ 2 CHIỀU GIỮA GIT ROOT & DESKTOP APP STORAGE
@@ -903,6 +905,22 @@ export function getAthleteRole(rawAthleteId) {
 // Kiểm tra vai trò của người dùng hiện tại
 app.get('/api/auth/roles', (req, res) => {
   const rawAthleteId = (req.headers['x-athlete-id'] || req.query.athleteId || '').toString();
+  const authMethod = (req.headers['x-auth-method'] || req.query.authMethod || '').toString().trim();
+  const isMemberVerifiedHeader = (req.headers['x-member-verified'] || '').toString().trim() === 'true';
+
+  // BẢO MẬT TUYỆT ĐỐI (Cách A): Nếu phiên đăng nhập qua Member PIN, TƯỚC TOÀN BỘ QUYỀN ADMIN!
+  if (authMethod === 'member_pin' || isMemberVerifiedHeader) {
+    return res.json({
+      athleteId: rawAthleteId,
+      superAdminId: SUPER_ADMIN_ID,
+      superAdminIds: getSuperAdminIds(),
+      isSuperAdmin: false,
+      isSubAdmin: false,
+      isAdmin: false,
+      permissions: null
+    });
+  }
+
   const subAdmins = loadAdminsList();
 
   const isSuperAdmin = isSuperAdminUser(rawAthleteId);
@@ -932,8 +950,34 @@ app.get('/api/auth/roles', (req, res) => {
 });
 
 // ==========================================
-// THÀNH VIÊN CLB: XÁC THỰC BẰNG DROPDOWN TÊN + PASSCODE CLB (PHƯƠNG ÁN 3)
+// THÀNH VIÊN CLB: XÁC THỰC MÃ PIN CÁ NHÂN (GIẢI PHÁP 1: 4 SỐ CUỐI ID STRAVA)
 // ==========================================
+
+function loadMemberPins() {
+  try {
+    if (fs.existsSync(MEMBER_PINS_FILE)) {
+      return JSON.parse(fs.readFileSync(MEMBER_PINS_FILE, 'utf8') || '{}');
+    }
+  } catch (err) {
+    console.error('Lỗi đọc member_pins.json:', err.message);
+  }
+  return {};
+}
+
+function saveMemberPins(pinsData) {
+  writeStorageJson(MEMBER_PINS_FILE, pinsData);
+}
+
+function getDefaultPin(athleteId) {
+  if (!athleteId) return '0000';
+  const cleanId = String(athleteId).trim();
+  const slice4 = cleanId.slice(-4);
+  return slice4.padStart(4, '0');
+}
+
+function hashPin(pin, athleteId) {
+  return crypto.createHash('sha256').update(`${pin}_${athleteId}_strava_200k_salt`).digest('hex');
+}
 
 // Lấy danh sách thành viên công khai cho màn hình Đăng nhập (không cần token OAuth)
 app.get('/api/auth/club-members', (req, res) => {
@@ -963,24 +1007,73 @@ app.get('/api/auth/club-members', (req, res) => {
   }
 });
 
-// Xác thực thành viên bằng passcode CLB (mặc định "200k", không phân biệt hoa thường)
+// Xác thực thành viên bằng PIN cá nhân (Mặc định: 4 số cuối Strava ID)
 app.post('/api/auth/verify-member', (req, res) => {
   try {
-    const { athleteId, passcode } = req.body || {};
+    const { athleteId, pin, passcode } = req.body || {};
+    const inputPin = String(pin || passcode || '').trim();
     if (!athleteId) {
       return res.status(400).json({ success: false, error: 'Vui lòng chọn thành viên' });
     }
-    if (!passcode) {
-      return res.status(400).json({ success: false, error: 'Vui lòng nhập mật khẩu CLB' });
+    if (!inputPin) {
+      return res.status(400).json({ success: false, error: 'Vui lòng nhập mã PIN cá nhân (4 số cuối Strava ID)' });
     }
 
-    const currentPass = getClubAccessPasscode();
-    if (String(passcode).trim().toLowerCase() !== currentPass.toLowerCase()) {
-      return res.status(401).json({ success: false, error: 'Mật khẩu truy cập CLB không đúng' });
+    const idStr = String(athleteId).trim();
+    const pins = loadMemberPins();
+    const memberPinRecord = pins[idStr];
+
+    // Kiểm tra khóa brute-force
+    const now = Date.now();
+    if (memberPinRecord && memberPinRecord.lockedUntil && memberPinRecord.lockedUntil > now) {
+      const waitMinutes = Math.ceil((memberPinRecord.lockedUntil - now) / 60000);
+      return res.status(429).json({
+        success: false,
+        error: `Tài khoản đã bị tạm khóa do nhập sai PIN quá 5 lần. Vui lòng thử lại sau ${waitMinutes} phút hoặc liên hệ Admin reset PIN.`
+      });
+    }
+
+    let isPinValid = false;
+    let isDefault = false;
+
+    if (memberPinRecord && memberPinRecord.pinHash) {
+      // Thành viên đã đổi PIN riêng
+      const computedHash = hashPin(inputPin, idStr);
+      isPinValid = (computedHash === memberPinRecord.pinHash);
+    } else {
+      // Thành viên dùng PIN mặc định là 4 số cuối Strava ID
+      const defaultPin = getDefaultPin(idStr);
+      // Hỗ trợ cả defaultPin và passcode CLB (nếu có người vẫn gõ passcode cũ)
+      const currentClubPass = getClubAccessPasscode();
+      isPinValid = (inputPin === defaultPin || inputPin.toLowerCase() === currentClubPass.toLowerCase());
+      isDefault = true;
+    }
+
+    if (!isPinValid) {
+      if (!pins[idStr]) {
+        pins[idStr] = { failedAttempts: 0, lockedUntil: null };
+      }
+      pins[idStr].failedAttempts = (pins[idStr].failedAttempts || 0) + 1;
+      if (pins[idStr].failedAttempts >= 5) {
+        pins[idStr].lockedUntil = now + 15 * 60 * 1000; // Khóa 15 phút
+      }
+      saveMemberPins(pins);
+
+      const remaining = Math.max(0, 5 - pins[idStr].failedAttempts);
+      const warnMsg = remaining > 0 
+        ? `Mã PIN không chính xác. Bạn còn ${remaining} lần thử.` 
+        : `Bạn đã nhập sai 5 lần. Tài khoản bị tạm khóa 15 phút.`;
+      return res.status(401).json({ success: false, error: warnMsg, remainingAttempts: remaining });
+    }
+
+    // Đăng nhập thành công: reset số lần thử sai
+    if (pins[idStr] && pins[idStr].failedAttempts > 0) {
+      pins[idStr].failedAttempts = 0;
+      pins[idStr].lockedUntil = null;
+      saveMemberPins(pins);
     }
 
     const roster = getAllClubMembersRoster();
-    const idStr = String(athleteId).trim();
     let found = roster.find(m => String(m.id || m.athleteId) === idStr);
 
     if (!found) {
@@ -1014,7 +1107,8 @@ app.post('/api/auth/verify-member', (req, res) => {
       lastname: found.lastname || '',
       name: found.name || `${found.firstname || ''} ${found.lastname || ''}`.trim() || idStr,
       profile_medium: found.profile_medium || found.profile || null,
-      isMemberVerified: true
+      isMemberVerified: true,
+      authMethod: 'member_pin'
     } : {
       id: idStr,
       athleteId: idStr,
@@ -1022,12 +1116,14 @@ app.post('/api/auth/verify-member', (req, res) => {
       lastname: '',
       name: `Athlete #${idStr}`,
       profile_medium: null,
-      isMemberVerified: true
+      isMemberVerified: true,
+      authMethod: 'member_pin'
     };
 
     res.json({
       success: true,
-      athlete: athleteData
+      athlete: athleteData,
+      isDefaultPin: isDefault
     });
   } catch (err) {
     console.error('Lỗi verify-member:', err.message);
@@ -1035,8 +1131,106 @@ app.post('/api/auth/verify-member', (req, res) => {
   }
 });
 
+// Thành viên tự đổi mã PIN cá nhân
+app.post('/api/member/change-pin', (req, res) => {
+  try {
+    const rawAthleteId = (req.headers['x-athlete-id'] || req.body.athleteId || '').toString().trim();
+    const { oldPin, newPin } = req.body || {};
+
+    if (!rawAthleteId) {
+      return res.status(400).json({ success: false, error: 'Thiếu athlete ID' });
+    }
+    if (!newPin || !/^\d{4}$/.test(String(newPin).trim())) {
+      return res.status(400).json({ success: false, error: 'Mã PIN mới phải gồm đúng 4 chữ số (0-9)' });
+    }
+
+    const cleanNewPin = String(newPin).trim();
+    const cleanOldPin = String(oldPin || '').trim();
+    const pins = loadMemberPins();
+    const memberPinRecord = pins[rawAthleteId];
+
+    // Xác thực PIN cũ
+    let isOldPinValid = false;
+    if (memberPinRecord && memberPinRecord.pinHash) {
+      isOldPinValid = (hashPin(cleanOldPin, rawAthleteId) === memberPinRecord.pinHash);
+    } else {
+      const defaultPin = getDefaultPin(rawAthleteId);
+      isOldPinValid = (cleanOldPin === defaultPin);
+    }
+
+    if (!isOldPinValid) {
+      return res.status(401).json({ success: false, error: 'Mã PIN hiện tại không chính xác' });
+    }
+
+    // Lưu PIN mới đã hash
+    pins[rawAthleteId] = {
+      pinHash: hashPin(cleanNewPin, rawAthleteId),
+      updatedAt: new Date().toISOString(),
+      failedAttempts: 0,
+      lockedUntil: null
+    };
+    saveMemberPins(pins);
+
+    addAuditLog('CHANGE_MEMBER_PIN', `Athlete #${rawAthleteId}`, `Thành viên đã cập nhật mã PIN cá nhân mới.`);
+
+    res.json({ success: true, message: 'Đổi mã PIN thành công' });
+  } catch (err) {
+    console.error('Lỗi change-pin:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Admin reset mã PIN của thành viên về mặc định (4 số cuối Strava ID)
+app.post('/api/admin/reset-member-pin', (req, res) => {
+  try {
+    const rawAdminId = (req.headers['x-athlete-id'] || '').toString().trim();
+    const authMethod = (req.headers['x-auth-method'] || '').toString().trim();
+
+    // Nếu phiên đăng nhập qua member_pin thì không có quyền reset PIN
+    if (authMethod === 'member_pin') {
+      return res.status(403).json({ success: false, error: 'Chỉ Quản trị viên Strava OAuth mới có quyền reset PIN' });
+    }
+
+    const isSuperAdmin = isSuperAdminUser(rawAdminId);
+    const subAdmins = loadAdminsList();
+    const isSubAdmin = !isSuperAdmin && isAthleteInSubAdmins(rawAdminId, subAdmins);
+
+    if (!isSuperAdmin && !isSubAdmin) {
+      return res.status(403).json({ success: false, error: 'Bạn không có quyền quản trị viên' });
+    }
+
+    const { targetAthleteId } = req.body || {};
+    if (!targetAthleteId) {
+      return res.status(400).json({ success: false, error: 'Thiếu ID thành viên cần reset PIN' });
+    }
+
+    const cleanTargetId = String(targetAthleteId).trim();
+    const pins = loadMemberPins();
+
+    if (pins[cleanTargetId]) {
+      delete pins[cleanTargetId];
+      saveMemberPins(pins);
+    }
+
+    const defaultPin = getDefaultPin(cleanTargetId);
+    addAuditLog('ADMIN_RESET_PIN', `Admin #${rawAdminId}`, `Reset mã PIN cho athlete ID ${cleanTargetId} về mặc định (${defaultPin})`);
+
+    res.json({
+      success: true,
+      message: `Đã reset mã PIN của thành viên về 4 số cuối ID Strava (${defaultPin})`
+    });
+  } catch (err) {
+    console.error('Lỗi reset-member-pin:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Lấy mật khẩu CLB hiện tại (chỉ dành cho Admin / Super Admin)
 app.get('/api/admin/club-pass', (req, res) => {
+  const authMethod = (req.headers['x-auth-method'] || '').toString().trim();
+  if (authMethod === 'member_pin') {
+    return res.status(403).json({ success: false, error: 'Chỉ Quản trị viên Strava OAuth mới được xem mật khẩu CLB' });
+  }
   const rawAthleteId = (req.headers['x-athlete-id'] || '').toString();
   const subAdmins = loadAdminsList();
   const isSuperAdmin = isSuperAdminUser(rawAthleteId);

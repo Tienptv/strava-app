@@ -45,9 +45,19 @@ function App() {
 
     const storedId = localStorage.getItem('athleteId');
     const storedAthlete = localStorage.getItem('athlete');
+    const isMemberVerifiedStored = localStorage.getItem('isMemberVerified') === 'true';
     if (storedId && storedAthlete && storedId !== 'guest') {
-      setAthleteId(storedId);
-      setAthlete(JSON.parse(storedAthlete));
+      try {
+        const parsedAthlete = JSON.parse(storedAthlete);
+        if (isMemberVerifiedStored) {
+          parsedAthlete.isMemberVerified = true;
+          parsedAthlete.authMethod = 'member_pin';
+        }
+        setAthleteId(storedId);
+        setAthlete(parsedAthlete);
+      } catch (_) {
+        setAthleteId(storedId);
+      }
     } else if (isGuestQuery || isGuestStored) {
       const guestAthlete = { id: 'guest', firstname: 'Khách', lastname: 'Xem', isGuest: true, profile_medium: null };
       setAthleteId('guest');
@@ -70,30 +80,39 @@ function App() {
     localStorage.setItem('isGuest', 'true');
   };
 
-  // Đăng nhập dành cho Thành viên (Phương án 3: Dropdown tên + Passcode CLB)
+  // Đăng nhập dành cho Thành viên (Mã PIN cá nhân / 4 số cuối Strava ID)
   const handleMemberLogin = (athleteData) => {
     if (!athleteData || !athleteData.id) return;
     const id = String(athleteData.id);
+    const verifiedAthlete = {
+      ...athleteData,
+      isMemberVerified: true,
+      authMethod: 'member_pin'
+    };
     setAthleteId(id);
-    setAthlete(athleteData);
+    setAthlete(verifiedAthlete);
     localStorage.removeItem('isGuest');
     localStorage.setItem('athleteId', id);
-    localStorage.setItem('athlete', JSON.stringify(athleteData));
+    localStorage.setItem('athlete', JSON.stringify(verifiedAthlete));
     localStorage.setItem('isMemberVerified', 'true');
   };
 
   // Hàm gọi API có kèm athlete ID
   const apiFetch = useCallback(async (endpoint, options = {}) => {
+    const isMemberVerified = localStorage.getItem('isMemberVerified') === 'true';
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      'x-athlete-id': athleteId || '',
+      ...(isMemberVerified ? { 'x-auth-method': 'member_pin', 'x-member-verified': 'true' } : {}),
+      ...options.headers,
+    };
+
     const res = await fetch(`${API_BASE}${endpoint}`, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'x-athlete-id': athleteId || '',
-        ...options.headers,
-      },
+      headers: authHeaders,
     });
     if (!res.ok) {
-      if (res.status === 401 && athleteId !== 'guest') {
+      if (res.status === 401 && athleteId !== 'guest' && !isMemberVerified) {
         handleLogout();
         throw new Error(t('sessionExpired'));
       }
@@ -316,17 +335,19 @@ function App() {
     );
   }
 
+  const isMemberSession = Boolean(athlete?.isMemberVerified || localStorage.getItem('isMemberVerified') === 'true');
   const envSuperAdminIds = (import.meta.env.VITE_ADMIN_STRAVA_ID || '133066813')
     .toString()
     .split(',')
     .map(s => s.trim())
     .filter(Boolean);
-  const isSuperAdmin = Boolean(userRoles.isSuperAdmin || (athlete && envSuperAdminIds.includes(athlete.id.toString())));
-  const isAdmin = Boolean(userRoles.isAdmin || isSuperAdmin);
+  // BẢO MẬT TUYỆT ĐỐI (Cách A): Phiên Member PIN 100% không bao giờ có quyền Admin
+  const isSuperAdmin = !isMemberSession && Boolean(userRoles.isSuperAdmin || (athlete && envSuperAdminIds.includes(athlete.id.toString())));
+  const isAdmin = !isMemberSession && Boolean(userRoles.isAdmin || isSuperAdmin);
 
   return (
     <BrowserRouter>
-      {athlete && <Navbar athlete={athlete} onLogout={handleLogout} isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} />}
+      {athlete && <Navbar athlete={athlete} onLogout={handleLogout} isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} apiFetch={apiFetch} />}
       <div className={athlete ? "app-layout" : ""}>
         {athlete && isAdmin && !isMobile && (
           <Sidebar 
