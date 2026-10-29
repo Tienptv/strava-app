@@ -1,6 +1,6 @@
 {
   "99901": {
-    "id": "plan_99901_1789574399202",
+    "id": "plan_99901_1793293462816",
     "athleteId": "99901",
     "raceName": "Garmin Run 2026",
     "targetDistanceKm": 21.0975,
@@ -1318,10 +1318,10 @@
       "downgradeReasonEn": "",
       "color": "#00A3A6"
     },
-    "createdAt": "2026-09-16T15:59:59.203Z"
+    "createdAt": "2026-10-29T17:04:22.817Z"
   },
   "99902": {
-    "id": "plan_99902_1789574399210",
+    "id": "plan_99902_1793293462824",
     "athleteId": "99902",
     "raceName": "Techcombank Marathon 2026",
     "targetDistanceKm": 42.195,
@@ -2841,16 +2841,16 @@
       "downgradeReasonEn": "",
       "color": "#00A3A6"
     },
-    "createdAt": "2026-09-16T15:59:59.210Z"
+    "createdAt": "2026-10-29T17:04:22.824Z"
   },
   "99903": {
-    "id": "plan_99903_1789574399217",
+    "id": "plan_99903_1793293462831",
     "athleteId": "99903",
     "raceName": "VnExpress Marathon",
     "targetDistanceKm": 21.0975,
     "targetTimeSeconds": 6900,
-    "raceDate": "2026-12-09",
-    "startDate": "2026-09-16",
+    "raceDate": "2027-01-21",
+    "startDate": "2026-10-29",
     "daysPerWeek": 4,
     "longRunDay": "sunday",
     "totalWeeks": 12,
@@ -4162,16 +4162,16 @@
       "downgradeReasonEn": "",
       "color": "#00A3A6"
     },
-    "createdAt": "2026-09-16T15:59:59.217Z"
+    "createdAt": "2026-10-29T17:04:22.831Z"
   },
   "99905": {
-    "id": "plan_99905_1789574399225",
+    "id": "plan_99905_1793293462839",
     "athleteId": "99905",
     "raceName": "Upcoming Race",
     "targetDistanceKm": 10,
     "targetTimeSeconds": 3000,
-    "raceDate": "2026-12-09",
-    "startDate": "2026-09-16",
+    "raceDate": "2027-01-21",
+    "startDate": "2026-10-29",
     "daysPerWeek": 4,
     "longRunDay": "sunday",
     "totalWeeks": 12,
@@ -5495,7 +5495,7 @@
       "downgradeReasonVi": "Giấc ngủ kém (4.8h, điểm 50/100); Nhịp tim nghỉ tăng +8 bpm (dấu hiệu quá tải/viêm cơ); HRV xuống thấp (hệ thần kinh giao cảm căng thẳng); Body Battery cạn kiệt (30%)",
       "downgradeReasonEn": "Poor sleep (4.8h, score 50/100); Elevated resting HR +8 bpm (signs of fatigue/strain); Low HRV status (sympathetic nervous system stress); Low Body Battery (30%)"
     },
-    "createdAt": "2026-09-16T15:59:59.225Z"
+    "createdAt": "2026-10-29T17:04:22.839Z"
   },
   "120540594": {
     "id": "plan_120540594_1789608607794",
@@ -6625,13 +6625,13 @@
     "createdAt": "2026-10-20T01:01:22.485Z"
   },
   "ath_phuong_01": {
-    "id": "plan_ath_phuong_01_1789574399232",
+    "id": "plan_ath_phuong_01_1793293462847",
     "athleteId": "ath_phuong_01",
     "raceName": "Upcoming Race",
     "targetDistanceKm": 21.0975,
     "targetTimeSeconds": 6600,
-    "raceDate": "2026-12-09",
-    "startDate": "2026-09-16",
+    "raceDate": "2027-01-21",
+    "startDate": "2026-10-29",
     "daysPerWeek": 4,
     "longRunDay": "sunday",
     "totalWeeks": 12,
@@ -7943,16 +7943,16 @@
       "downgradeReasonVi": "",
       "downgradeReasonEn": ""
     },
-    "createdAt": "2026-09-16T15:59:59.232Z"
+    "createdAt": "2026-10-29T17:04:22.847Z"
   },
   "ath_phuong_02": {
-    "id": "plan_ath_phuong_02_1789574399238",
+    "id": "plan_ath_phuong_02_1793293462852",
     "athleteId": "ath_phuong_02",
     "raceName": "Upcoming Race",
     "targetDistanceKm": 10,
     "targetTimeSeconds": 3600,
-    "raceDate": "2026-12-09",
-    "startDate": "2026-09-16",
+    "raceDate": "2027-01-21",
+    "startDate": "2026-10-29",
     "daysPerWeek": 4,
     "longRunDay": "sunday",
     "totalWeeks": 12,
@@ -9276,6 +9276,6 @@
       "downgradeReasonVi": "Giấc ngủ kém (7h, điểm 55/100); Nhịp tim nghỉ tăng +10 bpm (dấu hiệu quá tải/viêm cơ)",
       "downgradeReasonEn": "Poor sleep (7h, score 55/100); Elevated resting HR +10 bpm (signs of fatigue/strain)"
     },
-    "createdAt": "2026-09-16T15:59:59.238Z"
+    "createdAt": "2026-10-29T17:04:22.852Z"
   }
 }

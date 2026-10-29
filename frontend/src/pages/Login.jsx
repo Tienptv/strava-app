@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Activity, 
   Users, 
@@ -629,6 +630,30 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
         <p style={{ marginTop: 14, fontSize: '0.74rem', color: 'var(--text-muted)' }}>
           {t('loginNote')}
         </p>
+
+        {/* Footer liên kết pháp lý & tuân thủ Strava API Brand Guidelines */}
+        <div style={{
+          marginTop: 18,
+          paddingTop: 14,
+          borderTop: '1px solid rgba(0, 45, 84, 0.08)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 6
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.75rem' }}>
+            <Link to="/privacy-policy" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+              {t('privacyPolicy')}
+            </Link>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <Link to="/terms-of-service" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+              {t('termsOfService')}
+            </Link>
+          </div>
+          <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+            Powered by Strava API | HaskoningDHV Running Club
+          </div>
+        </div>
       </div>
     </div>
   );

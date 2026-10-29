@@ -8,6 +8,8 @@ import Dashboard from './pages/Dashboard';
 import ClubView from './pages/ClubView';
 import Administer from './pages/Administer';
 import NextGenDashboard from './pages/NextGenDashboard';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import { useLang } from './i18n/LangContext';
@@ -441,6 +443,8 @@ function App() {
                     : <Navigate to="/" replace />
                 }
               />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </ErrorBoundary>

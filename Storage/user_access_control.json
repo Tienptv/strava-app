@@ -1,7 +1,7 @@
 {
-  "version": 11,
-  "updatedAt": "2026-10-23T11:09:48.655Z",
-  "updatedBy": "Admin (133066813)",
+  "version": 15,
+  "updatedAt": "2026-10-29T17:09:49.238Z",
+  "updatedBy": "Test_Restore",
   "modules": {
     "aiCoach": {
       "key": "aiCoach",
