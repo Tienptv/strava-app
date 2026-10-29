@@ -84,19 +84,25 @@ export default function PersonalGoal({
     return athlete?.isGuest ? Boolean(mod.enabledForGuests) : Boolean(mod.enabledForMembers);
   }, [effectiveIsAdmin, accessConfig, athlete]);
 
-  // Calculate if editing is locked by date
+  // Calculate if editing is locked by date (Normalized to Vietnam time zone Asia/Ho_Chi_Minh)
   let isLockedByDate = false;
   if (!isAdmin && lockTargetsAfterDate > 0) {
-    const today = new Date();
-    const todayMonth = today.getMonth() + 1;
-    const todayYear = today.getFullYear();
+    const vnDateParts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date()).split('-').map(Number);
+    const todayYear = vnDateParts[0];
+    const todayMonth = vnDateParts[1];
+    const todayDay = vnDateParts[2];
     
     const isPastMonth = currentYear < todayYear || (currentYear === todayYear && currentMonth < todayMonth);
     const isCurrentMonth = currentYear === todayYear && currentMonth === todayMonth;
     
     if (isPastMonth) {
       isLockedByDate = true;
-    } else if (isCurrentMonth && today.getDate() > lockTargetsAfterDate) {
+    } else if (isCurrentMonth && todayDay > lockTargetsAfterDate) {
       isLockedByDate = true;
     }
   }
@@ -285,6 +291,14 @@ export default function PersonalGoal({
         setTimeout(() => setSaveSuccess(false), 2500);
       } catch (err) {
         console.error('Error saving target to API:', err);
+        // Hoàn nguyên mục tiêu nếu server từ chối cập nhật
+        loadUserTarget();
+        Swal.fire({
+          icon: 'warning',
+          title: lang === 'en' ? 'Cannot Save Target' : 'Không thể lưu mục tiêu',
+          text: err.message || (lang === 'en' ? 'Failed to update target' : 'Cập nhật mục tiêu thất bại'),
+          confirmButtonColor: '#00A3A6'
+        });
       } finally {
         setSaving(false);
       }

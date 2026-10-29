@@ -1,5 +1,159 @@
 [
   {
+    "id": "1793285758058",
+    "timestamp": "2026-10-29T14:55:58.058Z",
+    "action": "Execute Script",
+    "user": "System Admin",
+    "details": "Ran COMMIT_AND_PUSH.bat"
+  },
+  {
+    "id": "1793285291093",
+    "timestamp": "2026-10-29T14:48:11.093Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (554 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793285267948",
+    "timestamp": "2026-10-29T14:47:47.948Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (554 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793285265974",
+    "timestamp": "2026-10-29T14:47:45.974Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (554 mục), targets.json (95 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (17 người đăng ký), club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793238490558",
+    "timestamp": "2026-10-29T01:48:10.558Z",
+    "action": "ADMIN_RESET_PIN",
+    "user": "Admin #133066813",
+    "details": "Reset mã PIN cho athlete ID 72851794 về mặc định (1794)"
+  },
+  {
+    "id": "1793238490546",
+    "timestamp": "2026-10-29T01:48:10.546Z",
+    "action": "CHANGE_MEMBER_PIN",
+    "user": "Athlete #72851794",
+    "details": "Thành viên đã cập nhật mã PIN cá nhân mới."
+  },
+  {
+    "id": "1793238484683",
+    "timestamp": "2026-10-29T01:48:04.683Z",
+    "action": "Cập nhật Mục tiêu / Phạt",
+    "user": "Admin (133066813)",
+    "details": "Đã cập nhật mục tiêu cho Lieu_V._2026_10"
+  },
+  {
+    "id": "1793238484646",
+    "timestamp": "2026-10-29T01:48:04.646Z",
+    "action": "Cập nhật Mục tiêu / Phạt",
+    "user": "Thành viên (72851794)",
+    "details": "Đã cập nhật mục tiêu cho Lieu_V._2026_10"
+  },
+  {
+    "id": "1793238461258",
+    "timestamp": "2026-10-29T01:47:41.258Z",
+    "action": "Cập nhật Mục tiêu / Phạt",
+    "user": "Thành viên (72851794)",
+    "details": "Đã cập nhật mục tiêu cho Lieu_V._2026_10"
+  },
+  {
+    "id": "1793237683954",
+    "timestamp": "2026-10-29T01:34:43.954Z",
+    "action": "ADMIN_RESET_PIN",
+    "user": "Admin #133066813",
+    "details": "Reset mã PIN cho athlete ID 72851794 về mặc định (1794)"
+  },
+  {
+    "id": "1793237683943",
+    "timestamp": "2026-10-29T01:34:43.943Z",
+    "action": "CHANGE_MEMBER_PIN",
+    "user": "Athlete #72851794",
+    "details": "Thành viên đã cập nhật mã PIN cá nhân mới."
+  },
+  {
+    "id": "1793236715633",
+    "timestamp": "2026-10-29T01:18:35.633Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (550 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793234923922",
+    "timestamp": "2026-10-29T00:48:43.922Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (550 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793234850306",
+    "timestamp": "2026-10-29T00:47:30.306Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (550 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793234849504",
+    "timestamp": "2026-10-29T00:47:29.504Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (550 mục), targets.json (95 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (17 người đăng ký), club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793153016047",
+    "timestamp": "2026-10-28T02:03:36.047Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (542 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793152979494",
+    "timestamp": "2026-10-28T02:02:59.494Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (542 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793152978509",
+    "timestamp": "2026-10-28T02:02:58.509Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (542 mục), targets.json (95 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (17 người đăng ký), club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793065392561",
+    "timestamp": "2026-10-27T01:43:12.561Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (535 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793065340927",
+    "timestamp": "2026-10-27T01:42:20.927Z",
+    "action": "Đẩy dữ liệu lên Cloud",
+    "user": "133066813",
+    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (535 mục), targets.json (95 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json, club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793065339772",
+    "timestamp": "2026-10-27T01:42:19.772Z",
+    "action": "Kéo dữ liệu Cloud",
+    "user": "133066813",
+    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (535 mục), targets.json (95 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (17 người đăng ký), club_roster.json (48 thành viên), tokens_v2.json (3 tokens), club_access_config.json"
+  },
+  {
+    "id": "1793028552667",
+    "timestamp": "2026-10-26T15:29:12.668Z",
+    "action": "Cập nhật Cấu hình thử thách",
+    "user": "Tien PhamTV",
+    "details": "Lưu cấu hình thử thách (Journey from HCMC to the North Pole)"
+  },
+  {
     "id": "1793004651605",
     "timestamp": "2026-10-26T08:50:51.605Z",
     "action": "Execute Script",
@@ -1244,159 +1398,5 @@
     "action": "Đẩy dữ liệu lên Cloud",
     "user": "133066813",
     "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (389 mục), targets.json (91 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1791165083165",
-    "timestamp": "2026-10-05T01:51:23.165Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (389 mục), targets.json (91 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (13 người đăng ký)"
-  },
-  {
-    "id": "1790925035710",
-    "timestamp": "2026-10-02T07:10:35.710Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (370 mục), targets.json (90 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790925034457",
-    "timestamp": "2026-10-02T07:10:34.457Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (370 mục), targets.json (90 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (13 người đăng ký)"
-  },
-  {
-    "id": "1790821876819",
-    "timestamp": "2026-10-01T02:31:16.819Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (89 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790821852578",
-    "timestamp": "2026-10-01T02:30:52.578Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (89 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790821749498",
-    "timestamp": "2026-10-01T02:29:09.498Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (89 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790821748094",
-    "timestamp": "2026-10-01T02:29:08.094Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (89 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (13 người đăng ký)"
-  },
-  {
-    "id": "1790821712699",
-    "timestamp": "2026-10-01T02:28:32.699Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (89 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790821676352",
-    "timestamp": "2026-10-01T02:27:56.352Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (88 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790821667058",
-    "timestamp": "2026-10-01T02:27:47.058Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
-  },
-  {
-    "id": "1790821661600",
-    "timestamp": "2026-10-01T02:27:41.600Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (88 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (13 người đăng ký)"
-  },
-  {
-    "id": "1790821596676",
-    "timestamp": "2026-10-01T02:26:36.676Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (88 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790819192831",
-    "timestamp": "2026-10-01T01:46:32.831Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (88 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790818026101",
-    "timestamp": "2026-10-01T01:27:06.101Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (86 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790818024973",
-    "timestamp": "2026-10-01T01:27:04.973Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (363 mục), targets.json (86 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (9 người đăng ký)"
-  },
-  {
-    "id": "1790751293351",
-    "timestamp": "2026-09-30T06:54:53.351Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (360 mục), targets.json (86 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790751292182",
-    "timestamp": "2026-09-30T06:54:52.182Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (360 mục), targets.json (86 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (9 người đăng ký)"
-  },
-  {
-    "id": "1790741534299",
-    "timestamp": "2026-09-30T04:12:14.299Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (357 mục), targets.json (86 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790741533196",
-    "timestamp": "2026-09-30T04:12:13.196Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (357 mục), targets.json (86 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (9 người đăng ký)"
-  },
-  {
-    "id": "1790732780766",
-    "timestamp": "2026-09-30T01:46:20.766Z",
-    "action": "Đẩy dữ liệu lên Cloud",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu lên https://strava-app-86t5.onrender.com: imported_activities.json (359 mục), targets.json (86 mục), challenge_config.json, admins.json (1 sub-admins), name_mapping.json, club_goal.json, member_penalties_mapping.json"
-  },
-  {
-    "id": "1790732780022",
-    "timestamp": "2026-09-30T01:46:20.022Z",
-    "action": "Kéo dữ liệu Cloud",
-    "user": "133066813",
-    "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (359 mục), targets.json (86 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (9 người đăng ký)"
-  },
-  {
-    "id": "1790695905473",
-    "timestamp": "2026-09-29T15:31:45.473Z",
-    "action": "Git Push",
-    "user": "133066813",
-    "details": "Đã đẩy dữ liệu & mã nguồn lên GitHub (origin/main)"
   }
 ]

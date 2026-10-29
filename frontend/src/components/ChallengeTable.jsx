@@ -3,11 +3,12 @@ import { useLang } from '../i18n/LangContext';
 import { normalize } from '../utils/challengeStats';
 import { roundUpPenaltyK } from '../utils/penaltyUtils';
 import { Save, CheckCircle2, ShieldAlert, ShieldCheck, ChevronDown } from 'lucide-react';
+import Swal from 'sweetalert2';
 import ProgressBar from './ProgressBar';
 import { getAthleteAvatar } from '../utils/avatar';
 import HalloweenHeaderBar from './HalloweenHeaderBar';
 import pumpkin3dImg from '../assets/halloween/pumpkin_3d.png';
-import { HalloweenCandyWrapped, HalloweenCandyCorn, HalloweenCandySwirl, HalloweenGoldenLeaf, HalloweenTableMist } from './HalloweenDecorations';
+import { HalloweenCandyWrapped, HalloweenCandyCorn, HalloweenCandySwirl, HalloweenGoldenLeaf } from './HalloweenDecorations';
 
 const MONTH_NAMES_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -118,6 +119,16 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
       if (matchById) return matchById;
     }
 
+    // 1b. Khớp tuyệt đối theo Athlete ID qua nameMapping
+    if (athId && nameMapping) {
+      const matchByNameMap = challengeData.find(row => {
+        const rowName = `${row.member?.firstname || ''} ${row.member?.lastname || ''}`.trim();
+        const entry = nameMapping[rowName] || nameMapping[row.matchKey];
+        return entry?.athleteId && String(entry.athleteId) === athId;
+      });
+      if (matchByNameMap) return matchByNameMap;
+    }
+
     // 2. Khớp đúng thứ tự Tên - Họ (Tuyệt đối không đảo Họ Tên)
     const matchByDirect = challengeData.find(row => {
       const mF = normalize(row.member?.firstname);
@@ -222,7 +233,16 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
       apiFetch('/challenge/targets', {
         method: 'POST',
         body: JSON.stringify(updates)
-      }).catch(e => console.error("Error saving data", e));
+      }).catch(e => {
+        console.error("Error saving data", e);
+        loadTargets(); // Hoàn nguyên dữ liệu trên bảng nếu server từ chối
+        Swal.fire({
+          icon: 'warning',
+          title: lang === 'en' ? 'Cannot Update Target' : 'Không thể lưu mục tiêu',
+          text: e.message || (lang === 'en' ? 'Update rejected by server' : 'Máy chủ từ chối cập nhật'),
+          confirmButtonColor: '#00A3A6'
+        });
+      });
     }
   };
 
@@ -491,19 +511,25 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
               // Check if this row is the logged in athlete (Chỉ 1 dòng duy nhất được gán isMe)
               const isMe = Boolean(myRow && myRow.matchKey === row.matchKey);
 
-              // Check lock deadline
+              // Check lock deadline (Normalized to Vietnam time zone Asia/Ho_Chi_Minh)
               let isLockedByDate = false;
               if (!isAdmin && lockTargetsAfterDate > 0) {
-                const currentDate = new Date();
-                const currentMonthIndex = currentDate.getMonth() + 1;
-                const currentYear = currentDate.getFullYear();
+                const vnDateParts = new Intl.DateTimeFormat('en-CA', {
+                  timeZone: 'Asia/Ho_Chi_Minh',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit'
+                }).format(new Date()).split('-').map(Number);
+                const currentYear = vnDateParts[0];
+                const currentMonthIndex = vnDateParts[1];
+                const currentDay = vnDateParts[2];
 
                 const isPastMonth = year < currentYear || (year === currentYear && month < currentMonthIndex);
                 const isCurrentMonth = year === currentYear && month === currentMonthIndex;
 
                 if (isPastMonth) {
                   isLockedByDate = true;
-                } else if (isCurrentMonth && currentDate.getDate() > lockTargetsAfterDate) {
+                } else if (isCurrentMonth && currentDay > lockTargetsAfterDate) {
                   isLockedByDate = true;
                 }
               }
@@ -862,9 +888,6 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                 strokeLinecap="round"
               />
             </svg>
-
-            {/* Màn sương trắng mờ ảo đáy bảng (Khung đỏ hàng TOTAL) */}
-            <HalloweenTableMist />
 
             {/* Các khung màu vàng: Bí ngô & Kẹo Halloween */}
             {/* 1. Mép trái hàng 6-7: Kẹo bọc nơ tím/cam */}

@@ -3567,10 +3567,207 @@ function getCanonicalRunnerKey(rawKey, athleteId = null) {
   return strKey;
 }
 
-// Cập nhật dữ liệu target/penalty
+// Helper: Phân tích baseKey, year, month từ runner key (vd: 'Tien_P._2026_10' -> baseKey: 'Tien_P.', year: 2026, month: 10)
+function parseKeyYearMonth(key) {
+  if (!key) return { baseKey: '', year: null, month: null };
+  const str = String(key).trim();
+  const match = str.match(/_(\d{4})_(\d{1,2})$/);
+  if (match) {
+    return {
+      baseKey: str.slice(0, -match[0].length),
+      year: parseInt(match[1], 10),
+      month: parseInt(match[2], 10)
+    };
+  }
+  return { baseKey: str, year: null, month: null };
+}
+
+// Helper: Tra cứu Strava Athlete ID từ runner matchKey/name (Tuân thủ Rule #6: Athlete ID Mandatory)
+function resolveAthleteIdFromKey(key) {
+  if (!key) return null;
+  const { baseKey } = parseKeyYearMonth(key);
+  const cleanKey = baseKey.trim();
+  const canonKey = getCanonicalRunnerKey(cleanKey);
+  const canonBase = parseKeyYearMonth(canonKey).baseKey;
+
+  // 1. Kiểm tra trực tiếp nếu key là số ID
+  if (/^\d{5,}$/.test(cleanKey)) return cleanKey;
+
+  // 2. Tra cứu trong name_mapping.json
+  try {
+    if (fs.existsSync(NAME_MAPPING_FILE)) {
+      const mapping = JSON.parse(fs.readFileSync(NAME_MAPPING_FILE, 'utf8') || '{}');
+      if (mapping[cleanKey]?.athleteId) return String(mapping[cleanKey].athleteId).trim();
+      if (mapping[canonBase]?.athleteId) return String(mapping[canonBase].athleteId).trim();
+      for (const [k, v] of Object.entries(mapping)) {
+        if (v && v.athleteId && (v.key === cleanKey || v.key === canonBase || k === cleanKey || k === canonBase)) {
+          return String(v.athleteId).trim();
+        }
+      }
+    }
+  } catch (_) {}
+
+  // 3. Tra cứu trong challenge_config.json participants
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8') || '{}');
+      const parts = cfg.participants || {};
+      if (parts[cleanKey]?.athleteId || parts[cleanKey]?.id) {
+        return String(parts[cleanKey].athleteId || parts[cleanKey].id).trim();
+      }
+      if (parts[canonBase]?.athleteId || parts[canonBase]?.id) {
+        return String(parts[canonBase].athleteId || parts[canonBase].id).trim();
+      }
+      for (const [k, p] of Object.entries(parts)) {
+        if (p && (p.athleteId || p.id)) {
+          const pMatch = p.matchKey || k;
+          if (pMatch === cleanKey || pMatch === canonBase) {
+            return String(p.athleteId || p.id).trim();
+          }
+        }
+      }
+    }
+  } catch (_) {}
+
+  // 4. Tra cứu qua getAthleteMatchKeyAndId (AthleteID_Name.csv)
+  const info = getAthleteMatchKeyAndId(canonBase || cleanKey);
+  if (info && info.id && /^\d+$/.test(info.id)) {
+    return String(info.id).trim();
+  }
+
+  return null;
+}
+
+// Cập nhật dữ liệu target/penalty (Có kiểm tra quyền sở hữu & Hạn chót ngày 12 theo giờ Việt Nam)
 app.post('/api/challenge/targets', (req, res) => {
   try {
+    const rawAthleteId = (req.headers['x-athlete-id'] || req.query.athleteId || req.body?.athleteId || '').toString().trim();
+    const authMethod = (req.headers['x-auth-method'] || req.query.authMethod || '').toString().trim();
+    const isMemberVerified = (req.headers['x-member-verified'] || '').toString().trim() === 'true';
+
+    // 1. Xác định quyền Admin
+    // BẢO MẬT TUYỆT ĐỐI: Phiên đăng nhập qua member_pin không bao giờ có quyền Admin (Zero Privilege Escalation)
+    const isMemberPinSession = (authMethod === 'member_pin' || isMemberVerified);
+    const isSuperAdmin = !isMemberPinSession && isSuperAdminUser(rawAthleteId);
+    const subAdmins = loadAdminsList();
+    const isSubAdmin = !isMemberPinSession && !!rawAthleteId && isAthleteInSubAdmins(rawAthleteId, subAdmins);
+    const isAdmin = isSuperAdmin || isSubAdmin;
+    const isLocalhost = (req.hostname === 'localhost' || req.hostname === '127.0.0.1');
+
+    // Nạp cấu hình thử thách để lấy lockTargetsAfterDate và allowEditOthers
+    let challengeConfig = { lockTargetsAfterDate: 12, allowEditOthers: false };
+    if (fs.existsSync(CONFIG_FILE)) {
+      try {
+        const loadedCfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+        if (loadedCfg && typeof loadedCfg === 'object') {
+          challengeConfig = { ...challengeConfig, ...loadedCfg };
+        }
+      } catch (_) {}
+    }
+
+    const lockDate = (challengeConfig.lockTargetsAfterDate !== undefined && challengeConfig.lockTargetsAfterDate !== null)
+      ? Number(challengeConfig.lockTargetsAfterDate)
+      : 12;
+    const allowEditOthers = Boolean(challengeConfig.allowEditOthers);
+
+    // Chuẩn hóa thời gian hiện tại theo múi giờ Việt Nam (UTC+7, Asia/Ho_Chi_Minh)
+    // Hỗ trợ kiểm thử ngày giờ giả định (chỉ cho phép trên môi trường test hoặc localhost)
+    const simulatedDateHeader = (process.env.NODE_ENV === 'test' || isLocalhost) ? req.headers['x-test-simulated-date'] : null;
+    let currentVnYear, currentVnMonth, currentVnDay;
+    if (simulatedDateHeader && /^\d{4}-\d{2}-\d{2}$/.test(String(simulatedDateHeader).trim())) {
+      const [sY, sM, sD] = String(simulatedDateHeader).trim().split('-');
+      currentVnYear = parseInt(sY, 10);
+      currentVnMonth = parseInt(sM, 10);
+      currentVnDay = parseInt(sD, 10);
+    } else {
+      const vnDateStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date());
+      const [vnYearStr, vnMonthStr, vnDayStr] = vnDateStr.split('-');
+      currentVnYear = parseInt(vnYearStr, 10);
+      currentVnMonth = parseInt(vnMonthStr, 10);
+      currentVnDay = parseInt(vnDayStr, 10);
+    }
+
     const payload = req.body;
+    const itemsToProcess = [];
+
+    if (Array.isArray(payload)) {
+      payload.forEach(item => {
+        if (item && item.matchKey) itemsToProcess.push(item);
+      });
+    } else if (payload && payload.matchKey) {
+      itemsToProcess.push(payload);
+    } else if (payload && typeof payload === 'object') {
+      Object.keys(payload).forEach(key => {
+        if (payload[key] && typeof payload[key] === 'object') {
+          itemsToProcess.push({ matchKey: key, target: payload[key].target, penalty: payload[key].penalty });
+        }
+      });
+    } else {
+      return res.status(400).json({ error: 'Dữ liệu không hợp lệ' });
+    }
+
+    if (itemsToProcess.length === 0) {
+      return res.status(400).json({ error: 'Không có mục tiêu nào được gửi' });
+    }
+
+    // 2. KIỂM TRA PHÂN QUYỀN & HẠN CHÓT (Nếu KHÔNG PHẢI ADMIN)
+    if (!isAdmin) {
+      if (!rawAthleteId) {
+        return res.status(401).json({
+          error: 'Vui lòng đăng nhập để thiết lập mục tiêu và tham gia thử thách',
+          errorEn: 'Please log in to set targets and participate in challenges',
+          code: 'UNAUTHORIZED'
+        });
+      }
+
+      for (const item of itemsToProcess) {
+        const { baseKey, year: targetYear, month: targetMonth } = parseKeyYearMonth(item.matchKey);
+        const resolvedYear = targetYear || currentVnYear;
+        const resolvedMonth = targetMonth || currentVnMonth;
+
+        // A. Kiểm tra Quyền Sở Hữu (Ownership Check): Chỉ được sửa của chính mình
+        if (!allowEditOthers) {
+          const itemAthleteId = resolveAthleteIdFromKey(item.matchKey) || resolveAthleteIdFromKey(baseKey);
+          if (itemAthleteId && itemAthleteId !== rawAthleteId) {
+            return res.status(403).json({
+              error: 'Bạn chỉ có quyền thêm hoặc chỉnh sửa mục tiêu của chính mình.',
+              errorEn: 'You can only add or edit your own target and penalty status.',
+              code: 'FORBIDDEN_EDIT_OTHERS'
+            });
+          }
+        }
+
+        // B. Kiểm tra Deadline (Hạn chót ngày lockDate hàng tháng, mặc định 12)
+        if (lockDate > 0) {
+          const isPastMonth = resolvedYear < currentVnYear || (resolvedYear === currentVnYear && resolvedMonth < currentVnMonth);
+          const isCurrentMonth = resolvedYear === currentVnYear && resolvedMonth === currentVnMonth;
+
+          if (isPastMonth) {
+            return res.status(403).json({
+              error: `Tháng ${resolvedMonth}/${resolvedYear} đã kết thúc, không thể chỉnh sửa mục tiêu.`,
+              errorEn: `Month ${resolvedMonth}/${resolvedYear} has ended. Targets cannot be modified.`,
+              code: 'TARGET_LOCKED_PAST_MONTH'
+            });
+          }
+
+          if (isCurrentMonth && currentVnDay > lockDate) {
+            return res.status(403).json({
+              error: `Đã hết hạn tự đăng ký hoặc chỉnh sửa mục tiêu cho tháng ${resolvedMonth} (Hạn chót là ngày ${lockDate} hàng tháng). Vui lòng liên hệ Admin để được hỗ trợ.`,
+              errorEn: `The deadline to set or edit targets for month ${resolvedMonth} was day ${lockDate}. Please contact Admin for assistance.`,
+              code: 'TARGET_LOCKED_BY_DATE',
+              deadlineDay: lockDate
+            });
+          }
+        }
+      }
+    }
+
+    // 3. THỰC THI GHI DỮ LIỆU
     let data = {};
     if (fs.existsSync(TARGETS_FILE)) {
       try {
@@ -3593,24 +3790,9 @@ app.post('/api/challenge/targets', (req, res) => {
       }
     };
 
-    if (Array.isArray(payload)) {
-      payload.forEach(item => {
-        if (item && item.matchKey) {
-          processItem(item.matchKey, item.target, item.penalty);
-        }
-      });
-    } else if (payload && payload.matchKey) {
-      processItem(payload.matchKey, payload.target, payload.penalty);
-    } else if (payload && typeof payload === 'object') {
-      // Direct object map { [matchKey]: { target, penalty } }
-      Object.keys(payload).forEach(key => {
-        if (payload[key] && typeof payload[key] === 'object') {
-          processItem(key, payload[key].target, payload[key].penalty);
-        }
-      });
-    } else {
-      return res.status(400).json({ error: 'Dữ liệu không hợp lệ' });
-    }
+    itemsToProcess.forEach(item => {
+      processItem(item.matchKey, item.target, item.penalty);
+    });
 
     // Dọn sạch vĩnh viễn các key alias như Hà Xuân_A._* nếu còn sót lại trong data
     Object.keys(data).forEach(k => {
@@ -3622,10 +3804,16 @@ app.post('/api/challenge/targets', (req, res) => {
     });
 
     writeStorageJson(TARGETS_FILE, data);
+
+    if (rawAthleteId) {
+      const userLabel = isAdmin ? `Admin (${rawAthleteId})` : `Thành viên (${rawAthleteId})`;
+      addAuditLog('Cập nhật Mục tiêu / Phạt', userLabel, `Đã cập nhật mục tiêu cho ${itemsToProcess.map(i => i.matchKey).join(', ')}`);
+    }
+
     res.json(data);
   } catch (error) {
     console.error('Lỗi lưu targets:', error.message);
-    res.status(500).json({ error: 'Không thể lưu dữ liệu targets' });
+    res.status(500).json({ error: 'Không thể lưu dữ liệu targets: ' + error.message });
   }
 });
 

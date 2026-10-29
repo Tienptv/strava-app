@@ -166,58 +166,6 @@
   }
 }
 
-/* =========================================================================
-   MYSTICAL HEADERBAR MIST LAYER (HÀNG TOTAL - ĐỒNG BỘ 100% HEADERBAR)
-   ========================================================================= */
-
-.halloween-table-mist-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 52px;
-  pointer-events: none;
-  overflow: hidden;
-  border-bottom-left-radius: var(--radius-sm, 8px);
-  border-bottom-right-radius: var(--radius-sm, 8px);
-  z-index: 10;
-}
-
-.halloween-table-mist-ambient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(23, 17, 38, 0.42) 0%, rgba(58, 45, 82, 0.16) 60%, transparent 100%);
-  box-shadow: inset 0 -4px 14px rgba(23, 17, 38, 0.25);
-}
-
-.halloween-mist-wave {
-  position: absolute;
-  bottom: 0;
-  top: 0;
-  left: -200px;
-  width: calc(100% + 400px);
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  pointer-events: none;
-}
-
-.halloween-mist-wave.wave-1 {
-  opacity: 0.88;
-  animation: headerbarMistDrift 18s infinite ease-in-out alternate;
-}
-
-.halloween-mist-wave.wave-2 {
-  opacity: 0.55;
-  filter: blur(1.5px);
-  transform: scaleX(-1);
-  animation: headerbarMistDrift 24s infinite ease-in-out alternate-reverse;
-}
-
-@keyframes headerbarMistDrift {
-  0% { transform: translateX(0) scaleY(1); }
-  50% { transform: translateX(35px) scaleY(1.08); }
-  100% { transform: translateX(-25px) scaleY(0.96); }
-}
 
 /* =========================================================================
    HALLOWEEN DECOR ITEMS (PUMPKINS & CANDIES ON GLASS OVERLAY)

@@ -1,5 +1,4 @@
 import React from 'react';
-import headerbarMistTexture from '../assets/halloween/headerbar_mist_texture.png';
 
 /**
  * 1. MẠNG NHỆN GÓC TRÊN BÊN TRÁI & CHÚ NHỆN ĐU TƠ (Corner Spiderweb with Hanging Spider)
@@ -486,27 +485,10 @@ export function HalloweenCandySwirl({ size = 36, style = {} }) {
 }
 
 /**
- * 10. MÀN SƯƠNG HUYỀN BÍ ĐÁY BẢNG (Đồng bộ 100% vân sương Headerbar)
+ * 10. MÀN SƯƠNG HUYỀN BÍ ĐÁY BẢNG (Đã gỡ bỏ theo yêu cầu người dùng)
  */
 export function HalloweenTableMist() {
-  return (
-    <div className="halloween-table-mist-container">
-      {/* Lớp nền sương lam tím đêm mờ ảo */}
-      <div className="halloween-table-mist-ambient" />
-
-      {/* Lớp dải sóng sương thực tế từ Headerbar (Wave 1) */}
-      <div 
-        className="halloween-mist-wave wave-1"
-        style={{ backgroundImage: `url(${headerbarMistTexture})` }}
-      />
-
-      {/* Lớp dải sóng sương đối ứng trôi chậm (Wave 2) */}
-      <div 
-        className="halloween-mist-wave wave-2"
-        style={{ backgroundImage: `url(${headerbarMistTexture})` }}
-      />
-    </div>
-  );
+  return null;
 }
 
 /**
