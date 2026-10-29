@@ -402,7 +402,7 @@ function App() {
               <Route
                 path="/nextgen"
                 element={
-                  athlete
+                  athlete && !athlete.isGuest && athlete.id !== 'guest'
                     ? <NextGenDashboard 
                         athlete={athlete} 
                         isAdmin={isAdmin}

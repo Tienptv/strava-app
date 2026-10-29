@@ -104,10 +104,10 @@ const translations = {
     resetPinSuccess: 'Đã reset mã PIN thành công về 4 số cuối ID ({pin})!',
     resetPinFailed: 'Không thể reset mã PIN.',
     adminLoginSection: 'Dành riêng cho Quản trị viên (Super Admin & Sub Admin)',
-    adminLoginNote: '⚠️ Tính năng này CHỈ DÀNH RIÊNG cho ID của Super Admin và Sub Admin để gia hạn Token cào dữ liệu và quản trị hệ thống. Tất cả thành viên CLB khác vui lòng sử dụng khung "Đăng nhập Thành viên" phía trên.',
+    adminLoginNote: 'Tính năng này CHỈ DÀNH RIÊNG cho ID của Super Admin và Sub Admin để gia hạn Token đồng bộ API và quản trị hệ thống. Tất cả thành viên CLB khác vui lòng sử dụng khung "Đăng nhập Thành viên" phía trên.',
     adminOnlyNoticeBadge: 'Chỉ dành cho Admin',
     oauthNotAdminTitle: 'Tài Khoản Không Thuộc Danh Sách Quản Trị Viên',
-    oauthNotAdminDesc: 'Tài khoản Strava của bạn (ID: {id}) không có quyền Quản trị viên. Tính năng Đăng nhập qua Strava chỉ dành riêng cho Super Admin & Sub Admin để gia hạn token cào bài.',
+    oauthNotAdminDesc: 'Tài khoản Strava của bạn (ID: {id}) không có quyền Quản trị viên. Tính năng Đăng nhập qua Strava chỉ dành riêng cho Super Admin & Sub Admin để gia hạn Token đồng bộ API.',
     oauthNotAdminAction: 'Quay lại Đăng nhập Thành viên CLB',
 
     // Sidebar Reload Group Members
@@ -1022,10 +1022,10 @@ const translations = {
     resetPinSuccess: 'PIN reset successfully to last 4 digits of ID ({pin})!',
     resetPinFailed: 'Failed to reset PIN.',
     adminLoginSection: 'Exclusively for Administrators (Super Admin & Sub Admin)',
-    adminLoginNote: '⚠️ This feature is EXCLUSIVELY for Super Admin and Sub Admin IDs to renew scraping tokens and administer the system. All other club members please use the "Club Member Access" form above.',
+    adminLoginNote: 'This feature is EXCLUSIVELY for Super Admin and Sub Admin IDs to renew API synchronization tokens and administer the system. All other club members please use the "Club Member Access" form above.',
     adminOnlyNoticeBadge: 'Admins Only',
     oauthNotAdminTitle: 'Account Not in Administrator List',
-    oauthNotAdminDesc: 'Your Strava account (ID: {id}) does not have Administrator privileges. Strava OAuth login is strictly reserved for Super Admins & Sub Admins to renew scraper tokens.',
+    oauthNotAdminDesc: 'Your Strava account (ID: {id}) does not have Administrator privileges. Strava OAuth login is strictly reserved for Super Admins & Sub Admins to renew API synchronization tokens.',
     oauthNotAdminAction: 'Back to Club Member Login',
 
     // Sidebar Reload Group Members
