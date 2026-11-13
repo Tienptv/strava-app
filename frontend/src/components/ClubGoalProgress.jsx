@@ -396,18 +396,6 @@ export default function ClubGoalProgress({ totalDistance = 0, apiFetch, isAdmin 
               ⏳ {t('timeIndicator') || 'Time'}: <strong>{percentTime}%</strong> ({lang === 'en' ? `Day ${dayOfYear}/${totalDaysInYear}` : `Ngày ${dayOfYear}/${totalDaysInYear}`})
             </span>
           </div>
-          {nextEvent && (
-            <div className="upcoming-race-badge" title={lang === 'en' ? `Next race: ${nextEvent.name}` : `Giải chạy sắp tới: ${nextEvent.name}`}>
-              <Sparkles size={14} color="#ea580c" />
-              <span className="upcoming-race-badge__label">{t('upcoming')}</span>
-              <strong className="upcoming-race-badge__name">{nextEvent.name}</strong>
-              <span className="upcoming-race-badge__countdown">
-                {nextEvent.daysDiff === 0 
-                  ? `🔥 ${t('todayExclamation')}` 
-                  : (lang === 'en' ? `(${nextEvent.daysDiff} days left)` : `(còn ${nextEvent.daysDiff} ngày)`)}
-              </span>
-            </div>
-          )}
         </div>
       </div>
       

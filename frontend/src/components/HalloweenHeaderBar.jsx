@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Sparkles } from 'lucide-react';
 
 import witchHatImg from '../assets/halloween/witch_hat.png';
 import pumpkinImg from '../assets/halloween/pumpkin.png';
@@ -260,6 +260,7 @@ export default function HalloweenHeaderBar({
   totalMonthlyDistance = 0,
   targetKm = 0,
   goalData,
+  nextEvent,
   showDayAndTimeCols = false,
   t
 }) {
@@ -453,6 +454,35 @@ export default function HalloweenHeaderBar({
             </div>
           )}
         </div>
+
+        {/* Thẻ Giải chạy sắp tới (Upcoming Race Badge) */}
+        {nextEvent && (
+          <div 
+            className="upcoming-race-badge" 
+            title={lang === 'en' ? `Next race: ${nextEvent.name}${nextEvent.registrationUrl ? ' (Click to register)' : ''}` : `Giải chạy sắp tới: ${nextEvent.name}${nextEvent.registrationUrl ? ' (Bấm để đăng ký)' : ''}`}
+            onClick={() => {
+              if (nextEvent.registrationUrl) {
+                window.open(nextEvent.registrationUrl, '_blank', 'noopener,noreferrer');
+              }
+            }}
+            style={{
+              cursor: nextEvent.registrationUrl ? 'pointer' : 'default',
+              userSelect: 'none',
+              marginLeft: '8px',
+              position: 'relative',
+              zIndex: 10
+            }}
+          >
+            <Sparkles size={14} color="#ea580c" />
+            <span className="upcoming-race-badge__label">{t ? t('upcoming') : 'UPCOMING:'}</span>
+            <strong className="upcoming-race-badge__name" style={{ color: '#fff' }}>{nextEvent.name}</strong>
+            <span className="upcoming-race-badge__countdown">
+              {nextEvent.daysDiff === 0 
+                ? `🔥 ${t ? t('todayExclamation') : 'TODAY!'}` 
+                : (lang === 'en' ? `(${nextEvent.daysDiff} days left)` : `(còn ${nextEvent.daysDiff} ngày)`)}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 3. CỤM BÊN PHẢI: LEADER BADGE (100% THEO ẢNH THAM CHIẾU) */}

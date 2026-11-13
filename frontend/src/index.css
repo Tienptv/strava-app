@@ -3466,7 +3466,8 @@ body.is-screenshot-capturing .challenge-analytics-card.is-collapsed {
 .challenge-title-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .challenge-title-main {
@@ -6161,6 +6162,13 @@ html[data-orientation="landscape"][data-is-mobile="true"] .mobile-landscape-tabl
   font-size: 0.8rem;
   color: #c2410c;
   animation: pulseTag 3s infinite ease-in-out;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.upcoming-race-badge:hover {
+  background: rgba(234, 88, 12, 0.14);
+  border-color: rgba(234, 88, 12, 0.45);
+  transform: translateY(-1px);
 }
 
 @keyframes pulseTag {

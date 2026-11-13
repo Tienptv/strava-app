@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLang } from '../i18n/LangContext';
 import { normalize } from '../utils/challengeStats';
 import { roundUpPenaltyK } from '../utils/penaltyUtils';
-import { Save, CheckCircle2, ShieldAlert, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Save, CheckCircle2, ShieldAlert, ShieldCheck, ChevronDown, Sparkles } from 'lucide-react';
 import Swal from 'sweetalert2';
 import ProgressBar from './ProgressBar';
 import { getAthleteAvatar } from '../utils/avatar';
@@ -366,6 +366,30 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     daysLeft = daysInMonth;
   }
 
+  // Next upcoming race tính từ ngày hôm nay
+  const nextEvent = React.useMemo(() => {
+    const rawEvents = Array.isArray(goalData?.events) ? goalData.events : [];
+    const today = new Date();
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+
+    const upcoming = rawEvents
+      .map(ev => {
+        if (!ev || !ev.date) return null;
+        const evDate = new Date(ev.date);
+        const evMidnight = new Date(evDate.getFullYear(), evDate.getMonth(), evDate.getDate()).getTime();
+        const daysDiff = Math.ceil((evMidnight - todayMidnight) / (1000 * 60 * 60 * 24));
+        return {
+          ...ev,
+          daysDiff,
+          isPastEvent: daysDiff < 0
+        };
+      })
+      .filter(ev => ev && ev.daysDiff !== null && ev.daysDiff >= 0)
+      .sort((a, b) => a.daysDiff - b.daysDiff);
+
+    return upcoming[0] || null;
+  }, [goalData?.events]);
+
   return (
     <div className={`challenge-container ${isHalloween ? 'challenge-table--halloween' : ''}`}>
       {isHalloween ? (
@@ -385,6 +409,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
           totalMonthlyDistance={totalMonthlyDistance}
           targetKm={targetKm}
           goalData={goalData}
+          nextEvent={nextEvent}
           showDayAndTimeCols={showDayAndTimeCols}
           t={t}
         />
@@ -426,6 +451,32 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                 )}
               </div>
             </h2>
+
+            {/* Thẻ Giải chạy sắp tới (Upcoming Race Badge) - Di chuyển từ thanh hành trình năm xuống */}
+            {nextEvent && (
+              <div 
+                className="upcoming-race-badge" 
+                title={lang === 'en' ? `Next race: ${nextEvent.name}${nextEvent.registrationUrl ? ' (Click to register)' : ''}` : `Giải chạy sắp tới: ${nextEvent.name}${nextEvent.registrationUrl ? ' (Bấm để đăng ký)' : ''}`}
+                onClick={() => {
+                  if (nextEvent.registrationUrl) {
+                    window.open(nextEvent.registrationUrl, '_blank', 'noopener,noreferrer');
+                  }
+                }}
+                style={{
+                  cursor: nextEvent.registrationUrl ? 'pointer' : 'default',
+                  userSelect: 'none'
+                }}
+              >
+                <Sparkles size={14} color="#ea580c" />
+                <span className="upcoming-race-badge__label">{t('upcoming')}</span>
+                <strong className="upcoming-race-badge__name">{nextEvent.name}</strong>
+                <span className="upcoming-race-badge__countdown">
+                  {nextEvent.daysDiff === 0 
+                    ? `🔥 ${t('todayExclamation')}` 
+                    : (lang === 'en' ? `(${nextEvent.daysDiff} days left)` : `(còn ${nextEvent.daysDiff} ngày)`)}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Căn lề phải đúng bằng tổng độ rộng các cột sticky bên phải: 460px (khi ẩn Days/Time) hoặc 570px (khi hiện Days/Time) */}
