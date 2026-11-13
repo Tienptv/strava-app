@@ -1,24 +1,24 @@
 {
-  "version": 15,
-  "updatedAt": "2026-10-29T17:09:49.238Z",
-  "updatedBy": "Test_Restore",
+  "version": 16,
+  "updatedAt": "2026-11-03T02:09:21.418Z",
+  "updatedBy": "Admin (133066813)",
   "modules": {
     "aiCoach": {
       "key": "aiCoach",
       "group": "ai_advanced",
-      "enabledForMembers": false,
+      "enabledForMembers": true,
       "enabledForGuests": false
     },
     "runnaRoadmap": {
       "key": "runnaRoadmap",
       "group": "ai_advanced",
-      "enabledForMembers": false,
+      "enabledForMembers": true,
       "enabledForGuests": false
     },
     "garminSync": {
       "key": "garminSync",
       "group": "ai_advanced",
-      "enabledForMembers": false,
+      "enabledForMembers": true,
       "enabledForGuests": false
     },
     "leaderboardPodium": {

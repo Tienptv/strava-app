@@ -25,8 +25,22 @@ function App() {
   const [athlete, setAthlete] = useState(null);
   const [athleteId, setAthleteId] = useState(localStorage.getItem('athleteId'));
   const [loading, setLoading] = useState(true);
-  const [challengeMonth, setChallengeMonth] = useState(new Date().getMonth() + 1);
-  const [challengeYear, setChallengeYear] = useState(new Date().getFullYear());
+  const [challengeMonth, setChallengeMonth] = useState(() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const m = parseInt(searchParams.get('month'), 10);
+      if (m >= 1 && m <= 12) return m;
+    } catch (_) {}
+    return new Date().getMonth() + 1;
+  });
+  const [challengeYear, setChallengeYear] = useState(() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const y = parseInt(searchParams.get('year'), 10);
+      if (y >= 2020 && y <= 2035) return y;
+    } catch (_) {}
+    return new Date().getFullYear();
+  });
   const [userRoles, setUserRoles] = useState({ isSuperAdmin: false, isSubAdmin: false, isAdmin: false });
   const [userAccessConfig, setUserAccessConfig] = useState(null);
   const { t, lang } = useLang();
@@ -47,13 +61,30 @@ function App() {
 
     const storedId = localStorage.getItem('athleteId');
     const storedAthlete = localStorage.getItem('athlete');
-    const isMemberVerifiedStored = localStorage.getItem('isMemberVerified') === 'true';
+    const storedAuthMethod = localStorage.getItem('authMethod');
     if (storedId && storedAthlete && storedId !== 'guest') {
       try {
         const parsedAthlete = JSON.parse(storedAthlete);
-        if (isMemberVerifiedStored) {
+        if (storedAuthMethod === 'member_pin' || parsedAthlete.authMethod === 'member_pin') {
           parsedAthlete.isMemberVerified = true;
           parsedAthlete.authMethod = 'member_pin';
+          localStorage.setItem('authMethod', 'member_pin');
+        } else {
+          // Phiên Strava OAuth chính thức -> dọn dẹp cờ PIN
+          parsedAthlete.authMethod = 'strava_oauth';
+          delete parsedAthlete.isMemberVerified;
+          localStorage.setItem('authMethod', 'strava_oauth');
+          localStorage.removeItem('isMemberVerified');
+          localStorage.setItem('athlete', JSON.stringify(parsedAthlete));
+
+          if (parsedAthlete.isAdmin !== undefined || parsedAthlete.isSuperAdmin !== undefined) {
+            setUserRoles({
+              isSuperAdmin: Boolean(parsedAthlete.isSuperAdmin),
+              isSubAdmin: Boolean(parsedAthlete.isSubAdmin),
+              isAdmin: Boolean(parsedAthlete.isAdmin || parsedAthlete.isSuperAdmin),
+              permissions: parsedAthlete.permissions || null
+            });
+          }
         }
         setAthleteId(storedId);
         setAthlete(parsedAthlete);
@@ -73,6 +104,41 @@ function App() {
   useEffect(() => {
     initVisitorTracker({ athlete, athleteId });
   }, [athlete, athleteId]);
+
+  // Lắng nghe sự kiện Realtime SSE từ Cloud Render khi có bài chạy mới sync từ Strava
+  useEffect(() => {
+    let eventSource = null;
+    let reconnectTimeout = null;
+
+    const setupSSE = () => {
+      try {
+        eventSource = new EventSource('/api/realtime/stream');
+        eventSource.onmessage = (e) => {
+          try {
+            const payload = JSON.parse(e.data);
+            if (payload && payload.type === 'activity_synced') {
+              // Yêu cầu người dùng: "không cần hiển thị thông báo, bài chạy hiển thị lập tức trên bảng dashboard"
+              window.dispatchEvent(new CustomEvent('challengeUpdated', { detail: payload }));
+            }
+          } catch (_) {}
+        };
+        eventSource.onerror = () => {
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          // Tự động kết nối lại sau 10 giây nếu mất kết nối
+          reconnectTimeout = setTimeout(setupSSE, 10000);
+        };
+      } catch (_) {}
+    };
+
+    setupSSE();
+    return () => {
+      if (eventSource) eventSource.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    };
+  }, []);
 
   // Đăng nhập nhanh chế độ Khách (Xem công khai trên Render / điện thoại)
   const handleGuestLogin = () => {
@@ -96,16 +162,18 @@ function App() {
     localStorage.removeItem('isGuest');
     localStorage.setItem('athleteId', id);
     localStorage.setItem('athlete', JSON.stringify(verifiedAthlete));
+    localStorage.setItem('authMethod', 'member_pin');
     localStorage.setItem('isMemberVerified', 'true');
   };
 
   // Hàm gọi API có kèm athlete ID
   const apiFetch = useCallback(async (endpoint, options = {}) => {
-    const isMemberVerified = localStorage.getItem('isMemberVerified') === 'true';
+    const currentAuthMethod = localStorage.getItem('authMethod') || athlete?.authMethod;
+    const isMemberPin = currentAuthMethod === 'member_pin';
     const authHeaders = {
       'Content-Type': 'application/json',
       'x-athlete-id': athleteId || '',
-      ...(isMemberVerified ? { 'x-auth-method': 'member_pin', 'x-member-verified': 'true' } : {}),
+      ...(isMemberPin ? { 'x-auth-method': 'member_pin', 'x-member-verified': 'true' } : { 'x-auth-method': 'strava_oauth' }),
       ...options.headers,
     };
 
@@ -114,7 +182,7 @@ function App() {
       headers: authHeaders,
     });
     if (!res.ok) {
-      if (res.status === 401 && athleteId !== 'guest' && !isMemberVerified) {
+      if (res.status === 401 && athleteId !== 'guest' && !isMemberPin) {
         handleLogout();
         throw new Error(t('sessionExpired'));
       }
@@ -245,6 +313,18 @@ function App() {
         setAthleteId(data.athleteId.toString());
         localStorage.setItem('athleteId', data.athleteId.toString());
         localStorage.setItem('athlete', JSON.stringify(data.athlete));
+        localStorage.setItem('authMethod', 'strava_oauth');
+        localStorage.removeItem('isMemberVerified');
+        localStorage.removeItem('isGuest');
+
+        if (data.isAdmin !== undefined || data.isSuperAdmin !== undefined) {
+          setUserRoles({
+            isSuperAdmin: Boolean(data.isSuperAdmin),
+            isSubAdmin: Boolean(data.isSubAdmin),
+            isAdmin: Boolean(data.isAdmin || data.isSuperAdmin),
+            permissions: data.permissions || null
+          });
+        }
 
         if (data.cookie) {
           sessionStorage.setItem('stravaCookie', data.cookie);
@@ -263,6 +343,7 @@ function App() {
 
       return {
         success: false,
+        isNotMember: !!data.isNotMember,
         isNotAdmin: !!data.isNotAdmin,
         athleteId: data.athleteId || '',
         error: lang === 'en' ? (data.errorEn || data.error) : data.error
@@ -323,6 +404,7 @@ function App() {
     setUserRoles({ isSuperAdmin: false, isSubAdmin: false, isAdmin: false });
     localStorage.removeItem('athleteId');
     localStorage.removeItem('athlete');
+    localStorage.removeItem('authMethod');
     localStorage.removeItem('isGuest');
     localStorage.removeItem('isMemberVerified');
     sessionStorage.removeItem('stravaCookie');
@@ -337,15 +419,16 @@ function App() {
     );
   }
 
-  const isMemberSession = Boolean(athlete?.isMemberVerified || localStorage.getItem('isMemberVerified') === 'true');
+  const currentAuthMethod = localStorage.getItem('authMethod') || athlete?.authMethod;
+  const isMemberPinSession = currentAuthMethod === 'member_pin';
   const envSuperAdminIds = (import.meta.env.VITE_ADMIN_STRAVA_ID || '133066813')
     .toString()
     .split(',')
     .map(s => s.trim())
     .filter(Boolean);
   // BẢO MẬT TUYỆT ĐỐI (Cách A): Phiên Member PIN 100% không bao giờ có quyền Admin
-  const isSuperAdmin = !isMemberSession && Boolean(userRoles.isSuperAdmin || (athlete && envSuperAdminIds.includes(athlete.id.toString())));
-  const isAdmin = !isMemberSession && Boolean(userRoles.isAdmin || isSuperAdmin);
+  const isSuperAdmin = !isMemberPinSession && Boolean(userRoles.isSuperAdmin || (athlete && envSuperAdminIds.includes(athlete.id.toString())));
+  const isAdmin = !isMemberPinSession && Boolean(userRoles.isAdmin || isSuperAdmin);
 
   return (
     <BrowserRouter>
@@ -489,7 +572,8 @@ function CallbackHandler({ onCallback }) {
     }
   }, []);
 
-  if (status === 'error' && errorDetails?.isNotAdmin) {
+  if (status === 'error' && (errorDetails?.isNotMember || errorDetails?.isNotAdmin)) {
+    const isStranger = Boolean(errorDetails?.isNotMember);
     return (
       <div style={{
         minHeight: '100vh',
@@ -532,7 +616,7 @@ function CallbackHandler({ onCallback }) {
             margin: '0 0 10px',
             fontFamily: "'Plus Jakarta Sans', sans-serif"
           }}>
-            {t('oauthNotAdminTitle')}
+            {isStranger ? t('oauthNotMemberTitle') : t('oauthNotAdminTitle')}
           </h2>
 
           <p style={{
@@ -541,24 +625,8 @@ function CallbackHandler({ onCallback }) {
             lineHeight: 1.55,
             margin: '0 0 16px'
           }}>
-            {t('oauthNotAdminDesc').replace('{id}', errorDetails.athleteId || '')}
+            {(isStranger ? t('oauthNotMemberDesc') : t('oauthNotAdminDesc')).replace('{id}', errorDetails.athleteId || '')}
           </p>
-
-          <div style={{
-            background: '#fffbeb',
-            border: '1px solid #fde68a',
-            borderRadius: '10px',
-            padding: '12px 14px',
-            marginBottom: '24px',
-            textAlign: 'left',
-            fontSize: '0.82rem',
-            color: '#92400e',
-            lineHeight: 1.5
-          }}>
-            {lang === 'en'
-              ? '🔒 To protect Strava developer limits, your Strava connection was safely revoked. Please return to the login screen and select your name under "Club Member Access".'
-              : '🔒 Để bảo vệ hạn mức ứng dụng Strava, quyền kết nối vừa rồi đã được hệ thống tự động hủy an toàn. Bạn chỉ cần quay lại và chọn tên của mình ở mục "Đăng nhập Thành viên CLB".'}
-          </div>
 
           <a
             href="/"
@@ -582,7 +650,7 @@ function CallbackHandler({ onCallback }) {
             }}
           >
             <Users size={18} />
-            <span>{t('oauthNotAdminAction')}</span>
+            <span>{isStranger ? t('oauthNotMemberAction') : t('oauthNotAdminAction')}</span>
           </a>
         </div>
       </div>

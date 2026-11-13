@@ -143,6 +143,9 @@ export async function captureFullTableChrome(options = {}) {
   const isChartsCollapsed = options.chartsCollapsed !== undefined 
     ? options.chartsCollapsed 
     : (typeof window !== 'undefined' && localStorage.getItem('strava_challenge_charts_collapsed') === 'true');
+  const seasonalTheme = options.seasonalTheme !== undefined
+    ? options.seasonalTheme
+    : (typeof window !== 'undefined' ? (localStorage.getItem('strava_seasonal_theme') || 'default') : 'default');
 
   Swal.fire({
     title: isEn ? 'Exporting Full Table...' : 'Đang xuất toàn bộ bảng...',
@@ -162,7 +165,8 @@ export async function captureFullTableChrome(options = {}) {
         year, 
         athleteId: options.athleteId, 
         lang: currentLang,
-        chartsCollapsed: isChartsCollapsed 
+        chartsCollapsed: isChartsCollapsed,
+        seasonalTheme
       })
     });
 
@@ -216,6 +220,9 @@ export async function captureLeaderboardOnlyChrome(options = {}) {
   const isChartsCollapsed = options.chartsCollapsed !== undefined 
     ? options.chartsCollapsed 
     : (typeof window !== 'undefined' && localStorage.getItem('strava_challenge_charts_collapsed') === 'true');
+  const seasonalTheme = options.seasonalTheme !== undefined
+    ? options.seasonalTheme
+    : (typeof window !== 'undefined' ? (localStorage.getItem('strava_seasonal_theme') || 'default') : 'default');
 
   Swal.fire({
     title: isEn ? 'Exporting Leaderboard Table...' : 'Đang xuất Bảng xếp hạng...',
@@ -236,7 +243,8 @@ export async function captureLeaderboardOnlyChrome(options = {}) {
         athleteId: options.athleteId, 
         lang: currentLang,
         chartsCollapsed: isChartsCollapsed,
-        targetScope: 'leaderboard'
+        targetScope: 'leaderboard',
+        seasonalTheme
       })
     });
 

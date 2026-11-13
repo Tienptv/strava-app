@@ -673,14 +673,25 @@ app.post('/api/auth/token', async (req, res) => {
     const athleteId = tokenData.athlete?.id;
     const strAthleteId = athleteId ? athleteId.toString().trim() : '';
 
-    // KIỂM TRA PHÂN QUYỀN: Chỉ cho phép Super Admin và Sub Admin đăng nhập qua Strava OAuth
+    // KIỂM TRA PHÂN QUYỀN: Cho phép Admin hoặc Thành viên CLB Haskoning đăng nhập qua Strava OAuth
     const isSuperAdmin = isSuperAdminUser(strAthleteId);
     const subAdmins = loadAdminsList();
     const isSubAdmin = !isSuperAdmin && isAthleteInSubAdmins(strAthleteId, subAdmins);
     const isAuthorizedAdmin = isSuperAdmin || isSubAdmin;
+    const isMemberOfClub = isClubMemberOrAdmin(strAthleteId);
+    const adminPermissions = isSuperAdmin ? {
+      generalSettings: true,
+      manageRoles: true,
+      activityLogs: true,
+      dataManagement: true,
+      penaltiesTargets: true,
+      syncStrava: true,
+      importActivities: true
+    } : (isSubAdmin ? getPermissionsForAthlete(strAthleteId) : null);
 
-    if (!isAuthorizedAdmin) {
-      console.warn(`[OAuth Security] Chặn tài khoản Strava ID ${strAthleteId} (${tokenData.athlete?.firstname} ${tokenData.athlete?.lastname}) vì không thuộc danh sách Admin/SuperAdmin/SubAdmin.`);
+    // Nếu không phải Admin và cũng không thuộc CLB Haskoning -> Chặn và deauthorize để giải phóng quota Sandbox
+    if (!isAuthorizedAdmin && !isMemberOfClub) {
+      console.warn(`[OAuth Security] Chặn tài khoản Strava ID ${strAthleteId} (${tokenData.athlete?.firstname} ${tokenData.athlete?.lastname}) vì không thuộc CLB Haskoning.`);
 
       // Tự động thu hồi (deauthorize) trên Strava ngay lập tức để giải phóng quota Sandbox
       if (tokenData.access_token) {
@@ -695,13 +706,14 @@ app.post('/api/auth/token', async (req, res) => {
       return res.status(403).json({
         success: false,
         isNotAdmin: true,
+        isNotMember: true,
         athleteId: strAthleteId,
-        error: `Tài khoản Strava của bạn (ID: ${strAthleteId}) không thuộc danh sách Quản trị viên (Super Admin / Sub Admin). Tính năng đăng nhập Strava chỉ dành cho Quản trị viên gia hạn quyền. Thành viên CLB vui lòng sử dụng khung "Đăng nhập Thành viên" ở màn hình chính.`,
-        errorEn: `Your Strava account (ID: ${strAthleteId}) is not in the Administrator list (Super Admin / Sub Admin). Strava OAuth is strictly reserved for Administrators. Club members please log in using "Club Member Access" on the main screen.`
+        error: `Tài khoản Strava của bạn (ID: ${strAthleteId}) chưa thuộc Câu lạc bộ HaskoningDHV Running Club. Vui lòng liên hệ Ban quản trị để tham gia CLB trước khi đăng nhập.`,
+        errorEn: `Your Strava account (ID: ${strAthleteId}) is not yet a member of HaskoningDHV Running Club. Please contact an Administrator to join the club before logging in.`
       });
     }
 
-    // Lưu token với athlete ID làm key (chỉ dành cho Admin đã được phê duyệt)
+    // Lưu token với athlete ID làm key (cho cả Admin và Thành viên CLB để kích hoạt Realtime Webhook tự động)
     tokenStore.set(strAthleteId, {
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
@@ -740,8 +752,20 @@ app.post('/api/auth/token', async (req, res) => {
     }
 
     res.json({
-      athlete: tokenData.athlete,
+      athlete: {
+        ...tokenData.athlete,
+        authMethod: 'strava_oauth',
+        isAdmin: isAuthorizedAdmin,
+        isSuperAdmin: isSuperAdmin,
+        isSubAdmin: isSubAdmin,
+        permissions: adminPermissions
+      },
       athleteId: athleteId,
+      authMethod: 'strava_oauth',
+      isAdmin: isAuthorizedAdmin,
+      isSuperAdmin: isSuperAdmin,
+      isSubAdmin: isSubAdmin,
+      permissions: adminPermissions,
       expires_at: tokenData.expires_at,
       cookie: autoCookie || getSavedCookie() || '',
     });
@@ -889,6 +913,49 @@ function getPermissionsForAthlete(athleteId) {
     if (customPermissions[rawId]) return { ...base, ...customPermissions[rawId] };
   }
   return base;
+}
+
+// Kiểm tra xem một Strava Athlete ID có thuộc CLB Haskoning hoặc là Admin không
+function isClubMemberOrAdmin(athleteIdentifier) {
+  if (!athleteIdentifier || athleteIdentifier === 'guest') return false;
+  const rawId = athleteIdentifier.toString().trim();
+
+  // 1. Kiểm tra Admin (Super Admin hoặc Sub Admin)
+  if (isSuperAdminUser(rawId)) return true;
+  const subAdmins = loadAdminsList();
+  if (isAthleteInSubAdmins(rawId, subAdmins)) return true;
+
+  // 2. Kiểm tra trong danh sách thành viên CLB (club_roster, AthleteID_Name.csv, challenge_config)
+  try {
+    const roster = getAllClubMembersRoster();
+    if (Array.isArray(roster) && roster.some(m => String(m.id || m.athleteId) === rawId)) {
+      return true;
+    }
+  } catch (_) {}
+
+  // 3. Kiểm tra trực tiếp trong AthleteID_Name.csv
+  try {
+    if (fs.existsSync(ATHLETE_NAMES_FILE)) {
+      const content = fs.readFileSync(ATHLETE_NAMES_FILE, 'utf8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        const parts = line.split(',');
+        if (parts[0] && parts[0].trim() === rawId) {
+          return true;
+        }
+      }
+    }
+  } catch (_) {}
+
+  // 4. Kiểm tra trong targets.json
+  try {
+    if (fs.existsSync(TARGETS_FILE)) {
+      const targets = readStorageJson(TARGETS_FILE, {});
+      if (targets[rawId]) return true;
+    }
+  } catch (_) {}
+
+  return false;
 }
 
 // Xác định vai trò của người dùng (admin, member, guest)
@@ -4828,6 +4895,45 @@ async function getAnyValidAccessToken() {
   return null;
 }
 
+// ==========================================
+// REAL-TIME BROADCASTER (Server-Sent Events - SSE)
+// ==========================================
+const sseClients = new Set();
+
+app.get('/api/realtime/stream', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders?.();
+
+  res.write(`data: ${JSON.stringify({ type: 'connected', timestamp: Date.now() })}\n\n`);
+  sseClients.add(res);
+
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(': ping\n\n');
+    } catch (_) {}
+  }, 25000);
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    sseClients.delete(res);
+  });
+});
+
+function broadcastRealtimeEvent(payload) {
+  if (sseClients.size === 0) return;
+  const data = `data: ${JSON.stringify(payload)}\n\n`;
+  for (const client of sseClients) {
+    try {
+      client.write(data);
+    } catch (_) {
+      sseClients.delete(client);
+    }
+  }
+}
+
 // 1. Xác thực Handshake khi đăng ký Webhook với Strava
 app.get('/api/webhook', (req, res) => {
   try {
@@ -4888,6 +4994,12 @@ async function handleStravaWebhookEvent(event) {
         writeStorageJson(IMPORTED_FILE, existing);
         console.log(`🗑️ [WEBHOOK_DELETE] Đã xoá bài chạy ${activityIdStr} khỏi imported_activities.json`);
         addAuditLog('Webhook Xoá Bài Chạy', `Strava ID: ${athleteIdStr}`, `Đã xoá hoạt động ${activityIdStr}`);
+        broadcastRealtimeEvent({
+          type: 'activity_synced',
+          action: 'deleted',
+          athleteId: athleteIdStr,
+          activityId: activityIdStr
+        });
         return { success: true, action: 'deleted', id: activityIdStr };
       }
     }
@@ -4961,6 +5073,16 @@ async function handleStravaWebhookEvent(event) {
     console.log(`⚡ [WEBHOOK_SUCCESS] Tự động cập nhật thành công bài chạy ${distKm}km của VĐV ${runnerName} (ID: ${activityIdStr})!`);
 
     addAuditLog('Strava Webhook Realtime', runnerName, `Tự động cập nhật bài chạy ${distKm}km (ID: ${activityIdStr})`);
+
+    // Phát tín hiệu Realtime SSE tới mọi trình duyệt đang mở để dashboard tự động cập nhật lập tức
+    broadcastRealtimeEvent({
+      type: 'activity_synced',
+      action: 'merged',
+      athlete: runnerName,
+      athleteId: athleteIdStr,
+      distanceKm: distKm,
+      activityId: activityIdStr
+    });
 
     // Nếu đang chạy ở bản desktop thì tự động đẩy lên Render Cloud
     if (!process.env.RENDER) {
@@ -5318,7 +5440,7 @@ app.post('/api/auth/logout', async (req, res) => {
 // FULL-PAGE SCREENSHOT VIA HEADLESS CHROME
 // ==========================================
 app.post('/api/screenshot/full-table', async (req, res) => {
-  const { month, year, athleteId, lang: currentLang, chartsCollapsed, targetScope } = req.body || {};
+  const { month, year, athleteId, lang: currentLang, chartsCollapsed, targetScope, seasonalTheme } = req.body || {};
   const frontendUrl = (fs.existsSync(path.join(__dirname, '../dist')) || !process.env.FRONTEND_URL)
     ? `http://localhost:${PORT || 3001}`
     : process.env.FRONTEND_URL;
@@ -5343,12 +5465,13 @@ app.post('/api/screenshot/full-table', async (req, res) => {
         '--font-render-hinting=max',
         '--force-color-profile=srgb',
         `--user-data-dir=${tempProfileDir}`,
-        '--window-size=2100,1200'
+        '--window-size=2400,3200'
       ]
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 2100, height: 1200, deviceScaleFactor: 2.5 });
+    // Đặt Viewport rộng rãi chuẩn 4K / Widescreen ngay từ đầu để GPU headless không bị invalidate tile cache
+    await page.setViewport({ width: 2400, height: 3200, deviceScaleFactor: 2.0 });
 
     // Set local storage authentication & language BEFORE page loads
     const validTokens = Array.from(tokenStore.keys());
@@ -5357,7 +5480,7 @@ app.post('/api/screenshot/full-table', async (req, res) => {
       : (validTokens[0] || athleteId || '133066813').toString();
     const targetLang = currentLang || 'en';
 
-    await page.evaluateOnNewDocument((id, lng, isCollapsed) => {
+    await page.evaluateOnNewDocument((id, lng, isCollapsed, theme) => {
       localStorage.setItem('athleteId', id);
       localStorage.setItem('athlete', JSON.stringify({
         id: parseInt(id, 10) || 133066813,
@@ -5368,9 +5491,18 @@ app.post('/api/screenshot/full-table', async (req, res) => {
       if (isCollapsed) {
         localStorage.setItem('strava_challenge_charts_collapsed', 'true');
       }
-    }, targetAthId, targetLang, Boolean(chartsCollapsed));
+      if (theme) {
+        localStorage.setItem('strava_seasonal_theme', theme);
+      }
+    }, targetAthId, targetLang, Boolean(chartsCollapsed), seasonalTheme || 'default');
 
-    const targetUrl = targetScope === 'leaderboard' ? `${frontendUrl}/leaderboard` : frontendUrl;
+    // Truyền trực tiếp tháng và năm vào URL để React khởi tạo thẳng tháng đích, triệt tiêu race condition
+    const qParams = new URLSearchParams();
+    if (month) qParams.set('month', month.toString());
+    if (year) qParams.set('year', year.toString());
+    const qs = qParams.toString() ? `?${qParams.toString()}` : '';
+
+    const targetUrl = targetScope === 'leaderboard' ? `${frontendUrl}/leaderboard${qs}` : `${frontendUrl}/${qs}`;
     await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
 
     if (targetScope === 'leaderboard') {
@@ -5379,13 +5511,20 @@ app.post('/api/screenshot/full-table', async (req, res) => {
     } else {
       await page.waitForSelector('.challenge-view, .dashboard, table', { timeout: 15000 });
     }
-    await new Promise(r => setTimeout(r, 800));
+    // Chờ chắc chắn dữ liệu bảng đã load xong (hết loading spinner và có dòng dữ liệu)
+    await page.waitForFunction(() => {
+      const loading = document.querySelector('.loading');
+      const rows = document.querySelectorAll('.challenge-table tbody tr');
+      return !loading && rows.length > 0;
+    }, { timeout: 15000 });
+    await new Promise(r => setTimeout(r, 500));
 
     // Hide navbar and expand view for clean full-page screenshot
     await page.evaluate(async (targetMonth, isCollapsed, scope) => {
-      // 1. Xóa vĩnh viễn các phần tử điều hướng và thanh sidebar khỏi cây DOM
+      document.body.classList.add('is-screenshot-capturing');
+      // 1. Ẩn các phần tử điều hướng và thanh sidebar mà không xóa DOM (chống crash Virtual DOM của React)
       document.querySelectorAll('.sidebar, aside, nav.navbar, .navbar, .admin-sidebar, [class*="sidebar"]').forEach(el => {
-        try { el.remove(); } catch (_) { el.style.display = 'none'; }
+        el.style.display = 'none';
       });
 
       // Khi chụp riêng Bảng xếp hạng (Option 3: scope === 'leaderboard'),
@@ -5393,7 +5532,7 @@ app.post('/api/screenshot/full-table', async (req, res) => {
       // để Bảng xếp hạng nằm ngay đỉnh viewport (top = 0), không bị đẩy ra ngoài vùng nhìn.
       if (scope === 'leaderboard') {
         document.querySelectorAll('.club-treasury-banner, .challenge-analytics-card, .annual-timeline-card, .dashboard__header').forEach(el => {
-          try { el.remove(); } catch (_) { el.style.display = 'none'; }
+          el.style.display = 'none';
         });
       } else {
         if (isCollapsed) {
@@ -5410,17 +5549,20 @@ app.post('/api/screenshot/full-table', async (req, res) => {
         }
       }
 
-      // Switch month tab if specified
+      // Switch month tab if specified and not already active
       if (targetMonth) {
         await new Promise((resolve) => {
           const trigger = document.querySelector('.month-dropdown-trigger');
-          if (trigger) {
+          const enMonths = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+          const targetEn = enMonths[parseInt(targetMonth, 10) - 1] || '';
+          const triggerText = (trigger?.textContent || '').trim().toLowerCase();
+          const alreadyActive = triggerText.includes(targetMonth.toString()) || (targetEn && triggerText.includes(targetEn));
+
+          if (!alreadyActive && trigger) {
             trigger.click();
             setTimeout(() => {
               const items = document.querySelectorAll('.month-dropdown-item');
               let clicked = false;
-              const enMonths = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-              const targetEn = enMonths[parseInt(targetMonth, 10) - 1] || '';
               items.forEach(item => {
                 const txt = (item.textContent || '').trim().toLowerCase();
                 if (txt === `t${targetMonth}` || txt.includes(targetMonth.toString()) || (targetEn && txt.includes(targetEn))) {
@@ -5436,8 +5578,12 @@ app.post('/api/screenshot/full-table', async (req, res) => {
               resolve();
             }, 100);
           } else {
+            if (trigger) {
+              const chevron = trigger.querySelector('svg');
+              if (chevron) chevron.style.display = 'none';
+            }
             const monthBtn = document.querySelector(`.month-pill[data-month="${targetMonth}"], .tab[data-month="${targetMonth}"]`);
-            if (monthBtn) {
+            if (monthBtn && !monthBtn.classList.contains('active')) {
               monthBtn.click();
             }
             resolve();
@@ -5555,8 +5701,15 @@ app.post('/api/screenshot/full-table', async (req, res) => {
       document.head.appendChild(style);
     }, month, Boolean(chartsCollapsed), targetScope);
 
-    await new Promise(r => setTimeout(r, 600));
+    // Chờ chắc chắn dữ liệu bảng đã load xong (hết loading spinner và có dòng dữ liệu)
+    await page.waitForFunction(() => {
+      const loading = document.querySelector('.loading');
+      const rows = document.querySelectorAll('.challenge-table tbody tr');
+      return !loading && rows.length > 0;
+    }, { timeout: 15000 });
+    await new Promise(r => setTimeout(r, 400));
 
+    // Lấy ElementHandle mới nhất sau khi React đã mount và hoàn tất render
     let targetEl;
     if (targetScope === 'leaderboard') {
       targetEl = await page.$('.challenge-container') || await page.$('.challenge-table-wrapper');
@@ -5566,16 +5719,6 @@ app.post('/api/screenshot/full-table', async (req, res) => {
 
     if (!targetEl) {
       throw new Error('Không tìm thấy bảng xếp hạng (.challenge-container) để chụp hình.');
-    }
-
-    // Tự động điều chỉnh kích thước viewport theo bounding box thực tế của targetEl
-    // đảm bảo 100% diện tích bảng xếp hạng nằm trọn vẹn trong khung đệm GPU của Chrome headless
-    const box = await targetEl.boundingBox();
-    if (box) {
-      const vpWidth = Math.max(2100, Math.ceil(box.x + box.width + 40));
-      const vpHeight = Math.max(1200, Math.ceil(box.y + box.height + 60));
-      await page.setViewport({ width: vpWidth, height: vpHeight, deviceScaleFactor: 2.5 });
-      await new Promise(r => setTimeout(r, 300));
     }
 
     const elInfo = await targetEl.evaluate(el => ({ tag: el.tagName, class: el.className, w: el.offsetWidth, h: el.offsetHeight }));

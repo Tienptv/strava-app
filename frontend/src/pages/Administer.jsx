@@ -2215,17 +2215,17 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
             onClick={() => handleTabClick('themes')}
             className={`tab ${activeTab === 'themes' ? 'tab--active' : ''}`}
           >
-            <Sparkles size={18} color={activeTab === 'themes' ? '#ff7518' : 'var(--accent)'} />
+            <Sparkles size={18} color={activeTab === 'themes' ? (seasonalTheme === 'christmas' ? '#d42426' : (seasonalTheme === 'halloween' ? '#ff7518' : 'var(--accent)')) : 'var(--accent)'} />
             <span style={{ flex: 1 }}>{t('tab10Title')}</span>
             <span style={{ 
               fontSize: '0.65rem', 
               padding: '2px 6px', 
               borderRadius: '6px', 
-              background: seasonalTheme === 'halloween' ? 'linear-gradient(135deg, #ff7518, #d84315)' : '#e2e8f0', 
-              color: seasonalTheme === 'halloween' ? '#fff' : '#64748b',
+              background: seasonalTheme === 'halloween' ? 'linear-gradient(135deg, #ff7518, #d84315)' : (seasonalTheme === 'christmas' ? 'linear-gradient(135deg, #d42426, #00A3A6)' : '#e2e8f0'), 
+              color: (seasonalTheme === 'halloween' || seasonalTheme === 'christmas') ? '#fff' : '#64748b',
               fontWeight: 700 
             }}>
-              {seasonalTheme === 'halloween' ? '🎃 ON' : 'OFF'}
+              {seasonalTheme === 'halloween' ? '🎃 ON' : (seasonalTheme === 'christmas' ? '🎄 ON' : 'OFF')}
             </span>
           </button>
         </div>
@@ -5043,11 +5043,11 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                   borderRadius: '20px',
                   fontSize: '0.82rem',
                   fontWeight: 700,
-                  background: seasonalTheme === 'halloween' ? 'rgba(255, 117, 24, 0.15)' : '#f1f5f9',
-                  color: seasonalTheme === 'halloween' ? '#d84315' : '#64748b',
-                  border: seasonalTheme === 'halloween' ? '1px solid rgba(255, 117, 24, 0.35)' : '1px solid #e2e8f0'
+                  background: seasonalTheme === 'halloween' ? 'rgba(255, 117, 24, 0.15)' : (seasonalTheme === 'christmas' ? 'rgba(212, 36, 38, 0.15)' : '#f1f5f9'),
+                  color: seasonalTheme === 'halloween' ? '#d84315' : (seasonalTheme === 'christmas' ? '#d42426' : '#64748b'),
+                  border: seasonalTheme === 'halloween' ? '1px solid rgba(255, 117, 24, 0.35)' : (seasonalTheme === 'christmas' ? '1px solid rgba(212, 36, 38, 0.35)' : '1px solid #e2e8f0')
                 }}>
-                  {seasonalTheme === 'halloween' ? `🎃 ${t('halloweenThemeTitle')} - ${t('activeThemeBadge')}` : `🏢 ${t('defaultThemeTitle')}`}
+                  {seasonalTheme === 'halloween' ? `🎃 ${t('halloweenThemeTitle')} - ${t('activeThemeBadge')}` : (seasonalTheme === 'christmas' ? `🎄 ${t('christmasThemeTitle')} - ${t('activeThemeBadge')}` : `🏢 ${t('defaultThemeTitle')}`)}
                 </span>
               </div>
             </div>
@@ -5129,33 +5129,78 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                 </div>
               </div>
 
-              {/* 2. CHRISTMAS THEME CARD (COMING SOON) */}
+              {/* 2. CHRISTMAS THEME CARD (ACTIVE TOGGLE) */}
               <div style={{
                 borderRadius: '14px',
                 padding: '20px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                opacity: 0.85
+                background: seasonalTheme === 'christmas' ? 'linear-gradient(135deg, rgba(212, 36, 38, 0.08) 0%, rgba(0, 163, 166, 0.05) 100%)' : '#f8fafc',
+                border: seasonalTheme === 'christmas' ? '2px solid #d42426' : '1px solid #e2e8f0',
+                boxShadow: seasonalTheme === 'christmas' ? '0 8px 24px rgba(212, 36, 38, 0.18)' : 'none',
+                transition: 'all 0.25s ease'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '1.8rem' }}>🎄</span>
+                    <span style={{ fontSize: '1.8rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}>🎄</span>
                     <div>
                       <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-navy)' }}>
                         {t('christmasThemeTitle')}
                       </h3>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0284c7' }}>
-                        {t('comingSoonBadge')}
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#d42426' }}>
+                        {lang === 'en' ? 'December Winter Special' : 'Lễ hội Mùa Đông Tháng 12'}
                       </span>
                     </div>
                   </div>
-                  <span style={{ fontSize: '0.72rem', padding: '4px 8px', borderRadius: '6px', background: '#e2e8f0', color: '#64748b', fontWeight: 600 }}>
-                    ❄️ Dec 2026
-                  </span>
+
+                  {/* Toggle Switch */}
+                  <label 
+                    style={{ position: 'relative', display: 'inline-block', width: '52px', height: '28px', cursor: 'pointer' }}
+                    title={seasonalTheme === 'christmas' ? t('activeThemeBadge') : t('inactiveThemeBadge')}
+                  >
+                    <input 
+                      type="checkbox"
+                      checked={seasonalTheme === 'christmas'}
+                      onChange={() => handleToggleTheme('christmas')}
+                      disabled={savingTheme}
+                      style={{ opacity: 0, width: 0, height: 0 }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: seasonalTheme === 'christmas' ? 'linear-gradient(135deg, #d42426 0%, #00A3A6 100%)' : '#cbd5e1',
+                      borderRadius: '28px',
+                      transition: '0.25s',
+                      boxShadow: seasonalTheme === 'christmas' ? '0 0 12px rgba(212, 36, 38, 0.6)' : 'none'
+                    }}>
+                      <span style={{
+                        position: 'absolute',
+                        height: '22px',
+                        width: '22px',
+                        left: seasonalTheme === 'christmas' ? '26px' : '3px',
+                        bottom: '3px',
+                        background: '#ffffff',
+                        borderRadius: '50%',
+                        transition: '0.25s',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }} />
+                    </span>
+                  </label>
                 </div>
+
                 <p style={{ margin: '0 0 16px 0', fontSize: '0.86rem', color: '#64748b', lineHeight: 1.5 }}>
                   {t('christmasThemeDesc')}
                 </p>
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(212, 36, 38, 0.1)', color: '#d42426', fontWeight: 600 }}>
+                    ❄️ {lang === 'en' ? 'Frost Glass & Snow' : 'Kính sương & Tuyết rơi'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(251, 191, 36, 0.15)', color: '#b45309', fontWeight: 600 }}>
+                    💡 {lang === 'en' ? 'Fairy Lights Glow' : 'Dây đèn Fairy lung linh'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(0, 163, 166, 0.1)', color: 'var(--accent)', fontWeight: 600 }}>
+                    🛡️ {lang === 'en' ? 'Zero Layout Shift' : 'Không đổi bố cục'}
+                  </span>
+                </div>
               </div>
 
               {/* 3. TET THEME CARD (COMING SOON) */}

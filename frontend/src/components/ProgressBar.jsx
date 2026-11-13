@@ -1,12 +1,12 @@
 import React from 'react';
 
-export default function ProgressBar({ current, target, isCompleted, percent }) {
+export default function ProgressBar({ current, target, isCompleted, percent, className = '' }) {
   const displayPercent = percent === 0 ? 0 : Math.max(percent, 2);
   const isHighPercent = percent > 50;
 
   return (
     <div 
-      className="table-progress-container" 
+      className={`table-progress-container ${className}`} 
       title={`${current.toFixed(1)} / ${target} km (${percent}%)`}
     >
       <div className="table-progress-bg">

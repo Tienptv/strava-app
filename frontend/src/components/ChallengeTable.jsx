@@ -367,7 +367,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
   }
 
   return (
-    <div className="challenge-container">
+    <div className={`challenge-container ${isHalloween ? 'challenge-table--halloween' : ''}`}>
       {isHalloween ? (
         <HalloweenHeaderBar
           month={month}
@@ -391,7 +391,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
       ) : (
         <div className="challenge-header" style={{ position: 'relative' }}>
           <div className="challenge-title-group">
-            <h2 className="challenge-title-main">
+            <h2 className="challenge-title-main" style={{ position: 'relative' }}>
               <span className="challenge-title-text">{t('challengeMonth')}</span>
               <span className="challenge-title-dot">•</span>
               <div className="month-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
@@ -447,7 +447,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
           )}
 
           {challengeData.length > 0 && challengeData[0].totalDistance > 0 && (
-            <div className="runner-of-the-month" title="Runner of the Month">
+            <div className="runner-of-the-month" title="Runner of the Month" style={{ position: 'relative' }}>
               <span className="rotm-icon">🏆</span>
               <img
                 src={getAvatar(challengeData[0].member, 24)}
@@ -618,17 +618,19 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                       const isZeroVal = rawTarget === 0 || rawTarget === '0' || rawTarget === undefined || rawTarget === '';
 
                       return (
-                        <input
-                          type="number"
-                          placeholder="0"
-                          value={displayTarget}
-                          onChange={(e) => handleTargetChange(row.matchKey, e.target.value)}
-                          onBlur={(e) => handleTargetBlur(row.matchKey, e.target.value)}
-                          onKeyDown={handleTargetKeyDown}
-                          disabled={!canEdit}
-                          title={!canEdit ? (isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('noEditPermission')) : t('enterTargetKm')}
-                          className={`target-input ${isZeroVal ? 'is-zero-target' : ''} ${!canEdit ? 'target-input--readonly' : ''} ${isMe ? 'target-input--me' : ''}`}
-                        />
+                        <span className="target-input-wrapper" style={{ display: 'inline-block', position: 'relative' }}>
+                          <input
+                            type="number"
+                            placeholder="0"
+                            value={displayTarget}
+                            onChange={(e) => handleTargetChange(row.matchKey, e.target.value)}
+                            onBlur={(e) => handleTargetBlur(row.matchKey, e.target.value)}
+                            onKeyDown={handleTargetKeyDown}
+                            disabled={!canEdit}
+                            title={!canEdit ? (isLockedByDate ? `${lang === 'en' ? 'Only Admins can edit targets after day' : 'Chỉ Admin mới có thể thay đổi mục tiêu sau ngày'} ${lockTargetsAfterDate}` : t('noEditPermission')) : t('enterTargetKm')}
+                            className={`target-input ${isZeroVal ? 'is-zero-target' : ''} ${!canEdit ? 'target-input--readonly' : ''} ${isMe ? 'target-input--me' : ''}`}
+                          />
+                        </span>
                       );
                     })()}
                   </td>

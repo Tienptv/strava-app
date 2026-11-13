@@ -38,8 +38,8 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
   const [verifying, setVerifying] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // State: Phần đăng nhập Admin Strava (thu gọn mặc định)
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  // State: Phần đăng nhập bằng PIN cá nhân (thu gọn mặc định để ưu tiên Strava OAuth)
+  const [showPinLogin, setShowPinLogin] = useState(false);
 
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -178,8 +178,109 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
         </div>
 
         {/* ============================================================== */}
-        {/* KHUNG ĐĂNG NHẬP THÀNH VIÊN CLB (PHƯƠNG ÁN 3)                   */}
+        {/* KHUNG ĐĂNG NHẬP CHÍNH: STRAVA OAUTH (REALTIME CHO TẤT CẢ VĐV)  */}
         {/* ============================================================== */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.98)',
+          border: '1.5px solid rgba(0, 163, 166, 0.35)',
+          borderRadius: '16px',
+          padding: '22px 18px',
+          boxShadow: '0 8px 24px rgba(0, 45, 84, 0.08)',
+          width: '100%',
+          marginBottom: '14px',
+          textAlign: 'center',
+          boxSizing: 'border-box'
+        }}>
+          {/* Huy hiệu Realtime Lime Green */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '5px 12px',
+            borderRadius: '20px',
+            background: 'rgba(120, 190, 32, 0.12)',
+            border: '1px solid rgba(120, 190, 32, 0.35)',
+            color: '#2e7d32',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            marginBottom: '14px'
+          }}>
+            <span>{t('stravaRealtimeBadge')}</span>
+          </div>
+
+          {/* Nút bấm Đăng nhập Strava chính thức cho toàn bộ thành viên */}
+          <button 
+            type="button" 
+            className="btn btn--primary" 
+            style={{
+              width: '100%',
+              padding: '13px 18px',
+              fontSize: '1.02rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              background: 'linear-gradient(135deg, #00A3A6 0%, #002D54 100%)',
+              boxShadow: '0 4px 14px rgba(0, 163, 166, 0.35)',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              color: '#ffffff',
+              border: 'none',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+            onClick={() => onLogin(false)}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 18px rgba(0, 163, 166, 0.45)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 163, 166, 0.35)';
+            }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="15.5,7 20,16 17.5,16 15.5,12 13.5,16 11,16"/>
+              <polygon points="10.5,16 13,16 10,22 7,16 9.5,16 10,17"/>
+            </svg>
+            <span>{t('loginWithStrava')}</span>
+            <ChevronRight size={18} />
+          </button>
+
+          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '10px', lineHeight: 1.45 }}>
+            {t('stravaRealtimeDesc')}
+          </div>
+
+          {/* Nút Đổi tài khoản Strava */}
+          <div style={{ marginTop: '8px' }}>
+            <button
+              type="button"
+              className="btn btn-switch-account"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--accent)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 8px'
+              }}
+              onClick={() => onLogin(true)}
+              title={t('switchAccountHint')}
+            >
+              <RefreshCw size={13} style={{ flexShrink: 0 }} />
+              <span>{t('switchAccount')}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ============================================================== */}
+        {/* KHUNG ĐĂNG NHẬP THÀNH VIÊN CLB (DỰ PHÒNG CHO NGƯỜI DÙNG PIN)  */}
+        {/* ============================================================== */}
+        {showPinLogin && (
         <div style={{
           background: 'rgba(255, 255, 255, 0.98)',
           border: '1.5px solid rgba(0, 163, 166, 0.35)',
@@ -481,6 +582,7 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
             </button>
           </form>
         </div>
+        )}
 
         {/* Nút Xem Ngay (Khách vãng lai) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
@@ -518,15 +620,15 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
             <ChevronRight size={16} />
           </button>
 
-          {/* DÀNH CHO QUẢN TRỊ VIÊN: LINK THU GỌN ĐỂ ĐĂNG NHẬP STRAVA OAUTH */}
-          <div style={{ marginTop: '8px' }}>
+          {/* Link thu gọn đăng nhập bằng mã PIN cá nhân */}
+          <div style={{ marginTop: '6px' }}>
             <button
               type="button"
-              onClick={() => setShowAdminLogin(!showAdminLogin)}
+              onClick={() => setShowPinLogin(!showPinLogin)}
               style={{
                 background: 'none',
                 border: 'none',
-                fontSize: '0.78rem',
+                fontSize: '0.80rem',
                 color: '#64748b',
                 cursor: 'pointer',
                 display: 'inline-flex',
@@ -536,94 +638,10 @@ export default function Login({ onLogin, onGuestAccess, onMemberLogin }) {
                 fontWeight: 600
               }}
             >
-              <ShieldCheck size={14} color="var(--accent)" />
-              <span>{t('adminLoginSection')}</span>
-              <ChevronDown size={14} style={{ transform: showAdminLogin ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+              <Key size={14} color="var(--accent)" />
+              <span>{t('orLoginWithPin')}</span>
+              <ChevronDown size={14} style={{ transform: showPinLogin ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
             </button>
-
-            {showAdminLogin && (
-              <div style={{
-                background: '#f8fafc',
-                border: '1.5px solid #cbd5e1',
-                borderRadius: '12px',
-                padding: '14px',
-                marginTop: '6px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-                boxShadow: '0 4px 12px rgba(0, 45, 84, 0.05)'
-              }}>
-                {/* Huy hiệu cảnh báo chỉ dành cho Admin */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  borderBottom: '1px solid #e2e8f0',
-                  paddingBottom: '8px'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '0.80rem', color: 'var(--primary-navy)' }}>
-                    <ShieldCheck size={16} color="var(--accent)" />
-                    <span>{t('adminLoginSection')}</span>
-                  </div>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    color: '#dc2626',
-                    border: '1px solid rgba(239, 68, 68, 0.25)'
-                  }}>
-                    {t('adminOnlyNoticeBadge')}
-                  </span>
-                </div>
-
-                {/* Hộp thông báo cảnh báo ID */}
-                <div style={{
-                  display: 'flex',
-                  gap: '8px',
-                  alignItems: 'flex-start',
-                  background: '#fffbeb',
-                  border: '1px solid #fde68a',
-                  borderRadius: '8px',
-                  padding: '9px 10px',
-                  fontSize: '0.74rem',
-                  lineHeight: 1.45,
-                  color: '#92400e',
-                  textAlign: 'left'
-                }}>
-                  <AlertTriangle size={15} style={{ flexShrink: 0, marginTop: '2px', color: '#d97706' }} />
-                  <div>
-                    {t('adminLoginNote')}
-                  </div>
-                </div>
-
-                <button 
-                  type="button" 
-                  className="btn btn--primary" 
-                  style={{ width: '100%', padding: '10px 14px', fontSize: '0.88rem' }}
-                  onClick={() => onLogin(false)}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="15.5,7 20,16 17.5,16 15.5,12 13.5,16 11,16"/>
-                    <polygon points="10.5,16 13,16 10,22 7,16 9.5,16 10,17"/>
-                  </svg>
-                  {t('loginButton')}
-                  <ChevronRight size={16} />
-                </button>
-
-                <button 
-                  type="button" 
-                  className="btn btn-switch-account" 
-                  style={{ width: '100%', padding: '8px 12px', fontSize: '0.82rem' }}
-                  onClick={() => onLogin(true)}
-                  title={t('switchAccountHint')}
-                >
-                  <RefreshCw size={14} style={{ flexShrink: 0 }} />
-                  <span>{t('switchAccount')}</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
 

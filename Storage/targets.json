@@ -355,5 +355,41 @@
   "An_H._2026_10": {
     "target": 21,
     "penalty": true
+  },
+  "Sang_N._2026_11": {
+    "penalty": true,
+    "target": 60
+  },
+  "Tien_P._2026_11": {
+    "penalty": true,
+    "target": 120
+  },
+  "Thinh_V._2026_11": {
+    "penalty": true,
+    "target": 50
+  },
+  "Linh_T._2026_11": {
+    "target": 50,
+    "penalty": true
+  },
+  "Tam_N._2026_11": {
+    "target": 100,
+    "penalty": true
+  },
+  "Thức_T._2026_11": {
+    "penalty": true,
+    "target": 50
+  },
+  "Cuong_N._2026_11": {
+    "penalty": true,
+    "target": 70
+  },
+  "Thanh_X._2026_11": {
+    "penalty": true,
+    "target": 68
+  },
+  "An_H._2026_11": {
+    "target": 22,
+    "penalty": true
   }
 }

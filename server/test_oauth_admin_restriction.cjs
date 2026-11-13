@@ -5,8 +5,9 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { spawn } = require('child_process');
 
-const PORT = 3001;
+const PORT = 3997;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 
 function makePostRequest(endpoint, body) {
@@ -62,6 +63,22 @@ async function runTests() {
   console.log('🧪 BẮT ĐẦU KIỂM THỬ: GIỚI HẠN STRAVA OAUTH THEO ID ADMIN');
   console.log('====================================================\n');
 
+  console.log(`Đang khởi động test server trên port ${PORT}...`);
+  const serverProcess = spawn('node', ['server/index.js'], {
+    cwd: path.join(__dirname, '..'),
+    env: { ...process.env, TEST_PORT: String(PORT), PORT: String(PORT) },
+    stdio: 'ignore'
+  });
+
+  for (let i = 0; i < 30; i++) {
+    try {
+      await makeGetRequest('/api/health');
+      break;
+    } catch (_) {
+      await new Promise(r => setTimeout(r, 200));
+    }
+  }
+
   let passCount = 0;
   let failCount = 0;
 
@@ -75,8 +92,9 @@ async function runTests() {
     }
   }
 
-  // 1. Kiểm tra danh sách Admin hiện có
-  console.log('--- 1. Kiểm tra cấu hình danh sách ID Admin ---');
+  try {
+    // 1. Kiểm tra danh sách Admin hiện có
+    console.log('--- 1. Kiểm tra cấu hình danh sách ID Admin ---');
   const rolesRes = await makeGetRequest('/api/auth/roles', { 'x-athlete-id': '133066813' });
   assert(rolesRes.status === 200, 'GET /api/auth/roles trả về HTTP 200 cho Super Admin');
   const superAdminIds = rolesRes.data.superAdminIds || [];
@@ -102,11 +120,12 @@ async function runTests() {
   assert(emptyRes.status === 400, 'Thiếu code trong body trả về HTTP 400 Bad Request');
   assert(emptyRes.data.error === 'Thiếu authorization code', 'Thông báo lỗi tiếng Việt chuẩn xác');
 
-  // 4. Kiểm tra giao diện Login.jsx có huy hiệu và cảnh báo Admin Only
+  // 4. Kiểm tra giao diện Login.jsx có nút Strava Realtime cho toàn bộ thành viên
   console.log('\n--- 4. Kiểm tra cấu trúc giao diện Login & Translations ---');
   const loginJsx = fs.readFileSync(path.join(__dirname, '../frontend/src/pages/Login.jsx'), 'utf8');
-  assert(loginJsx.includes('adminOnlyNoticeBadge'), 'Login.jsx có hiển thị huy hiệu adminOnlyNoticeBadge');
-  assert(loginJsx.includes('adminLoginNote'), 'Login.jsx có hộp cảnh báo adminLoginNote');
+  assert(loginJsx.includes('stravaRealtimeBadge'), 'Login.jsx có hiển thị huy hiệu stravaRealtimeBadge');
+  assert(loginJsx.includes('loginWithStrava'), 'Login.jsx có nút đăng nhập Strava chính thức loginWithStrava');
+  assert(loginJsx.includes('orLoginWithPin'), 'Login.jsx có tùy chọn thu gọn orLoginWithPin');
   assert(loginJsx.includes('AlertTriangle'), 'Login.jsx sử dụng icon AlertTriangle cảnh báo nổi bật');
 
   const appJsx = fs.readFileSync(path.join(__dirname, '../frontend/src/App.jsx'), 'utf8');
@@ -118,12 +137,15 @@ async function runTests() {
   assert(transJs.includes('oauthNotAdminTitle') && transJs.includes('Account Not in Administrator List'), 'Translations có đầy đủ song ngữ vi/en cho oauthNotAdminTitle');
   assert(transJs.includes('oauthNotAdminAction') && transJs.includes('Back to Club Member Login'), 'Translations có đầy đủ song ngữ vi/en cho oauthNotAdminAction');
 
-  console.log('\n====================================================');
-  console.log(`🏁 KẾT QUẢ KIỂM THỬ: ${passCount} PASS, ${failCount} FAIL`);
-  console.log('====================================================\n');
+    console.log('\n====================================================');
+    console.log(`🏁 KẾT QUẢ KIỂM THỬ: ${passCount} PASS, ${failCount} FAIL`);
+    console.log('====================================================\n');
 
-  if (failCount > 0) {
-    process.exit(1);
+    if (failCount > 0) {
+      process.exit(1);
+    }
+  } finally {
+    serverProcess.kill('SIGTERM');
   }
 }
 

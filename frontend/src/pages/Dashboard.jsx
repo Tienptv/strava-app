@@ -123,8 +123,22 @@ export default function Dashboard({
   // Challenge States
   const isMemberSession = Boolean(athlete?.isMemberVerified || localStorage.getItem('isMemberVerified') === 'true');
   const [viewMode, setViewMode] = useState(isMobile || athlete?.isGuest || isMemberSession ? 'challenge' : 'overview'); // 'overview' | 'challenge'
-  const [internalMonth, setInternalMonth] = useState(new Date().getMonth() + 1);
-  const [internalYear, setInternalYear] = useState(new Date().getFullYear());
+  const [internalMonth, setInternalMonth] = useState(() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const m = parseInt(searchParams.get('month'), 10);
+      if (m >= 1 && m <= 12) return m;
+    } catch (_) {}
+    return new Date().getMonth() + 1;
+  });
+  const [internalYear, setInternalYear] = useState(() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const y = parseInt(searchParams.get('year'), 10);
+      if (y >= 2020 && y <= 2035) return y;
+    } catch (_) {}
+    return new Date().getFullYear();
+  });
 
   const challengeMonth = propMonth !== undefined ? propMonth : internalMonth;
   const challengeYear = propYear !== undefined ? propYear : internalYear;
