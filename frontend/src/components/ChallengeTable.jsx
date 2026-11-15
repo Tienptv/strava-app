@@ -10,6 +10,7 @@ import HalloweenHeaderBar from './HalloweenHeaderBar';
 import pumpkin3dImg from '../assets/halloween/pumpkin_3d.png';
 import { HalloweenCandyWrapped, HalloweenCandyCorn, HalloweenCandySwirl, HalloweenGoldenLeaf } from './HalloweenDecorations';
 import ThemeOverlayLayer from '../themes/ThemeOverlayLayer';
+import { SnowCapBar } from '../themes/christmas';
 
 const MONTH_NAMES_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -80,6 +81,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
   }, []);
 
   const isHalloween = seasonalTheme === 'halloween';
+  const isChristmas = seasonalTheme === 'christmas';
 
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -429,6 +431,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                   className="challenge-title-date month-dropdown-trigger"
                   onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
                 >
+                  {isChristmas && <SnowCapBar variant="month" />}
                   {lang === 'en' ? `${MONTH_NAMES_EN[month - 1]} ${year}` : `Tháng ${month}, ${year}`}
                   <ChevronDown size={18} strokeWidth={2.5} />
                 </button>
@@ -469,9 +472,11 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                 }}
                 style={{
                   cursor: nextEvent.registrationUrl ? 'pointer' : 'default',
-                  userSelect: 'none'
+                  userSelect: 'none',
+                  position: 'relative'
                 }}
               >
+                {isChristmas && <SnowCapBar variant="race" />}
                 <Sparkles size={14} color="#ea580c" />
                 <span className="upcoming-race-badge__label">{t('upcoming')}</span>
                 <strong className="upcoming-race-badge__name">{nextEvent.name}</strong>
@@ -493,7 +498,8 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
                 </span>
               </div>
 
-              <div className="club-goal__km-display" style={{ background: '#f8fafc', padding: '0 16px', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: 0, height: '100%', boxSizing: 'border-box' }}>
+              <div className="club-goal__km-display" style={{ background: '#f8fafc', padding: '0 16px', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: 0, height: '100%', boxSizing: 'border-box', position: 'relative' }}>
+                {isChristmas && <SnowCapBar variant="goal" />}
                 <span className="current-dist" style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '1.1rem' }}>{totalMonthlyDistance.toFixed(1)}</span>
                 <div className="target-display" style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: '4px' }}>
                   <span className="total-goal" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>/ {targetKm} km</span>
@@ -504,6 +510,7 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
 
           {challengeData.length > 0 && challengeData[0].totalDistance > 0 && (
             <div className="runner-of-the-month" title="Runner of the Month" style={{ position: 'relative' }}>
+              {isChristmas && <SnowCapBar variant="runner" />}
               <span className="rotm-icon">🏆</span>
               <img
                 src={getAvatar(challengeData[0].member, 24)}

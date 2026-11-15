@@ -1,0 +1,106 @@
+/* =========================================================================
+   SNOW CAP & ICICLES (TUYẾT PHỦ & NHŨ TUYẾT PHA LÊ)
+   Hiệu ứng trang trí Giáng sinh cho các thanh bar / capsule pill
+   ========================================================================= */
+
+.snow-cap-bar-wrapper {
+  position: absolute;
+  top: -8px;
+  left: -2px;
+  right: -2px;
+  height: 22px;
+  pointer-events: none !important;
+  user-select: none !important;
+  z-index: 12;
+  overflow: visible;
+}
+
+.snow-cap-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* Ánh sao lấp lánh (Sparkle Star) trên đỉnh ụ tuyết */
+.snow-cap-sparkle {
+  position: absolute;
+  pointer-events: none;
+  animation: snowSparkleTwinkle 2.8s infinite ease-in-out;
+  filter: drop-shadow(0 0 4px #38bdf8) drop-shadow(0 0 8px #ffffff);
+}
+
+.snow-cap-sparkle--left {
+  top: -2px;
+  left: 24%;
+  animation-delay: -0.8s;
+}
+
+.snow-cap-sparkle--right {
+  top: -3px;
+  right: 22%;
+  animation-delay: -2.1s;
+}
+
+@keyframes snowSparkleTwinkle {
+  0%, 100% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.15) rotate(90deg);
+    opacity: 1;
+  }
+}
+
+/* Biến thể riêng cho từng thanh bar nếu cần tinh chỉnh độ phủ */
+.snow-cap-bar--month {
+  top: -7px;
+  left: -1px;
+  right: -1px;
+}
+
+.snow-cap-bar--race {
+  top: -7.5px;
+  left: -2px;
+  right: -2px;
+}
+
+.snow-cap-bar--runner {
+  top: -8px;
+  left: -2px;
+  right: -2px;
+}
+
+/* =========================================================================
+   HIỆU ỨNG PHỦ BĂNG BỀ MẶT CHO CÁC THANH BAR TRONG THEME GIÁNG SINH
+   ========================================================================= */
+
+.theme-christmas .month-dropdown-trigger {
+  position: relative !important;
+  overflow: visible !important;
+  border-color: rgba(186, 230, 253, 0.75) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 249, 255, 0.92) 100%) !important;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.theme-christmas .month-dropdown-trigger:hover {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35) !important;
+}
+
+.theme-christmas .upcoming-race-badge {
+  position: relative !important;
+  overflow: visible !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%) !important;
+  border: 1px solid rgba(186, 230, 253, 0.8) !important;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.theme-christmas .runner-of-the-month {
+  position: relative !important;
+  overflow: visible !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 249, 255, 0.92) 100%) !important;
+  border: 1.5px solid rgba(125, 211, 252, 0.85) !important;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3), inset 0 0 10px rgba(224, 242, 254, 0.6) !important;
+}

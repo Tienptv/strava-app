@@ -15,4 +15,5 @@ export const CHRISTMAS_THEME_CONFIG = {
 };
 
 export { default as SnowfallOverlay } from './SnowfallOverlay';
+export { default as SnowCapBar } from './SnowCapBar';
 export * from './SnowflakeVectors';
