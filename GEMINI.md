@@ -143,6 +143,30 @@
   5. **Quan trắc theo phương pháp RED & USE (Metrics & Tracing):** Đo lường 3 chỉ số RED trên từng API và Agent Node: **Rate** (RPS), **Errors** (tỷ lệ lỗi 4xx/5xx), **Duration** (độ trễ phân vị P50, P95, P99).
 - *(Chi tiết văn bản gốc đầy đủ xem tại `.agents/rules/global-architecture.md` và `docs/architecture/production_architecture_and_observability.md`)*
 
+---
+
+## 10. Quy Chuẩn Thiết Kế Code Tầng Domain (Mức 1 - 2 - 3)
+- Mọi mã nguồn trong `src/domain/` BẮT BUỘC tuân thủ nghiêm ngặt 5 nguyên tắc sau:
+  1. **Guard Clauses & Early Return (Cấm Arrow Anti-Pattern):** Tuyệt đối không lồng `if-else` quá 2 cấp. Không dùng khối `else` sau lệnh `return` hoặc `raise`. Mọi hàm chia làm 3 tầng: Tầng 1 - Guard Clauses (ném `InvalidParameterError`/`ResourceNotFoundError`), Tầng 2 - Early Return (Edge Cases), Tầng 3 - Happy Path.
+  2. **Thay thế `if-elif-else` bằng Lookup Table hoặc Strategy Pattern:** Cấm viết chuỗi `if-elif-else` từ 3 nhánh trở lên. Dùng `dict.get()` cho tra cứu/điều phối ngắn (< 20 dòng); dùng **Strategy Pattern** (`abc.ABC` + `@abstractmethod`) kèm **Registry Dictionary** cho nhánh phức tạp.
+  3. **Dependency Injection (DI):** Không tự khởi tạo kết nối Database hay API Client bên trong hàm xử lý. Tiêm từ bên ngoài qua `__init__` hoặc Factory.
+  4. **Single Level of Abstraction (SLA):** Hàm Mức 1 (Public API) chỉ điều phối nghiệp vụ mức cao ("Làm cái gì"). Hàm Mức 2, 3 (`_private`) xử lý chi tiết kỹ thuật ("Làm như thế nào"). Không trộn lẫn phép toán cấp thấp vào Mức 1.
+  5. **The Stepdown Rule (Quy tắc Đọc xuống):** Sắp xếp thứ tự hàm trong file theo thứ tự ưu tiên chiều sâu (Depth-First): Caller nằm trên, Callee (`_private`) nằm ngay bên dưới nhánh gọi nó. Độc lập hoàn toàn với MCP: Tuyệt đối không `import mcp` hay `FastMCP` trong `src/domain/`.
+
+---
+
+## 11. Quy Chuẩn Đóng Gói MCP Tool (Mức 0 - Adapter Layer)
+- Tầng `src/mcp_server/` tuân theo **Mô hình Tảng băng chìm**: Chỉ làm lớp vỏ mỏng tiếp xúc với AI Agent, tiêm phụ thuộc (DI) và gọi xuống hàm Mức 1 trong `src/domain/`.
+- **4 Quy tắc Bắt buộc tại Mức 0:**
+  1. **Đơn vị đo lường trong Tên biến & Schema:** Tên tham số có hậu tố đơn vị (`load_kn`, `length_m`, `area_mm2`, `timeout_sec`). Dùng `Annotated[type, Field(description="...")]` của Pydantic để mô tả giới hạn vật lý và định dạng.
+  2. **Docstring là System Prompt thu nhỏ:** Ghi rõ (a) Công cụ này dùng để làm gì, (b) Khi nào AI nên/không nên gọi, (c) Ý nghĩa kết quả trả về.
+  3. **Không dùng `try-except` thủ công trong từng Tool:** Luôn import và gắn `@mcp_error_boundary` từ `src.core.error_boundary` để tự động chuẩn hóa đầu ra thành `ToolResponse` (`status`, `trace_id`, `data`, `error_message`, `ai_recovery_hint`).
+  4. **Chống AI gọi trùng lặp (Idempotency) cho thao tác Ghi/Sửa:** Bắt buộc gắn `@mcp_idempotent` từ `src.core.idempotency`.
+- **Thứ tự Decorator Chuẩn:**
+  - Read-Only: `@mcp.tool()` -> `@mcp_error_boundary`
+  - Write/Mutate: `@mcp.tool()` -> `@mcp_error_boundary` -> `@mcp_idempotent(store=..., ttl_seconds=...)` *(Lưu ý: `@mcp_error_boundary` PHẢI nằm ngoài `@mcp_idempotent`)*.
+
+
 
 
 

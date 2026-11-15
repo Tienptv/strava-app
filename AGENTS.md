@@ -65,4 +65,12 @@ Mọi phản hồi sinh code, sửa lỗi (refactor) hoặc đánh giá code (co
    - Áp dụng cấu trúc Clean Architecture & Multi-Agent Ready (`.agents/`, `api/`, `domain/`, `agents/`, `infrastructure/`, `observability/`).
    - Tuân thủ 5 quy tắc vàng: Structured JSON Logging (ISO-8601 UTC, `trace_id`, `span_id`, `actor_context`, `duration_ms`), context propagation qua `contextvars`/`AsyncLocalStorage`, tự động che dữ liệu nhạy cảm PII (`***REDACTED***`), kỷ luật phân cấp Log Levels (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`), và đo lường RED (Rate, Errors, Duration P50/P95/P99).
    - Chi tiết: `.agents/rules/global-architecture.md`, `.agents/skills/observability-and-logging/SKILL.md`, `docs/architecture/production_architecture_and_observability.md`.
+9. **Quy Chuẩn Thiết Kế Code Tầng Domain (Clean Code Mức 1 - 2 - 3):**
+   - Áp dụng cho mọi code trong `src/domain/`: (1) Guard Clauses & Early Return chia 3 tầng (cấm arrow anti-pattern, ném `InvalidParameterError`/`ResourceNotFoundError`), (2) Cấm `if-elif-else` >= 3 nhánh, thay bằng Lookup Table hoặc Strategy Pattern + Registry, (3) Dependency Injection tiêm qua `__init__`/Factory, (4) Single Level of Abstraction (Mức 1 là Public API điều phối; Mức 2, 3 là `_private`), (5) Stepdown Rule sắp xếp Caller trên, Callee dưới; độc lập hoàn toàn không import `mcp` trong domain.
+   - Chi tiết: `.cursor/rules/01-clean-code-domain.mdc`, `.agents/rules/01-clean-code-domain.md`, `CLAUDE.md`.
+10. **Quy Chuẩn Đóng Gói MCP Tool (Adapter Layer Mức 0):**
+   - Áp dụng cho `src/mcp_server/`: Mô hình tảng băng chìm (chỉ làm vỏ mỏng gọi Mức 1 trong domain).
+   - 4 quy tắc bắt buộc: (1) Tên tham số có hậu tố đơn vị (`load_kn`, `timeout_sec`) kèm Pydantic `Annotated[..., Field(description=...)]`, (2) Docstring là System Prompt thu nhỏ, (3) Luôn bọc `@mcp_error_boundary` chuẩn hóa `ToolResponse`, (4) Chống trùng lặp `@mcp_idempotent` cho lệnh Ghi/Sửa.
+   - Thứ tự Decorator: `@mcp.tool()` -> `@mcp_error_boundary` -> `@mcp_idempotent`.
+   - Chi tiết: `.cursor/rules/02-mcp-adapter.mdc`, `.agents/rules/02-mcp-adapter.md`, `CLAUDE.md`.
 
