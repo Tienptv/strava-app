@@ -14,7 +14,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@rolldown/binding-win32-x64-msvc": "^1.2.19",
     "archiver": "^8.0.0",
     "chart.js": "^4.5.1",
     "cors": "^2.8.5",
