@@ -15,6 +15,7 @@ import { processChallengeData, getCombinedDistance } from '../utils/challengeSta
 import { useLang } from '../i18n/LangContext';
 import { loadChallengeData } from '../utils/challengeDataLoader';
 import { APP_VERSION } from '../config/version';
+import MusicButton from '../components/MusicButton';
 import MobileLeaderboard from '../components/MobileLeaderboard';
 import MobileBottomNav from '../components/MobileBottomNav';
 import TreasuryTransparencyModal from '../components/TreasuryTransparencyModal';
@@ -880,8 +881,9 @@ export default function Dashboard({
         </>
       )}
 
-      {/* Version Tag */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', paddingBottom: '8px' }}>
+      {/* Version Tag & Music Control Button */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px', marginTop: '16px', paddingBottom: '8px' }}>
+        <MusicButton lang={lang} />
         <span className="app-version-tag">
           Version {APP_VERSION}
         </span>

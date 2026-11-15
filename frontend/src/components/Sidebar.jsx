@@ -73,7 +73,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
           sessionStorage.setItem('stravaCookie', res.cookie);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [apiFetch]);
 
   // Helper: lưu cookie lên server để scraper có thể inject vào Puppeteer
@@ -84,7 +84,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
         method: 'POST',
         body: JSON.stringify({ cookie: cookieValue })
       });
-    } catch (_) {}
+    } catch (_) { }
   };
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
           setUpdateInfo(data);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [apiFetch]);
 
   const handleCheckUpdate = async (isManual = true) => {
@@ -116,8 +116,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
     if (isManual) {
       Swal.fire({
         title: lang === 'en' ? 'Checking for Updates...' : 'Đang kiểm tra cập nhật...',
-        text: lang === 'en' 
-          ? 'Connecting to Render Cloud...' 
+        text: lang === 'en'
+          ? 'Connecting to Render Cloud...'
           : 'Đang kết nối tới máy chủ Render Cloud...',
         allowOutsideClick: false,
         didOpen: () => {
@@ -196,8 +196,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
           } else if (data && data.cloudConnected === false) {
             Swal.fire({
               title: lang === 'en' ? 'Cloud Server Busy' : 'Máy chủ Cloud chưa phản hồi',
-              text: lang === 'en' 
-                ? 'Could not connect to Render Cloud. It may be waking up, please try again in 30 seconds.' 
+              text: lang === 'en'
+                ? 'Could not connect to Render Cloud. It may be waking up, please try again in 30 seconds.'
                 : 'Không thể kết nối đến máy chủ Cloud (Render Cloud có thể đang khởi động lại). Vui lòng thử lại sau 30 giây.',
               icon: 'warning',
               confirmButtonColor: '#f59e0b'
@@ -205,8 +205,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
           } else {
             Swal.fire({
               title: lang === 'en' ? 'Up to Date' : 'Đã là bản mới nhất',
-              text: lang === 'en' 
-                ? `You are using the latest version (v${APP_VERSION}).` 
+              text: lang === 'en'
+                ? `You are using the latest version (v${APP_VERSION}).`
                 : `Bạn đang sử dụng phiên bản mới nhất (v${APP_VERSION}).`,
               icon: 'success',
               confirmButtonColor: '#00A3A6'
@@ -318,7 +318,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
         })
       });
       window.dispatchEvent(new CustomEvent('challengeUpdated', { detail: { year: activeYear, month: activeMonth } }));
-      
+
       setSavedMessage(true);
       setTimeout(() => setSavedMessage(false), 3000);
     } catch (err) {
@@ -330,8 +330,8 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
   const handleCsvUpload = async (e) => {
     const files = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.csv'));
     if (!files.length) {
-       Swal.fire(t('noCsvFound'), '', 'warning');
-       return;
+      Swal.fire(t('noCsvFound'), '', 'warning');
+      return;
     }
 
     let allImportedActivities = [];
@@ -342,7 +342,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
           header: true,
           skipEmptyLines: true,
           transformHeader: (h) => h.trim().replace(/^["']|["']$/g, '').trim(),
-          complete: function(results) {
+          complete: function (results) {
             const data = results.data;
             const importedActivities = data.map(row => {
               // Bỏ qua các hoạt động ẩn (nếu có cột chỉ định)
@@ -350,7 +350,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
               const hideFromHome = String(row.hide_from_home || row.Hide_from_home || 'false').toLowerCase() === 'true';
               const visibility = row.visibility || row.Visibility;
               if (isPrivate || hideFromHome || (visibility && String(visibility).toLowerCase() !== 'everyone')) {
-                 return null;
+                return null;
               }
 
               const rawDistStr = String(row.Distance || 0).toLowerCase();
@@ -360,7 +360,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                 distNum = distNum * 1.609344;
               }
               let dist = isNaN(distNum) ? 0 : Math.round(distNum * 1000);
-              
+
               let movingTimeStr = row['Duration'] || row['Moving Time'] || row['Time'] || '00:00:00';
               let timeParts = movingTimeStr.split(':').map(Number);
               let movingTimeSec = 0;
@@ -372,7 +372,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
 
               let athleteId = null;
               let athleteName = row.Name || row.Athlete || '';
-              
+
               if (row.Athlete && String(row.Athlete).includes('/athletes/')) {
                 athleteId = parseInt(String(row.Athlete).replace('/athletes/', ''), 10);
                 athleteName = row.Name || '';
@@ -398,21 +398,21 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                 localIsoStr = dateStr.substring(0, 19) + 'Z';
               } else if (dateStr) {
                 if (dateStr.includes('/')) {
-                   let dParts = dateStr.split(' ')[0].split('/');
-                   let tPart = dateStr.split(' ')[1] || '00:00:00';
-                   if (dParts.length === 3) {
-                      if (dParts[0].length === 4) {
-                         dateStr = `${dParts[0]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[2]).padStart(2, '0')}T${tPart}Z`;
-                      } else {
-                         dateStr = `${dParts[2]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[0]).padStart(2, '0')}T${tPart}Z`;
-                      }
-                      localIsoStr = dateStr;
-                   }
+                  let dParts = dateStr.split(' ')[0].split('/');
+                  let tPart = dateStr.split(' ')[1] || '00:00:00';
+                  if (dParts.length === 3) {
+                    if (dParts[0].length === 4) {
+                      dateStr = `${dParts[0]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[2]).padStart(2, '0')}T${tPart}Z`;
+                    } else {
+                      dateStr = `${dParts[2]}-${String(dParts[1]).padStart(2, '0')}-${String(dParts[0]).padStart(2, '0')}T${tPart}Z`;
+                    }
+                    localIsoStr = dateStr;
+                  }
                 } else if (dateStr.includes('-')) {
-                   let parts = dateStr.split(' ');
-                   let dPart = parts[0];
-                   let tPart = parts[1] || '00:00:00';
-                   localIsoStr = `${dPart}T${tPart}Z`;
+                  let parts = dateStr.split(' ');
+                  let dPart = parts[0];
+                  let tPart = parts[1] || '00:00:00';
+                  localIsoStr = `${dPart}T${tPart}Z`;
                 }
               }
 
@@ -435,7 +435,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
             });
             resolve(importedActivities.filter(Boolean));
           },
-          error: function(err) {
+          error: function (err) {
             console.error('Lỗi parse CSV', err);
             resolve([]);
           }
@@ -454,12 +454,12 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
     const normalize = (n) => (n || '').trim().toLowerCase().replace(/[\.\s]/g, '');
     const uniqueMap = new Map();
     const getCompKey = (act) => {
-       const d = (act.start_date_local || '').substring(0, 16); // Chuẩn hóa tới phút YYYY-MM-DDTHH:mm
-       const t = act.moving_time || 0;
-       const dist = Math.round(act.distance || 0);
-       const athId = act.athlete?.id || '';
-       const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
-       return `comp_${athId || name}_${d}_${t}_${dist}`;
+      const d = (act.start_date_local || '').substring(0, 16); // Chuẩn hóa tới phút YYYY-MM-DDTHH:mm
+      const t = act.moving_time || 0;
+      const dist = Math.round(act.distance || 0);
+      const athId = act.athlete?.id || '';
+      const name = `${normalize(act.athlete?.firstname)}_${normalize(act.athlete?.lastname)}`;
+      return `comp_${athId || name}_${d}_${t}_${dist}`;
     };
 
     const isBetterRecord = (a, b) => {
@@ -491,13 +491,13 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
 
     // Chỉ update các hoạt động từ tháng 8/2026 trở đi vào importedActivities (các tháng 1-7 đã lưu riêng trong historical)
     const augImportedActivities = allImportedActivities.filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
-    
+
     // Chỉ deduplicate nội bộ các file vừa upload
     augImportedActivities.forEach(addRecord);
 
     const finalSet = new Set(uniqueMap.values());
     const finalActivities = Array.from(finalSet).filter(a => !a.start_date_local || a.start_date_local >= '2026-08-01T00:00:00');
-    
+
     try {
       await apiFetch('/challenge/imported?replaceByDate=true', {
         method: 'POST',
@@ -653,7 +653,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
               <span>{lang === 'en' ? 'Sync' : 'Đồng bộ'}</span>
             </button>
           </div>
-          <select 
+          <select
             className="sidebar__select"
             value={selectedClubId}
             onChange={(e) => {
@@ -691,10 +691,10 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                   // Strava Club Members API often doesn't return athlete 'id'
                   const uniqueId = member.matchKey || (member.id ? member.id.toString() : `${member.firstname}_${member.lastname}`);
                   const isSelected = !!participants[uniqueId];
-                  
+
                   return (
-                    <div 
-                      key={uniqueId} 
+                    <div
+                      key={uniqueId}
                       className={`sidebar__member-item ${isSelected ? 'sidebar__member-item--selected' : ''}`}
                       onClick={() => toggleParticipant(uniqueId, member)}
                     >
@@ -731,13 +731,13 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                 </button>
               </div>
             )}
-            
+
             <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div className="sidebar__stats" style={{ color: '#002D54', fontWeight: 600, padding: 0 }}>
                 <span style={{ color: '#002D54' }}>{t('participants')}:</span>
                 <strong style={{ color: '#002D54' }}>{participantCount}</strong>
               </div>
-              
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <input
                   type="checkbox"
@@ -754,19 +754,19 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                   {t('allowEditOthers')}
                 </label>
               </div>
-              
+
               <button className="btn btn--primary sidebar__btn-save" onClick={handleSave}>
                 <Save size={16} style={{ marginRight: 6 }} />
                 {savedMessage ? t('challengeSaved') : t('saveChallenge')}
               </button>
-              
-              <button 
-                className="btn btn--secondary" 
+
+              <button
+                className="btn btn--secondary"
                 onClick={() => navigate('/administer')}
-                style={{ 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
-                  padding: '10px 8px', background: 'rgba(0, 163, 166, 0.08)', color: 'var(--primary-navy)', 
-                  border: '1px solid var(--accent)', borderRadius: '6px', fontSize: '13px', 
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                  padding: '10px 8px', background: 'rgba(0, 163, 166, 0.08)', color: 'var(--primary-navy)',
+                  border: '1px solid var(--accent)', borderRadius: '6px', fontSize: '13px',
                   fontWeight: 'bold', marginTop: '4px', gap: '6px'
                 }}
               >
@@ -800,7 +800,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
           {(isSuperAdmin || !permissions || permissions.syncStrava !== false) && (
             <>
               <div style={{ marginTop: '8px' }}>
-                <button 
+                <button
                   className="btn btn--secondary"
                   onClick={async () => {
                     try {
@@ -812,7 +812,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                       } else {
                         setStravaCookie('');
                         sessionStorage.removeItem('stravaCookie');
-                        
+
                         const confirmRes = await Swal.fire({
                           title: t('openChromePrompt') || (lang === 'en' ? 'Open Chrome to Login?' : 'Mở Chrome để đăng nhập Strava?'),
                           text: lang === 'en' ? 'Chrome will open for you to login to Strava and automatically retrieve cookies.' : 'Hệ thống sẽ mở Google Chrome để bạn đăng nhập Strava và tự động lấy cookie.',
@@ -821,7 +821,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                           confirmButtonText: lang === 'en' ? 'OK' : 'Đồng ý',
                           cancelButtonText: lang === 'en' ? 'Cancel' : 'Hủy bỏ'
                         });
-                        
+
                         if (confirmRes.isConfirmed) {
                           Swal.fire({
                             title: lang === 'en' ? '⏳ Opening Google Chrome...' : '⏳ Đang mở Google Chrome...',
@@ -849,20 +849,20 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                       Swal.fire(t('errorPrefix'), e.message, 'error');
                     }
                   }}
-                  style={{ 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
-                    padding: '10px 8px', background: stravaCookie ? '#e8f5e9' : '#fff3e0', 
-                    color: '#002D54', 
-                    border: `1px solid ${stravaCookie ? '#66bb6a' : '#ffb74d'}`, borderRadius: '6px', fontSize: '13px', 
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                    padding: '10px 8px', background: stravaCookie ? '#e8f5e9' : '#fff3e0',
+                    color: '#002D54',
+                    border: `1px solid ${stravaCookie ? '#66bb6a' : '#ffb74d'}`, borderRadius: '6px', fontSize: '13px',
                     fontWeight: 'bold', width: '100%', marginBottom: '6px'
                   }}
                 >
                   <svg style={{ marginRight: 6 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                   {stravaCookie ? `🟢 ${t('stravaCookieOk')}` : `🔑 ${t('stravaLogin')}`}
                 </button>
-                <input 
-                  type="text" 
-                  placeholder={t('importCsvPlaceholder')} 
+                <input
+                  type="text"
+                  placeholder={t('importCsvPlaceholder')}
                   value={stravaCookie}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -878,15 +878,15 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                 />
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   value={syncLimit}
                   onChange={(e) => setSyncLimit(e.target.value)}
                   title={t('fetchLimitTooltip')}
                   style={{ width: '60px', padding: '8px', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', textAlign: 'center', fontWeight: 'bold', color: '#002D54', background: '#fff' }}
                   min="1"
                 />
-                <button 
+                <button
                   onClick={async () => {
                     if (!selectedClubId) {
                       Swal.fire(t('selectGroupFirst'), '', 'warning');
@@ -915,12 +915,12 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                       const athlete = JSON.parse(localStorage.getItem('athlete') || '{}');
                       const subAdminName = athlete.firstname ? `${athlete.firstname} ${athlete.lastname || ''}`.trim() : 'Admin (Desktop App)';
 
-                      const data = await apiFetch(`/clubs/${selectedClubId}/auto-sync-scrape`, { 
+                      const data = await apiFetch(`/clubs/${selectedClubId}/auto-sync-scrape`, {
                         method: 'POST',
-                        body: JSON.stringify({ 
-                          cookie: cookieToUse || undefined, 
+                        body: JSON.stringify({
+                          cookie: cookieToUse || undefined,
                           limit: Number(syncLimit),
-                          subAdminName 
+                          subAdminName
                         })
                       });
 
@@ -992,7 +992,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                           });
                           window.location.reload();
                         } else {
-                          await Swal.fire({
+                          const result = await Swal.fire({
                             title: lang === 'en' ? '⚠️ Sync Partially Completed' : '⚠️ Đồng bộ hoàn thành một phần',
                             html: `
                               <div style="text-align: left; font-size: 0.88rem; color: #334155; line-height: 1.6;">
@@ -1007,20 +1007,57 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                                 <div style="padding: 10px 14px; background: ${finalCloudSynced ? '#fdf4ff' : '#fffbeb'}; border: 1px solid ${finalCloudSynced ? '#fbcfe8' : '#fde68a'}; border-radius: 8px;">
                                   <p style="color: ${finalCloudSynced ? '#c026d3' : '#d97706'}; font-weight: 700; margin: 0 0 4px;">${lang === 'en' ? '🚀 3. Push to Render Cloud:' : '🚀 3. Đẩy lên Render Cloud:'}</p>
                                   <p style="margin: 0; color: ${finalCloudSynced ? '#a21caf' : '#b45309'};">• ${finalCloudSynced ? (lang === 'en' ? 'Success' : 'Thành công') : (lang === 'en' ? 'Failed: ' + pushError : 'Thất bại: ' + pushError)}</p>
+                                  ${!finalCloudSynced ? `<p style="margin: 6px 0 0; font-size: 0.78rem; color: #b45309; line-height: 1.4;">${lang === 'en' ? '💡 Server may be waking up or busy. Click "Retry Push to Cloud" below to re-send immediately without re-scraping Strava.' : '💡 Máy chủ Cloud có thể đang khởi động lại hoặc bận. Bạn hãy bấm "Thử lại đẩy lên Cloud" bên dưới để đẩy ngay mà không cần cào lại Strava.'}</p>` : ''}
                                 </div>
                               </div>
                             `,
                             icon: 'warning',
-                            confirmButtonColor: '#f59e0b',
-                            confirmButtonText: lang === 'en' ? 'OK' : 'Đã hiểu'
+                            showCancelButton: !finalCloudSynced,
+                            confirmButtonColor: !finalCloudSynced ? '#00A3A6' : '#f59e0b',
+                            confirmButtonText: !finalCloudSynced
+                              ? (lang === 'en' ? '🔄 Retry Push to Cloud' : '🔄 Thử lại đẩy lên Cloud')
+                              : (lang === 'en' ? 'OK' : 'Đã hiểu'),
+                            cancelButtonColor: '#64748b',
+                            cancelButtonText: lang === 'en' ? 'Dismiss' : 'Đóng'
                           });
+
+                          if (result.isConfirmed && !finalCloudSynced) {
+                            Swal.fire({
+                              title: lang === 'en' ? 'Pushing Data to Cloud...' : 'Đang đẩy dữ liệu lên Cloud...',
+                              html: `<p style="font-size: 0.88rem; color: #64748b;">${lang === 'en' ? 'Connecting to Render Cloud with auto-retry...' : 'Đang kết nối lại với máy chủ Render Cloud...'}</p>`,
+                              allowOutsideClick: false,
+                              didOpen: () => { Swal.showLoading(); }
+                            });
+                            try {
+                              const retryRes = await apiFetch('/storage/push-to-cloud', { method: 'POST' });
+                              if (retryRes && retryRes.success) {
+                                await Swal.fire({
+                                  title: lang === 'en' ? '🎉 Push Succeeded!' : '🎉 Đẩy lên Cloud thành công!',
+                                  text: lang === 'en' ? 'All local activities and settings have been synced to Cloud Render.' : 'Toàn bộ dữ liệu bài tập và thiết lập từ máy tính đã được đồng bộ lên Cloud Render.',
+                                  icon: 'success',
+                                  confirmButtonColor: '#16a34a',
+                                  confirmButtonText: lang === 'en' ? 'OK' : 'Đã hiểu'
+                                });
+                              } else {
+                                throw new Error(retryRes?.error || 'Push failed');
+                              }
+                            } catch (retryErr) {
+                              await Swal.fire({
+                                title: lang === 'en' ? 'Push Retry Failed' : 'Thử lại thất bại',
+                                text: (lang === 'en' ? 'Could not reach Render Cloud: ' : 'Không thể kết nối Render Cloud: ') + retryErr.message,
+                                icon: 'error',
+                                confirmButtonColor: '#f59e0b',
+                                confirmButtonText: lang === 'en' ? 'OK' : 'Đã hiểu'
+                              });
+                            }
+                          }
                           window.location.reload();
                         }
                       } else {
                         if (data.error && (data.error.includes('Cookie') || data.error.includes('Phiên đăng nhập đã hết hạn'))) {
                           setStravaCookie('');
                           sessionStorage.removeItem('stravaCookie');
-                          
+
                           const confirmSync = await Swal.fire({
                             title: t('sessionExpired'),
                             text: t('openChromePrompt'),
@@ -1029,7 +1066,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                             confirmButtonText: lang === 'en' ? 'Open Chrome' : 'Mở Chrome',
                             cancelButtonText: lang === 'en' ? 'Close' : 'Đóng'
                           });
-                          
+
                           if (confirmSync.isConfirmed) {
                             Swal.fire({
                               title: lang === 'en' ? '⏳ Opening Google Chrome...' : '⏳ Đang mở Google Chrome...',
@@ -1063,9 +1100,9 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
 
                   }}
                   className="btn btn--primary"
-                  style={{ 
-                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', 
-                    padding: '10px 8px', fontSize: '13px', 
+                  style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                    padding: '10px 8px', fontSize: '13px',
                     fontWeight: 'bold'
                   }}
                   title={lang === 'en' ? 'Scrape Strava activities & auto sync to Render Cloud' : 'Cào dữ liệu Strava và tự động đồng bộ ngay lên Render Cloud'}
@@ -1077,7 +1114,7 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
             </>
           )}
           <div style={{ marginTop: '8px' }}>
-            <button 
+            <button
               className="btn btn--secondary btn-screenshot"
               onClick={() => {
                 showScreenshotModal({
@@ -1087,14 +1124,14 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
                   athleteId: localStorage.getItem('athleteId')
                 });
               }}
-              style={{ 
-                width: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                cursor: 'pointer', 
-                padding: '10px 8px', 
-                fontSize: '13px', 
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                padding: '10px 8px',
+                fontSize: '13px',
                 fontWeight: 'bold'
               }}
               title={t('screenshotTooltip')}
@@ -1105,14 +1142,14 @@ export default function Sidebar({ apiFetch, currentMonth, currentYear, isAdmin, 
           </div>
 
           {/* Version & 1-Click Update Control */}
-          <div style={{ 
-            marginTop: '10px', 
-            paddingTop: '8px', 
-            borderTop: '1px solid #e2e8f0', 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            marginTop: '10px',
+            paddingTop: '8px',
+            borderTop: '1px solid #e2e8f0',
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            fontSize: '11px' 
+            fontSize: '11px'
           }}>
             <span style={{ color: '#888888', fontStyle: 'italic', userSelect: 'none' }}>
               v{APP_VERSION}

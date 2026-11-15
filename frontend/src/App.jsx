@@ -17,6 +17,7 @@ import { APP_VERSION } from './config/version';
 import { useAutoUpdate, AutoUpdateToast } from './utils/useAutoUpdate';
 import { useDeviceScreen } from './utils/useDeviceScreen';
 import { initVisitorTracker } from './services/visitorTracker';
+import { MusicProvider } from './context/MusicContext';
 import Swal from 'sweetalert2';
 
 const API_BASE = '/api';
@@ -431,7 +432,8 @@ function App() {
   const isAdmin = !isMemberPinSession && Boolean(userRoles.isAdmin || isSuperAdmin);
 
   return (
-    <BrowserRouter>
+    <MusicProvider>
+      <BrowserRouter>
       {athlete && <Navbar athlete={athlete} onLogout={handleLogout} isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} apiFetch={apiFetch} />}
       <div className={athlete ? "app-layout" : ""}>
         {athlete && isAdmin && !isMobile && (
@@ -542,6 +544,7 @@ function App() {
         onReloadNow={reloadNow} 
       />
     </BrowserRouter>
+  </MusicProvider>
   );
 }
 

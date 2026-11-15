@@ -46,13 +46,15 @@ import {
   BellRing,
   Radio,
   ShieldCheck,
-  Key
+  Key,
+  FolderOpen
 } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 import { processChallengeData } from '../utils/challengeStats';
 import { roundUpPenaltyK } from '../utils/penaltyUtils';
 import { loadChallengeData } from '../utils/challengeDataLoader';
 import { APP_VERSION } from '../config/version';
+import MusicButton from '../components/MusicButton';
 import SmartReminderTool from '../components/SmartReminderTool';
 import LiveVisitorsTool from '../components/LiveVisitorsTool';
 
@@ -137,6 +139,29 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
       console.error('Failed to save seasonal theme:', e);
     } finally {
       setSavingTheme(false);
+    }
+  };
+
+  const handleOpenMusicFolder = async () => {
+    try {
+      const res = await apiFetch('/audio/open-folder', { method: 'POST' });
+      if (res && res.success) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: t('openMusicFolderSuccess'),
+          text: res.path,
+          showConfirmButton: false,
+          timer: 3500,
+          timerProgressBar: true
+        });
+      } else {
+        throw new Error(res?.error || 'Failed to open audio folder');
+      }
+    } catch (err) {
+      console.error('Lỗi mở thư mục nhạc:', err);
+      Swal.fire(lang === 'en' ? 'Error' : 'Lỗi', t('openMusicFolderError') + err.message, 'error');
     }
   };
 
@@ -5200,6 +5225,41 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
                   <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(0, 163, 166, 0.1)', color: 'var(--accent)', fontWeight: 600 }}>
                     🛡️ {lang === 'en' ? 'Zero Layout Shift' : 'Không đổi bố cục'}
                   </span>
+                  <button
+                    type="button"
+                    onClick={handleOpenMusicFolder}
+                    title={t('openMusicFolderDesc')}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      fontSize: '0.75rem',
+                      padding: '3px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(0, 163, 166, 0.12)',
+                      border: '1px solid rgba(0, 163, 166, 0.4)',
+                      color: 'var(--accent, #00A3A6)',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: '0 1px 3px rgba(0, 45, 84, 0.06)'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.borderColor = 'var(--accent, #00A3A6)';
+                      e.currentTarget.style.background = 'rgba(0, 163, 166, 0.2)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 163, 166, 0.25)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.borderColor = 'rgba(0, 163, 166, 0.4)';
+                      e.currentTarget.style.background = 'rgba(0, 163, 166, 0.12)';
+                      e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 45, 84, 0.06)';
+                    }}
+                  >
+                    <FolderOpen size={13} color="#00A3A6" />
+                    <span>{t('openMusicFolderBtn')}</span>
+                  </button>
                 </div>
               </div>
 
@@ -5663,8 +5723,9 @@ export default function Administer({ apiFetch, athlete, isSuperAdmin, isAdmin, p
         </div> {/* End admin-content */}
       </div> {/* End admin-layout */}
 
-      {/* Version Tag */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', paddingBottom: '4px' }}>
+      {/* Version Tag & Music Control Button */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px', marginTop: '10px', paddingBottom: '4px' }}>
+        <MusicButton lang={lang} />
         <span className="app-version-tag">
           Version {APP_VERSION}
         </span>

@@ -234,6 +234,24 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 
+// Phục vụ trực tiếp thư mục /audio với no-cache để phát ngay bản nhạc mới nhất mà Admin vừa dán vào
+const globalAudioPublicDir = path.join(__dirname, '../frontend/public/audio');
+const globalAudioDistDir = path.join(__dirname, '../dist/audio');
+
+app.use('/audio', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
+if (fs.existsSync(globalAudioPublicDir)) {
+  app.use('/audio', express.static(globalAudioPublicDir));
+}
+if (fs.existsSync(globalAudioDistDir)) {
+  app.use('/audio', express.static(globalAudioDistDir));
+}
+
 // ==========================================
 // BUILD ID & VERSION IDENTIFIER
 // ==========================================
@@ -1822,6 +1840,71 @@ app.get('/api/challenge/penalties-raw', (req, res) => {
   }
 });
 
+/**
+ * Thực hiện gọi HTTP fetch có khả năng chống chịu sự cố cao (Production-Grade Resilient HTTP Fetch):
+ * - Tự động thử lại (Auto-Retry with Backoff) khi gặp lỗi mạng (fetch failed, ECONNRESET, ETIMEDOUT, 502, 503, 504)
+ * - Tự động kiểm soát timeout chống treo tiến trình
+ * - Đính kèm Connection: 'close' và User-Agent để triệt tiêu lỗi Keep-Alive Socket race condition với Render/Cloudflare
+ * - Bóc tách chi tiết nguyên nhân gốc (err.cause) tránh nuốt lỗi thầm lặng
+ */
+export async function fetchWithRetry(url, options = {}, maxRetries = 3, timeoutMs = 30000) {
+  let lastError = null;
+  const backoffDelays = [1500, 3000, 5000];
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort(new Error(`Request timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    const mergedHeaders = {
+      'Connection': 'close',
+      'User-Agent': 'Strava-Desktop-App/1.2.7',
+      ...(options.headers || {})
+    };
+
+    try {
+      const resp = await fetch(url, {
+        ...options,
+        headers: mergedHeaders,
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      // Nếu gặp các mã lỗi tạm thời phía Cloud (502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout)
+      if ([502, 503, 504].includes(resp.status) && attempt < maxRetries) {
+        const errText = await resp.text().catch(() => '');
+        console.warn(`[fetchWithRetry] Lần ${attempt}/${maxRetries} thất bại do Cloud trả về HTTP ${resp.status}: ${errText.slice(0, 150)}. Đang chờ thử lại...`);
+        const delay = backoffDelays[attempt - 1] || 3000;
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+
+      return resp;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      lastError = err;
+      const causeCode = err.cause?.code || err.cause?.message || (err.name === 'AbortError' ? 'TIMEOUT' : '');
+      const fullErrorMsg = causeCode ? `${err.message} (${causeCode})` : err.message;
+
+      console.warn(`[fetchWithRetry] Lần ${attempt}/${maxRetries} tới ${url} thất bại: ${fullErrorMsg}`);
+
+      if (attempt < maxRetries) {
+        const delay = backoffDelays[attempt - 1] || 3000;
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+
+  // Đính kèm chi tiết nguyên nhân vào lỗi ném ra
+  const finalCause = lastError?.cause?.code || lastError?.cause?.message || (lastError?.name === 'AbortError' ? 'TIMEOUT' : '');
+  const finalMsg = finalCause ? `${lastError.message} (${finalCause})` : (lastError?.message || 'Network request failed');
+  const enhancedErr = new Error(finalMsg);
+  enhancedErr.cause = lastError?.cause;
+  throw enhancedErr;
+}
+
 // [GIẢI PHÁP 2] Kéo dữ liệu mới nhất từ Cloud Render về lưu vào máy local
 app.post('/api/storage/pull-from-cloud', async (req, res) => {
   const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
@@ -1830,9 +1913,9 @@ app.post('/api/storage/pull-from-cloud', async (req, res) => {
     const results = [];
 
     const fetchJson = async (endpoint) => {
-      const resp = await fetch(`${cloudUrl}${endpoint}`, {
+      const resp = await fetchWithRetry(`${cloudUrl}${endpoint}`, {
         headers: { 'Content-Type': 'application/json' }
-      });
+      }, 3, 20000);
       if (!resp.ok) throw new Error(`HTTP ${resp.status} từ ${endpoint}`);
       return await resp.json();
     };
@@ -2079,6 +2162,70 @@ app.get('/api/clubs/:id/roster-raw', (req, res) => {
   res.json(getAllClubMembersRoster());
 });
 
+// Endpoint mở thư mục chứa file nhạc trên máy tính bằng Windows File Explorer
+app.post('/api/audio/open-folder', async (req, res) => {
+  try {
+    const { exec } = await import('child_process');
+    let audioDir = path.join(__dirname, '../frontend/public/audio');
+    if (!fs.existsSync(audioDir)) {
+      audioDir = path.join(__dirname, '../dist/audio');
+    }
+    if (!fs.existsSync(audioDir)) {
+      fs.mkdirSync(audioDir, { recursive: true });
+    }
+
+    const resolvedPath = path.resolve(audioDir);
+
+    if (process.platform === 'win32') {
+      exec(`explorer.exe "${resolvedPath}"`);
+    } else if (process.platform === 'darwin') {
+      exec(`open "${resolvedPath}"`);
+    } else {
+      exec(`xdg-open "${resolvedPath}"`);
+    }
+
+    const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
+    addAuditLog('Mở thư mục nhạc', currentAthleteId || 'Admin', `Đã mở thư mục âm thanh: ${resolvedPath}`);
+
+    res.json({ success: true, path: resolvedPath, message: 'Đã mở thư mục chứa nhạc thành công' });
+  } catch (err) {
+    console.error('Lỗi khi mở thư mục âm thanh:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Endpoint trả về thông tin file nhạc hiện có trong thư mục audio kèm cache-busting
+app.get('/api/audio/info', (req, res) => {
+  try {
+    let audioDir = path.join(__dirname, '../frontend/public/audio');
+    if (!fs.existsSync(audioDir)) {
+      audioDir = path.join(__dirname, '../dist/audio');
+    }
+    if (!fs.existsSync(audioDir)) {
+      return res.json({ success: false, error: 'Thư mục audio không tồn tại' });
+    }
+
+    const files = fs.readdirSync(audioDir);
+    // Tìm file audio trong thư mục
+    const audioFile = files.find(f => /\.(mp3|wav|ogg|m4a|aac)$/i.test(f));
+    if (audioFile) {
+      const filePath = path.join(audioDir, audioFile);
+      const stats = fs.statSync(filePath);
+      return res.json({
+        success: true,
+        file: audioFile,
+        url: `/audio/${encodeURIComponent(audioFile)}?v=${Math.floor(stats.mtimeMs)}`,
+        size: stats.size,
+        mtime: stats.mtime
+      });
+    }
+    res.json({ success: false, error: 'Không tìm thấy file nhạc trong thư mục' });
+  } catch (err) {
+    console.error('Lỗi khi đọc file nhạc:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // [GIẢI PHÁP 3] Đẩy toàn bộ dữ liệu từ máy Local lên Cloud Render
 app.post('/api/storage/push-to-cloud', async (req, res) => {
   const currentAthleteId = (req.headers['x-athlete-id'] || '').toString();
@@ -2118,11 +2265,11 @@ app.post('/api/storage/push-to-cloud', async (req, res) => {
     }
 
     const targetEndpoint = `${cloudUrl}/api/storage/sync-bundle`;
-    const resp = await fetch(targetEndpoint, {
+    const resp = await fetchWithRetry(targetEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bundle)
-    });
+    }, 3, 35000);
 
     if (!resp.ok) {
       const errText = await resp.text();
@@ -2139,8 +2286,9 @@ app.post('/api/storage/push-to-cloud', async (req, res) => {
       message: `Đã đẩy thành công toàn bộ dữ liệu từ máy lên Cloud Render!`
     });
   } catch (err) {
-    console.error('Lỗi push to cloud:', err);
-    res.status(500).json({ success: false, error: err.message });
+    const errorDetail = err.cause?.code ? `${err.message} (${err.cause.code})` : err.message;
+    console.error('Lỗi push to cloud:', errorDetail);
+    res.status(500).json({ success: false, error: errorDetail });
   }
 });
 

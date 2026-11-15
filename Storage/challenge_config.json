@@ -390,21 +390,6 @@
       "owner": false,
       "resource_state": 2,
       "_fromClub": true
-    },
-    "pham_T.": {
-      "matchKey": "pham_T.",
-      "id": "120540594",
-      "athleteId": "120540594",
-      "firstname": "pham",
-      "lastname": "tien",
-      "name": "pham tien",
-      "profile_medium": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c",
-      "profile": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c",
-      "membership": "member",
-      "admin": false,
-      "owner": false,
-      "resource_state": 2,
-      "_fromClub": true
     }
   },
   "monthlyParticipants": {
@@ -6162,21 +6147,6 @@
         "owner": false,
         "resource_state": 2,
         "_fromClub": true
-      },
-      "pham_T.": {
-        "matchKey": "pham_T.",
-        "id": "120540594",
-        "athleteId": "120540594",
-        "firstname": "pham",
-        "lastname": "tien",
-        "name": "pham tien",
-        "profile_medium": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c",
-        "profile": "https://lh3.googleusercontent.com/a/ACg8ocIXhU5I9n1isrMyc-SJ_oyeT2sI7MjBTNlagYDBCf1_1bXlJQ=s96-c",
-        "membership": "member",
-        "admin": false,
-        "owner": false,
-        "resource_state": 2,
-        "_fromClub": true
       }
     }
   },
@@ -6184,9 +6154,9 @@
   "allowEditOthers": false,
   "penaltyRate": 200000,
   "defaultTarget": 50,
-  "defaultChart": "leaderboard",
+  "defaultChart": "progress",
   "title": "Journey from HCMC to the North Pole",
   "lockTargetsAfterDate": 12,
   "showDayAndTimeCols": false,
-  "seasonalTheme": "default"
+  "seasonalTheme": "christmas"
 }
