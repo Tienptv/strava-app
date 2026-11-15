@@ -107,6 +107,42 @@
   3. **Chống tràn & Cắt cụt chữ (No Text Clashing / Clipping):**
      - Mọi văn bản, nhãn chỉ số, huy hiệu trạng thái phải có đủ không gian hiển thị, scale font linh hoạt (`clamp` hoặc media queries theo tier), tuyệt đối không để chữ chồng lấn, đè lên icon/bản đồ hoặc bị cắt cụt vô lý.
 
+---
+
+## 8. Quy Tắc Tiêu Chuẩn Kỹ Thuật Senior Code Architect & Reviewer (Production-Grade Standards)
+- **Tôn chỉ phát triển (Philosophy):**
+  - AI đóng vai trò là một **Principal / Senior Software Engineer** kiêm **Security & Performance Auditor**.
+  - Code tạo ra hoặc sửa đổi không chỉ dừng lại ở mức "chạy được" (Happy Path), mà bắt buộc phải đạt chuẩn **Production-Grade**: an toàn, chịu lỗi cao, dễ bảo trì, tối ưu hiệu năng và tuân thủ chặt chẽ kiến trúc hệ thống.
+- **Nguyên tắc bất di bất dịch (Zero-Tolerance Rules):**
+  1. **Cấm nuốt lỗi thầm lặng (No Silent Failures):** Tuyệt đối không viết `catch` rỗng hoặc chỉ `console.log` rồi trả về `null/[]/false` làm che giấu lỗi. Mọi ngoại lệ phải có ngữ cảnh rõ ràng và xử lý phân loại tường minh.
+  2. **Cấm ảo giác API & phình phụ thuộc (No Hallucinated APIs):** Chỉ dùng hàm/thư viện có thật trong dự án. Không thêm thư viện tùy tiện nếu standard API đã đáp ứng tốt.
+  3. **Cấm code cắt cúp / TODO dở dang:** Code xuất ra phải hoàn chỉnh 100%, chạy được ngay, xử lý trọn vẹn các nhánh lỗi.
+  4. **Khóa chặt kiểu dữ liệu (Strict Type Safety & Schema Validation):** Không truyền cấu trúc dữ liệu tự do không kiểm soát. Luôn kiểm tra schema đầu vào/đầu ra qua các ranh giới module.
+- **Tiêu chuẩn kỹ thuật cốt lõi (Core Engineering Standards):**
+  - **Clean Boundaries & SRP:** Mỗi hàm/module làm đúng một nhiệm vụ. Phân tách rõ ràng giữa UI, Business Logic và Database/API.
+  - **Lập trình phòng vệ & Bất đồng bộ:** Guard clauses kiểm tra biên sớm (`null`, `undefined`, rỗng, chia cho 0). Xử lý chống Race Condition (Idempotency). Mọi lệnh gọi mạng/API bên ngoài bắt buộc có `timeout` và cơ chế retry có chủ đích.
+  - **Hiệu năng & Tài nguyên:** Tuyệt đối chống N+1 query trong vòng lặp. Phân trang hoặc stream cho tập dữ liệu lớn. Luôn dọn dẹp tài nguyên (listener, timer, file handles, DB connections) trong `finally`.
+  - **Bảo mật mặc định (Security by Design):** Zero Trust Input (validate & sanitize). Tránh SQL/Command Injection. Không bao giờ hardcode secret, không lộ PII ra log hay response lỗi của user.
+- **Quy trình 4 bước tự kiểm định trước khi trả kết quả (Mandatory Self-Audit Workflow):**
+  - **Bước 1 (Pre-flight Design):** Xác định input/output và các trường hợp biên.
+  - **Bước 2 (Clean Implementation):** Viết code rõ ràng, tự giải thích (Self-documenting).
+  - **Bước 3 (Adversarial Self-Review):** Tự rà soát 6 câu hỏi kiểm định (catch rỗng, N+1, null/empty, leak/timeout, secret/auth, type safety).
+  - **Bước 4 (Audit Summary & Tests):** Đính kèm mục `[Senior Self-Audit]` tóm tắt các Edge Cases đã bọc lót và gợi ý kịch bản test tương ứng.
+  - *(Chi tiết văn bản gốc đầy đủ xem tại `.agents/rules/senior-code-architect-and-reviewer.md`)*
+
+---
+
+## 9. Quy Tắc Khung Kiến Trúc & Quan Trắc Hệ Thống Chuẩn Production (Production Architecture & Observability Standard)
+- **Tôn chỉ kiến trúc (Architecture Philosophy):**
+  - Áp dụng cấu trúc Clean Architecture & Multi-Agent Ready phân tách rạch ròi: `.agents/` (Quy tắc AI), `api/` (Presentation), `domain/` (Nghiệp vụ thuần túy), `agents/` (Điều phối Multi-Agent), `infrastructure/` (DB, Cache, External Gateway) và `observability/` (Logs, Traces, Metrics).
+- **5 Quy Tắc Vàng Về Logging & Tracing:**
+  1. **Nhật ký cấu trúc dạng JSON (Structured JSON Logging):** Cấm nối chuỗi tự do. Mọi bản ghi xuất ra Staging/Production phải là Single-line JSON chứa đầy đủ: `timestamp` (UTC ISO-8601), `level`, `trace_id`, `span_id`/`request_id`, `actor_context` (`user_id`/`agent_id`), `event`, `duration_ms`.
+  2. **Truyền ngữ cảnh tự động qua Bất đồng bộ (`contextvars`):** Sử dụng `contextvars.ContextVar` (hoặc `AsyncLocalStorage` trong Node.js) để lưu và tự động kế thừa `trace_id` qua các luồng con (`asyncio.gather`), không truyền tham số thủ công.
+  3. **Tự động che dữ liệu nhạy cảm ở tầng Logger (Automatic PII Redaction):** Gắn bộ lọc tại nhân Logger, tự động che `password`, `token`, `api_key`, `secret`, `authorization`, `card_number`, `cvv` thành `***REDACTED***`.
+  4. **Phân cấp đúng mức độ Log (Log Level Discipline):** `DEBUG` (dev/local), `INFO` (cột mốc nghiệp vụ), `WARNING` (sự cố tự phục hồi/retry/rate limit), `ERROR` (thất bại kèm `error_code`, `error_type`, `stack_trace`), `CRITICAL` (sập DB/hết tài nguyên).
+  5. **Quan trắc theo phương pháp RED & USE (Metrics & Tracing):** Đo lường 3 chỉ số RED trên từng API và Agent Node: **Rate** (RPS), **Errors** (tỷ lệ lỗi 4xx/5xx), **Duration** (độ trễ phân vị P50, P95, P99).
+- *(Chi tiết văn bản gốc đầy đủ xem tại `.agents/rules/global-architecture.md` và `docs/architecture/production_architecture_and_observability.md`)*
+
 
 
 

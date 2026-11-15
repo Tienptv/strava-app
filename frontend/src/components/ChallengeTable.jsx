@@ -9,6 +9,7 @@ import { getAthleteAvatar } from '../utils/avatar';
 import HalloweenHeaderBar from './HalloweenHeaderBar';
 import pumpkin3dImg from '../assets/halloween/pumpkin_3d.png';
 import { HalloweenCandyWrapped, HalloweenCandyCorn, HalloweenCandySwirl, HalloweenGoldenLeaf } from './HalloweenDecorations';
+import ThemeOverlayLayer from '../themes/ThemeOverlayLayer';
 
 const MONTH_NAMES_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -301,10 +302,35 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     onUserDataChange(matchKey, 'penalty', isChecked);
   };
 
+  // Next upcoming race tính từ ngày hôm nay (Đặt ở top-level Hook để không bao giờ bị vi phạm Rules of Hooks)
+  const nextEvent = React.useMemo(() => {
+    const rawEvents = Array.isArray(goalData?.events) ? goalData.events : [];
+    const today = new Date();
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+
+    const upcoming = rawEvents
+      .map(ev => {
+        if (!ev || !ev.date) return null;
+        const evDate = new Date(ev.date);
+        const evMidnight = new Date(evDate.getFullYear(), evDate.getMonth(), evDate.getDate()).getTime();
+        const daysDiff = Math.ceil((evMidnight - todayMidnight) / (1000 * 60 * 60 * 24));
+        return {
+          ...ev,
+          daysDiff,
+          isPastEvent: daysDiff < 0
+        };
+      })
+      .filter(ev => ev && ev.daysDiff !== null && ev.daysDiff >= 0)
+      .sort((a, b) => a.daysDiff - b.daysDiff);
+
+    return upcoming[0] || null;
+  }, [goalData?.events]);
+
   // Tính khoảng cách xa nhất trong 1 ngày của tháng để làm mốc cho heatmap (red -> green)
   const maxDailyDist = React.useMemo(() => {
     let max = 0;
-    challengeData.forEach(row => {
+    (challengeData || []).forEach(row => {
+      if (!row || !row.dailyDistances) return;
       Object.values(row.dailyDistances).forEach(d => {
         if (d > max) max = d;
       });
@@ -366,32 +392,11 @@ export default function ChallengeTable({ challengeData, year, month, apiFetch, a
     daysLeft = daysInMonth;
   }
 
-  // Next upcoming race tính từ ngày hôm nay
-  const nextEvent = React.useMemo(() => {
-    const rawEvents = Array.isArray(goalData?.events) ? goalData.events : [];
-    const today = new Date();
-    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-
-    const upcoming = rawEvents
-      .map(ev => {
-        if (!ev || !ev.date) return null;
-        const evDate = new Date(ev.date);
-        const evMidnight = new Date(evDate.getFullYear(), evDate.getMonth(), evDate.getDate()).getTime();
-        const daysDiff = Math.ceil((evMidnight - todayMidnight) / (1000 * 60 * 60 * 24));
-        return {
-          ...ev,
-          daysDiff,
-          isPastEvent: daysDiff < 0
-        };
-      })
-      .filter(ev => ev && ev.daysDiff !== null && ev.daysDiff >= 0)
-      .sort((a, b) => a.daysDiff - b.daysDiff);
-
-    return upcoming[0] || null;
-  }, [goalData?.events]);
-
   return (
-    <div className={`challenge-container ${isHalloween ? 'challenge-table--halloween' : ''}`}>
+    <div className={`challenge-container ${isHalloween ? 'challenge-table--halloween' : ''} ${seasonalTheme ? `theme-${seasonalTheme}` : ''}`}>
+      {/* LỚP KÍNH PHỦ TRONG SUỐT 100% (THEME OVERLAY LAYER - KHUNG ĐỎ) */}
+      <ThemeOverlayLayer theme={seasonalTheme} />
+
       {isHalloween ? (
         <HalloweenHeaderBar
           month={month}

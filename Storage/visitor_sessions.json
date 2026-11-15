@@ -1,4 +1,54 @@
 {
+  "v_4682b414-1cf7": {
+    "visitorId": "v_4682b414-1cf7",
+    "firstSeen": "2026-11-13T17:30:41.516Z",
+    "pageViewsCount": 61,
+    "pagesHistory": [
+      "/",
+      "/callback",
+      "/administer"
+    ],
+    "lastSeen": "2026-11-15T04:56:58.910Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Edge PWA)",
+    "browser": "Edge",
+    "os": "Windows 10/11",
+    "isPwa": true,
+    "isGuest": false,
+    "screenSize": "2844x1521",
+    "lastPage": "/administer",
+    "durationMinutes": 2126,
+    "athleteId": "133066813",
+    "athleteName": "Tien PhamTV",
+    "avatar": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/medium.jpg"
+  },
+  "v_6fe64e0a-f9ba": {
+    "visitorId": "v_6fe64e0a-f9ba",
+    "firstSeen": "2026-09-14T07:00:00.148Z",
+    "pageViewsCount": 911,
+    "pagesHistory": [
+      "/",
+      "/administer",
+      "/callback",
+      "/nextgen",
+      "/terms-of-service"
+    ],
+    "lastSeen": "2026-11-13T10:29:14.733Z",
+    "clientIp": "127.0.0.1",
+    "deviceType": "Desktop",
+    "deviceModel": "Windows 10/11 (Chrome PWA)",
+    "browser": "Chrome",
+    "os": "Windows 10/11",
+    "isPwa": true,
+    "isGuest": false,
+    "screenSize": "2133x1254",
+    "athleteId": "133066813",
+    "athleteName": "Tien PhamTV",
+    "lastPage": "/",
+    "durationMinutes": 86609,
+    "avatar": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/medium.jpg"
+  },
   "v_ccf1564d-f08b": {
     "visitorId": "v_ccf1564d-f08b",
     "firstSeen": "2026-11-13T07:36:49.119Z",
@@ -19,32 +69,6 @@
     "athleteName": "Admin",
     "lastPage": "/leaderboard",
     "durationMinutes": 1
-  },
-  "v_6fe64e0a-f9ba": {
-    "visitorId": "v_6fe64e0a-f9ba",
-    "firstSeen": "2026-09-14T07:00:00.148Z",
-    "pageViewsCount": 898,
-    "pagesHistory": [
-      "/",
-      "/administer",
-      "/callback",
-      "/nextgen",
-      "/terms-of-service"
-    ],
-    "lastSeen": "2026-11-13T07:39:09.245Z",
-    "clientIp": "127.0.0.1",
-    "deviceType": "Desktop",
-    "deviceModel": "Windows 10/11 (Chrome PWA)",
-    "browser": "Chrome",
-    "os": "Windows 10/11",
-    "isPwa": true,
-    "isGuest": false,
-    "screenSize": "2133x1254",
-    "athleteId": "133066813",
-    "athleteName": "Tien PhamTV",
-    "lastPage": "/",
-    "durationMinutes": 86439,
-    "avatar": "https://dgalywyr863hv.cloudfront.net/pictures/athletes/133066813/30299114/11/medium.jpg"
   },
   "v_621c5730-eb5a": {
     "visitorId": "v_621c5730-eb5a",
@@ -4168,27 +4192,6 @@
       "/leaderboard"
     ],
     "lastSeen": "2026-09-16T04:19:33.493Z",
-    "clientIp": "127.0.0.1",
-    "deviceType": "Desktop",
-    "deviceModel": "Windows 10/11 (Chrome)",
-    "browser": "Chrome",
-    "os": "Windows 10/11",
-    "isPwa": false,
-    "isGuest": false,
-    "screenSize": "2100x1200",
-    "athleteId": "133066813",
-    "athleteName": "Admin",
-    "lastPage": "/leaderboard",
-    "durationMinutes": 1
-  },
-  "v_f2da8e73-96e9": {
-    "visitorId": "v_f2da8e73-96e9",
-    "firstSeen": "2026-09-16T04:19:05.908Z",
-    "pageViewsCount": 1,
-    "pagesHistory": [
-      "/leaderboard"
-    ],
-    "lastSeen": "2026-09-16T04:19:09.846Z",
     "clientIp": "127.0.0.1",
     "deviceType": "Desktop",
     "deviceModel": "Windows 10/11 (Chrome)",

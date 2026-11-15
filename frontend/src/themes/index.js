@@ -39,3 +39,6 @@ export function getThemeById(themeId) {
   return AVAILABLE_THEMES.find(t => t.id === themeId) || AVAILABLE_THEMES[0];
 }
 
+export { default as ThemeOverlayLayer } from './ThemeOverlayLayer';
+
+

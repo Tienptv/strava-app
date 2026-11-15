@@ -80,7 +80,7 @@ async function main() {
 
   // Spawn test server on TEST_PORT
   console.log(`[1/7] Khởi động test server trên cổng ${TEST_PORT}...`);
-  const serverProcess = spawn('node', ['server/index.js'], {
+  const serverProcess = spawn(process.execPath, ['server/index.js'], {
     cwd: path.join(__dirname, '..'),
     env: { ...process.env, TEST_PORT: String(TEST_PORT), PORT: String(TEST_PORT), NODE_ENV: 'test' },
     stdio: ['ignore', 'pipe', 'pipe']

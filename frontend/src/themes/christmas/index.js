@@ -14,3 +14,5 @@ export const CHRISTMAS_THEME_CONFIG = {
   brandNavy: '#002D54'
 };
 
+export { default as SnowfallOverlay } from './SnowfallOverlay';
+export * from './SnowflakeVectors';

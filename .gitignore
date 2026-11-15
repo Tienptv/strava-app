@@ -36,3 +36,9 @@ download/
 # backup files
 backup/
 *.zip
+
+# OneDrive sync conflict duplicates & Windows desktop metadata
+*-Corporate-*
+*-DESKTOP-*
+desktop.ini
+
