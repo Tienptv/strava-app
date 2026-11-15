@@ -1,5 +1,12 @@
 [
   {
+    "id": "1794719350714",
+    "timestamp": "2026-11-15T05:09:10.714Z",
+    "action": "Execute Script",
+    "user": "System Admin",
+    "details": "Ran COMMIT_AND_PUSH.bat"
+  },
+  {
     "id": "1794718598341",
     "timestamp": "2026-11-15T04:56:38.341Z",
     "action": "Execute Script",
@@ -1391,12 +1398,5 @@
     "action": "Kéo dữ liệu Cloud",
     "user": "133066813",
     "details": "Đã kéo từ https://strava-app-86t5.onrender.com: imported_activities.json (506 mục), targets.json (95 mục tiêu/phạt), challenge_config.json, admins.json (1 super-admins, 1 sub-admins), member_penalties_mapping.json, wpn_subscriptions.json (17 người đăng ký), club_roster.json (48 thành viên), tokens_v2.json (2 tokens), club_access_config.json"
-  },
-  {
-    "id": "1792771256378",
-    "timestamp": "2026-10-23T16:00:56.378Z",
-    "action": "Execute Script",
-    "user": "System Admin",
-    "details": "Ran COMMIT_AND_PUSH.bat"
   }
 ]
