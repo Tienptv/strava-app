@@ -10,7 +10,7 @@ assert(fs.existsSync(snowCapPath), 'SnowCapBar.jsx must exist');
 const snowCapContent = fs.readFileSync(snowCapPath, 'utf8');
 assert(snowCapContent.includes('export default function SnowCapBar'), 'SnowCapBar export missing');
 assert(snowCapContent.includes('snow-cap-svg'), 'snow-cap-svg class missing');
-assert(snowCapContent.includes('snowCapGradient'), 'snowCapGradient missing');
+assert(snowCapContent.includes('snowCapGrad_'), 'snowCapGrad_ missing');
 assert(snowCapContent.includes('snow-cap-sparkle'), 'snow-cap-sparkle missing');
 console.log('✅ Case 1: SnowCapBar.jsx component verified (SVG path, gradient & sparkles)');
 
